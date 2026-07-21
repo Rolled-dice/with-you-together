@@ -25,11 +25,11 @@ const PriceParam = z.enum([
 
 const PRICE_LABELS: Record<z.infer<typeof PriceParam>, string> = {
   together_monthly_inr: "Together plan — ₹799 / month",
-  together_monthly_usd: "Together plan — $9.99 / month",
+  together_monthly_usd: "Together plan — $8.99 / month",
   family_monthly_inr: "Family plan — ₹1,499 / month",
-  family_monthly_usd: "Family plan — $17.99 / month",
+  family_monthly_usd: "Family plan — $16.99 / month",
   care_monthly_inr: "Care plan — ₹3,499 / month",
-  care_monthly_usd: "Care plan — $41.99 / month",
+  care_monthly_usd: "Care plan — $39.99 / month",
   together_monthly: "Together plan (monthly)",
   family_monthly: "Family plan (monthly)",
   together_yearly: "Together plan (yearly)",
