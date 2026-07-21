@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart, Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,12 +10,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FieldRow } from "@/components/auth/field-row";
+import { classifyAuthError } from "@/lib/auth-errors";
 
 const SignUpForm = lazy(() =>
   import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })),
 );
 
+type AuthSearch = { reason?: "session_expired" | "signed_out"; redirect?: string };
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>): AuthSearch => ({
+    reason:
+      search.reason === "session_expired" || search.reason === "signed_out"
+        ? search.reason
+        : undefined,
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — WithU" },
