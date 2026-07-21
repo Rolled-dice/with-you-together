@@ -116,26 +116,27 @@ function JournalPage() {
 
   return (
     <AppShell>
-      <PageHeader
-        eyebrow="Journal"
-        slogan="Your pages. Your pace."
-        title="Just for you"
-        description="A private space. Nothing here is shared with family or Listeners."
-      >
-        <Button
-          variant="outline"
-          onClick={handleExport}
-          disabled={isExporting || isLoading || entries.length === 0}
-          className="rounded-brand"
+      <div className="pb-[calc(1rem_+_env(safe-area-inset-bottom))] md:pb-0">
+        <PageHeader
+          eyebrow="Journal"
+          slogan="Your pages. Your pace."
+          title="Just for you"
+          description="A private space. Nothing here is shared with family or Listeners."
         >
-          {isExporting ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Download className="mr-2 h-4 w-4" />
-          )}
-          Export PDF
-        </Button>
-      </PageHeader>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={isExporting || isLoading || entries.length === 0}
+            className="rounded-brand"
+          >
+            {isExporting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            Export PDF
+          </Button>
+        </PageHeader>
 
 
       <Card className="rounded-brand border-border bg-card animate-fade-up card-lift">
@@ -287,6 +288,7 @@ function JournalPage() {
             );
           })
         )}
+        </div>
       </div>
     </AppShell>
   );
