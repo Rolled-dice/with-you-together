@@ -217,29 +217,40 @@ function AuthPage() {
               >
                 <TabsContent value="signin" forceMount={tab === "signin" ? true : undefined} className="mt-6">
                   {tab === "signin" && (
-                    <>
-                      <SignInForm redirectTo={redirectTo} />
-                      <Divider />
-                      <div className="space-y-2">
-                        <OAuthButton provider="google" label="Continue with Google" redirectTo={redirectTo} />
-                        <OAuthButton provider="apple" label="Continue with Apple" redirectTo={redirectTo} />
-                      </div>
-                    </>
+                    <OAuthLockGroup>
+                      {(lock) => (
+                        <>
+                          <SignInForm redirectTo={redirectTo} lock={lock} />
+                          <Divider />
+                          <div className="space-y-2">
+                            <OAuthButton provider="google" label="Continue with Google" redirectTo={redirectTo} lock={lock} />
+                            <OAuthButton provider="apple" label="Continue with Apple" redirectTo={redirectTo} lock={lock} />
+                          </div>
+                        </>
+                      )}
+                    </OAuthLockGroup>
                   )}
                 </TabsContent>
 
                 <TabsContent value="signup" forceMount={tab === "signup" ? true : undefined} className="mt-6">
                   {tab === "signup" && (
                     <Suspense fallback={<FormSkeleton />}>
-                      <SignUpForm redirectTo={redirectTo} />
-                      <Divider />
-                      <div className="space-y-2">
-                        <OAuthButton provider="google" label="Sign up with Google" requireAge redirectTo={redirectTo} />
-                        <OAuthButton provider="apple" label="Sign up with Apple" requireAge redirectTo={redirectTo} />
-                      </div>
+                      <OAuthLockGroup>
+                        {(lock) => (
+                          <>
+                            <SignUpForm redirectTo={redirectTo} />
+                            <Divider />
+                            <div className="space-y-2">
+                              <OAuthButton provider="google" label="Sign up with Google" requireAge redirectTo={redirectTo} lock={lock} />
+                              <OAuthButton provider="apple" label="Sign up with Apple" requireAge redirectTo={redirectTo} lock={lock} />
+                            </div>
+                          </>
+                        )}
+                      </OAuthLockGroup>
                     </Suspense>
                   )}
                 </TabsContent>
+
               </motion.div>
             </AnimatePresence>
           </Tabs>
