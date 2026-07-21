@@ -314,13 +314,14 @@ function OAuthLockGroup({ children }: { children: (lock: AuthLock) => React.Reac
 }
 
 
-function SignInForm({ redirectTo }: { redirectTo: string }) {
+function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const busy = lock.busy === "signin";
+  const disabled = lock.busy !== null;
 
   async function attemptSignIn() {
-    setLoading(true);
+    if (!lock.acquire("signin")) return;
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
@@ -333,8 +334,7 @@ function SignInForm({ redirectTo }: { redirectTo: string }) {
           ? { label: "Try again", onClick: () => void attemptSignIn() }
           : undefined,
       });
-    } finally {
-      setLoading(false);
+      lock.release();
     }
   }
 
@@ -342,6 +342,7 @@ function SignInForm({ redirectTo }: { redirectTo: string }) {
     e.preventDefault();
     await attemptSignIn();
   }
+
 
   return (
     <motion.form
