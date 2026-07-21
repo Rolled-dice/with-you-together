@@ -840,7 +840,7 @@ function Landing() {
               {
                 name: "Family",
                 price: "₹1,499",
-                period: "/mo · $16.99",
+                period: "/mo · $15.99",
                 highlight: true,
                 features: ["Up to 3 members", "12 Human Listener sessions / month", "Owner allocates freely", "Family dashboard & shared check-ins", "8 free reschedules"],
               },
