@@ -56,7 +56,7 @@ export const PLAN_DISPLAY: Record<PlanId, {
   care: {
     name: "Care",
     inrLabel: "₹3,499",
-    usdLabel: "$41.99",
+    usdLabel: "$39.99",
     members: 4,
     sessions: 24,
     reschedules: 12,
