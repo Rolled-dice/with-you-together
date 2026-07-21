@@ -35,14 +35,15 @@ function AuthPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (!cancelled && data.session) navigate({ to: "/dashboard", replace: true });
     });
-    // warm the signup chunk on idle
-    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
-    const idle = w.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 400));
-    idle(() => import("@/components/auth/sign-up-form"));
     return () => {
       cancelled = true;
     };
   }, [navigate]);
+
+  // Prefetch the signup chunk only when the user shows intent (hovers/focuses the tab)
+  const prefetchSignup = () => {
+    void import("@/components/auth/sign-up-form");
+  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
@@ -98,7 +99,13 @@ function AuthPage() {
               <TabsTrigger value="signin" className="rounded-brand transition-all">
                 Sign in
               </TabsTrigger>
-              <TabsTrigger value="signup" className="rounded-brand transition-all">
+              <TabsTrigger
+                value="signup"
+                className="rounded-brand transition-all"
+                onMouseEnter={prefetchSignup}
+                onFocus={prefetchSignup}
+                onTouchStart={prefetchSignup}
+              >
                 Create account
               </TabsTrigger>
             </TabsList>
