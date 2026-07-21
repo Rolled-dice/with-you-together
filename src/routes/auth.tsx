@@ -301,6 +301,7 @@ function OAuthButton({
   requireAge?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   async function onClick() {
     if (requireAge) {
@@ -313,8 +314,14 @@ function OAuthButton({
     const result = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: window.location.origin,
     });
-    if (!result.redirected) setLoading(false);
-    if (result.error) toast.error(result.error.message ?? "Sign in failed");
+    if (result.error) {
+      setLoading(false);
+      toast.error(result.error.message ?? "Sign in failed");
+      return;
+    }
+    if (result.redirected) return;
+    // Popup flow: session is set — navigate immediately.
+    navigate({ to: "/dashboard", replace: true });
   }
 
   const providerLabel = provider === "google" ? "Google" : "Apple";
