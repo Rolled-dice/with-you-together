@@ -190,7 +190,7 @@ function Landing() {
 
               {/* SLOGAN */}
               <p className="mt-4 text-sm font-semibold uppercase tracking-[0.28em] text-coral">
-                Love, on the same page.
+                Distance shouldn't become disconnection.
               </p>
 
               <h1 className="mt-2 max-w-2xl text-[2.1rem] leading-[1.05] font-bold tracking-tight sm:text-5xl md:text-5xl lg:text-6xl">
