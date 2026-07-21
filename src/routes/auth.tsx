@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Heart, Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -217,29 +217,40 @@ function AuthPage() {
               >
                 <TabsContent value="signin" forceMount={tab === "signin" ? true : undefined} className="mt-6">
                   {tab === "signin" && (
-                    <>
-                      <SignInForm redirectTo={redirectTo} />
-                      <Divider />
-                      <div className="space-y-2">
-                        <OAuthButton provider="google" label="Continue with Google" redirectTo={redirectTo} />
-                        <OAuthButton provider="apple" label="Continue with Apple" redirectTo={redirectTo} />
-                      </div>
-                    </>
+                    <OAuthLockGroup>
+                      {(lock) => (
+                        <>
+                          <SignInForm redirectTo={redirectTo} lock={lock} />
+                          <Divider />
+                          <div className="space-y-2">
+                            <OAuthButton provider="google" label="Continue with Google" redirectTo={redirectTo} lock={lock} />
+                            <OAuthButton provider="apple" label="Continue with Apple" redirectTo={redirectTo} lock={lock} />
+                          </div>
+                        </>
+                      )}
+                    </OAuthLockGroup>
                   )}
                 </TabsContent>
 
                 <TabsContent value="signup" forceMount={tab === "signup" ? true : undefined} className="mt-6">
                   {tab === "signup" && (
                     <Suspense fallback={<FormSkeleton />}>
-                      <SignUpForm redirectTo={redirectTo} />
-                      <Divider />
-                      <div className="space-y-2">
-                        <OAuthButton provider="google" label="Sign up with Google" requireAge redirectTo={redirectTo} />
-                        <OAuthButton provider="apple" label="Sign up with Apple" requireAge redirectTo={redirectTo} />
-                      </div>
+                      <OAuthLockGroup>
+                        {(lock) => (
+                          <>
+                            <SignUpForm redirectTo={redirectTo} />
+                            <Divider />
+                            <div className="space-y-2">
+                              <OAuthButton provider="google" label="Sign up with Google" requireAge redirectTo={redirectTo} lock={lock} />
+                              <OAuthButton provider="apple" label="Sign up with Apple" requireAge redirectTo={redirectTo} lock={lock} />
+                            </div>
+                          </>
+                        )}
+                      </OAuthLockGroup>
                     </Suspense>
                   )}
                 </TabsContent>
+
               </motion.div>
             </AnimatePresence>
           </Tabs>
@@ -277,13 +288,40 @@ function Divider() {
   );
 }
 
-function SignInForm({ redirectTo }: { redirectTo: string }) {
+type AuthLock = {
+  busy: "signin" | "google" | "apple" | null;
+  acquire: (owner: "signin" | "google" | "apple") => boolean;
+  release: () => void;
+};
+
+function OAuthLockGroup({ children }: { children: (lock: AuthLock) => React.ReactNode }) {
+  const [busy, setBusy] = useState<AuthLock["busy"]>(null);
+  const busyRef = useRef<AuthLock["busy"]>(null);
+  const lock: AuthLock = {
+    busy,
+    acquire: (owner) => {
+      if (busyRef.current) return false;
+      busyRef.current = owner;
+      setBusy(owner);
+      return true;
+    },
+    release: () => {
+      busyRef.current = null;
+      setBusy(null);
+    },
+  };
+  return <>{children(lock)}</>;
+}
+
+
+function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const busy = lock.busy === "signin";
+  const disabled = lock.busy !== null;
 
   async function attemptSignIn() {
-    setLoading(true);
+    if (!lock.acquire("signin")) return;
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
@@ -296,8 +334,7 @@ function SignInForm({ redirectTo }: { redirectTo: string }) {
           ? { label: "Try again", onClick: () => void attemptSignIn() }
           : undefined,
       });
-    } finally {
-      setLoading(false);
+      lock.release();
     }
   }
 
@@ -305,6 +342,7 @@ function SignInForm({ redirectTo }: { redirectTo: string }) {
     e.preventDefault();
     await attemptSignIn();
   }
+
 
   return (
     <motion.form
@@ -343,10 +381,10 @@ function SignInForm({ redirectTo }: { redirectTo: string }) {
         <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
           <Button
             type="submit"
-            disabled={loading}
+            disabled={disabled}
             className="w-full rounded-brand bg-brand-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-primary/90 hover:shadow-md"
           >
-            {loading ? (
+            {busy ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Signing in…
@@ -354,6 +392,7 @@ function SignInForm({ redirectTo }: { redirectTo: string }) {
             ) : (
               "Sign in"
             )}
+
           </Button>
         </motion.div>
       </FieldRow>
@@ -386,22 +425,25 @@ function OAuthButton({
   label,
   redirectTo,
   requireAge = false,
+  lock,
 }: {
   provider: "google" | "apple";
   label: string;
   redirectTo: string;
   requireAge?: boolean;
+  lock: AuthLock;
 }) {
-  const [loading, setLoading] = useState(false);
+  const busy = lock.busy === provider;
+  const disabled = lock.busy !== null;
 
   async function attempt() {
-    setLoading(true);
+    if (!lock.acquire(provider)) return;
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
       });
       if (result.error) throw result.error;
-      if (result.redirected) return; // browser navigates away
+      if (result.redirected) return; // browser navigates away — keep lock held
       // Popup flow: session is set — navigate immediately.
       window.location.replace(redirectTo);
     } catch (err) {
@@ -412,11 +454,12 @@ function OAuthButton({
           ? { label: "Try again", onClick: () => void attempt() }
           : undefined,
       });
-      setLoading(false);
+      lock.release();
     }
   }
 
   async function onClick() {
+    if (disabled) return;
     if (requireAge) {
       const ok = window.confirm(
         "By continuing you confirm you are 13 or older. WithU is not available to under-13 users.",
@@ -432,6 +475,7 @@ function OAuthButton({
     await attempt();
   }
 
+
   const providerLabel = provider === "google" ? "Google" : "Apple";
 
   return (
@@ -440,19 +484,21 @@ function OAuthButton({
         type="button"
         variant="outline"
         onClick={onClick}
-        disabled={loading}
+        disabled={disabled}
+        aria-busy={busy}
         className="group relative w-full overflow-hidden rounded-brand transition-all hover:border-brand-primary/40 hover:shadow-md"
       >
         <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-brand-primary/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         <span className="relative flex items-center justify-center gap-2">
-          {loading ? (
+          {busy ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : provider === "google" ? (
             <GoogleIcon className="h-4 w-4" />
           ) : (
             <AppleIcon className="h-4 w-4" />
           )}
-          {loading ? `Opening ${providerLabel}…` : label}
+          {busy ? `Opening ${providerLabel}…` : label}
+
         </span>
       </Button>
     </motion.div>
