@@ -1057,11 +1057,11 @@ function FeatureCard({
   children,
 }: {
   tone: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
   body: string;
   delay?: number;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <div
