@@ -295,6 +295,54 @@ export type Database = {
           },
         ]
       }
+      feedback_submissions: {
+        Row: {
+          admin_notes: string | null
+          category: Database["public"]["Enums"]["feedback_category"]
+          created_at: string
+          email: string | null
+          id: string
+          message: string
+          page: string | null
+          priority: Database["public"]["Enums"]["feedback_priority"]
+          status: string
+          subject: string | null
+          triage_status: Database["public"]["Enums"]["feedback_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          category: Database["public"]["Enums"]["feedback_category"]
+          created_at?: string
+          email?: string | null
+          id?: string
+          message: string
+          page?: string | null
+          priority?: Database["public"]["Enums"]["feedback_priority"]
+          status?: string
+          subject?: string | null
+          triage_status?: Database["public"]["Enums"]["feedback_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: Database["public"]["Enums"]["feedback_category"]
+          created_at?: string
+          email?: string | null
+          id?: string
+          message?: string
+          page?: string | null
+          priority?: Database["public"]["Enums"]["feedback_priority"]
+          status?: string
+          subject?: string | null
+          triage_status?: Database["public"]["Enums"]["feedback_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           body: string
@@ -545,6 +593,51 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_webhook_events: {
+        Row: {
+          environment: string
+          error: string | null
+          event_type: string
+          id: string
+          payload: Json | null
+          processed: boolean
+          processed_at: string | null
+          received_at: string
+          stripe_customer_id: string | null
+          stripe_event_id: string
+          stripe_subscription_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          environment: string
+          error?: string | null
+          event_type: string
+          id?: string
+          payload?: Json | null
+          processed?: boolean
+          processed_at?: string | null
+          received_at?: string
+          stripe_customer_id?: string | null
+          stripe_event_id: string
+          stripe_subscription_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          environment?: string
+          error?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          processed?: boolean
+          processed_at?: string | null
+          received_at?: string
+          stripe_customer_id?: string | null
+          stripe_event_id?: string
+          stripe_subscription_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -593,6 +686,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -603,13 +717,30 @@ export type Database = {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_family_admin: {
         Args: { _family: string; _uid: string }
         Returns: boolean
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       family_role: "owner" | "adult" | "teen"
+      feedback_category:
+        | "feature_request"
+        | "bug_report"
+        | "product_feedback"
+        | "ai_feedback"
+        | "listener_feedback"
+        | "support"
+      feedback_priority: "low" | "normal" | "high" | "urgent"
+      feedback_status: "new" | "in_review" | "planned" | "resolved" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -737,7 +868,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       family_role: ["owner", "adult", "teen"],
+      feedback_category: [
+        "feature_request",
+        "bug_report",
+        "product_feedback",
+        "ai_feedback",
+        "listener_feedback",
+        "support",
+      ],
+      feedback_priority: ["low", "normal", "high", "urgent"],
+      feedback_status: ["new", "in_review", "planned", "resolved", "archived"],
     },
   },
 } as const
