@@ -288,6 +288,32 @@ function Divider() {
   );
 }
 
+type AuthLock = {
+  busy: "signin" | "google" | "apple" | null;
+  acquire: (owner: "signin" | "google" | "apple") => boolean;
+  release: () => void;
+};
+
+function OAuthLockGroup({ children }: { children: (lock: AuthLock) => React.ReactNode }) {
+  const [busy, setBusy] = useState<AuthLock["busy"]>(null);
+  const busyRef = useRef<AuthLock["busy"]>(null);
+  const lock: AuthLock = {
+    busy,
+    acquire: (owner) => {
+      if (busyRef.current) return false;
+      busyRef.current = owner;
+      setBusy(owner);
+      return true;
+    },
+    release: () => {
+      busyRef.current = null;
+      setBusy(null);
+    },
+  };
+  return <>{children(lock)}</>;
+}
+
+
 function SignInForm({ redirectTo }: { redirectTo: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
