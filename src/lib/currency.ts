@@ -27,7 +27,7 @@ export const PLAN_DISPLAY: Record<PlanId, {
   together: {
     name: "Together",
     inrLabel: "₹799",
-    usdLabel: "$9.99",
+    usdLabel: "$8.99",
     members: 1,
     sessions: 4,
     reschedules: 4,
@@ -41,7 +41,7 @@ export const PLAN_DISPLAY: Record<PlanId, {
   family: {
     name: "Family",
     inrLabel: "₹1,499",
-    usdLabel: "$17.99",
+    usdLabel: "$16.99",
     members: 3,
     sessions: 12,
     reschedules: 8,
@@ -56,7 +56,7 @@ export const PLAN_DISPLAY: Record<PlanId, {
   care: {
     name: "Care",
     inrLabel: "₹3,499",
-    usdLabel: "$41.99",
+    usdLabel: "$39.99",
     members: 4,
     sessions: 24,
     reschedules: 12,
