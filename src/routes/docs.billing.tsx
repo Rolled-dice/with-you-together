@@ -64,7 +64,7 @@ function Page() {
         <p>Cancel any time from Billing. You keep access until the end of your paid period. No cancellation fees.</p>
       </DocSection>
 
-      <TryItNow to="/billing" label="Manage billing" />
+      <TryItNow to="/settings" label="Manage billing" />
 
       <DocSection title="Common questions">
         <MiniFaq

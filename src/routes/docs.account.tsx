@@ -45,7 +45,7 @@ function Page() {
         <Callout tone="warn" title="This can't be undone">Consider exporting your journal first if you want a copy.</Callout>
       </DocSection>
 
-      <TryItNow to="/account" label="Open account settings" />
+      <TryItNow to="/settings" label="Open account settings" />
 
       <DocSection title="Common questions">
         <MiniFaq
