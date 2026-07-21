@@ -18,16 +18,17 @@ export const Route = createFileRoute("/_authenticated")({
   pendingMs: 0,
   wrapInSuspense: true,
   beforeLoad: async ({ location }) => {
-    let session = (await supabase.auth.getSession()).data.session;
-    const expiresAtMs = session?.expires_at ? session.expires_at * 1000 : 0;
+    const session = (await supabase.auth.getSession()).data.session;
 
     if (!session) {
       throw redirect({ to: "/auth", search: { redirect: location.href } });
     }
 
-    // Refresh before validation on cold loads when the cached access token is
-    // near expiry. This avoids bouncing returning users to /auth prematurely.
-    if (expiresAtMs && expiresAtMs - Date.now() < 120_000) {
+    const expiresAtMs = session.expires_at ? session.expires_at * 1000 : 0;
+    const nowMs = Date.now();
+
+    // Hard-expired: must refresh synchronously before rendering.
+    if (expiresAtMs && expiresAtMs <= nowMs) {
       const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError || !refreshed.session) {
         throw redirect({
@@ -35,9 +36,17 @@ export const Route = createFileRoute("/_authenticated")({
           search: { reason: "session_expired", redirect: location.href },
         });
       }
-      session = refreshed.session;
+      return { user: refreshed.session.user };
     }
+
+    // Near-expiry: kick off a background refresh so the token stays fresh
+    // without blocking the initial render. onAuthStateChange handles the update.
+    if (expiresAtMs && expiresAtMs - nowMs < 120_000) {
+      void supabase.auth.refreshSession();
+    }
+
     return { user: session.user };
   },
+
   component: () => <Outlet />,
 });
