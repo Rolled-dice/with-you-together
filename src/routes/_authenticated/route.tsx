@@ -37,19 +37,6 @@ export const Route = createFileRoute("/_authenticated")({
       }
       session = refreshed.session;
     }
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarding_completed")
-      .eq("id", session.user.id)
-      .maybeSingle();
-
-    if (
-      profile &&
-      !profile.onboarding_completed &&
-      location.pathname !== "/onboarding"
-    ) {
-      throw redirect({ to: "/onboarding" });
-    }
     return { user: session.user };
   },
   component: () => <Outlet />,
