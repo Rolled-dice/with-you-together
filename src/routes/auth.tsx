@@ -338,12 +338,7 @@ function SignUpForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="rounded-brand border border-dashed border-brand-accent/40 bg-brand-accent/5 p-3 text-xs text-muted-foreground">
-        <strong className="block text-brand-accent">Test mode</strong>
-        Phone OTP is currently using the Supabase test provider. For testing, sign up with{" "}
-        <code className="rounded bg-muted px-1 py-0.5 font-medium">{TEST_PHONE_NUMBER}</code>{" "}
-        and verify with code{" "}
-        <code className="rounded bg-muted px-1 py-0.5 font-medium">{TEST_PHONE_CODE}</code>.
+
       </div>
 
       <div className="space-y-2">
