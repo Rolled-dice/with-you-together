@@ -65,10 +65,12 @@ const TIMEZONES = [
 const DEFAULT_TZ =
   typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "Asia/Kolkata";
 
-function tomorrowIso() {
+function todayIso() {
   const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function ListenersPage() {
@@ -80,7 +82,7 @@ function ListenersPage() {
 
   const bookings = useQuery({ queryKey: ["listener-bookings"], queryFn: () => listBookingsFn() });
 
-  const [day, setDay] = useState(tomorrowIso());
+  const [day, setDay] = useState(todayIso());
   const [time, setTime] = useState("18:00");
   const [tz, setTz] = useState(TIMEZONES.includes(DEFAULT_TZ) ? DEFAULT_TZ : "Asia/Kolkata");
   const [duration, setDuration] = useState(45);
@@ -183,7 +185,7 @@ function ListenersPage() {
                 <Input
                   id="day"
                   type="date"
-                  min={tomorrowIso()}
+                  min={todayIso()}
                   value={day}
                   onChange={(e) => setDay(e.target.value)}
                 />
@@ -285,7 +287,7 @@ function ListenersPage() {
                   <Button
                     onClick={() =>
                       book.mutate({
-                        preferred_day: tomorrowIso(),
+                        preferred_day: todayIso(),
                         preferred_time: "12:00",
                         time_zone: tz,
                         duration_minutes: 30,
