@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
@@ -41,7 +40,6 @@ function ageFromDob(iso: string): number | null {
 type Stage = "form" | "otp";
 
 export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
-  const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,7 +79,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
       email,
       password,
       options: {
-          emailRedirectTo: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
+        emailRedirectTo: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
         data: {
           full_name: fullName,
           display_name: fullName,

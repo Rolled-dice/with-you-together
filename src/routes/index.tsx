@@ -965,7 +965,7 @@ function Landing() {
               size="lg"
               className="rounded-2xl gradient-sunrise px-8 text-neutral-900 shadow-glow hover:-translate-y-0.5 transition-transform"
             >
-              <Link to="/auth">
+              <Link to={nextStep}>
                 <Sun className="mr-2 h-4 w-4" /> Start your family's WithU
               </Link>
             </Button>
@@ -1002,8 +1002,8 @@ function Landing() {
                   size="lg"
                   className="rounded-2xl gradient-sunrise px-8 text-neutral-900 shadow-glow hover:-translate-y-0.5 transition-transform"
                 >
-                  <Link to="/auth">
-                    <Heart className="mr-2 h-4 w-4" /> Start your free 7-day trial
+                  <Link to={nextStep}>
+                    <Heart className="mr-2 h-4 w-4" /> {signedIn ? "Open dashboard" : "Start your free 7-day trial"}
                   </Link>
                 </Button>
                 <Button
@@ -1012,7 +1012,7 @@ function Landing() {
                   variant="secondary"
                   className="rounded-2xl bg-white/10 px-8 text-white backdrop-blur hover:bg-white/20"
                 >
-                  <Link to="/auth">I already have an account</Link>
+                  <Link to={nextStep}>{signedIn ? "Continue where I left off" : "I already have an account"}</Link>
                 </Button>
               </div>
             </div>
@@ -1153,8 +1153,8 @@ function Landing() {
                 Product
               </h4>
               <ul className="mt-4 space-y-2 text-sm text-neutral-900">
-                <li><Link to="/auth" className="hover:text-coral">Start free trial</Link></li>
-                <li><Link to="/auth" className="hover:text-coral">Sign in</Link></li>
+                <li><Link to={nextStep} className="hover:text-coral">{signedIn ? "Open dashboard" : "Start free trial"}</Link></li>
+                <li><Link to={nextStep} className="hover:text-coral">{signedIn ? "Continue" : "Sign in"}</Link></li>
                 <li><Link to="/docs" className="hover:text-coral">Docs</Link></li>
                 <li><a href="#pricing" className="hover:text-coral">Pricing</a></li>
                 <li><a href="#faq" className="hover:text-coral">FAQ</a></li>

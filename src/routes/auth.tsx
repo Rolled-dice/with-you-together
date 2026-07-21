@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Heart, Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FieldRow } from "@/components/auth/field-row";
 import { classifyAuthError } from "@/lib/auth-errors";
-import { authRedirectSearch, safeAuthRedirect } from "@/lib/auth-routing";
+import { safeAuthRedirect } from "@/lib/auth-routing";
 
 const SignUpForm = lazy(() =>
   import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })),
@@ -38,7 +38,6 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
   const redirectTo = safeAuthRedirect(search.redirect);
   const [tab, setTab] = useState<"signin" | "signup">("signin");
