@@ -834,7 +834,7 @@ function Landing() {
               {
                 name: "Together",
                 price: "₹799",
-                period: "/mo · $9.99",
+                period: "/mo · $8.99",
                 features: ["1 member", "4 Human Listener sessions / month", "AI Companion, Mood, Journal", "4 free reschedules"],
               },
               {
