@@ -922,6 +922,50 @@ function Landing() {
           </div>
         </section>
 
+        {/* Final CTA — clear next step */}
+        <section className="mt-8 sm:mt-12" data-reveal>
+          <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-neutral-900 p-8 sm:p-12 lg:p-16 text-center shadow-glow">
+            <div
+              aria-hidden
+              className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-coral/20 blur-3xl"
+            />
+            <div
+              aria-hidden
+              className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-primary/20 blur-3xl"
+            />
+            <div className="relative">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral">
+                Ready when you are
+              </p>
+              <h2 className="mx-auto mt-4 max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                Start checking in today.
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-base text-white/80 sm:text-lg">
+                Take the next step for the people you love. It takes under a minute, and your first week is free.
+              </p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  className="rounded-2xl gradient-sunrise px-8 text-neutral-900 shadow-glow hover:-translate-y-0.5 transition-transform"
+                >
+                  <Link to="/auth">
+                    <Heart className="mr-2 h-4 w-4" /> Start your free 7-day trial
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="secondary"
+                  className="rounded-2xl bg-white/10 px-8 text-white backdrop-blur hover:bg-white/20"
+                >
+                  <Link to="/auth">I already have an account</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ============= FOOTER ============= */}
         <footer className="mt-16 rounded-t-[2rem] sm:rounded-t-[2.5rem] gradient-peach px-6 pb-10 pt-12 sm:px-10 sm:pt-14 shadow-soft">
           {/* Support + feedback CTA band */}
