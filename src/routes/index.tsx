@@ -51,7 +51,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "A warm, safe space where families stay gently connected across distance, generations, and busy lives.",
+          "WithU is a warm family care membership — AI Companion, private journal, human listeners, and a shared circle that keeps your loved ones close.",
       },
     ],
   }),
