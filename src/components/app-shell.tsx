@@ -85,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <main
             key={pathname}
-            className="flex-1 animate-fade-in px-4 py-6 pb-[calc(6.25rem+env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
+            className="flex-1 animate-fade-in px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
           >
             {children}
           </main>
