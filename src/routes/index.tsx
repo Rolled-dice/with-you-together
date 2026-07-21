@@ -769,6 +769,41 @@ function Landing() {
           </div>
         </section>
 
+        {/* Emotional campaign — the truth behind the product */}
+        <section className="py-16 sm:py-24" data-reveal>
+          <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] gradient-blush p-8 sm:p-12 lg:p-16 text-center shadow-soft">
+            <div
+              aria-hidden
+              className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/40 blur-3xl"
+            />
+            <div
+              aria-hidden
+              className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-coral/20 blur-3xl"
+            />
+            <div className="relative">
+              <Quote className="mx-auto h-10 w-10 text-coral" strokeWidth={1.5} />
+              <h2 className="mx-auto mt-6 max-w-3xl text-3xl font-bold leading-snug tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                People still care.
+                <br />
+                Life just got busy.
+              </h2>
+              <p className="mx-auto mt-5 max-w-2xl text-base text-neutral-800/85 sm:text-lg">
+                WithU is built for the quiet guilt of not calling enough, the missed birthdays,
+                and the late-night worry that sits in your chest. We make it easier to show up —
+                without making anyone feel like a burden.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-medium text-neutral-900 backdrop-blur">
+                  <Heart className="h-4 w-4 text-coral" /> No guilt. Just gentle check-ins.
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-medium text-neutral-900 backdrop-blur">
+                  <Clock className="h-4 w-4 text-coral" /> Takes under a minute.
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
 
         {/* FAQ — accordion with smooth expand/collapse */}
         <section id="faq" className="scroll-mt-24 py-16 sm:py-24">
