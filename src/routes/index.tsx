@@ -673,7 +673,7 @@ function Landing() {
                 key={t.name}
                 className={`relative rounded-brand border p-6 card-hover ${
                   t.highlight
-                    ? "border-coral bg-white shadow-glow sm:col-span-2 lg:col-span-1 sm:scale-[1.01]"
+                    ? "border-coral bg-white shadow-glow sm:scale-[1.01]"
                     : "border-border bg-card"
                 }`}
               >
