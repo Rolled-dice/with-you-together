@@ -55,7 +55,7 @@ function CompanionLayout() {
 
   return (
     <AppShell>
-      <div className="flex h-[calc(100vh-6rem)] gap-4 md:gap-6 animate-fade-up">
+      <div className="flex h-[calc(100dvh-9.75rem-env(safe-area-inset-bottom))] min-h-[36rem] gap-4 animate-fade-up md:h-[calc(100vh-6rem)] md:gap-6">
         <aside className="hidden w-64 shrink-0 flex-col gap-3 md:flex">
           <Button
             onClick={() => createMut.mutate()}
