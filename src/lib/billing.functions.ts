@@ -87,7 +87,7 @@ export const createMembershipCheckout = createServerFn({ method: "POST" })
         userId: context.userId,
       });
 
-      // 7-day free trial only on the Together plan (₹799 / $9.99 monthly),
+      // 7-day free trial only on the Together plan (₹799 / $8.99 monthly),
       // and only for first-time subscribers (no prior subscription rows).
       const isTogetherMonthly =
         data.priceId === "together_monthly_inr" ||
