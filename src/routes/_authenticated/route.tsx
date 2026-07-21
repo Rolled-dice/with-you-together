@@ -23,14 +23,23 @@ export const Route = createFileRoute("/_authenticated")({
     // Access token may be expired on cold load before the background
     // auto-refresh loop starts. Try a one-shot refresh before redirecting.
     if (error || !data.user) {
+      const hadStoredSession = Boolean((await supabase.auth.getSession()).data.session);
       const { data: refreshed, error: refreshError } =
         await supabase.auth.refreshSession();
       if (refreshError || !refreshed.session) {
-        throw redirect({ to: "/auth" });
+        throw redirect({
+          to: "/auth",
+          search: hadStoredSession
+            ? { reason: "session_expired", redirect: location.href }
+            : { redirect: location.href },
+        });
       }
       const retry = await supabase.auth.getUser();
       if (retry.error || !retry.data.user) {
-        throw redirect({ to: "/auth" });
+        throw redirect({
+          to: "/auth",
+          search: { reason: "session_expired", redirect: location.href },
+        });
       }
       data = retry.data;
     }
