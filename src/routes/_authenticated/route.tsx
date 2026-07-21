@@ -18,8 +18,7 @@ export const Route = createFileRoute("/_authenticated")({
   pendingMs: 0,
   wrapInSuspense: true,
   beforeLoad: async ({ location }) => {
-    const sessionResult = await supabase.auth.getSession();
-    const session = sessionResult.data.session;
+    let session = (await supabase.auth.getSession()).data.session;
     const expiresAtMs = session?.expires_at ? session.expires_at * 1000 : 0;
 
     if (!session) {
@@ -29,31 +28,19 @@ export const Route = createFileRoute("/_authenticated")({
     // Refresh before validation on cold loads when the cached access token is
     // near expiry. This avoids bouncing returning users to /auth prematurely.
     if (expiresAtMs && expiresAtMs - Date.now() < 120_000) {
-      const { error: refreshError } = await supabase.auth.refreshSession();
-      if (refreshError) {
+      const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError || !refreshed.session) {
         throw redirect({
           to: "/auth",
           search: { reason: "session_expired", redirect: location.href },
         });
       }
-    }
-
-    let { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) {
-      await supabase.auth.refreshSession();
-      const retry = await supabase.auth.getUser();
-      if (retry.error || !retry.data.user) {
-        throw redirect({
-          to: "/auth",
-          search: { reason: "session_expired", redirect: location.href },
-        });
-      }
-      data = retry.data;
+      session = refreshed.session;
     }
     const { data: profile } = await supabase
       .from("profiles")
       .select("onboarding_completed")
-      .eq("id", data.user.id)
+      .eq("id", session.user.id)
       .maybeSingle();
 
     if (
@@ -63,7 +50,7 @@ export const Route = createFileRoute("/_authenticated")({
     ) {
       throw redirect({ to: "/onboarding" });
     }
-    return { user: data.user };
+    return { user: session.user };
   },
   component: () => <Outlet />,
 });
