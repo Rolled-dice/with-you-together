@@ -216,6 +216,85 @@ export type Database = {
           },
         ]
       }
+      family_session_allocations: {
+        Row: {
+          allocated: number
+          created_at: string
+          family_id: string
+          id: string
+          member_user_id: string
+          period_start: string
+          updated_at: string
+          used: number
+        }
+        Insert: {
+          allocated?: number
+          created_at?: string
+          family_id: string
+          id?: string
+          member_user_id: string
+          period_start: string
+          updated_at?: string
+          used?: number
+        }
+        Update: {
+          allocated?: number
+          created_at?: string
+          family_id?: string
+          id?: string
+          member_user_id?: string
+          period_start?: string
+          updated_at?: string
+          used?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_session_allocations_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_session_pool: {
+        Row: {
+          created_at: string
+          family_id: string
+          period_start: string
+          reschedules_total: number
+          reschedules_used: number
+          total_sessions: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          family_id: string
+          period_start: string
+          reschedules_total?: number
+          reschedules_used?: number
+          total_sessions?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          family_id?: string
+          period_start?: string
+          reschedules_total?: number
+          reschedules_used?: number
+          total_sessions?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_session_pool_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           body: string
@@ -408,9 +487,16 @@ export type Database = {
           care_status: string
           care_tier: string
           created_at: string
+          date_of_birth: string | null
           display_name: string | null
+          full_name: string | null
           id: string
           onboarding_completed: boolean
+          phone: string | null
+          phone_country: string | null
+          phone_verified: boolean
+          preferred_currency: string | null
+          preferred_language: string
           pronouns: string | null
           timezone: string | null
           updated_at: string
@@ -422,9 +508,16 @@ export type Database = {
           care_status?: string
           care_tier?: string
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
+          full_name?: string | null
           id: string
           onboarding_completed?: boolean
+          phone?: string | null
+          phone_country?: string | null
+          phone_verified?: boolean
+          preferred_currency?: string | null
+          preferred_language?: string
           pronouns?: string | null
           timezone?: string | null
           updated_at?: string
@@ -436,9 +529,16 @@ export type Database = {
           care_status?: string
           care_tier?: string
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
+          full_name?: string | null
           id?: string
           onboarding_completed?: boolean
+          phone?: string | null
+          phone_country?: string | null
+          phone_verified?: boolean
+          preferred_currency?: string | null
+          preferred_language?: string
           pronouns?: string | null
           timezone?: string | null
           updated_at?: string
