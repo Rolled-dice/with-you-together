@@ -224,7 +224,7 @@ function Landing() {
 
             {/* Hero visual — family illustration + orbiting avatars */}
             <div className="relative mx-auto w-full max-w-md md:max-w-none">
-              <div className="orbit-stage relative aspect-square w-full [perspective:1000px]">
+              <div className="orbit-stage relative aspect-square w-full overflow-hidden [perspective:1000px]">
                 {/* Soft halo */}
                 <div
                   aria-hidden
