@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "withu-mcp",
+      "version": "0.1.0",
+      "title": "WithU"
+    },
+    "tools": [
+      {
+        "name": "get_app_info",
+        "title": "About WithU",
+        "description": "Returns a public overview of the WithU app: what it does, who it's for, main features, and links. Safe for anyone to read.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_membership_plans",
+        "title": "List WithU membership plans",
+        "description": "Returns WithU's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data — safe for anyone to read.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "currency": {
+              "description": "Filter to a single currency. Omit to return both.",
+              "type": "string",
+              "enum": [
+                "INR",
+                "USD"
+              ]
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_crisis_hotlines",
+        "title": "List crisis and mental health hotlines",
+        "description": "Returns a curated list of publicly published mental-health crisis hotlines (India and international) with phone numbers and hours. Public safety information — safe for anyone to read.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_grounding_exercises",
+        "title": "List grounding & calming exercises",
+        "description": "Returns short grounding and breathing exercises from WithU's public safety library. Optional id filter returns a single exercise.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Return a single exercise by id.",
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

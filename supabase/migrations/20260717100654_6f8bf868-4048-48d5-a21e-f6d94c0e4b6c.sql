@@ -1,0 +1,9 @@
+
+ALTER TABLE public.listener_bookings
+  ADD COLUMN IF NOT EXISTS room_name TEXT,
+  ADD COLUMN IF NOT EXISTS ready_user BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS ready_listener BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS recording_consent_user BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS recording_consent_listener BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS call_started_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS call_ended_at TIMESTAMPTZ;
