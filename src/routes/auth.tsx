@@ -339,7 +339,6 @@ function SignUpForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
 
-      </div>
 
       <div className="space-y-2">
         <Label htmlFor="signup-name">Full name</Label>
