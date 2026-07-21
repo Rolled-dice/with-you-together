@@ -27,7 +27,7 @@ const PRICE_LABELS: Record<z.infer<typeof PriceParam>, string> = {
   together_monthly_inr: "Together plan — ₹799 / month",
   together_monthly_usd: "Together plan — $8.99 / month",
   family_monthly_inr: "Family plan — ₹1,499 / month",
-  family_monthly_usd: "Family plan — $16.99 / month",
+  family_monthly_usd: "Family plan — $15.99 / month",
   care_monthly_inr: "Care plan — ₹3,499 / month",
   care_monthly_usd: "Care plan — $36.99 / month",
   together_monthly: "Together plan (monthly)",
