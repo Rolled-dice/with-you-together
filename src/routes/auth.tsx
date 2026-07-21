@@ -271,13 +271,28 @@ function SignInForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  async function attemptSignIn() {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      navigate({ to: "/dashboard", replace: true });
+    } catch (err) {
+      const info = classifyAuthError(err);
+      toast.error(info.title, {
+        description: info.description,
+        action: info.retryable
+          ? { label: "Try again", onClick: () => void attemptSignIn() }
+          : undefined,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    navigate({ to: "/dashboard", replace: true });
+    await attemptSignIn();
   }
 
   return (
