@@ -83,10 +83,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Brand compact />
           </header>
 
-          <main key={pathname} className="flex-1 animate-fade-in px-4 py-6 sm:px-8 sm:py-10">{children}</main>
+          <main key={pathname} className="flex-1 animate-fade-in px-4 py-6 pb-24 sm:px-8 sm:py-10 md:pb-10">{children}</main>
 
           {/* Mobile bottom nav */}
-          <nav className="sticky bottom-0 z-10 flex overflow-x-auto border-t border-border bg-sidebar md:hidden">
+          <nav
+            className="fixed inset-x-0 bottom-0 z-40 flex overflow-x-auto border-t border-border bg-sidebar/95 backdrop-blur supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0px)] md:hidden"
+          >
             {NAV.map((item) => {
               const active = pathname === item.to || pathname.startsWith(item.to + "/");
               const Icon = item.icon;
