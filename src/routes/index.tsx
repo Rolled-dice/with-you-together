@@ -384,6 +384,32 @@ function Landing() {
           ))}
         </section>
 
+        {/* Mission statement */}
+        <section className="mt-12 sm:mt-16" data-reveal>
+          <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] gradient-sunrise p-8 sm:p-12 lg:p-16 text-center shadow-glow">
+            <div
+              aria-hidden
+              className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/30 blur-3xl"
+            />
+            <div
+              aria-hidden
+              className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-white/25 blur-3xl"
+            />
+            <div className="relative">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral">
+                Our mission
+              </p>
+              <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-bold leading-snug tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+                Distance shouldn’t become disconnection.
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base text-neutral-800/85 sm:text-lg">
+                People still care. Life just got busy. WithU exists to keep the people who matter
+                close — even when the world pulls them apart.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* How it works — colorful 3-step */}
         <section className="py-16 sm:py-24">
           <div className="text-center animate-fade-up">
