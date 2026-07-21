@@ -16,7 +16,7 @@ export const Route = createFileRoute("/docs/billing")({
 const plans = [
   { name: "Together", seats: "You + 1", minutes: "120 min / mo", usd: "$8.99", inr: "₹799" },
   { name: "Family", seats: "Up to 5", minutes: "300 min / mo", usd: "$16.99", inr: "₹1,499" },
-  { name: "Care", seats: "Larger families", minutes: "Custom", usd: "$39.99", inr: "₹3,499" },
+  { name: "Care", seats: "Larger families", minutes: "Custom", usd: "$36.99", inr: "₹3,499" },
 ];
 
 function Page() {

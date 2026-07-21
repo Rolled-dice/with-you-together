@@ -847,7 +847,7 @@ function Landing() {
               {
                 name: "Care",
                 price: "₹3,499",
-                period: "/mo · $39.99",
+                period: "/mo · $36.99",
                 features: ["Up to 4 members (seniors & long-distance)", "24 Human Listener sessions / month", "Priority booking", "12 free reschedules"],
               },
             ].map((t) => (
