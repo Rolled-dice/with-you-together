@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Heart, Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FieldRow } from "@/components/auth/field-row";
 import { classifyAuthError } from "@/lib/auth-errors";
+import { safeAuthRedirect } from "@/lib/auth-routing";
 
 const SignUpForm = lazy(() =>
   import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })),
@@ -37,8 +38,8 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
+  const redirectTo = safeAuthRedirect(search.redirect);
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [checkingSession, setCheckingSession] = useState(true);
   const [online, setOnline] = useState(
@@ -66,25 +67,36 @@ function AuthPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const fallback = window.setTimeout(() => {
+      if (!cancelled) setCheckingSession(false);
+    }, 900);
+
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
+      window.clearTimeout(fallback);
       if (data.session) {
-        navigate({ to: "/dashboard", replace: true });
+        window.location.replace(redirectTo);
       } else {
+        setCheckingSession(false);
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        window.clearTimeout(fallback);
         setCheckingSession(false);
       }
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-        navigate({ to: "/dashboard", replace: true });
+        window.location.replace(redirectTo);
       }
     });
     return () => {
       cancelled = true;
+      window.clearTimeout(fallback);
       sub.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [redirectTo]);
 
   // Prefetch the signup chunk only when the user shows intent (hovers/focuses the tab)
   const prefetchSignup = () => {
@@ -206,11 +218,11 @@ function AuthPage() {
                 <TabsContent value="signin" forceMount={tab === "signin" ? true : undefined} className="mt-6">
                   {tab === "signin" && (
                     <>
-                      <SignInForm />
+                      <SignInForm redirectTo={redirectTo} />
                       <Divider />
                       <div className="space-y-2">
-                        <OAuthButton provider="google" label="Continue with Google" />
-                        <OAuthButton provider="apple" label="Continue with Apple" />
+                        <OAuthButton provider="google" label="Continue with Google" redirectTo={redirectTo} />
+                        <OAuthButton provider="apple" label="Continue with Apple" redirectTo={redirectTo} />
                       </div>
                     </>
                   )}
@@ -219,11 +231,11 @@ function AuthPage() {
                 <TabsContent value="signup" forceMount={tab === "signup" ? true : undefined} className="mt-6">
                   {tab === "signup" && (
                     <Suspense fallback={<FormSkeleton />}>
-                      <SignUpForm />
+                      <SignUpForm redirectTo={redirectTo} />
                       <Divider />
                       <div className="space-y-2">
-                        <OAuthButton provider="google" label="Sign up with Google" requireAge />
-                        <OAuthButton provider="apple" label="Sign up with Apple" requireAge />
+                        <OAuthButton provider="google" label="Sign up with Google" requireAge redirectTo={redirectTo} />
+                        <OAuthButton provider="apple" label="Sign up with Apple" requireAge redirectTo={redirectTo} />
                       </div>
                     </Suspense>
                   )}
@@ -265,8 +277,7 @@ function Divider() {
   );
 }
 
-function SignInForm() {
-  const navigate = useNavigate();
+function SignInForm({ redirectTo }: { redirectTo: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -276,7 +287,7 @@ function SignInForm() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      navigate({ to: "/dashboard", replace: true });
+      window.location.replace(redirectTo);
     } catch (err) {
       const info = classifyAuthError(err);
       toast.error(info.title, {
@@ -373,25 +384,26 @@ function AppleIcon({ className }: { className?: string }) {
 function OAuthButton({
   provider,
   label,
+  redirectTo,
   requireAge = false,
 }: {
   provider: "google" | "apple";
   label: string;
+  redirectTo: string;
   requireAge?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   async function attempt() {
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
       });
       if (result.error) throw result.error;
       if (result.redirected) return; // browser navigates away
       // Popup flow: session is set — navigate immediately.
-      navigate({ to: "/dashboard", replace: true });
+      window.location.replace(redirectTo);
     } catch (err) {
       const info = classifyAuthError(err);
       toast.error(info.title, {

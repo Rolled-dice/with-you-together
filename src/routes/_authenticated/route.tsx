@@ -18,45 +18,26 @@ export const Route = createFileRoute("/_authenticated")({
   pendingMs: 0,
   wrapInSuspense: true,
   beforeLoad: async ({ location }) => {
-    let { data, error } = await supabase.auth.getUser();
+    let session = (await supabase.auth.getSession()).data.session;
+    const expiresAtMs = session?.expires_at ? session.expires_at * 1000 : 0;
 
-    // Access token may be expired on cold load before the background
-    // auto-refresh loop starts. Try a one-shot refresh before redirecting.
-    if (error || !data.user) {
-      const hadStoredSession = Boolean((await supabase.auth.getSession()).data.session);
-      const { data: refreshed, error: refreshError } =
-        await supabase.auth.refreshSession();
+    if (!session) {
+      throw redirect({ to: "/auth", search: { redirect: location.href } });
+    }
+
+    // Refresh before validation on cold loads when the cached access token is
+    // near expiry. This avoids bouncing returning users to /auth prematurely.
+    if (expiresAtMs && expiresAtMs - Date.now() < 120_000) {
+      const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError || !refreshed.session) {
-        throw redirect({
-          to: "/auth",
-          search: hadStoredSession
-            ? { reason: "session_expired", redirect: location.href }
-            : { redirect: location.href },
-        });
-      }
-      const retry = await supabase.auth.getUser();
-      if (retry.error || !retry.data.user) {
         throw redirect({
           to: "/auth",
           search: { reason: "session_expired", redirect: location.href },
         });
       }
-      data = retry.data;
+      session = refreshed.session;
     }
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarding_completed")
-      .eq("id", data.user.id)
-      .maybeSingle();
-
-    if (
-      profile &&
-      !profile.onboarding_completed &&
-      location.pathname !== "/onboarding"
-    ) {
-      throw redirect({ to: "/onboarding" });
-    }
-    return { user: data.user };
+    return { user: session.user };
   },
   component: () => <Outlet />,
 });

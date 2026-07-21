@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ComponentType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import {
@@ -37,6 +37,7 @@ import avatarDad from "@/assets/avatar-dad.png";
 import avatarMom from "@/assets/avatar-mom.png";
 import avatarTeen from "@/assets/avatar-teen.png";
 import avatarKid from "@/assets/avatar-kid.png";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -68,6 +69,23 @@ const familyAvatars = [
 
 function Landing() {
   const heroRef = useRef<HTMLElement | null>(null);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!cancelled) setSignedIn(Boolean(data.session));
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!cancelled) setSignedIn(Boolean(session));
+    });
+    return () => {
+      cancelled = true;
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
+  const nextStep: "/dashboard" | "/auth" = signedIn ? "/dashboard" : "/auth";
 
   // Subtle pointer-driven parallax: writes --px / --py (-1..1) on the hero root.
   // Layers read those vars at different depths so background, character, and
@@ -147,10 +165,10 @@ function Landing() {
             <Link to="/docs">Docs</Link>
           </Button>
           <Button asChild variant="ghost" className="rounded-brand hidden sm:inline-flex">
-            <Link to="/auth">Sign in</Link>
+            <Link to={nextStep}>{signedIn ? "Dashboard" : "Sign in"}</Link>
           </Button>
           <Button asChild className="rounded-brand bg-neutral-900 text-white hover:bg-neutral-800">
-            <Link to="/auth">Start free</Link>
+            <Link to={nextStep}>{signedIn ? "Open app" : "Start free"}</Link>
           </Button>
         </div>
       </header>
@@ -233,7 +251,7 @@ function Landing() {
                   size="lg"
                   className="rounded-2xl bg-neutral-900 px-6 text-white shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-neutral-800"
                 >
-                  <Link to="/auth">Start 7-day free trial</Link>
+                  <Link to={nextStep}>{signedIn ? "Open dashboard" : "Start 7-day free trial"}</Link>
                 </Button>
                 <Button
                   asChild
@@ -241,7 +259,7 @@ function Landing() {
                   variant="secondary"
                   className="rounded-2xl bg-white/75 text-neutral-900 backdrop-blur hover:bg-white"
                 >
-                  <Link to="/auth">I already have an account</Link>
+                  <Link to={nextStep}>{signedIn ? "Continue where I left off" : "I already have an account"}</Link>
                 </Button>
               </div>
               <p className="mt-4 text-xs text-neutral-800/70">
@@ -947,7 +965,7 @@ function Landing() {
               size="lg"
               className="rounded-2xl gradient-sunrise px-8 text-neutral-900 shadow-glow hover:-translate-y-0.5 transition-transform"
             >
-              <Link to="/auth">
+              <Link to={nextStep}>
                 <Sun className="mr-2 h-4 w-4" /> Start your family's WithU
               </Link>
             </Button>
@@ -984,8 +1002,8 @@ function Landing() {
                   size="lg"
                   className="rounded-2xl gradient-sunrise px-8 text-neutral-900 shadow-glow hover:-translate-y-0.5 transition-transform"
                 >
-                  <Link to="/auth">
-                    <Heart className="mr-2 h-4 w-4" /> Start your free 7-day trial
+                  <Link to={nextStep}>
+                    <Heart className="mr-2 h-4 w-4" /> {signedIn ? "Open dashboard" : "Start your free 7-day trial"}
                   </Link>
                 </Button>
                 <Button
@@ -994,7 +1012,7 @@ function Landing() {
                   variant="secondary"
                   className="rounded-2xl bg-white/10 px-8 text-white backdrop-blur hover:bg-white/20"
                 >
-                  <Link to="/auth">I already have an account</Link>
+                  <Link to={nextStep}>{signedIn ? "Continue where I left off" : "I already have an account"}</Link>
                 </Button>
               </div>
             </div>
@@ -1135,8 +1153,8 @@ function Landing() {
                 Product
               </h4>
               <ul className="mt-4 space-y-2 text-sm text-neutral-900">
-                <li><Link to="/auth" className="hover:text-coral">Start free trial</Link></li>
-                <li><Link to="/auth" className="hover:text-coral">Sign in</Link></li>
+                <li><Link to={nextStep} className="hover:text-coral">{signedIn ? "Open dashboard" : "Start free trial"}</Link></li>
+                <li><Link to={nextStep} className="hover:text-coral">{signedIn ? "Continue" : "Sign in"}</Link></li>
                 <li><Link to="/docs" className="hover:text-coral">Docs</Link></li>
                 <li><a href="#pricing" className="hover:text-coral">Pricing</a></li>
                 <li><a href="#faq" className="hover:text-coral">FAQ</a></li>
