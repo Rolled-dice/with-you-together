@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FieldRow } from "@/components/auth/field-row";
 
 const SignUpForm = lazy(() =>
   import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })),
@@ -242,19 +243,6 @@ function SignInForm() {
   );
 }
 
-export function FieldRow({ children }: { children: React.ReactNode }) {
-  return (
-    <motion.div
-      className="space-y-2"
-      variants={{
-        hidden: { opacity: 0, y: 8 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
-      }}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
