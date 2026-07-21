@@ -85,7 +85,7 @@ function Landing() {
     };
   }, []);
 
-  const nextStep = signedIn ? "/dashboard" : "/auth";
+  const nextStep: "/dashboard" | "/auth" = signedIn ? "/dashboard" : "/auth";
 
   // Subtle pointer-driven parallax: writes --px / --py (-1..1) on the hero root.
   // Layers read those vars at different depths so background, character, and
