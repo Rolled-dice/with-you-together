@@ -10,9 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as DocsSafetyRouteImport } from './routes/docs.safety'
+import { Route as DocsListenersRouteImport } from './routes/docs.listeners'
+import { Route as DocsJournalRouteImport } from './routes/docs.journal'
+import { Route as DocsInsightsRouteImport } from './routes/docs.insights'
+import { Route as DocsGettingStartedRouteImport } from './routes/docs.getting-started'
+import { Route as DocsFaqRouteImport } from './routes/docs.faq'
+import { Route as DocsFamilyRouteImport } from './routes/docs.family'
+import { Route as DocsCompanionRouteImport } from './routes/docs.companion'
+import { Route as DocsBillingRouteImport } from './routes/docs.billing'
+import { Route as DocsAccountRouteImport } from './routes/docs.account'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -40,6 +52,11 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -53,6 +70,61 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsSafetyRoute = DocsSafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsListenersRoute = DocsListenersRouteImport.update({
+  id: '/listeners',
+  path: '/listeners',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsJournalRoute = DocsJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsInsightsRoute = DocsInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsGettingStartedRoute = DocsGettingStartedRouteImport.update({
+  id: '/getting-started',
+  path: '/getting-started',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsFaqRoute = DocsFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsFamilyRoute = DocsFamilyRouteImport.update({
+  id: '/family',
+  path: '/family',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCompanionRoute = DocsCompanionRouteImport.update({
+  id: '/companion',
+  path: '/companion',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsBillingRoute = DocsBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsAccountRoute = DocsAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => DocsRoute,
 } as any)
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
@@ -171,6 +243,7 @@ const ApiPublicPaymentsWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/docs': typeof DocsRouteWithChildren
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -187,6 +260,17 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/docs/account': typeof DocsAccountRoute
+  '/docs/billing': typeof DocsBillingRoute
+  '/docs/companion': typeof DocsCompanionRoute
+  '/docs/family': typeof DocsFamilyRoute
+  '/docs/faq': typeof DocsFaqRoute
+  '/docs/getting-started': typeof DocsGettingStartedRoute
+  '/docs/insights': typeof DocsInsightsRoute
+  '/docs/journal': typeof DocsJournalRoute
+  '/docs/listeners': typeof DocsListenersRoute
+  '/docs/safety': typeof DocsSafetyRoute
+  '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
@@ -212,6 +296,17 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/docs/account': typeof DocsAccountRoute
+  '/docs/billing': typeof DocsBillingRoute
+  '/docs/companion': typeof DocsCompanionRoute
+  '/docs/family': typeof DocsFamilyRoute
+  '/docs/faq': typeof DocsFaqRoute
+  '/docs/getting-started': typeof DocsGettingStartedRoute
+  '/docs/insights': typeof DocsInsightsRoute
+  '/docs/journal': typeof DocsJournalRoute
+  '/docs/listeners': typeof DocsListenersRoute
+  '/docs/safety': typeof DocsSafetyRoute
+  '/docs': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
@@ -224,6 +319,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/docs': typeof DocsRouteWithChildren
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -240,6 +336,17 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/docs/account': typeof DocsAccountRoute
+  '/docs/billing': typeof DocsBillingRoute
+  '/docs/companion': typeof DocsCompanionRoute
+  '/docs/family': typeof DocsFamilyRoute
+  '/docs/faq': typeof DocsFaqRoute
+  '/docs/getting-started': typeof DocsGettingStartedRoute
+  '/docs/insights': typeof DocsInsightsRoute
+  '/docs/journal': typeof DocsJournalRoute
+  '/docs/listeners': typeof DocsListenersRoute
+  '/docs/safety': typeof DocsSafetyRoute
+  '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/_authenticated/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
@@ -252,6 +359,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/docs'
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -268,6 +376,17 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/chat'
     | '/checkout/return'
+    | '/docs/account'
+    | '/docs/billing'
+    | '/docs/companion'
+    | '/docs/family'
+    | '/docs/faq'
+    | '/docs/getting-started'
+    | '/docs/insights'
+    | '/docs/journal'
+    | '/docs/listeners'
+    | '/docs/safety'
+    | '/docs/'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/feedback'
     | '/call/$bookingId'
@@ -293,6 +412,17 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/chat'
     | '/checkout/return'
+    | '/docs/account'
+    | '/docs/billing'
+    | '/docs/companion'
+    | '/docs/family'
+    | '/docs/faq'
+    | '/docs/getting-started'
+    | '/docs/insights'
+    | '/docs/journal'
+    | '/docs/listeners'
+    | '/docs/safety'
+    | '/docs'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/feedback'
     | '/call/$bookingId'
@@ -304,6 +434,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/docs'
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -320,6 +451,17 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/api/chat'
     | '/checkout/return'
+    | '/docs/account'
+    | '/docs/billing'
+    | '/docs/companion'
+    | '/docs/family'
+    | '/docs/faq'
+    | '/docs/getting-started'
+    | '/docs/insights'
+    | '/docs/journal'
+    | '/docs/listeners'
+    | '/docs/safety'
+    | '/docs/'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/feedback'
     | '/_authenticated/call/$bookingId'
@@ -332,6 +474,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DocsRoute: typeof DocsRouteWithChildren
   McpRoute: typeof McpRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -348,6 +491,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -370,6 +520,83 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/docs/': {
+      id: '/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/safety': {
+      id: '/docs/safety'
+      path: '/safety'
+      fullPath: '/docs/safety'
+      preLoaderRoute: typeof DocsSafetyRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/listeners': {
+      id: '/docs/listeners'
+      path: '/listeners'
+      fullPath: '/docs/listeners'
+      preLoaderRoute: typeof DocsListenersRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/journal': {
+      id: '/docs/journal'
+      path: '/journal'
+      fullPath: '/docs/journal'
+      preLoaderRoute: typeof DocsJournalRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/insights': {
+      id: '/docs/insights'
+      path: '/insights'
+      fullPath: '/docs/insights'
+      preLoaderRoute: typeof DocsInsightsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/getting-started': {
+      id: '/docs/getting-started'
+      path: '/getting-started'
+      fullPath: '/docs/getting-started'
+      preLoaderRoute: typeof DocsGettingStartedRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/faq': {
+      id: '/docs/faq'
+      path: '/faq'
+      fullPath: '/docs/faq'
+      preLoaderRoute: typeof DocsFaqRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/family': {
+      id: '/docs/family'
+      path: '/family'
+      fullPath: '/docs/family'
+      preLoaderRoute: typeof DocsFamilyRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/companion': {
+      id: '/docs/companion'
+      path: '/companion'
+      fullPath: '/docs/companion'
+      preLoaderRoute: typeof DocsCompanionRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/billing': {
+      id: '/docs/billing'
+      path: '/billing'
+      fullPath: '/docs/billing'
+      preLoaderRoute: typeof DocsBillingRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/account': {
+      id: '/docs/account'
+      path: '/account'
+      fullPath: '/docs/account'
+      preLoaderRoute: typeof DocsAccountRouteImport
+      parentRoute: typeof DocsRoute
     }
     '/checkout/return': {
       id: '/checkout/return'
@@ -572,10 +799,41 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface DocsRouteChildren {
+  DocsAccountRoute: typeof DocsAccountRoute
+  DocsBillingRoute: typeof DocsBillingRoute
+  DocsCompanionRoute: typeof DocsCompanionRoute
+  DocsFamilyRoute: typeof DocsFamilyRoute
+  DocsFaqRoute: typeof DocsFaqRoute
+  DocsGettingStartedRoute: typeof DocsGettingStartedRoute
+  DocsInsightsRoute: typeof DocsInsightsRoute
+  DocsJournalRoute: typeof DocsJournalRoute
+  DocsListenersRoute: typeof DocsListenersRoute
+  DocsSafetyRoute: typeof DocsSafetyRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+}
+
+const DocsRouteChildren: DocsRouteChildren = {
+  DocsAccountRoute: DocsAccountRoute,
+  DocsBillingRoute: DocsBillingRoute,
+  DocsCompanionRoute: DocsCompanionRoute,
+  DocsFamilyRoute: DocsFamilyRoute,
+  DocsFaqRoute: DocsFaqRoute,
+  DocsGettingStartedRoute: DocsGettingStartedRoute,
+  DocsInsightsRoute: DocsInsightsRoute,
+  DocsJournalRoute: DocsJournalRoute,
+  DocsListenersRoute: DocsListenersRoute,
+  DocsSafetyRoute: DocsSafetyRoute,
+  DocsIndexRoute: DocsIndexRoute,
+}
+
+const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DocsRoute: DocsRouteWithChildren,
   McpRoute: McpRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:

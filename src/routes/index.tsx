@@ -144,6 +144,9 @@ function Landing() {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" className="rounded-brand hidden sm:inline-flex">
+            <Link to="/docs">Docs</Link>
+          </Button>
+          <Button asChild variant="ghost" className="rounded-brand hidden sm:inline-flex">
             <Link to="/auth">Sign in</Link>
           </Button>
           <Button asChild className="rounded-brand bg-neutral-900 text-white hover:bg-neutral-800">
@@ -1029,6 +1032,7 @@ function Landing() {
               <ul className="mt-4 space-y-2 text-sm text-neutral-900">
                 <li><Link to="/auth" className="hover:text-coral">Start free trial</Link></li>
                 <li><Link to="/auth" className="hover:text-coral">Sign in</Link></li>
+                <li><Link to="/docs" className="hover:text-coral">Docs</Link></li>
                 <li><a href="#pricing" className="hover:text-coral">Pricing</a></li>
                 <li><a href="#faq" className="hover:text-coral">FAQ</a></li>
                 <li><Link to="/safety" className="hover:text-coral">Safety & crisis</Link></li>
