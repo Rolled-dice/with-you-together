@@ -484,19 +484,21 @@ function OAuthButton({
         type="button"
         variant="outline"
         onClick={onClick}
-        disabled={loading}
+        disabled={disabled}
+        aria-busy={busy}
         className="group relative w-full overflow-hidden rounded-brand transition-all hover:border-brand-primary/40 hover:shadow-md"
       >
         <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-brand-primary/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         <span className="relative flex items-center justify-center gap-2">
-          {loading ? (
+          {busy ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : provider === "google" ? (
             <GoogleIcon className="h-4 w-4" />
           ) : (
             <AppleIcon className="h-4 w-4" />
           )}
-          {loading ? `Opening ${providerLabel}…` : label}
+          {busy ? `Opening ${providerLabel}…` : label}
+
         </span>
       </Button>
     </motion.div>
