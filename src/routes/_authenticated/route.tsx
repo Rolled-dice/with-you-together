@@ -18,9 +18,21 @@ export const Route = createFileRoute("/_authenticated")({
   pendingMs: 0,
   wrapInSuspense: true,
   beforeLoad: async ({ location }) => {
-    const { data, error } = await supabase.auth.getUser();
+    let { data, error } = await supabase.auth.getUser();
+
+    // Access token may be expired on cold load before the background
+    // auto-refresh loop starts. Try a one-shot refresh before redirecting.
     if (error || !data.user) {
-      throw redirect({ to: "/auth" });
+      const { data: refreshed, error: refreshError } =
+        await supabase.auth.refreshSession();
+      if (refreshError || !refreshed.session) {
+        throw redirect({ to: "/auth" });
+      }
+      const retry = await supabase.auth.getUser();
+      if (retry.error || !retry.data.user) {
+        throw redirect({ to: "/auth" });
+      }
+      data = retry.data;
     }
     const { data: profile } = await supabase
       .from("profiles")
