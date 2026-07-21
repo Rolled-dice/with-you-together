@@ -99,7 +99,13 @@ function AuthPage() {
               <TabsTrigger value="signin" className="rounded-brand transition-all">
                 Sign in
               </TabsTrigger>
-              <TabsTrigger value="signup" className="rounded-brand transition-all">
+              <TabsTrigger
+                value="signup"
+                className="rounded-brand transition-all"
+                onMouseEnter={prefetchSignup}
+                onFocus={prefetchSignup}
+                onTouchStart={prefetchSignup}
+              >
                 Create account
               </TabsTrigger>
             </TabsList>
