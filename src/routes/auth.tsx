@@ -144,6 +144,37 @@ function AuthPage() {
             Sign in or create your Care Membership.
           </p>
 
+          {!online && (
+            <div
+              role="status"
+              className="mt-4 flex items-start gap-2 rounded-brand border border-amber-300/60 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
+            >
+              <WifiOff className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <div>
+                <p className="font-medium">You're offline</p>
+                <p className="text-xs opacity-90">
+                  Sign-in needs a connection. We'll enable the buttons as soon as you're back.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {search.reason === "session_expired" && (
+            <div
+              role="alert"
+              className="mt-4 flex items-start gap-2 rounded-brand border border-brand-primary/30 bg-brand-primary/5 p-3 text-sm text-foreground"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-primary" />
+              <div>
+                <p className="font-medium">Your session expired</p>
+                <p className="text-xs text-muted-foreground">
+                  For your safety we signed you out. Please sign in again to pick up where you left off.
+                </p>
+              </div>
+            </div>
+          )}
+
+
           <Tabs
             value={tab}
             onValueChange={(v) => setTab(v as "signin" | "signup")}
