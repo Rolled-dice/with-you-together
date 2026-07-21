@@ -382,6 +382,28 @@ function OAuthButton({
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  async function attempt() {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return; // browser navigates away
+      // Popup flow: session is set — navigate immediately.
+      navigate({ to: "/dashboard", replace: true });
+    } catch (err) {
+      const info = classifyAuthError(err);
+      toast.error(info.title, {
+        description: info.description,
+        action: info.retryable
+          ? { label: "Try again", onClick: () => void attempt() }
+          : undefined,
+      });
+      setLoading(false);
+    }
+  }
+
   async function onClick() {
     if (requireAge) {
       const ok = window.confirm(
@@ -389,18 +411,13 @@ function OAuthButton({
       );
       if (!ok) return;
     }
-    setLoading(true);
-    const result = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      setLoading(false);
-      toast.error(result.error.message ?? "Sign in failed");
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      toast.error("You're offline", {
+        description: "Reconnect to the internet, then try again.",
+      });
       return;
     }
-    if (result.redirected) return;
-    // Popup flow: session is set — navigate immediately.
-    navigate({ to: "/dashboard", replace: true });
+    await attempt();
   }
 
   const providerLabel = provider === "google" ? "Google" : "Apple";
