@@ -35,9 +35,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
       <WithUCursor />
-      <div className="mx-auto flex min-h-screen w-full max-w-[1400px]">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
 
         {/* Sidebar (desktop) */}
         <aside className="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6">
@@ -83,11 +83,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Brand compact />
           </header>
 
-          <main key={pathname} className="flex-1 animate-fade-in px-4 py-6 pb-24 sm:px-8 sm:py-10 md:pb-10">{children}</main>
+          <main
+            key={pathname}
+            className="flex-1 animate-fade-in px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
+          >
+            {children}
+          </main>
 
           {/* Mobile bottom nav */}
           <nav
-            className="fixed inset-x-0 bottom-0 z-40 flex overflow-x-auto border-t border-border bg-sidebar/95 backdrop-blur supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0px)] md:hidden"
+            className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-8 overflow-hidden border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           >
             {NAV.map((item) => {
               const active = pathname === item.to || pathname.startsWith(item.to + "/");
@@ -97,12 +103,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex min-w-[72px] flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium transition-colors",
+                    "flex min-w-0 flex-col items-center justify-center gap-1 px-0.5 py-2 text-[10px] font-medium transition-colors sm:text-[11px]",
                     active ? "text-brand-accent" : "text-sidebar-foreground/70",
                   )}
                 >
                   <Icon className="h-5 w-5" strokeWidth={2} />
-                  {item.label}
+                  <span className="block max-w-full truncate leading-none">{item.label}</span>
                 </Link>
               );
             })}
