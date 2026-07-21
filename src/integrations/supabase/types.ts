@@ -71,6 +71,27 @@ export type Database = {
         }
         Relationships: []
       }
+      companion_memories: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -227,34 +248,67 @@ export type Database = {
       }
       listener_bookings: {
         Row: {
+          call_ended_at: string | null
+          call_started_at: string | null
           created_at: string
           duration_minutes: number
+          feedback_at: string | null
+          feedback_note: string | null
+          follow_up_wanted: boolean
           id: string
           listener_id: string
           note: string
+          rating: number | null
+          ready_listener: boolean
+          ready_user: boolean
+          recording_consent_listener: boolean
+          recording_consent_user: boolean
           requested_at: string
+          room_name: string | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          call_ended_at?: string | null
+          call_started_at?: string | null
           created_at?: string
           duration_minutes?: number
+          feedback_at?: string | null
+          feedback_note?: string | null
+          follow_up_wanted?: boolean
           id?: string
           listener_id: string
           note?: string
+          rating?: number | null
+          ready_listener?: boolean
+          ready_user?: boolean
+          recording_consent_listener?: boolean
+          recording_consent_user?: boolean
           requested_at: string
+          room_name?: string | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          call_ended_at?: string | null
+          call_started_at?: string | null
           created_at?: string
           duration_minutes?: number
+          feedback_at?: string | null
+          feedback_note?: string | null
+          follow_up_wanted?: boolean
           id?: string
           listener_id?: string
           note?: string
+          rating?: number | null
+          ready_listener?: boolean
+          ready_user?: boolean
+          recording_consent_listener?: boolean
+          recording_consent_user?: boolean
           requested_at?: string
+          room_name?: string | null
           status?: string
           updated_at?: string
           user_id?: string
