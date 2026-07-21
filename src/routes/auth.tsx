@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart, Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,12 +10,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FieldRow } from "@/components/auth/field-row";
+import { classifyAuthError } from "@/lib/auth-errors";
 
 const SignUpForm = lazy(() =>
   import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })),
 );
 
+type AuthSearch = { reason?: "session_expired" | "signed_out"; redirect?: string };
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>): AuthSearch => ({
+    reason:
+      search.reason === "session_expired" || search.reason === "signed_out"
+        ? search.reason
+        : undefined,
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — WithU" },
@@ -28,8 +38,31 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/auth" });
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [checkingSession, setCheckingSession] = useState(true);
+  const [online, setOnline] = useState(
+    typeof navigator === "undefined" ? true : navigator.onLine !== false,
+  );
+
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (search.reason === "session_expired") {
+      toast.error("Your session expired", {
+        description: "Please sign in again to continue.",
+      });
+    }
+  }, [search.reason]);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,6 +143,37 @@ function AuthPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Sign in or create your Care Membership.
           </p>
+
+          {!online && (
+            <div
+              role="status"
+              className="mt-4 flex items-start gap-2 rounded-brand border border-amber-300/60 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
+            >
+              <WifiOff className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <div>
+                <p className="font-medium">You're offline</p>
+                <p className="text-xs opacity-90">
+                  Sign-in needs a connection. We'll enable the buttons as soon as you're back.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {search.reason === "session_expired" && (
+            <div
+              role="alert"
+              className="mt-4 flex items-start gap-2 rounded-brand border border-brand-primary/30 bg-brand-primary/5 p-3 text-sm text-foreground"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-primary" />
+              <div>
+                <p className="font-medium">Your session expired</p>
+                <p className="text-xs text-muted-foreground">
+                  For your safety we signed you out. Please sign in again to pick up where you left off.
+                </p>
+              </div>
+            </div>
+          )}
+
 
           <Tabs
             value={tab}
@@ -207,13 +271,28 @@ function SignInForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  async function attemptSignIn() {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      navigate({ to: "/dashboard", replace: true });
+    } catch (err) {
+      const info = classifyAuthError(err);
+      toast.error(info.title, {
+        description: info.description,
+        action: info.retryable
+          ? { label: "Try again", onClick: () => void attemptSignIn() }
+          : undefined,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    navigate({ to: "/dashboard", replace: true });
+    await attemptSignIn();
   }
 
   return (
@@ -303,6 +382,28 @@ function OAuthButton({
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  async function attempt() {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return; // browser navigates away
+      // Popup flow: session is set — navigate immediately.
+      navigate({ to: "/dashboard", replace: true });
+    } catch (err) {
+      const info = classifyAuthError(err);
+      toast.error(info.title, {
+        description: info.description,
+        action: info.retryable
+          ? { label: "Try again", onClick: () => void attempt() }
+          : undefined,
+      });
+      setLoading(false);
+    }
+  }
+
   async function onClick() {
     if (requireAge) {
       const ok = window.confirm(
@@ -310,18 +411,13 @@ function OAuthButton({
       );
       if (!ok) return;
     }
-    setLoading(true);
-    const result = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      setLoading(false);
-      toast.error(result.error.message ?? "Sign in failed");
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      toast.error("You're offline", {
+        description: "Reconnect to the internet, then try again.",
+      });
       return;
     }
-    if (result.redirected) return;
-    // Popup flow: session is set — navigate immediately.
-    navigate({ to: "/dashboard", replace: true });
+    await attempt();
   }
 
   const providerLabel = provider === "google" ? "Google" : "Apple";
