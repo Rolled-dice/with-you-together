@@ -207,7 +207,7 @@ function SignUpForm() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -221,22 +221,18 @@ function SignUpForm() {
         },
       },
     });
+    setLoading(false);
     if (error) {
-      setLoading(false);
       return toast.error(error.message);
     }
-
-    // Send OTP to verify phone. Uses phone_change flow on the freshly created user.
-    const { error: otpErr } = await supabase.auth.updateUser({ phone: e164 });
-    setLoading(false);
-    if (otpErr) {
-      return toast.error(
-        `We couldn't send the OTP to ${e164}. Please check the number and try again. (${otpErr.message})`,
-      );
+    if (!data.session) {
+      toast.success("Check your email to confirm your account, then sign in.");
+      return;
     }
-    toast.success(`Verification code sent to ${e164}`);
-    setStage("otp");
+    toast.success("Welcome to WithU!");
+    navigate({ to: "/dashboard", replace: true });
   }
+
 
   async function verify(e: React.FormEvent) {
     e.preventDefault();
