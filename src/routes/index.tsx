@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ComponentType, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import {
