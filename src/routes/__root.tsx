@@ -100,11 +100,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d8e1c80-289d-41e7-bc07-16d0391bf521/id-preview-359918ef--7a70b00d-f5ae-4cf2-bb4f-e21f807b83ec.lovable.app-1784612868107.png" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "preconnect", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co" },
     ],
   }),
   shellComponent: RootShell,

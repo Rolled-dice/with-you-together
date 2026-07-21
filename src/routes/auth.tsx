@@ -35,14 +35,15 @@ function AuthPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (!cancelled && data.session) navigate({ to: "/dashboard", replace: true });
     });
-    // warm the signup chunk on idle
-    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
-    const idle = w.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 400));
-    idle(() => import("@/components/auth/sign-up-form"));
     return () => {
       cancelled = true;
     };
   }, [navigate]);
+
+  // Prefetch the signup chunk only when the user shows intent (hovers/focuses the tab)
+  const prefetchSignup = () => {
+    void import("@/components/auth/sign-up-form");
+  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
