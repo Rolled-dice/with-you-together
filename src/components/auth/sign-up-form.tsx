@@ -40,7 +40,7 @@ function ageFromDob(iso: string): number | null {
 
 type Stage = "form" | "otp";
 
-export function SignUpForm() {
+export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -81,7 +81,7 @@ export function SignUpForm() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
         data: {
           full_name: fullName,
           display_name: fullName,
@@ -100,7 +100,7 @@ export function SignUpForm() {
       return;
     }
     toast.success("Welcome to WithU!");
-    navigate({ to: "/dashboard", replace: true });
+    window.location.replace(redirectTo);
   }
 
   async function verify(e: React.FormEvent) {
@@ -123,7 +123,7 @@ export function SignUpForm() {
     }
     setLoading(false);
     toast.success("Phone verified. Welcome to WithU.");
-    navigate({ to: "/dashboard", replace: true });
+    window.location.replace(redirectTo);
   }
 
   async function resendOtp() {

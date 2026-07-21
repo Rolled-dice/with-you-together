@@ -136,8 +136,7 @@ function RootComponent() {
       if (
         event !== "SIGNED_IN" &&
         event !== "SIGNED_OUT" &&
-        event !== "USER_UPDATED" &&
-        event !== "TOKEN_REFRESHED"
+        event !== "USER_UPDATED"
       )
         return;
       router.invalidate();

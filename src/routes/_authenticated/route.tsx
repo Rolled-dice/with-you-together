@@ -18,22 +18,29 @@ export const Route = createFileRoute("/_authenticated")({
   pendingMs: 0,
   wrapInSuspense: true,
   beforeLoad: async ({ location }) => {
-    let { data, error } = await supabase.auth.getUser();
+    const sessionResult = await supabase.auth.getSession();
+    const session = sessionResult.data.session;
+    const expiresAtMs = session?.expires_at ? session.expires_at * 1000 : 0;
 
-    // Access token may be expired on cold load before the background
-    // auto-refresh loop starts. Try a one-shot refresh before redirecting.
-    if (error || !data.user) {
-      const hadStoredSession = Boolean((await supabase.auth.getSession()).data.session);
-      const { data: refreshed, error: refreshError } =
-        await supabase.auth.refreshSession();
-      if (refreshError || !refreshed.session) {
+    if (!session) {
+      throw redirect({ to: "/auth", search: { redirect: location.href } });
+    }
+
+    // Refresh before validation on cold loads when the cached access token is
+    // near expiry. This avoids bouncing returning users to /auth prematurely.
+    if (expiresAtMs && expiresAtMs - Date.now() < 120_000) {
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
         throw redirect({
           to: "/auth",
-          search: hadStoredSession
-            ? { reason: "session_expired", redirect: location.href }
-            : { redirect: location.href },
+          search: { reason: "session_expired", redirect: location.href },
         });
       }
+    }
+
+    let { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      await supabase.auth.refreshSession();
       const retry = await supabase.auth.getUser();
       if (retry.error || !retry.data.user) {
         throw redirect({
