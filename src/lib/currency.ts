@@ -27,7 +27,7 @@ export const PLAN_DISPLAY: Record<PlanId, {
   together: {
     name: "Together",
     inrLabel: "₹799",
-    usdLabel: "$9.99",
+    usdLabel: "$8.99",
     members: 1,
     sessions: 4,
     reschedules: 4,
