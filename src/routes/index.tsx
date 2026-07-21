@@ -562,29 +562,184 @@ function Landing() {
           </div>
         </section>
 
-        {/* Features */}
-        <section className="grid gap-4 py-16 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            { icon: MessageCircleHeart, title: "AI Companion", body: "A calm space to talk things through, with safety-first guardrails.", tone: "gradient-peach" },
-            { icon: BookHeart, title: "Private Journal", body: "Yours alone. Never shared with family or Listeners.", tone: "gradient-mint" },
-            { icon: Users, title: "Human Listeners", body: "Verified people to hear you, only when both sides are ready.", tone: "gradient-blush" },
-            { icon: LineChart, title: "Gentle Insights", body: "See mood trends and streaks — never a score, never a judgment.", tone: "gradient-sky" },
-            { icon: HeartHandshake, title: "Family Circle", body: "Invite family with clear roles and consent — teens keep their privacy.", tone: "gradient-lilac" },
-            { icon: Shield, title: "Safety First", body: "Crisis resources one tap away, with regional hotlines and grounding.", tone: "gradient-sage" },
-          ].map((f, i) => (
-            <div
-              key={f.title}
-              className={`rounded-3xl p-6 shadow-soft card-hover ${f.tone} animate-fade-up`}
-              style={{ animationDelay: `${i * 70}ms` }}
+        {/* What's inside — feature showcase with mini mocks */}
+        <section id="whats-inside" className="scroll-mt-24 py-16 sm:py-24">
+          <div className="text-center" data-reveal>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral">
+              What's inside your membership
+            </p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+              Every tool your family needs — in one warm place.
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
+              A quick peek at the six spaces you unlock the moment you sign in.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* 1. AI Companion */}
+            <FeatureCard
+              tone="gradient-peach"
+              icon={MessageCircleHeart}
+              title="AI Companion"
+              body="A calm space to talk things through, 24/7 — with safety-first guardrails."
+              delay={0}
             >
-              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white/80 text-neutral-800">
-                <f.icon className="h-5 w-5" />
+              <div className="mt-4 space-y-2">
+                <div className="ml-auto w-4/5 rounded-2xl rounded-tr-sm bg-white/90 px-3 py-2 text-xs text-neutral-800 shadow-soft">
+                  I couldn't sleep again.
+                </div>
+                <div className="w-4/5 rounded-2xl rounded-tl-sm bg-neutral-900 px-3 py-2 text-xs text-white shadow-soft">
+                  I'm here. Want to name what's on your mind, one thing at a time?
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-neutral-700/80">
+                  <span className="h-1.5 w-1.5 animate-bloom rounded-full bg-sage" />
+                  Companion typing…
+                </div>
               </div>
-              <h3 className="mt-4 text-base font-semibold text-neutral-900">{f.title}</h3>
-              <p className="mt-1 text-sm text-neutral-800/75">{f.body}</p>
-            </div>
-          ))}
+            </FeatureCard>
+
+            {/* 2. Private Journal */}
+            <FeatureCard
+              tone="gradient-mint"
+              icon={BookHeart}
+              title="Private Journal"
+              body="Yours alone. Never shared with family or Listeners."
+              delay={80}
+            >
+              <div className="mt-4 rounded-2xl bg-white/90 p-3 shadow-soft">
+                <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-neutral-500">
+                  <span>Tue · 9:42 pm</span>
+                  <span className="rounded-full bg-mint/40 px-2 py-0.5 font-semibold text-neutral-700">
+                    🔒 private
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-neutral-800">
+                  Small win: called Mom before dinner. She laughed at the dog story…
+                </p>
+                <div className="mt-3 flex gap-1">
+                  {["🙂", "🌱", "💛"].map((e) => (
+                    <span key={e} className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs">
+                      {e}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </FeatureCard>
+
+            {/* 3. Human Listeners */}
+            <FeatureCard
+              tone="gradient-blush"
+              icon={PhoneCall}
+              title="Human Listeners"
+              body="Verified people to hear you — book only when you're ready."
+              delay={160}
+            >
+              <div className="mt-4 rounded-2xl bg-white/90 p-3 shadow-soft">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={avatarMom}
+                    alt=""
+                    className="h-8 w-8 rounded-full border-2 border-white object-cover shadow-soft"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-semibold text-neutral-900">Neha · Listener</div>
+                    <div className="flex items-center gap-1 text-[10px] text-neutral-600">
+                      <Star className="h-3 w-3 text-coral" fill="currentColor" strokeWidth={0} /> 4.9 · 320 sessions
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-sage/25 px-2 py-0.5 text-[10px] font-semibold text-neutral-800">
+                    Today 8pm
+                  </span>
+                </div>
+              </div>
+            </FeatureCard>
+
+            {/* 4. Family Circle & Admin — the requested "admin dashboard" preview */}
+            <FeatureCard
+              tone="gradient-lilac"
+              icon={HeartHandshake}
+              title="Family Circle & Admin"
+              body="Owners manage roles, invites, and allocate the monthly session pool."
+              delay={0}
+            >
+              <div className="mt-4 rounded-2xl bg-white/90 p-3 shadow-soft">
+                <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-wide text-neutral-500">
+                  <span>Session pool</span>
+                  <span className="font-semibold text-neutral-700">8 / 12 left</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                  <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-coral to-sunrise-from" />
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  {[
+                    { name: "Rohan", role: "Owner", used: 2, of: 4 },
+                    { name: "Priya", role: "Adult", used: 1, of: 4 },
+                    { name: "Aria", role: "Teen", used: 1, of: 4 },
+                  ].map((m) => (
+                    <div
+                      key={m.name}
+                      className="flex items-center justify-between rounded-lg bg-neutral-50 px-2 py-1 text-[11px]"
+                    >
+                      <span className="font-medium text-neutral-800">
+                        {m.name}
+                        <span className="ml-1 text-neutral-500">· {m.role}</span>
+                      </span>
+                      <span className="font-semibold tabular-nums text-neutral-700">
+                        {m.used}/{m.of}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </FeatureCard>
+
+            {/* 5. Gentle Insights */}
+            <FeatureCard
+              tone="gradient-sky"
+              icon={LineChart}
+              title="Gentle Insights"
+              body="Mood trends and streaks — never a score, never a judgment."
+              delay={80}
+            >
+              <div className="mt-4 rounded-2xl bg-white/90 p-3 shadow-soft">
+                <div className="flex items-end gap-1.5 h-16">
+                  {[35, 55, 40, 68, 50, 78, 62].map((h, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-t-md bg-gradient-to-t from-sky-300 to-coral/80"
+                      style={{ height: `${h}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="mt-2 flex justify-between text-[10px] text-neutral-500">
+                  <span>Mon</span><span>Wed</span><span>Fri</span><span>Sun</span>
+                </div>
+              </div>
+            </FeatureCard>
+
+            {/* 6. Safety First */}
+            <FeatureCard
+              tone="gradient-sage"
+              icon={Shield}
+              title="Safety First"
+              body="Crisis resources one tap away — regional hotlines and grounding."
+              delay={160}
+            >
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center gap-2 rounded-2xl bg-white/90 px-3 py-2 shadow-soft">
+                  <LifeBuoy className="h-4 w-4 text-coral" />
+                  <span className="text-xs font-medium text-neutral-900">Talk to someone now</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-2xl bg-white/90 px-3 py-2 shadow-soft">
+                  <Sparkles className="h-4 w-4 text-coral" />
+                  <span className="text-xs font-medium text-neutral-900">Try 60-sec grounding</span>
+                </div>
+              </div>
+            </FeatureCard>
+          </div>
         </section>
+
 
         {/* FAQ — accordion with smooth expand/collapse */}
         <section id="faq" className="scroll-mt-24 py-16 sm:py-24">
