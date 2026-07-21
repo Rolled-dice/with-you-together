@@ -39,10 +39,6 @@ export const Route = createFileRoute("/_authenticated")({
       .select("onboarding_completed")
       .eq("id", data.user.id)
       .maybeSingle();
-      .from("profiles")
-      .select("onboarding_completed")
-      .eq("id", data.user.id)
-      .maybeSingle();
 
     if (
       profile &&
