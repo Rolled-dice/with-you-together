@@ -1047,3 +1047,37 @@ function Landing() {
     </div>
   );
 }
+
+function FeatureCard({
+  tone,
+  icon: Icon,
+  title,
+  body,
+  delay = 0,
+  children,
+}: {
+  tone: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  body: string;
+  delay?: number;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div
+      data-reveal
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`group relative overflow-hidden rounded-3xl p-6 shadow-soft card-hover ${tone}`}
+    >
+      <div className="flex items-center gap-3">
+        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white/85 text-neutral-800 shadow-soft transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110">
+          <Icon className="h-5 w-5" />
+        </div>
+        <h3 className="text-base font-semibold text-neutral-900">{title}</h3>
+      </div>
+      <p className="mt-2 text-sm text-neutral-800/80">{body}</p>
+      {children}
+    </div>
+  );
+}
+
