@@ -38,8 +38,31 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/auth" });
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [checkingSession, setCheckingSession] = useState(true);
+  const [online, setOnline] = useState(
+    typeof navigator === "undefined" ? true : navigator.onLine !== false,
+  );
+
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (search.reason === "session_expired") {
+      toast.error("Your session expired", {
+        description: "Please sign in again to continue.",
+      });
+    }
+  }, [search.reason]);
 
   useEffect(() => {
     let cancelled = false;
