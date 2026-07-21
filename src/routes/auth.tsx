@@ -207,7 +207,7 @@ function SignUpForm() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -221,22 +221,18 @@ function SignUpForm() {
         },
       },
     });
+    setLoading(false);
     if (error) {
-      setLoading(false);
       return toast.error(error.message);
     }
-
-    // Send OTP to verify phone. Uses phone_change flow on the freshly created user.
-    const { error: otpErr } = await supabase.auth.updateUser({ phone: e164 });
-    setLoading(false);
-    if (otpErr) {
-      return toast.error(
-        `We couldn't send the OTP to ${e164}. Please check the number and try again. (${otpErr.message})`,
-      );
+    if (!data.session) {
+      toast.success("Check your email to confirm your account, then sign in.");
+      return;
     }
-    toast.success(`Verification code sent to ${e164}`);
-    setStage("otp");
+    toast.success("Welcome to WithU!");
+    navigate({ to: "/dashboard", replace: true });
   }
+
 
   async function verify(e: React.FormEvent) {
     e.preventDefault();
@@ -342,13 +338,7 @@ function SignUpForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="rounded-brand border border-dashed border-brand-accent/40 bg-brand-accent/5 p-3 text-xs text-muted-foreground">
-        <strong className="block text-brand-accent">Test mode</strong>
-        Phone OTP is currently using the Supabase test provider. For testing, sign up with{" "}
-        <code className="rounded bg-muted px-1 py-0.5 font-medium">{TEST_PHONE_NUMBER}</code>{" "}
-        and verify with code{" "}
-        <code className="rounded bg-muted px-1 py-0.5 font-medium">{TEST_PHONE_CODE}</code>.
-      </div>
+
 
       <div className="space-y-2">
         <Label htmlFor="signup-name">Full name</Label>
