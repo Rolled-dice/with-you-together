@@ -425,22 +425,25 @@ function OAuthButton({
   label,
   redirectTo,
   requireAge = false,
+  lock,
 }: {
   provider: "google" | "apple";
   label: string;
   redirectTo: string;
   requireAge?: boolean;
+  lock: AuthLock;
 }) {
-  const [loading, setLoading] = useState(false);
+  const busy = lock.busy === provider;
+  const disabled = lock.busy !== null;
 
   async function attempt() {
-    setLoading(true);
+    if (!lock.acquire(provider)) return;
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
       });
       if (result.error) throw result.error;
-      if (result.redirected) return; // browser navigates away
+      if (result.redirected) return; // browser navigates away — keep lock held
       // Popup flow: session is set — navigate immediately.
       window.location.replace(redirectTo);
     } catch (err) {
@@ -451,11 +454,12 @@ function OAuthButton({
           ? { label: "Try again", onClick: () => void attempt() }
           : undefined,
       });
-      setLoading(false);
+      lock.release();
     }
   }
 
   async function onClick() {
+    if (disabled) return;
     if (requireAge) {
       const ok = window.confirm(
         "By continuing you confirm you are 13 or older. WithU is not available to under-13 users.",
@@ -470,6 +474,7 @@ function OAuthButton({
     }
     await attempt();
   }
+
 
   const providerLabel = provider === "google" ? "Google" : "Apple";
 
