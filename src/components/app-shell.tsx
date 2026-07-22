@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Heart, LayoutDashboard, MessageCircleHeart, BookHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart } from "lucide-react";
+import { Heart, LayoutDashboard, MessageCircleHeart, BookHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, Pill } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,6 +10,7 @@ import { useCardInteractions } from "@/hooks/use-card-interactions";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/care", label: "Care", icon: Pill },
   { to: "/companion", label: "Companion", icon: MessageCircleHeart },
   { to: "/journal", label: "Journal", icon: BookHeart },
   { to: "/insights", label: "Insights", icon: LineChart },
@@ -92,7 +93,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Mobile bottom nav */}
           <nav
-            className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-8 overflow-hidden border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
+            className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-9 overflow-hidden border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           >
             {NAV.map((item) => {

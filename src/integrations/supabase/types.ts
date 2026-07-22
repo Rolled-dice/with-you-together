@@ -116,6 +116,60 @@ export type Database = {
         }
         Relationships: []
       }
+      dose_logs: {
+        Row: {
+          created_at: string
+          for_user_id: string
+          id: string
+          logged_at: string | null
+          logged_by: string | null
+          medication_id: string
+          note: string | null
+          schedule_id: string | null
+          scheduled_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          for_user_id: string
+          id?: string
+          logged_at?: string | null
+          logged_by?: string | null
+          medication_id: string
+          note?: string | null
+          schedule_id?: string | null
+          scheduled_at: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          for_user_id?: string
+          id?: string
+          logged_at?: string | null
+          logged_by?: string | null
+          medication_id?: string
+          note?: string | null
+          schedule_id?: string | null
+          scheduled_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dose_logs_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dose_logs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "medication_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       families: {
         Row: {
           created_at: string
@@ -492,6 +546,101 @@ export type Database = {
         }
         Relationships: []
       }
+      medication_schedules: {
+        Row: {
+          created_at: string
+          days_of_week: number[]
+          id: string
+          medication_id: string
+          time_of_day: string
+          with_food: boolean
+        }
+        Insert: {
+          created_at?: string
+          days_of_week?: number[]
+          id?: string
+          medication_id: string
+          time_of_day: string
+          with_food?: boolean
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[]
+          id?: string
+          medication_id?: string
+          time_of_day?: string
+          with_food?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_schedules_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          added_by: string
+          created_at: string
+          dosage: string | null
+          end_date: string | null
+          for_user_id: string
+          form: string | null
+          id: string
+          instructions: string | null
+          is_active: boolean
+          name: string
+          notes: string | null
+          parsed_data: Json | null
+          prescribed_by: string | null
+          prescription_image_path: string | null
+          refill_date: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          dosage?: string | null
+          end_date?: string | null
+          for_user_id: string
+          form?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          parsed_data?: Json | null
+          prescribed_by?: string | null
+          prescription_image_path?: string | null
+          refill_date?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          dosage?: string | null
+          end_date?: string | null
+          for_user_id?: string
+          form?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          parsed_data?: Json | null
+          prescribed_by?: string | null
+          prescription_image_path?: string | null
+          refill_date?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -589,6 +738,51 @@ export type Database = {
           preferred_language?: string
           pronouns?: string | null
           timezone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reminders: {
+        Row: {
+          category: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_at: string
+          for_user_id: string
+          id: string
+          recurrence: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_at: string
+          for_user_id: string
+          id?: string
+          recurrence?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_at?: string
+          for_user_id?: string
+          id?: string
+          recurrence?: string | null
+          status?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -728,6 +922,8 @@ export type Database = {
         Args: { _family: string; _uid: string }
         Returns: boolean
       }
+      is_family_adult_of: { Args: { _for_user: string }; Returns: boolean }
+      same_family_as: { Args: { _for_user: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
