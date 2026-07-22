@@ -207,11 +207,12 @@ export const parsePrescription = createServerFn({ method: "POST" })
 
     const json = await res.json();
     const text = json?.choices?.[0]?.message?.content ?? "{}";
-    let parsed: unknown;
+    let parsed: Record<string, any> = { medications: [] };
     try {
-      parsed = JSON.parse(text);
+      const p = JSON.parse(text);
+      if (p && typeof p === "object") parsed = p as Record<string, any>;
     } catch {
-      parsed = { medications: [] };
+      // keep default
     }
     return parsed;
   });
