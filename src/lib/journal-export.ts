@@ -38,7 +38,7 @@ export function exportJournalToPdf(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(30, 30, 30);
-  doc.text("WithU Journal", margin, y);
+  doc.text("BesideU Journal", margin, y);
   y += 28;
 
   doc.setFont("helvetica", "normal");
@@ -128,7 +128,7 @@ export function exportJournalToPdf(
     doc.setFontSize(9);
     doc.setTextColor(160, 160, 160);
     doc.text(
-      `WithU · Private journal export · Page ${i} of ${pageCount}`,
+      `BesideU · Private journal export · Page ${i} of ${pageCount}`,
       pageW / 2,
       pageH - 24,
       { align: "center" },
@@ -136,5 +136,5 @@ export function exportJournalToPdf(
   }
 
   const stamp = new Date().toISOString().slice(0, 10);
-  doc.save(`withu-journal-${stamp}.pdf`);
+  doc.save(`besideu-journal-${stamp}.pdf`);
 }

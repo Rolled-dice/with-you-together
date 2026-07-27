@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Callout, MiniFaq } from "@/components/docs/docs-
 export const Route = createFileRoute("/docs/safety")({
   head: () => ({
     meta: [
-      { title: "Safety — WithU Docs" },
-      { name: "description", content: "How to get help fast, and what WithU is not." },
-      { property: "og:title", content: "Safety — WithU Docs" },
+      { title: "Safety — BesideU Docs" },
+      { name: "description", content: "How to get help fast, and what BesideU is not." },
+      { property: "og:title", content: "Safety — BesideU Docs" },
       { property: "og:description", content: "Crisis resources and safety guidance." },
     ],
   }),
@@ -19,7 +19,7 @@ function Page() {
       <DocHeader
         eyebrow="Important"
         title="Safety"
-        intro="WithU is a warm space — but it isn't therapy or an emergency service."
+        intro="BesideU is a warm space — but it isn't therapy or an emergency service."
       />
 
       <Callout tone="warn" title="If you're in immediate danger">
@@ -35,8 +35,8 @@ function Page() {
         </ul>
       </DocSection>
 
-      <DocSection title="How WithU supports you">
-        <p>Companion and Listeners are here to be with you — to hear you out, help you slow down, and remind you you're not alone. If a conversation raises concern for your safety, WithU will always surface these resources.</p>
+      <DocSection title="How BesideU supports you">
+        <p>Companion and Listeners are here to be with you — to hear you out, help you slow down, and remind you you're not alone. If a conversation raises concern for your safety, BesideU will always surface these resources.</p>
       </DocSection>
 
       <DocSection title="Common questions">

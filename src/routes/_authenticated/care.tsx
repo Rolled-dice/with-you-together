@@ -45,13 +45,13 @@ import {
 export const Route = createFileRoute("/_authenticated/care")({
   head: () => ({
     meta: [
-      { title: "Care Hub — Medicines & Reminders | WithU" },
+      { title: "Care Hub — Medicines & Reminders | BesideU" },
       {
         name: "description",
         content:
           "Upload prescriptions, get medicine reminders, and keep loved ones' care on track — all in one place.",
       },
-      { property: "og:title", content: "WithU Care Hub" },
+      { property: "og:title", content: "BesideU Care Hub" },
       {
         property: "og:description",
         content: "Prescription scanning and gentle medicine reminders for the family.",

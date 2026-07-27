@@ -29,8 +29,8 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in — WithU" },
-      { name: "description", content: "Sign in or create your WithU account." },
+      { title: "Sign in — BesideU" },
+      { name: "description", content: "Sign in or create your BesideU account." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -142,7 +142,7 @@ function AuthPage() {
           >
             <Heart className="h-5 w-5" strokeWidth={2.4} />
           </motion.span>
-          <span className="text-lg font-semibold tracking-tight">WithU</span>
+          <span className="text-lg font-semibold tracking-tight">BesideU</span>
         </Link>
 
         <motion.div
@@ -462,7 +462,7 @@ function OAuthButton({
     if (disabled) return;
     if (requireAge) {
       const ok = window.confirm(
-        "By continuing you confirm you are 13 or older. WithU is not available to under-13 users.",
+        "By continuing you confirm you are 13 or older. BesideU is not available to under-13 users.",
       );
       if (!ok) return;
     }

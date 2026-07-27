@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * WithU design system — warm, calm, safe, friendly, human, minimal.
+ * BesideU design system — warm, calm, safe, friendly, human, minimal.
  * All colors in oklch. Semantic tokens only; never hardcode colors in components.
  */
 
@@ -442,11 +442,11 @@
     }
   }
 
-  /* WithU signature cursor — desktop with fine pointer only */
+  /* BesideU signature cursor — desktop with fine pointer only */
   @media (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .withu-cursor { display: block; }
+    .besideu-cursor { display: block; }
   }
-  .withu-cursor { display: none; }
+  .besideu-cursor { display: none; }
 }
 
 /* Hero ambient motion uses dedicated classes so parallax transforms cannot

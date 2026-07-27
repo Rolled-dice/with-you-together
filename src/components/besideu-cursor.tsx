@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * WithU signature cursor.
+ * BesideU signature cursor.
  * - Coral dot tracks pointer 1:1.
  * - Peach ring eases behind with spring-like damping.
  * - Ring expands over interactive elements, pulses on press.
- * - Desktop + fine pointer + no reduced-motion only (CSS gate on .withu-cursor).
+ * - Desktop + fine pointer + no reduced-motion only (CSS gate on .besideu-cursor).
  * - Native OS cursor stays visible for accessibility.
  */
-export function WithUCursor() {
+export function BesideUCursor() {
   const dotRef = useRef<HTMLDivElement | null>(null);
   const ringRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(false);
@@ -101,7 +101,7 @@ export function WithUCursor() {
         .wcursor-ring--press { animation: wcursor-pop 260ms ease-out; }
         @keyframes wcursor-pop { 0% { transform: translate3d(var(--_x,0), var(--_y,0), 0) scale(0.85); } 100% { transform: translate3d(var(--_x,0), var(--_y,0), 0) scale(1); } }
       `}</style>
-      <div className="withu-cursor wcursor-root" aria-hidden>
+      <div className="besideu-cursor wcursor-root" aria-hidden>
         <div ref={ringRef} className="wcursor-ring" />
         <div ref={dotRef} className="wcursor-dot" />
       </div>

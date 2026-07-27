@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_authenticated/safety")({
   component: SafetyPage,
   head: () => ({
     meta: [
-      { title: "Safety & Crisis Support · WithU" },
+      { title: "Safety & Crisis Support · BesideU" },
       { name: "description", content: "Immediate crisis resources, hotlines, and grounding tools when you need someone right now." },
     ],
   }),
@@ -53,7 +53,7 @@ function SafetyPage() {
         eyebrow="You're not alone"
         slogan="You are not alone tonight."
         title="Safety & crisis support"
-        description="If you or someone you love is in danger, please reach out to a real person right now. WithU is a companion — not a replacement for a human in a crisis."
+        description="If you or someone you love is in danger, please reach out to a real person right now. BesideU is a companion — not a replacement for a human in a crisis."
       />
 
       <div className="rounded-brand border border-destructive/30 bg-destructive/5 p-5 mb-8 animate-fade-up">
@@ -144,7 +144,7 @@ function SafetyPage() {
         <div className="flex items-start gap-3">
           <ShieldCheck className="h-5 w-5 text-brand-accent mt-0.5" />
           <div>
-            <p className="font-semibold">How WithU handles crisis moments</p>
+            <p className="font-semibold">How BesideU handles crisis moments</p>
             <p className="text-sm text-muted-foreground mt-1">
               When our Companion detects language suggesting self-harm or acute danger, it pauses normal responses and surfaces these resources. Nothing you share here is used to train models, and family members never see your Companion conversations or Journal entries.
             </p>

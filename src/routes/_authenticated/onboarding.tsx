@@ -12,8 +12,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
-      { title: "Welcome — WithU" },
-      { name: "description", content: "A few gentle questions to set up your WithU space." },
+      { title: "Welcome — BesideU" },
+      { name: "description", content: "A few gentle questions to set up your BesideU space." },
     ],
   }),
   component: OnboardingPage,
@@ -77,7 +77,7 @@ function OnboardingPage() {
       toast.error(error.message);
       return;
     }
-    toast.success("You're all set. Welcome to WithU.");
+    toast.success("You're all set. Welcome to BesideU.");
     navigate({ to: "/dashboard" });
   }
 
@@ -94,13 +94,13 @@ function OnboardingPage() {
       <div className="mx-auto flex max-w-xl flex-col gap-6">
         <div className="flex items-center gap-2 text-brand-primary">
           <Heart className="h-5 w-5" />
-          <span className="text-sm font-medium tracking-wide">WithU</span>
+          <span className="text-sm font-medium tracking-wide">BesideU</span>
         </div>
         <Card className="rounded-brand border-border bg-card">
           <CardHeader>
             <CardTitle className="text-2xl font-semibold">A gentle welcome</CardTitle>
             <CardDescription>
-              A few soft questions so WithU can meet you where you are. Nothing here is shared —
+              A few soft questions so BesideU can meet you where you are. Nothing here is shared —
               it's yours.
             </CardDescription>
           </CardHeader>
@@ -140,7 +140,7 @@ function OnboardingPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="intent">What are you hoping WithU can hold for you?</Label>
+                <Label htmlFor="intent">What are you hoping BesideU can hold for you?</Label>
                 <Textarea
                   id="intent"
                   value={careIntent}
@@ -156,7 +156,7 @@ function OnboardingPage() {
                 className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
               >
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Enter WithU
+                Enter BesideU
               </Button>
             </form>
           </CardContent>

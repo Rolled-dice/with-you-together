@@ -5,22 +5,22 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://hagqbqxsedoqdoqdbtqt.supabase.co/auth/v1",
-    "resource_name": "WithU MCP",
+    "resource_name": "BesideU MCP",
     "accepted_audiences": [
       "authenticated"
     ]
   },
   "mcp": {
     "server": {
-      "name": "withu-mcp",
+      "name": "besideu-mcp",
       "version": "0.1.0",
-      "title": "WithU"
+      "title": "BesideU"
     },
     "tools": [
       {
         "name": "get_app_info",
-        "title": "About WithU",
-        "description": "Returns a public overview of the WithU app: what it does, who it's for, main features, and links. Safe for anyone to read.",
+        "title": "About BesideU",
+        "description": "Returns a public overview of the BesideU app: what it does, who it's for, main features, and links. Safe for anyone to read.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -35,8 +35,8 @@
       },
       {
         "name": "list_membership_plans",
-        "title": "List WithU membership plans",
-        "description": "Returns WithU's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data — safe for anyone to read.",
+        "title": "List BesideU membership plans",
+        "description": "Returns BesideU's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data — safe for anyone to read.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -77,7 +77,7 @@
       {
         "name": "list_grounding_exercises",
         "title": "List grounding & calming exercises",
-        "description": "Returns short grounding and breathing exercises from WithU's public safety library. Optional id filter returns a single exercise.",
+        "description": "Returns short grounding and breathing exercises from BesideU's public safety library. Optional id filter returns a single exercise.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
