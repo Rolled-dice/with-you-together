@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/journal")({
   head: () => ({
     meta: [
-      { title: "Journal — WithU" },
+      { title: "Journal — BesideU" },
       {
         name: "description",
         content: "Private journaling and mood check-ins, only you can see.",

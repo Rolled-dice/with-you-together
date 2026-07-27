@@ -5,10 +5,10 @@ import { DocHeader, DocSection, Steps, TryItNow } from "@/components/docs/docs-s
 export const Route = createFileRoute("/docs/")({
   head: () => ({
     meta: [
-      { title: "Welcome to WithU — Docs" },
-      { name: "description", content: "A quick tour of WithU and how to get started in under five minutes." },
-      { property: "og:title", content: "Welcome to WithU — Docs" },
-      { property: "og:description", content: "A quick tour of WithU and how to get started." },
+      { title: "Welcome to BesideU — Docs" },
+      { name: "description", content: "A quick tour of BesideU and how to get started in under five minutes." },
+      { property: "og:title", content: "Welcome to BesideU — Docs" },
+      { property: "og:description", content: "A quick tour of BesideU and how to get started." },
     ],
   }),
   component: Page,
@@ -28,8 +28,8 @@ function Page() {
     <>
       <DocHeader
         eyebrow="Welcome"
-        title="WithU, in five minutes"
-        intro="WithU helps you check in on the people you love — and helps them feel less alone between calls. These docs show you how each part works and how to get set up fast."
+        title="BesideU, in five minutes"
+        intro="BesideU helps you check in on the people you love — and helps them feel less alone between calls. These docs show you how each part works and how to get set up fast."
       />
 
       <DocSection title="Quick start">

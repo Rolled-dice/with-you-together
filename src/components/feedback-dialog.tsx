@@ -32,9 +32,9 @@ const CATEGORIES: {
   Icon: typeof Bug;
   tone: string;
 }[] = [
-  { value: "feature_request", label: "Feature request", hint: "Something you wish WithU could do", Icon: Lightbulb, tone: "bg-mint/40 text-neutral-900" },
+  { value: "feature_request", label: "Feature request", hint: "Something you wish BesideU could do", Icon: Lightbulb, tone: "bg-mint/40 text-neutral-900" },
   { value: "bug_report", label: "Bug report", hint: "Something looks or works wrong", Icon: Bug, tone: "bg-blush/50 text-neutral-900" },
-  { value: "product_feedback", label: "Product feedback", hint: "General thoughts on WithU", Icon: MessageSquareHeart, tone: "bg-peach/60 text-neutral-900" },
+  { value: "product_feedback", label: "Product feedback", hint: "General thoughts on BesideU", Icon: MessageSquareHeart, tone: "bg-peach/60 text-neutral-900" },
   { value: "ai_feedback", label: "AI Companion", hint: "How the AI felt to you", Icon: Sparkles, tone: "bg-lilac/40 text-neutral-900" },
   { value: "listener_feedback", label: "Listener feedback", hint: "About a listener session", Icon: Headphones, tone: "bg-sage/40 text-neutral-900" },
   { value: "support", label: "Support / help", hint: "You need a hand from our team", Icon: LifeBuoy, tone: "bg-sunrise/40 text-neutral-900" },
@@ -159,7 +159,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
               </div>
               <div className="flex items-start gap-2.5">
                 <MessageSquareHeart className="mt-0.5 h-4 w-4 shrink-0 text-coral" />
-                <p>Need help now? Email <a className="underline underline-offset-2" href="mailto:withU.customercare@support.com">withU.customercare@support.com</a>.</p>
+                <p>Need help now? Email <a className="underline underline-offset-2" href="mailto:besideU.customercare@support.com">besideU.customercare@support.com</a>.</p>
               </div>
             </div>
 
@@ -184,7 +184,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="text-xl">Help shape WithU</DialogTitle>
+              <DialogTitle className="text-xl">Help shape BesideU</DialogTitle>
               <DialogDescription>
                 Every note lands in our product review queue. We read them all — promise.
               </DialogDescription>

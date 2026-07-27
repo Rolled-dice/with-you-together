@@ -4,7 +4,7 @@ import { Heart, LayoutDashboard, MessageCircleHeart, BookHeart, Users, Settings,
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { WithUCursor } from "@/components/withu-cursor";
+import { BesideUCursor } from "@/components/besideu-cursor";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
 
@@ -37,7 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
-      <WithUCursor />
+      <BesideUCursor />
       <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
 
         {/* Sidebar (desktop) */}
@@ -127,10 +127,10 @@ function Brand({ compact = false }: { compact?: boolean }) {
         <Heart className="h-5 w-5" strokeWidth={2.4} />
       </span>
       {!compact && (
-        <span className="text-lg font-semibold tracking-tight text-foreground">WithU</span>
+        <span className="text-lg font-semibold tracking-tight text-foreground">BesideU</span>
       )}
       {compact && (
-        <span className="text-lg font-semibold tracking-tight text-foreground">WithU</span>
+        <span className="text-lg font-semibold tracking-tight text-foreground">BesideU</span>
       )}
     </Link>
   );

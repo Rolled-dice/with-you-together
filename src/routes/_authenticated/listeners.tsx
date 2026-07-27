@@ -40,11 +40,11 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/listeners")({
   head: () => ({
     meta: [
-      { title: "Listeners — WithU" },
+      { title: "Listeners — BesideU" },
       {
         name: "description",
         content:
-          "Book a scheduled session with WithU's in-house Listener team. Real people, always with you.",
+          "Book a scheduled session with BesideU's in-house Listener team. Real people, always with you.",
       },
     ],
   }),
@@ -144,7 +144,7 @@ function ListenersPage() {
         eyebrow="Listeners"
         slogan="Real ears. Real hearts."
         title="Book a Listener"
-        description="Our in-house team is trained to just… listen. Book ahead, and we'll match you with someone from the WithU roster."
+        description="Our in-house team is trained to just… listen. Book ahead, and we'll match you with someone from the BesideU roster."
       />
 
       {/* SLA + Rules strip */}
@@ -158,7 +158,7 @@ function ListenersPage() {
         <RuleTile
           icon={ShieldCheck}
           title="In-house team, SLA-backed"
-          body="Every booking is picked up by a WithU Listener. Confirmed within 15 minutes."
+          body="Every booking is picked up by a BesideU Listener. Confirmed within 15 minutes."
           delay={2}
         />
         <RuleTile
@@ -250,7 +250,7 @@ function ListenersPage() {
               Book with the in-house team
             </Button>
             <p className="text-xs text-muted-foreground">
-              You'll be matched with a WithU Listener automatically. No profile picking required.
+              You'll be matched with a BesideU Listener automatically. No profile picking required.
             </p>
           </CardContent>
         </Card>

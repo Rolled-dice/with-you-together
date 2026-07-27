@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Callout, MiniFaq, TryItNow } from "@/components/
 export const Route = createFileRoute("/docs/insights")({
   head: () => ({
     meta: [
-      { title: "Insights — WithU Docs" },
+      { title: "Insights — BesideU Docs" },
       { name: "description", content: "See gentle patterns in your mood over time — for your eyes only." },
-      { property: "og:title", content: "Insights — WithU Docs" },
+      { property: "og:title", content: "Insights — BesideU Docs" },
       { property: "og:description", content: "Gentle mood patterns over time." },
     ],
   }),

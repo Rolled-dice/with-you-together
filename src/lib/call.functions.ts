@@ -120,7 +120,7 @@ export const getCallToken = createServerFn({ method: "POST" })
 
     let roomName = b.room_name;
     if (!roomName) {
-      roomName = `withu-${b.id}`;
+      roomName = `besideu-${b.id}`;
       const patch: { room_name: string; call_started_at?: string } = {
         room_name: roomName,
       };

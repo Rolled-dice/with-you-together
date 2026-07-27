@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/journal")({
   head: () => ({
     meta: [
-      { title: "Journal — WithU Docs" },
+      { title: "Journal — BesideU Docs" },
       { name: "description", content: "A private space for your thoughts and moods." },
-      { property: "og:title", content: "Journal — WithU Docs" },
+      { property: "og:title", content: "Journal — BesideU Docs" },
       { property: "og:description", content: "Private notes and moods, only for you." },
     ],
   }),
@@ -19,7 +19,7 @@ function Page() {
       <DocHeader
         eyebrow="Feature"
         title="Journal"
-        intro="A quiet corner of WithU that belongs only to you."
+        intro="A quiet corner of BesideU that belongs only to you."
       />
 
       <DocSection title="What it is">

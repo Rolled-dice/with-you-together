@@ -4,10 +4,10 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/getting-started")({
   head: () => ({
     meta: [
-      { title: "Getting started — WithU Docs" },
-      { name: "description", content: "Create your WithU account, finish onboarding, pick a plan, and invite family." },
-      { property: "og:title", content: "Getting started — WithU Docs" },
-      { property: "og:description", content: "Set up WithU in a few minutes." },
+      { title: "Getting started — BesideU Docs" },
+      { name: "description", content: "Create your BesideU account, finish onboarding, pick a plan, and invite family." },
+      { property: "og:title", content: "Getting started — BesideU Docs" },
+      { property: "og:description", content: "Set up BesideU in a few minutes." },
     ],
   }),
   component: Page,
@@ -24,11 +24,11 @@ function Page() {
 
       <DocSection title="1. Create your account">
         <p>Use your email or continue with Google. We'll send a magic link — no password to remember.</p>
-        <Callout tone="tip" title="Under 13?">WithU is for people 13 and older. Family members below 13 should be added by a parent as a cared-for profile.</Callout>
+        <Callout tone="tip" title="Under 13?">BesideU is for people 13 and older. Family members below 13 should be added by a parent as a cared-for profile.</Callout>
       </DocSection>
 
       <DocSection title="2. Finish onboarding">
-        <p>We ask a few short questions — your name, who you're caring for, and how you'd like WithU to talk to you. It takes about a minute and you can change everything later.</p>
+        <p>We ask a few short questions — your name, who you're caring for, and how you'd like BesideU to talk to you. It takes about a minute and you can change everything later.</p>
       </DocSection>
 
       <DocSection title="3. Choose a plan">
@@ -53,7 +53,7 @@ function Page() {
           items={[
             { q: "Do I need a credit card to try?", a: "No. The trial is free and doesn't ask for one." },
             { q: "Can I switch plans later?", a: "Yes — upgrade or downgrade any time from Billing." },
-            { q: "What if my parent isn't tech-savvy?", a: "Send them the invite link — it opens WithU directly. The chat and calls are designed to be simple for older adults." },
+            { q: "What if my parent isn't tech-savvy?", a: "Send them the invite link — it opens BesideU directly. The chat and calls are designed to be simple for older adults." },
           ]}
         />
       </DocSection>

@@ -12,18 +12,18 @@ const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL ??
 const issuerUrl = supabaseUrl ? `${supabaseUrl.replace(/\/+$/, "")}/auth/v1` : "";
 
 export default defineMcp({
-  name: "withu-mcp",
-  title: "WithU",
+  name: "besideu-mcp",
+  title: "BesideU",
   version: "0.1.0",
   instructions:
-    "Authenticated tools for the WithU family wellbeing app. Read-only access to membership plans, crisis hotlines, grounding exercises, and general app info. No user or account data is exposed.",
+    "Authenticated tools for the BesideU family wellbeing app. Read-only access to membership plans, crisis hotlines, grounding exercises, and general app info. No user or account data is exposed.",
   tools: [getAppInfoTool, listMembershipPlansTool, listCrisisHotlinesTool, listGroundingExercisesTool],
   ...(issuerUrl
     ? {
         auth: auth.oauth.issuer({
           issuer: issuerUrl,
           acceptedAudiences: "authenticated",
-          resourceName: "WithU MCP",
+          resourceName: "BesideU MCP",
         }),
       }
     : {}),

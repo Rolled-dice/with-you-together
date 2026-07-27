@@ -3,9 +3,9 @@ import { z } from "zod";
 
 export default defineTool({
   name: "list_membership_plans",
-  title: "List WithU membership plans",
+  title: "List BesideU membership plans",
   description:
-    "Returns WithU's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data — safe for anyone to read.",
+    "Returns BesideU's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data — safe for anyone to read.",
   inputSchema: {
     currency: z
       .enum(["INR", "USD"])

@@ -35,7 +35,7 @@ import avatarKid from "@/assets/avatar-kid.png";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — WithU" },
+      { title: "Dashboard — BesideU" },
       { name: "description", content: "Your calm daily check-in and Care Membership overview." },
     ],
   }),
