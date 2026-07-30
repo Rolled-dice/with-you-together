@@ -35,7 +35,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   RefreshCw,
+  MessageCircle,
 } from "lucide-react";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { CallChatPanel } from "@/components/call-chat-panel";
+
 import {
   LiveKitRoom,
   VideoConference,
