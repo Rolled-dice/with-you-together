@@ -61,50 +61,57 @@ export function CallRoom({
         this upon account creation.
       </div>
 
-      <div className="grid min-h-0 flex-1 gap-3 p-3 md:grid-cols-2">
-        <div className="relative overflow-hidden rounded-brand bg-muted">
-          <video
-            ref={remoteVideoRef}
-            playsInline
-            className="h-full w-full object-cover"
-          />
-          <span className="absolute left-3 top-3 rounded-full bg-background/80 px-2 py-0.5 text-[11px]">
-            Them
-          </span>
-        </div>
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        <div className="grid min-h-0 flex-1 gap-3 p-3 md:grid-cols-2">
+          <div className="relative overflow-hidden rounded-brand bg-muted">
+            <video
+              ref={remoteVideoRef}
+              playsInline
+              className="h-full w-full object-cover"
+            />
+            <span className="absolute left-3 top-3 rounded-full bg-background/80 px-2 py-0.5 text-[11px]">
+              Them
+            </span>
+          </div>
 
-        <div className="relative overflow-hidden rounded-brand bg-muted">
-          <video
-            ref={localVideoRef}
-            muted
-            playsInline
-            className="h-full w-full object-cover"
-          />
-          <span className="absolute left-3 top-3 rounded-full bg-background/80 px-2 py-0.5 text-[11px]">
-            You
-          </span>
-          {/* Mic level visualizer on the local tile */}
-          <div className="absolute bottom-3 left-3 flex items-end gap-1 rounded-full bg-background/80 px-2 py-1.5">
-            {muted ? (
-              <MicOff className="h-3.5 w-3.5 text-destructive" />
-            ) : (
-              <>
-                <Mic className="mr-1 h-3.5 w-3.5 text-brand-primary" />
-                {bars.map((threshold, i) => (
-                  <span
-                    key={threshold}
-                    className={`w-1 rounded-full transition-all duration-100 ${
-                      volume >= threshold * 0.6
-                        ? "bg-brand-primary"
-                        : "bg-muted-foreground/30"
-                    }`}
-                    style={{ height: `${6 + i * 4}px` }}
-                  />
-                ))}
-              </>
-            )}
+          <div className="relative overflow-hidden rounded-brand bg-muted">
+            <video
+              ref={localVideoRef}
+              muted
+              playsInline
+              className="h-full w-full object-cover"
+            />
+            <span className="absolute left-3 top-3 rounded-full bg-background/80 px-2 py-0.5 text-[11px]">
+              You
+            </span>
+            {/* Mic level visualizer on the local tile */}
+            <div className="absolute bottom-3 left-3 flex items-end gap-1 rounded-full bg-background/80 px-2 py-1.5">
+              {muted ? (
+                <MicOff className="h-3.5 w-3.5 text-destructive" />
+              ) : (
+                <>
+                  <Mic className="mr-1 h-3.5 w-3.5 text-brand-primary" />
+                  {bars.map((threshold, i) => (
+                    <span
+                      key={threshold}
+                      className={`w-1 rounded-full transition-all duration-100 ${
+                        volume >= threshold * 0.6
+                          ? "bg-brand-primary"
+                          : "bg-muted-foreground/30"
+                      }`}
+                      style={{ height: `${6 + i * 4}px` }}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Desktop chat sidebar */}
+        <aside className="hidden min-h-0 w-[340px] shrink-0 border-l border-border lg:block">
+          <CallChat meeting={meeting} />
+        </aside>
       </div>
 
       {error && (
@@ -113,7 +120,10 @@ export function CallRoom({
         </p>
       )}
 
-      <div className="flex items-center justify-center gap-2 border-t border-border bg-card/60 px-4 py-3">
+      <div
+        className="flex items-center justify-center gap-2 border-t border-border bg-card/60 px-4 py-3"
+        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+      >
         <Button
           variant={muted ? "destructive" : "outline"}
           size="sm"
@@ -138,6 +148,27 @@ export function CallRoom({
           )}
           {cameraOn ? "Camera on" : "Camera off"}
         </Button>
+
+        {/* Mobile chat drawer */}
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button variant="outline" size="sm" className="lg:hidden">
+              <MessageSquare className="mr-1.5 h-4 w-4" /> Chat
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="h-[80vh]">
+            <DrawerHeader className="pb-0">
+              <DrawerTitle className="text-left text-base">In-call chat</DrawerTitle>
+            </DrawerHeader>
+            <div
+              className="min-h-0 flex-1"
+              style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            >
+              <CallChat meeting={meeting} />
+            </div>
+          </DrawerContent>
+        </Drawer>
+
         <Button
           variant="destructive"
           size="sm"
@@ -149,6 +180,7 @@ export function CallRoom({
           <PhoneOff className="mr-1.5 h-4 w-4" /> Leave
         </Button>
       </div>
+
 
       <audio ref={audioElRef} className="hidden" />
     </div>
