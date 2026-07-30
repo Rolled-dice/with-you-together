@@ -35,7 +35,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   RefreshCw,
+  MessageCircle,
 } from "lucide-react";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { CallChatPanel } from "@/components/call-chat-panel";
+
 import {
   LiveKitRoom,
   VideoConference,
@@ -127,6 +131,8 @@ function CallPage() {
   const endFn = useServerFn(endCall);
 
   const [role, setRole] = useState<"user" | "listener">("user");
+  const [chatOpen, setChatOpen] = useState(false);
+
   type Session = {
     token: string;
     url: string;
@@ -351,10 +357,33 @@ function CallPage() {
             devices={devices}
             onChange={setMediaMode}
           />
-          <div className="flex-1 min-h-0">
-            <VideoConference />
-            <RoomAudioRenderer />
+          <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+            <div className="relative min-h-0 flex-1">
+              <VideoConference />
+              <RoomAudioRenderer />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="absolute right-3 top-3 z-10 shadow-md md:hidden"
+                onClick={() => setChatOpen(true)}
+              >
+                <MessageCircle className="mr-1.5 h-4 w-4" /> Chat
+              </Button>
+            </div>
+            {/* Desktop: side-by-side chat sidebar */}
+            <aside className="hidden w-[340px] shrink-0 border-l border-border md:block">
+              <CallChatPanel role={role} />
+            </aside>
           </div>
+          {/* Mobile: bottom drawer chat */}
+          <Drawer open={chatOpen} onOpenChange={setChatOpen}>
+            <DrawerContent className="h-[80vh] md:hidden">
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <CallChatPanel role={role} onClose={() => setChatOpen(false)} />
+              </div>
+            </DrawerContent>
+          </Drawer>
+
         </LiveKitRoom>
       </div>
     );
