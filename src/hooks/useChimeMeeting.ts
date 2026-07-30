@@ -79,10 +79,82 @@ export function useChimeMeeting(
   const [cameraOn, setCameraOn] = useState(true);
   const [volume, setVolume] = useState(0);
 
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [micPermission, setMicPermission] = useState<
+    "granted" | "denied" | "unknown"
+  >("unknown");
+
   const [audioInputs, setAudioInputs] = useState<ChimeDevice[]>([]);
   const [videoInputs, setVideoInputs] = useState<ChimeDevice[]>([]);
   const [selectedAudioInput, setSelectedAudioInput] = useState<string>("");
   const [selectedVideoInput, setSelectedVideoInput] = useState<string>("");
+
+  const pushMessage = useCallback((m: Omit<ChatMessage, "id" | "at">) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        ...m,
+        id:
+          globalThis.crypto?.randomUUID?.() ??
+          `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        at: Date.now(),
+      },
+    ]);
+  }, []);
+
+  /** Broadcast over the Chime data channel; falls back to local echo. */
+  const broadcast = useCallback(
+    (payload: { kind: "text" | "system"; body: string }) => {
+      const session = sessionRef.current;
+      try {
+        session?.audioVideo.realtimeSendDataMessage(
+          CHAT_TOPIC,
+          JSON.stringify({ ...payload, senderRole: selfRole }),
+          30000,
+        );
+      } catch {
+        // data channel unavailable (mock backend) — local echo only
+      }
+    },
+    [selfRole],
+  );
+
+  const sendChatMessage = useCallback(
+    (body: string) => {
+      const text = body.trim();
+      if (!text) return;
+      broadcast({ kind: "text", body: text });
+      pushMessage({ kind: "text", body: text, senderRole: selfRole, self: true });
+    },
+    [broadcast, pushMessage, selfRole],
+  );
+
+  /** Watch browser microphone permission so the chat can warn on revocation. */
+  useEffect(() => {
+    let cancelled = false;
+    let statusRef: any = null;
+    const onChange = () => {
+      if (!cancelled && statusRef) setMicPermission(statusRef.state);
+    };
+    (async () => {
+      try {
+        const perms = (navigator as any)?.permissions;
+        if (!perms?.query) return;
+        const s = await perms.query({ name: "microphone" as PermissionName });
+        if (cancelled) return;
+        statusRef = s;
+        setMicPermission(s.state);
+        s.addEventListener?.("change", onChange);
+      } catch {
+        // permission API unsupported
+      }
+    })();
+    return () => {
+      cancelled = true;
+      statusRef?.removeEventListener?.("change", onChange);
+    };
+  }, []);
+
 
   /** Create the MeetingSession from (mock) credentials. Browser-only. */
   const initialize = useCallback(async () => {
