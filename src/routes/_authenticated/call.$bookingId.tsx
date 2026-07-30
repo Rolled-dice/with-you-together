@@ -131,6 +131,8 @@ function CallPage() {
   const endFn = useServerFn(endCall);
 
   const [role, setRole] = useState<"user" | "listener">("user");
+  const [chatOpen, setChatOpen] = useState(false);
+
   type Session = {
     token: string;
     url: string;
