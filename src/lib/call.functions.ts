@@ -101,8 +101,11 @@ export const getCallToken = createServerFn({ method: "POST" })
     const apiKey = process.env.LIVEKIT_API_KEY;
     const apiSecret = process.env.LIVEKIT_API_SECRET;
     if (!url || !apiKey || !apiSecret) {
-      throw new Error("LiveKit not configured");
+      throw new Error(
+        "Video calling isn't set up yet. Please try again later or contact support.",
+      );
     }
+
 
     const { data: b, error } = await context.supabase
       .from("listener_bookings")
