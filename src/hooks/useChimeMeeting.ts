@@ -49,7 +49,22 @@ export async function fetchChimeTokens(
 
 type Status = "idle" | "initializing" | "ready" | "in-call" | "error";
 
-export function useChimeMeeting(bookingId = "mock-booking") {
+export type ChatMessage = {
+  id: string;
+  kind: "text" | "system";
+  body: string;
+  senderRole: "user" | "listener" | "system";
+  self: boolean;
+  at: number;
+};
+
+const CHAT_TOPIC = "besideu-chat";
+
+export function useChimeMeeting(
+  bookingId = "mock-booking",
+  selfRole: "user" | "listener" = "user",
+) {
+
   const sessionRef = useRef<any>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -64,10 +79,82 @@ export function useChimeMeeting(bookingId = "mock-booking") {
   const [cameraOn, setCameraOn] = useState(true);
   const [volume, setVolume] = useState(0);
 
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [micPermission, setMicPermission] = useState<
+    "granted" | "denied" | "unknown"
+  >("unknown");
+
   const [audioInputs, setAudioInputs] = useState<ChimeDevice[]>([]);
   const [videoInputs, setVideoInputs] = useState<ChimeDevice[]>([]);
   const [selectedAudioInput, setSelectedAudioInput] = useState<string>("");
   const [selectedVideoInput, setSelectedVideoInput] = useState<string>("");
+
+  const pushMessage = useCallback((m: Omit<ChatMessage, "id" | "at">) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        ...m,
+        id:
+          globalThis.crypto?.randomUUID?.() ??
+          `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        at: Date.now(),
+      },
+    ]);
+  }, []);
+
+  /** Broadcast over the Chime data channel; falls back to local echo. */
+  const broadcast = useCallback(
+    (payload: { kind: "text" | "system"; body: string }) => {
+      const session = sessionRef.current;
+      try {
+        session?.audioVideo.realtimeSendDataMessage(
+          CHAT_TOPIC,
+          JSON.stringify({ ...payload, senderRole: selfRole }),
+          30000,
+        );
+      } catch {
+        // data channel unavailable (mock backend) — local echo only
+      }
+    },
+    [selfRole],
+  );
+
+  const sendChatMessage = useCallback(
+    (body: string) => {
+      const text = body.trim();
+      if (!text) return;
+      broadcast({ kind: "text", body: text });
+      pushMessage({ kind: "text", body: text, senderRole: selfRole, self: true });
+    },
+    [broadcast, pushMessage, selfRole],
+  );
+
+  /** Watch browser microphone permission so the chat can warn on revocation. */
+  useEffect(() => {
+    let cancelled = false;
+    let statusRef: any = null;
+    const onChange = () => {
+      if (!cancelled && statusRef) setMicPermission(statusRef.state);
+    };
+    (async () => {
+      try {
+        const perms = (navigator as any)?.permissions;
+        if (!perms?.query) return;
+        const s = await perms.query({ name: "microphone" as PermissionName });
+        if (cancelled) return;
+        statusRef = s;
+        setMicPermission(s.state);
+        s.addEventListener?.("change", onChange);
+      } catch {
+        // permission API unsupported
+      }
+    })();
+    return () => {
+      cancelled = true;
+      statusRef?.removeEventListener?.("change", onChange);
+    };
+  }, []);
+
 
   /** Create the MeetingSession from (mock) credentials. Browser-only. */
   const initialize = useCallback(async () => {
@@ -185,6 +272,34 @@ export function useChimeMeeting(bookingId = "mock-booking") {
       };
       session.audioVideo.addObserver(observer);
 
+      // Live chat over the Chime data channel.
+      try {
+        session.audioVideo.realtimeSubscribeToReceiveDataMessage(
+          CHAT_TOPIC,
+          (dataMessage: any) => {
+            try {
+              const parsed = JSON.parse(dataMessage.text());
+              pushMessage({
+                kind: parsed.kind === "system" ? "system" : "text",
+                body: String(parsed.body ?? ""),
+                senderRole:
+                  parsed.kind === "system"
+                    ? "system"
+                    : parsed.senderRole === "listener"
+                      ? "listener"
+                      : "user",
+                self: false,
+              });
+            } catch {
+              // ignore malformed payloads
+            }
+          },
+        );
+      } catch {
+        // data channel unavailable with mock credentials
+      }
+
+
       if (selectedAudioInput)
         await session.audioVideo.startAudioInput(selectedAudioInput);
       if (selectedVideoInput && cameraOn)
@@ -201,17 +316,30 @@ export function useChimeMeeting(bookingId = "mock-booking") {
       setError((e as Error).message);
       setStatus("error");
     }
-  }, [cameraOn, selectedAudioInput, selectedVideoInput, startVolumeMeter]);
+  }, [cameraOn, pushMessage, selectedAudioInput, selectedVideoInput, startVolumeMeter]);
+
+  const announceMic = useCallback(
+    (isMuted: boolean) => {
+      const label = selfRole === "listener" ? "Listener" : "You";
+      const body = `${label} ${isMuted ? "muted" : "unmuted"} their microphone`;
+      broadcast({ kind: "system", body });
+      pushMessage({ kind: "system", body, senderRole: "system", self: true });
+    },
+    [broadcast, pushMessage, selfRole],
+  );
 
   const muteMic = useCallback(() => {
     sessionRef.current?.audioVideo.realtimeMuteLocalAudio();
     setMuted(true);
-  }, []);
+    announceMic(true);
+  }, [announceMic]);
 
   const unmuteMic = useCallback(() => {
     sessionRef.current?.audioVideo.realtimeUnmuteLocalAudio();
     setMuted(false);
-  }, []);
+    announceMic(false);
+  }, [announceMic]);
+
 
   const toggleCamera = useCallback(async () => {
     const session = sessionRef.current;
@@ -266,10 +394,15 @@ export function useChimeMeeting(bookingId = "mock-booking") {
     muted,
     cameraOn,
     volume,
+    messages,
+    micPermission,
+    selfRole,
+    sendChatMessage,
     audioInputs,
     videoInputs,
     selectedAudioInput,
     selectedVideoInput,
+
     localVideoRef,
     remoteVideoRef,
     audioElRef,
