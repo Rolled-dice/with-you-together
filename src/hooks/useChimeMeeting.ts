@@ -272,6 +272,34 @@ export function useChimeMeeting(
       };
       session.audioVideo.addObserver(observer);
 
+      // Live chat over the Chime data channel.
+      try {
+        session.audioVideo.realtimeSubscribeToReceiveDataMessage(
+          CHAT_TOPIC,
+          (dataMessage: any) => {
+            try {
+              const parsed = JSON.parse(dataMessage.text());
+              pushMessage({
+                kind: parsed.kind === "system" ? "system" : "text",
+                body: String(parsed.body ?? ""),
+                senderRole:
+                  parsed.kind === "system"
+                    ? "system"
+                    : parsed.senderRole === "listener"
+                      ? "listener"
+                      : "user",
+                self: false,
+              });
+            } catch {
+              // ignore malformed payloads
+            }
+          },
+        );
+      } catch {
+        // data channel unavailable with mock credentials
+      }
+
+
       if (selectedAudioInput)
         await session.audioVideo.startAudioInput(selectedAudioInput);
       if (selectedVideoInput && cameraOn)
