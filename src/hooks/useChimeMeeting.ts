@@ -316,17 +316,30 @@ export function useChimeMeeting(
       setError((e as Error).message);
       setStatus("error");
     }
-  }, [cameraOn, selectedAudioInput, selectedVideoInput, startVolumeMeter]);
+  }, [cameraOn, pushMessage, selectedAudioInput, selectedVideoInput, startVolumeMeter]);
+
+  const announceMic = useCallback(
+    (isMuted: boolean) => {
+      const label = selfRole === "listener" ? "Listener" : "You";
+      const body = `${label} ${isMuted ? "muted" : "unmuted"} their microphone`;
+      broadcast({ kind: "system", body });
+      pushMessage({ kind: "system", body, senderRole: "system", self: true });
+    },
+    [broadcast, pushMessage, selfRole],
+  );
 
   const muteMic = useCallback(() => {
     sessionRef.current?.audioVideo.realtimeMuteLocalAudio();
     setMuted(true);
-  }, []);
+    announceMic(true);
+  }, [announceMic]);
 
   const unmuteMic = useCallback(() => {
     sessionRef.current?.audioVideo.realtimeUnmuteLocalAudio();
     setMuted(false);
-  }, []);
+    announceMic(false);
+  }, [announceMic]);
+
 
   const toggleCamera = useCallback(async () => {
     const session = sessionRef.current;
