@@ -1,7 +1,23 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, PhoneOff, Video, VideoOff } from "lucide-react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  MessageSquare,
+  Mic,
+  MicOff,
+  PhoneOff,
+  Video,
+  VideoOff,
+} from "lucide-react";
+import { CallChat } from "@/components/call/CallChat";
 import type { ChimeMeeting } from "@/hooks/useChimeMeeting";
+
 
 /** Active Chime session UI: recording banner, tiles, visualizer and controls. */
 export function CallRoom({
