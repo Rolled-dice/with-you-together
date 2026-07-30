@@ -49,7 +49,22 @@ export async function fetchChimeTokens(
 
 type Status = "idle" | "initializing" | "ready" | "in-call" | "error";
 
-export function useChimeMeeting(bookingId = "mock-booking") {
+export type ChatMessage = {
+  id: string;
+  kind: "text" | "system";
+  body: string;
+  senderRole: "user" | "listener" | "system";
+  self: boolean;
+  at: number;
+};
+
+const CHAT_TOPIC = "besideu-chat";
+
+export function useChimeMeeting(
+  bookingId = "mock-booking",
+  selfRole: "user" | "listener" = "user",
+) {
+
   const sessionRef = useRef<any>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number | null>(null);
