@@ -44,6 +44,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as AuthenticatedCompanionIndexRouteImport } from './routes/_authenticated/companion.index'
 import { Route as AuthenticatedCompanionThreadIdRouteImport } from './routes/_authenticated/companion.$threadId'
 import { Route as AuthenticatedCallBookingIdRouteImport } from './routes/_authenticated/call.$bookingId'
+import { Route as AuthenticatedCallRoomBookingIdRouteImport } from './routes/_authenticated/call-room.$bookingId'
 import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authenticated/admin.feedback'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -227,6 +228,12 @@ const AuthenticatedCallBookingIdRoute =
     path: '/call/$bookingId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCallRoomBookingIdRoute =
+  AuthenticatedCallRoomBookingIdRouteImport.update({
+    id: '/call-room/$bookingId',
+    path: '/call-room/$bookingId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFeedbackRoute =
   AuthenticatedAdminFeedbackRouteImport.update({
     id: '/admin/feedback',
@@ -280,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
+  '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion/': typeof AuthenticatedCompanionIndexRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
+  '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion': typeof AuthenticatedCompanionIndexRoute
@@ -358,6 +367,7 @@ export interface FileRoutesById {
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
+  '/_authenticated/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/_authenticated/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/_authenticated/companion/': typeof AuthenticatedCompanionIndexRoute
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/feedback'
+    | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
     | '/companion/'
@@ -436,6 +447,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/feedback'
+    | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
     | '/companion'
@@ -476,6 +488,7 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/feedback'
+    | '/_authenticated/call-room/$bookingId'
     | '/_authenticated/call/$bookingId'
     | '/_authenticated/companion/$threadId'
     | '/_authenticated/companion/'
@@ -743,6 +756,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCallBookingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/call-room/$bookingId': {
+      id: '/_authenticated/call-room/$bookingId'
+      path: '/call-room/$bookingId'
+      fullPath: '/call-room/$bookingId'
+      preLoaderRoute: typeof AuthenticatedCallRoomBookingIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/feedback': {
       id: '/_authenticated/admin/feedback'
       path: '/admin/feedback'
@@ -797,6 +817,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSafetyRoute: typeof AuthenticatedSafetyRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminFeedbackRoute: typeof AuthenticatedAdminFeedbackRoute
+  AuthenticatedCallRoomBookingIdRoute: typeof AuthenticatedCallRoomBookingIdRoute
   AuthenticatedCallBookingIdRoute: typeof AuthenticatedCallBookingIdRoute
 }
 
@@ -814,6 +835,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSafetyRoute: AuthenticatedSafetyRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminFeedbackRoute: AuthenticatedAdminFeedbackRoute,
+  AuthenticatedCallRoomBookingIdRoute: AuthenticatedCallRoomBookingIdRoute,
   AuthenticatedCallBookingIdRoute: AuthenticatedCallBookingIdRoute,
 }
 
