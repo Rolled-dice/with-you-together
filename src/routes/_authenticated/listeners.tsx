@@ -27,6 +27,7 @@ import {
   Ear,
   HeartHandshake,
   Loader2,
+  Phone,
   PhoneCall,
   ShieldCheck,
   Video,
@@ -463,11 +464,11 @@ function BookingRow({
         </div>
         {!past && (
           <div className="flex flex-wrap items-center gap-2">
-            <Button asChild size="sm" variant="outline" className="rounded-brand">
-              <Link to="/call/$bookingId" params={{ bookingId: booking.id }}>
-                <Video className="mr-1.5 h-4 w-4" /> Join
-              </Link>
-            </Button>
+            <span className="inline-flex items-center gap-1.5 rounded-brand border border-border bg-surface px-2.5 py-1.5 text-xs text-muted-foreground">
+              <Phone className="h-3.5 w-3.5 text-brand-accent" />
+              Your listener will call your phone at this time
+            </span>
+
             <Button
               size="sm"
               variant="ghost"
