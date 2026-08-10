@@ -1,79 +1,78 @@
-# Docs Section Plan (revised)
+# Plan: Remove Journal + Care, split Listeners out, Twilio calling, CRM panel, WhatsApp bot
 
-Public `/docs` area for both signed-in and signed-out users. **User-facing only** — how to get started and how each feature works from the user's perspective. No internal architecture, no "under the hood" tech notes, no infra/provider names.
+## Phase 0 — Cleanups (safe, immediate)
 
-## Routes
+**Remove Journal**
+- Delete the Journal page, its server functions, its PDF export, and the Journal docs page.
+- Remove Journal from the sidebar/mobile nav, dashboard cards, homepage "What's Inside", docs index and FAQ links.
+- Insights currently uses mood/journal data — it will fall back to the remaining signals (reminders, sessions, companion check-ins) instead of mood charts.
+- Database: the `journal_entries` table stays in place for now (no data loss). Say the word and I'll drop it in a separate migration.
 
-```
-src/routes/
-  docs.tsx                   -> layout with sidebar + <Outlet />
-  docs.index.tsx             -> /docs (Welcome + Quick Start)
-  docs.getting-started.tsx   -> /docs/getting-started
-  docs.companion.tsx         -> /docs/companion
-  docs.journal.tsx           -> /docs/journal
-  docs.listeners.tsx         -> /docs/listeners
-  docs.family.tsx            -> /docs/family
-  docs.insights.tsx          -> /docs/insights
-  docs.safety.tsx            -> /docs/safety
-  docs.billing.tsx           -> /docs/billing
-  docs.account.tsx           -> /docs/account   (profile, notifications, delete account)
-  docs.faq.tsx               -> /docs/faq
-```
+**Remove the Care tab (medicines move to WhatsApp)**
+- Remove the Care page and its nav entry, dashboard tiles, and homepage/doc references.
+- Keep the `medications`, `medication_schedules`, `dose_logs`, `reminders` tables and the prescription storage bucket — the WhatsApp bot will write to exactly these, so nothing has to be rebuilt.
 
-Each leaf has its own `head()` with unique title, description, and OG tags.
+**Separate Companion and Listener**
+- Companion becomes purely the AI chat: remove the "Human Listener" cross-promo card from the Companion page.
+- Listeners becomes its own top-level tab (already routed at `/listeners`), restyled as a standalone product surface: book a call, upcoming/past calls, agent info, SLA status.
 
-## Layout
+## Phase 1 — Listener calling on Twilio (replaces LiveKit)
 
-- Left sticky sidebar with grouped nav (Start here / Features / Account & Billing / Help). Collapsible sheet on mobile.
-- Top bar shows "Back to app" or "Sign in" based on auth state.
-- Right-side "On this page" TOC on `lg+`.
-- Breadcrumbs and prev/next footer links.
-- Client-side search across page titles and headings.
-- Reuses existing `[data-reveal]` scroll animations.
+- Remove LiveKit token/room code from the app; calls become **phone calls**, not browser video.
+- One shared Twilio international number is used as caller ID for every outbound call (your cost-safety requirement).
+- Agents work from a web console (Amazon Connect or the built-in agent panel below) and the system dials the member's mobile.
+- Booking rules enforced server-side:
+  - A call must be scheduled **at least 2 hours ahead**; earlier slots are rejected with a clear message.
+  - Reschedules inside the 2h window keep the existing "session marked used" behaviour.
 
-## Page template (user-facing only)
+## Phase 2 — Call CRM + Admin panel (new section in the app)
 
-Every page follows the same shape:
-1. **What it is** — one short paragraph
-2. **When to use it** — real situations
-3. **How to use it** — numbered steps with screenshots/icons
-4. **Tips** — small callouts
-5. **Try it now** — deep link into the app (auth-gated pages prompt sign-in first)
-6. **Common questions** — 2–4 mini FAQs
+New admin-only area (role-gated, same `user_roles`/`has_role` pattern already in the app):
+- **Queue board** — all bookings by state: requested → assigned → confirmed → in-call → completed / missed / escalated.
+- **Assignment engine** — agents get a skills/tags list, a timezone, working hours and a max concurrent load. Scoring picks the best available agent: skill match, timezone overlap, current load, recent-call fairness, and honours the 2h lead time. Unassignable bookings are flagged rather than silently dropped.
+- **SLA + escalation** — every booking carries target start time and SLA deadline; breaches surface as red rows plus an admin alert record.
+- **Flags** — agents or the system can raise a flag (safety concern, no-show, abusive call, tech failure) that lands in an admin inbox with severity and audit trail.
 
-No sections about databases, models, providers, RLS, encryption internals, or system diagrams.
+## Phase 3 — Notification / SLA warning ladder
 
-## Content outline
+A scheduled job runs every few minutes and, per booking:
+- **T-1.5h** — reminder to member + assigned agent (amber).
+- **T-1h** — second, stronger warning (amber, escalated in the CRM).
+- **Past SLA** — red state, admin notified with high priority, booking flagged as breached.
 
-- **Welcome / Quick Start** — what WithU helps with, 4-step get-started, link cards to each feature
-- **Getting Started** — create account, complete onboarding, pick a plan, invite family
-- **Companion** — starting a chat, what to ask, changing tone, ending a session
-- **Journal** — writing an entry, moods, viewing past entries, who can see it (only you)
-- **Listeners** — browsing listeners, booking a slot (including today), joining the call, session minutes
-- **Family Circle** — sending invites, accepting invites, shared minutes, what each member sees
-- **Insights** — reading your mood trends, what stays private
-- **Safety** — crisis resources, how to reach help fast
-- **Billing** — plans and prices (Together / Family / Care in USD & INR), upgrading, cancelling, refunds
-- **Account** — editing profile, notifications, changing password, deleting account
-- **FAQ** — top 10 questions
+Channels: in-app notification centre + WhatsApp message to the member + admin panel banner. SMS can be added but each SMS costs money, so it's off by default.
 
-## Components
+## Phase 4 — WhatsApp bot (medicines + appointment booking)
 
-- `src/components/docs/docs-shell.tsx`, `docs-sidebar.tsx`
-- `doc-section.tsx`, `steps.tsx`, `callout.tsx`, `mini-faq.tsx`
-- Reuses shadcn `Card`, `Badge`, `Separator`, `Sheet`
+One WhatsApp number, one bot, two jobs:
 
-## Navigation entry points
+**Medicines (replaces the Care tab)**
+- "Add medicine" conversation: name → dose → times per day → start/end date. Written to the existing medication tables.
+- Photo of a prescription → stored in the private prescriptions bucket → read by AI → bot asks the member to confirm the parsed medicines before saving.
+- Daily dose reminders at the scheduled times; replying "taken" / "skip" logs the dose.
 
-- "Docs" link in homepage header and footer
-- "Help & Docs" link in the authenticated app shell
+**Appointment booking (for elders with no web access)**
+- "Book a call" conversation: preferred day → preferred time → confirm. Bot enforces the same 2h rule and returns the assigned agent and time.
+- "My appointments", "reschedule", "cancel" all supported in chat.
+- Number is linked to an account by verifying the phone already stored on the profile; unknown numbers get an onboarding link.
 
-## Non-goals
+## What I need from you
 
-- No architecture / infrastructure pages
-- No markdown/CMS pipeline — authored in TSX
-- No new backend tables
+1. **Twilio account** — an Account SID and an API key/secret with permission to send/list messages **and read message media** (needed for prescription photos). I'll open a secure form when you're ready.
+2. **Twilio phone number** — the one international number you want to buy/use as caller ID.
+3. **WhatsApp sender** — either a Twilio WhatsApp sender (needs Meta business verification of your business, usually 1–3 days) or the Twilio WhatsApp sandbox to test immediately. Sandbox is fine for building; production needs the verified sender plus approved message templates for the reminders.
+4. **Amazon Connect** — do you already have an instance? If not, I can ship the agent console inside this app first (agent clicks "Call", Twilio dials the member, agent talks in the browser) and add Amazon Connect later. Amazon Connect needs an AWS account, an instance, and agent logins created by you.
+5. **Agent roster** — names, phone/email, timezones, working hours, and skills for the routing algorithm. A CSV or a list in chat is fine.
+6. **Escalation contacts** — who gets the red SLA/flag alerts (email or WhatsApp).
 
-## Open question
+## Technical notes
 
-Voice: friendly and plain-language (matches current landing tone)? I'll default to that unless you say otherwise.
+- Calling and messaging run through the Twilio connector gateway from server functions; no credentials in browser code.
+- WhatsApp inbound arrives at a public server route (`/api/public/hooks/whatsapp`) with signature verification; conversation state is stored in a new `whatsapp_sessions` table so the bot is stateless.
+- New tables: `agents`, `agent_availability`, `call_events`, `call_flags`, `notifications`, `whatsapp_sessions` — each with GRANTs, RLS scoped to owner/admin, and updated_at triggers.
+- Scheduling ladder runs via `pg_cron` → `pg_net` → `/api/public/hooks/call-sla`.
+- LiveKit code and env usage are removed once Twilio calling lands, so the "LiveKit not configured" error disappears.
+
+## Suggested order
+
+Phase 0 first (removals, immediately visible), then Phase 2 CRM schema + admin panel, then Twilio calling, then notifications, then the WhatsApp bot. I can start Phase 0 without any credentials from you.
