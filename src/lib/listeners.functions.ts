@@ -85,6 +85,17 @@ export const requestBooking = createServerFn({ method: "POST" })
         ? new Date().toISOString()
         : combineToUtc(data.preferred_day, data.preferred_time, data.time_zone);
 
+    // Scheduled calls need at least 2 hours of lead time so ops can assign an agent.
+    if (data.booking_type === "scheduled") {
+      const leadMs = new Date(requestedAt).getTime() - Date.now();
+      if (leadMs < 2 * 60 * 60 * 1000) {
+        throw new Error(
+          "Calls must be booked at least 2 hours ahead so we can assign a listener. Please pick a later time.",
+        );
+      }
+    }
+
+
     // Auto-assign: least-loaded active listener.
     const { data: listeners, error: lerr } = await context.supabase
       .from("listeners")
@@ -122,6 +133,9 @@ export const requestBooking = createServerFn({ method: "POST" })
           data.booking_type === "emergency_callback" ? 30 : data.duration_minutes,
         note: prefix + data.note,
         status: data.booking_type === "emergency_callback" ? "requested" : "confirmed",
+        crm_state: "requested",
+        sla_deadline: requestedAt,
+
       })
       .select("id")
       .single();

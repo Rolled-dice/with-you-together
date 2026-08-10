@@ -71,6 +71,133 @@ export type Database = {
         }
         Relationships: []
       }
+      call_agents: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          max_concurrent: number
+          name: string
+          phone: string | null
+          skills: string[]
+          timezone: string
+          updated_at: string
+          user_id: string | null
+          work_end: string
+          work_start: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          max_concurrent?: number
+          name: string
+          phone?: string | null
+          skills?: string[]
+          timezone?: string
+          updated_at?: string
+          user_id?: string | null
+          work_end?: string
+          work_start?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          max_concurrent?: number
+          name?: string
+          phone?: string | null
+          skills?: string[]
+          timezone?: string
+          updated_at?: string
+          user_id?: string | null
+          work_end?: string
+          work_start?: string
+        }
+        Relationships: []
+      }
+      call_events: {
+        Row: {
+          actor: string | null
+          booking_id: string
+          created_at: string
+          detail: Json
+          event_type: string
+          id: string
+        }
+        Insert: {
+          actor?: string | null
+          booking_id: string
+          created_at?: string
+          detail?: Json
+          event_type: string
+          id?: string
+        }
+        Update: {
+          actor?: string | null
+          booking_id?: string
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_events_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "listener_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_flags: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          raised_by: string | null
+          resolved: boolean
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          raised_by?: string | null
+          resolved?: boolean
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          raised_by?: string | null
+          resolved?: boolean
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_flags_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "listener_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companion_memories: {
         Row: {
           content: string
@@ -429,9 +556,11 @@ export type Database = {
       }
       listener_bookings: {
         Row: {
+          agent_id: string | null
           call_ended_at: string | null
           call_started_at: string | null
           created_at: string
+          crm_state: string
           duration_minutes: number
           feedback_at: string | null
           feedback_note: string | null
@@ -446,14 +575,17 @@ export type Database = {
           recording_consent_user: boolean
           requested_at: string
           room_name: string | null
+          sla_deadline: string | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          agent_id?: string | null
           call_ended_at?: string | null
           call_started_at?: string | null
           created_at?: string
+          crm_state?: string
           duration_minutes?: number
           feedback_at?: string | null
           feedback_note?: string | null
@@ -468,14 +600,17 @@ export type Database = {
           recording_consent_user?: boolean
           requested_at: string
           room_name?: string | null
+          sla_deadline?: string | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          agent_id?: string | null
           call_ended_at?: string | null
           call_started_at?: string | null
           created_at?: string
+          crm_state?: string
           duration_minutes?: number
           feedback_at?: string | null
           feedback_note?: string | null
@@ -490,11 +625,19 @@ export type Database = {
           recording_consent_user?: boolean
           requested_at?: string
           room_name?: string | null
+          sla_deadline?: string | null
           status?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "listener_bookings_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "call_agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "listener_bookings_listener_id_fkey"
             columns: ["listener_id"]
