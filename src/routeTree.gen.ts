@@ -42,10 +42,13 @@ import { Route as AuthenticatedCompanionIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedCompanionThreadIdRouteImport } from './routes/_authenticated/companion.$threadId'
 import { Route as AuthenticatedCallBookingIdRouteImport } from './routes/_authenticated/call.$bookingId'
 import { Route as AuthenticatedCallRoomBookingIdRouteImport } from './routes/_authenticated/call-room.$bookingId'
+import { Route as AuthenticatedAdminWhatsappRouteImport } from './routes/_authenticated/admin.whatsapp'
 import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authenticated/admin.feedback'
 import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authenticated/admin.calls'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksWhatsappRemindersRouteImport } from './routes/api/public/hooks/whatsapp-reminders'
+import { Route as ApiPublicHooksWhatsappRouteImport } from './routes/api/public/hooks/whatsapp'
 import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
 
 const McpRoute = McpRouteImport.update({
@@ -218,6 +221,12 @@ const AuthenticatedCallRoomBookingIdRoute =
     path: '/call-room/$bookingId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminWhatsappRoute =
+  AuthenticatedAdminWhatsappRouteImport.update({
+    id: '/admin/whatsapp',
+    path: '/admin/whatsapp',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFeedbackRoute =
   AuthenticatedAdminFeedbackRouteImport.update({
     id: '/admin/feedback',
@@ -241,6 +250,17 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWhatsappRemindersRoute =
+  ApiPublicHooksWhatsappRemindersRouteImport.update({
+    id: '/api/public/hooks/whatsapp-reminders',
+    path: '/api/public/hooks/whatsapp-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksWhatsappRoute = ApiPublicHooksWhatsappRouteImport.update({
+  id: '/api/public/hooks/whatsapp',
+  path: '/api/public/hooks/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksCallSlaRoute = ApiPublicHooksCallSlaRouteImport.update({
   id: '/api/public/hooks/call-sla',
   path: '/api/public/hooks/call-sla',
@@ -279,11 +299,14 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
+  '/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
   '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
+  '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -316,11 +339,14 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
+  '/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
   '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
+  '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -357,11 +383,14 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
+  '/_authenticated/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
   '/_authenticated/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/_authenticated/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/_authenticated/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
+  '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -398,11 +427,14 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/calls'
     | '/admin/feedback'
+    | '/admin/whatsapp'
     | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
     | '/companion/'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/whatsapp'
+    | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -435,11 +467,14 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/calls'
     | '/admin/feedback'
+    | '/admin/whatsapp'
     | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
     | '/companion'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/whatsapp'
+    | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -475,11 +510,14 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/calls'
     | '/_authenticated/admin/feedback'
+    | '/_authenticated/admin/whatsapp'
     | '/_authenticated/call-room/$bookingId'
     | '/_authenticated/call/$bookingId'
     | '/_authenticated/companion/$threadId'
     | '/_authenticated/companion/'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/whatsapp'
+    | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -495,6 +533,8 @@ export interface RootRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
+  ApiPublicHooksWhatsappRoute: typeof ApiPublicHooksWhatsappRoute
+  ApiPublicHooksWhatsappRemindersRoute: typeof ApiPublicHooksWhatsappRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -731,6 +771,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCallRoomBookingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/whatsapp': {
+      id: '/_authenticated/admin/whatsapp'
+      path: '/admin/whatsapp'
+      fullPath: '/admin/whatsapp'
+      preLoaderRoute: typeof AuthenticatedAdminWhatsappRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/feedback': {
       id: '/_authenticated/admin/feedback'
       path: '/admin/feedback'
@@ -757,6 +804,20 @@ declare module '@tanstack/react-router' {
       path: '/api/public/payments/webhook'
       fullPath: '/api/public/payments/webhook'
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/whatsapp-reminders': {
+      id: '/api/public/hooks/whatsapp-reminders'
+      path: '/api/public/hooks/whatsapp-reminders'
+      fullPath: '/api/public/hooks/whatsapp-reminders'
+      preLoaderRoute: typeof ApiPublicHooksWhatsappRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/whatsapp': {
+      id: '/api/public/hooks/whatsapp'
+      path: '/api/public/hooks/whatsapp'
+      fullPath: '/api/public/hooks/whatsapp'
+      preLoaderRoute: typeof ApiPublicHooksWhatsappRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/call-sla': {
@@ -798,6 +859,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminCallsRoute: typeof AuthenticatedAdminCallsRoute
   AuthenticatedAdminFeedbackRoute: typeof AuthenticatedAdminFeedbackRoute
+  AuthenticatedAdminWhatsappRoute: typeof AuthenticatedAdminWhatsappRoute
   AuthenticatedCallRoomBookingIdRoute: typeof AuthenticatedCallRoomBookingIdRoute
   AuthenticatedCallBookingIdRoute: typeof AuthenticatedCallBookingIdRoute
 }
@@ -815,6 +877,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminCallsRoute: AuthenticatedAdminCallsRoute,
   AuthenticatedAdminFeedbackRoute: AuthenticatedAdminFeedbackRoute,
+  AuthenticatedAdminWhatsappRoute: AuthenticatedAdminWhatsappRoute,
   AuthenticatedCallRoomBookingIdRoute: AuthenticatedCallRoomBookingIdRoute,
   AuthenticatedCallBookingIdRoute: AuthenticatedCallBookingIdRoute,
 }
@@ -863,6 +926,8 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutReturnRoute: CheckoutReturnRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
+  ApiPublicHooksWhatsappRoute: ApiPublicHooksWhatsappRoute,
+  ApiPublicHooksWhatsappRemindersRoute: ApiPublicHooksWhatsappRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

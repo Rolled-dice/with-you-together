@@ -1088,6 +1088,192 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_contacts: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          last_inbound_at: string | null
+          link_code: string | null
+          link_code_expires_at: string | null
+          opted_in: boolean
+          phone: string
+          updated_at: string
+          user_id: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          last_inbound_at?: string | null
+          link_code?: string | null
+          link_code_expires_at?: string | null
+          opted_in?: boolean
+          phone: string
+          updated_at?: string
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          last_inbound_at?: string | null
+          link_code?: string | null
+          link_code_expires_at?: string | null
+          opted_in?: boolean
+          phone?: string
+          updated_at?: string
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_messages: {
+        Row: {
+          body: string | null
+          created_at: string
+          direction: string
+          flow: string | null
+          id: string
+          media_type: string | null
+          media_url: string | null
+          phone: string
+          provider: string | null
+          provider_message_id: string | null
+          step: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          direction: string
+          flow?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          phone: string
+          provider?: string | null
+          provider_message_id?: string | null
+          step?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          direction?: string
+          flow?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          phone?: string
+          provider?: string | null
+          provider_message_id?: string | null
+          step?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_outbox: {
+        Row: {
+          attempts: number
+          body: string
+          booking_id: string | null
+          created_at: string
+          dedupe_key: string | null
+          dose_id: string | null
+          error: string | null
+          id: string
+          kind: string
+          phone: string
+          provider: string | null
+          provider_message_id: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          booking_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          dose_id?: string | null
+          error?: string | null
+          id?: string
+          kind?: string
+          phone: string
+          provider?: string | null
+          provider_message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          booking_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          dose_id?: string | null
+          error?: string | null
+          id?: string
+          kind?: string
+          phone?: string
+          provider?: string | null
+          provider_message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_outbox_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "listener_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_outbox_dose_id_fkey"
+            columns: ["dose_id"]
+            isOneToOne: false
+            referencedRelation: "dose_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_sessions: {
+        Row: {
+          context: Json
+          created_at: string
+          expires_at: string
+          flow: string
+          id: string
+          phone: string
+          step: string
+          updated_at: string
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          expires_at?: string
+          flow?: string
+          id?: string
+          phone: string
+          step?: string
+          updated_at?: string
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          expires_at?: string
+          flow?: string
+          id?: string
+          phone?: string
+          step?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
