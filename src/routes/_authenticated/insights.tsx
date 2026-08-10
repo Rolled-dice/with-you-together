@@ -53,22 +53,24 @@ const RANGE_OPTIONS = [
 type RangeKey = (typeof RANGE_OPTIONS)[number]["key"];
 
 function InsightsPage() {
-  const listFn = useServerFn(listJournalEntries);
-  const createFn = useServerFn(createJournalEntry);
+  const listFn = useServerFn(listMoodCheckIns);
+  const createFn = useServerFn(createMoodCheckIn);
   const qc = useQueryClient();
   const [pendingMood, setPendingMood] = useState<number | null>(null);
   const [range, setRange] = useState<RangeKey>("30");
 
   const { data: entries = [], isLoading } = useQuery({
-    queryKey: ["journal"],
+    queryKey: ["mood-checkins"],
     queryFn: () => listFn(),
   });
 
   const todayKey = dayKey(new Date());
-  const todayEntry = entries.find((e) => dayKey(new Date(e.created_at)) === todayKey && e.mood != null);
+  const todayEntry = entries.find(
+    (e) => dayKey(new Date(e.created_at)) === todayKey && e.mood != null,
+  );
 
   const checkInMut = useMutation({
-    mutationFn: (mood: number) => createFn({ data: { mood, title: "", body: "" } }),
+    mutationFn: (mood: number) => createFn({ data: { mood } }),
     onMutate: (mood) => setPendingMood(mood),
     onSuccess: (_, mood) => {
       toast.success(`Checked in as ${MOOD_LABEL[mood].label} ${MOOD_LABEL[mood].emoji}`);
