@@ -74,7 +74,7 @@ function InsightsPage() {
     onMutate: (mood) => setPendingMood(mood),
     onSuccess: (_, mood) => {
       toast.success(`Checked in as ${MOOD_LABEL[mood].label} ${MOOD_LABEL[mood].emoji}`);
-      qc.invalidateQueries({ queryKey: ["journal"] });
+      qc.invalidateQueries({ queryKey: ["mood-checkins"] });
     },
     onError: (err: Error) => toast.error(err.message || "Couldn't save your check-in"),
     onSettled: () => setPendingMood(null),
@@ -242,12 +242,10 @@ function InsightsPage() {
       ) : entries.length === 0 ? (
         <EmptyState
           icon={<NotebookPen className="h-5 w-5" />}
-          title="No entries yet"
-          description="Add a mood check-in from the Journal to start seeing patterns here."
-          action={
-            <a href="/journal" className="rounded-brand bg-brand-primary px-3 py-1.5 text-sm text-primary-foreground font-medium">Open Journal</a>
-          }
+          title="No check-ins yet"
+          description="Tap a mood above to start seeing your patterns here."
         />
+
 
       ) : (
         <>
