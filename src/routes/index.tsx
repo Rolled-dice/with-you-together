@@ -730,7 +730,7 @@ function Landing() {
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-semibold text-neutral-900">Neha · Listener</div>
                     <div className="flex items-center gap-1 text-[10px] text-neutral-600">
-                      <Star className="h-3 w-3 text-coral" fill="currentColor" strokeWidth={0} /> 4.9 · 320 sessions
+                      <Star className="h-3 w-3 text-coral" fill="currentColor" strokeWidth={0} /> Verified listener · trained in active listening
                     </div>
                   </div>
                   <span className="rounded-full bg-sage/25 px-2 py-0.5 text-[10px] font-semibold text-neutral-800">
