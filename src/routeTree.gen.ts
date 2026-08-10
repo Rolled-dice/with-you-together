@@ -46,6 +46,7 @@ import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authenticated/admin.calls'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
 
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
@@ -240,6 +241,11 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCallSlaRoute = ApiPublicHooksCallSlaRouteImport.update({
+  id: '/api/public/hooks/call-sla',
+  path: '/api/public/hooks/call-sla',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -277,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion/': typeof AuthenticatedCompanionIndexRoute
+  '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -313,6 +320,7 @@ export interface FileRoutesByTo {
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion': typeof AuthenticatedCompanionIndexRoute
+  '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -353,6 +361,7 @@ export interface FileRoutesById {
   '/_authenticated/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/_authenticated/companion/': typeof AuthenticatedCompanionIndexRoute
+  '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -393,6 +402,7 @@ export interface FileRouteTypes {
     | '/call/$bookingId'
     | '/companion/$threadId'
     | '/companion/'
+    | '/api/public/hooks/call-sla'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/call/$bookingId'
     | '/companion/$threadId'
     | '/companion'
+    | '/api/public/hooks/call-sla'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/_authenticated/call/$bookingId'
     | '/_authenticated/companion/$threadId'
     | '/_authenticated/companion/'
+    | '/api/public/hooks/call-sla'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -482,6 +494,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -746,6 +759,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/call-sla': {
+      id: '/api/public/hooks/call-sla'
+      path: '/api/public/hooks/call-sla'
+      fullPath: '/api/public/hooks/call-sla'
+      preLoaderRoute: typeof ApiPublicHooksCallSlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -842,6 +862,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,10 +1,13 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart } from "lucide-react";
+import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import { BesideUCursor } from "@/components/besideu-cursor";
+import { NotificationBell } from "@/components/notification-bell";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
 
@@ -18,12 +21,26 @@ const NAV = [
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
+const ADMIN_NAV = [
+  { to: "/admin/calls", label: "Call CRM", icon: PhoneCall },
+  { to: "/admin/feedback", label: "Feedback", icon: Inbox },
+] as const;
+
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   usePointerParallax();
   useCardInteractions();
+
+  const adminCheck = useServerFn(isCurrentUserAdmin);
+  const roleQ = useQuery({
+    queryKey: ["admin", "role-check"],
+    queryFn: () => adminCheck({}),
+    staleTime: 5 * 60 * 1000,
+  });
+  const isAdmin = roleQ.data?.isAdmin === true;
+  const navItems = isAdmin ? [...NAV, ...ADMIN_NAV] : NAV;
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -33,6 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
 
+
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
       <BesideUCursor />
@@ -40,9 +58,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {/* Sidebar (desktop) */}
         <aside className="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6">
-          <Brand />
+          <div className="flex items-center justify-between">
+            <Brand />
+            <NotificationBell />
+          </div>
+
           <nav className="mt-8 flex flex-1 flex-col gap-1">
-            {NAV.map((item) => {
+            {navItems.map((item) => {
               const active = pathname === item.to || pathname.startsWith(item.to + "/");
               const Icon = item.icon;
               return (
@@ -80,7 +102,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           {/* Mobile top bar */}
           <header className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:hidden">
             <Brand compact />
+            <NotificationBell />
           </header>
+
 
           <main
             key={pathname}
@@ -91,10 +115,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Mobile bottom nav */}
           <nav
-            className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-9 overflow-hidden border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
-            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            className="fixed inset-x-0 bottom-0 z-50 grid overflow-hidden border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
+            style={{
+              paddingBottom: "env(safe-area-inset-bottom)",
+              gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))`,
+            }}
           >
-            {NAV.map((item) => {
+
+            {navItems.map((item) => {
               const active = pathname === item.to || pathname.startsWith(item.to + "/");
               const Icon = item.icon;
               return (
