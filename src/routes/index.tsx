@@ -39,6 +39,7 @@ import avatarTeen from "@/assets/avatar-teen.png";
 import avatarKid from "@/assets/avatar-kid.png";
 import { supabase } from "@/integrations/supabase/client";
 import { getPublicStats } from "@/lib/stats.functions";
+import { useLiveStats } from "@/hooks/use-live-stats";
 
 export const Route = createFileRoute("/")({
   loader: () => getPublicStats(),
@@ -81,7 +82,7 @@ const familyAvatars = [
 ];
 
 function Landing() {
-  const stats = Route.useLoaderData();
+  const stats = useLiveStats(Route.useLoaderData());
   const heroRef = useRef<HTMLElement | null>(null);
   const [signedIn, setSignedIn] = useState(false);
 
