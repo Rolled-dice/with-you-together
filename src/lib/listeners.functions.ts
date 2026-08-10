@@ -133,6 +133,9 @@ export const requestBooking = createServerFn({ method: "POST" })
           data.booking_type === "emergency_callback" ? 30 : data.duration_minutes,
         note: prefix + data.note,
         status: data.booking_type === "emergency_callback" ? "requested" : "confirmed",
+        crm_state: "requested",
+        sla_deadline: requestedAt,
+
       })
       .select("id")
       .single();
