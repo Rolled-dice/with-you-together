@@ -5,7 +5,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sparkles,
   HeartHandshake,
-  BookHeart,
   MessageCircleHeart,
   Ear,
   ArrowUpRight,
@@ -125,7 +124,7 @@ function ProgressRing({
 function Dashboard() {
   const [profile, setProfile] = useState<ProfileSummary | null>(null);
   const [streak, setStreak] = useState<number>(0);
-  const [journalCount, setJournalCount] = useState<number>(0);
+  const [checkInCount, setCheckInCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const quotaFn = useServerFn(getMyAiQuota);
   const { data: quota, isLoading: quotaLoading } = useQuery({
@@ -171,7 +170,7 @@ function Dashboard() {
             cur.setDate(cur.getDate() - 1);
           }
           setStreak(s);
-          setJournalCount(entries.length);
+          setCheckInCount(entries.length);
         }
       } catch (e) {
         console.error("dashboard load failed", e);
@@ -207,9 +206,9 @@ function Dashboard() {
     : null;
 
   const badges = [
-    { label: "First check-in", earned: journalCount >= 1, tone: "gradient-peach" },
+    { label: "First check-in", earned: checkInCount >= 1, tone: "gradient-peach" },
     { label: "3-day streak", earned: streak >= 3, tone: "gradient-sage" },
-    { label: "Reflective 10", earned: journalCount >= 10, tone: "gradient-blush" },
+    { label: "Reflective 10", earned: checkInCount >= 10, tone: "gradient-blush" },
     { label: "Guardian", earned: streak >= 7, tone: "gradient-lilac" },
   ];
 
@@ -259,8 +258,8 @@ function Dashboard() {
                 variant="secondary"
                 className="w-full rounded-2xl bg-white/70 text-neutral-900 backdrop-blur hover:bg-white sm:w-auto"
               >
-                <Link to="/journal">
-                  <BookHeart className="mr-2 h-4 w-4" /> Quick journal
+                <Link to="/insights">
+                  <LineChart className="mr-2 h-4 w-4" /> Quick mood check-in
                 </Link>
               </Button>
             </div>
@@ -348,9 +347,9 @@ function Dashboard() {
         />
         <StatTile
           gradient="gradient-mint"
-          icon={<BookHeart className="h-5 w-5 text-sage" />}
-          label="Journal entries"
-          value={`${journalCount}`}
+          icon={<LineChart className="h-5 w-5 text-sage" />}
+          label="Mood check-ins"
+          value={`${checkInCount}`}
           hint="private & yours"
         />
         <StatTile
@@ -412,11 +411,11 @@ function Dashboard() {
             desc="A real person, on your schedule."
           />
           <QuickTile
-            to="/journal"
+            to="/insights"
             gradient="gradient-mint"
-            icon={<BookHeart className="h-6 w-6" />}
-            title="Journal"
-            desc="Private reflection space."
+            icon={<LineChart className="h-6 w-6" />}
+            title="Mood Insights"
+            desc="See your patterns over time."
           />
           <QuickTile
             to="/family"
