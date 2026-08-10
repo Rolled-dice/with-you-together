@@ -39,14 +39,14 @@ function Page() {
 
       <DocSection title="What each member sees">
         <ul className="list-disc space-y-1 pl-5">
-          <li><strong>You</strong> — your own Companion chats, journal, insights.</li>
-          <li><strong>Family owner</strong> — plan, billing, invites, session pool usage. Never chats or journals.</li>
+          <li><strong>You</strong> — your own Companion chats, mood check-ins, insights.</li>
+          <li><strong>Family owner</strong> — plan, billing, invites, session pool usage. Never chats or check-ins.</li>
           <li><strong>Other members</strong> — their own space, plus the shared listener pool.</li>
         </ul>
       </DocSection>
 
       <Callout tone="tip" title="Nobody reads anyone else's chats">
-        Family membership shares the plan and minutes — not your private conversations or journal.
+        Family membership shares the plan and minutes — not your private conversations or check-ins.
       </Callout>
 
       <TryItNow to="/family" label="Open Family Circle" />

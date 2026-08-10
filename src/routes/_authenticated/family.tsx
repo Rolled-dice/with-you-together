@@ -88,7 +88,7 @@ function FamilyPage() {
         eyebrow="Family"
         slogan="Closer, even from far."
         title="Your circle"
-        description="Journals and Companion chats stay private. Owner allocates the family's monthly Listener sessions."
+        description="Companion chats stay private. Owner allocates the family's monthly Listener sessions."
       />
 
       {!data?.family ? (
@@ -288,7 +288,7 @@ function FamilyView({
                         </Select>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Their journal and Companion chats stay private — only the tier and roster
+                        Their Companion chats stay private — only the tier and roster
                         are shared.
                       </p>
                     </div>
@@ -446,7 +446,7 @@ function FamilyView({
           <CardTitle className="text-base font-medium">Privacy in your circle</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Family members share the Care Membership tier and the roster. Journals, moods, and
+          Family members share the Care Membership tier and the roster. Moods and
           Companion conversations remain private to each person and are protected by row-level
           security.
         </CardContent>

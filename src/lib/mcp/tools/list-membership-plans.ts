@@ -18,10 +18,10 @@ export default defineTool({
       {
         id: "gentle_start",
         name: "Gentle Start",
-        blurb: "Solo journaling + light AI check-ins.",
+        blurb: "Solo mood check-ins + light AI conversations.",
         ai_messages_per_month: 25,
         pricing: { INR: { monthly: 299, yearly: 2990 }, USD: { monthly: 4.99, yearly: 49 } },
-        features: ["Journaling", "Mood tracking", "25 AI companion messages / month", "Safety resources"],
+        features: ["Mood check-ins", "Mood trends", "25 AI companion messages / month", "Safety resources"],
       },
       {
         id: "together",

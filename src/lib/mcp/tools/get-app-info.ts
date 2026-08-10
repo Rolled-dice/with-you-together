@@ -12,11 +12,11 @@ export default defineTool({
       name: "BesideU",
       slogan: "Love, on the same page.",
       description:
-        "BesideU is a family-first emotional wellbeing app combining an AI companion, private journaling, human listener sessions, and a shared family circle.",
+        "BesideU is a family-first emotional wellbeing app combining an AI companion, human listener sessions, mood insights, and a shared family circle.",
       audience: "Individuals 13+ and families looking for calm, safe, private mental-wellbeing support.",
       features: [
         "AI Companion chat with mood-aware prompts",
-        "Private journaling with mood tracking and PDF export",
+        "Private mood check-ins with trends and streaks",
         "Human listener booking with rescheduling",
         "Family Circle with shared session pool",
         "Crisis resources and grounding exercises",

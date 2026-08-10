@@ -32,7 +32,7 @@ export const PLAN_DISPLAY: Record<PlanId, {
     sessions: 4,
     reschedules: 4,
     bullets: [
-      "AI Companion, Mood, Journal",
+      "AI Companion, Mood insights",
       "4 Human Listener sessions / month",
       "4 free reschedules",
       "1 member",

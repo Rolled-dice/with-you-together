@@ -83,19 +83,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "BesideU is a warm family care membership — AI Companion, private journal, human listeners, and a shared circle that keeps your loved ones close.",
+          "BesideU is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { name: "author", content: "BesideU" },
       { property: "og:title", content: "BesideU — Checking in when they can't" },
       {
         property: "og:description",
         content:
-          "BesideU is a warm family care membership — AI Companion, private journal, human listeners, and a shared circle that keeps your loved ones close.",
+          "BesideU is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "BesideU — Checking in when they can't" },
-      { name: "twitter:description", content: "BesideU is a warm family care membership — AI Companion, private journal, human listeners, and a shared circle that keeps your loved ones close." },
+      { name: "twitter:description", content: "BesideU is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d8e1c80-289d-41e7-bc07-16d0391bf521/id-preview-359918ef--7a70b00d-f5ae-4cf2-bb4f-e21f807b83ec.lovable.app-1784612868107.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d8e1c80-289d-41e7-bc07-16d0391bf521/id-preview-359918ef--7a70b00d-f5ae-4cf2-bb4f-e21f807b83ec.lovable.app-1784612868107.png" },
     ],

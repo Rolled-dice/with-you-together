@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MessageCircleHeart, BookHeart, PhoneCall, Users, LineChart, LifeBuoy, ArrowRight } from "lucide-react";
+import { MessageCircleHeart, PhoneCall, Users, LineChart, LifeBuoy, ArrowRight } from "lucide-react";
 import { DocHeader, DocSection, Steps, TryItNow } from "@/components/docs/docs-shell";
 
 export const Route = createFileRoute("/docs/")({
