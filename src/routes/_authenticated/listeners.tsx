@@ -30,7 +30,6 @@ import {
   Phone,
   PhoneCall,
   ShieldCheck,
-  Video,
   X,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
