@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Inbox } from "lucide-react";
+import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Inbox, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,6 +23,7 @@ const NAV = [
 
 const ADMIN_NAV = [
   { to: "/admin/calls", label: "Call CRM", icon: PhoneCall },
+  { to: "/admin/whatsapp", label: "WhatsApp Bot", icon: MessageCircle },
   { to: "/admin/feedback", label: "Feedback", icon: Inbox },
 ] as const;
 
