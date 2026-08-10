@@ -38,8 +38,10 @@ import avatarMom from "@/assets/avatar-mom.png";
 import avatarTeen from "@/assets/avatar-teen.png";
 import avatarKid from "@/assets/avatar-kid.png";
 import { supabase } from "@/integrations/supabase/client";
+import { getPublicStats } from "@/lib/stats.functions";
 
 export const Route = createFileRoute("/")({
+  loader: () => getPublicStats(),
   head: () => ({
     meta: [
       { title: "BesideU — Checking in when they can't" },
@@ -57,7 +59,18 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: Landing,
+  errorComponent: () => null,
+  notFoundComponent: () => null,
 });
+
+function formatCount(n: number) {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}k+`;
+  }
+  return String(n);
+}
+
 
 const familyAvatars = [
   { src: avatarGrandma, name: "Grandma Anu", role: "Cared for" },
