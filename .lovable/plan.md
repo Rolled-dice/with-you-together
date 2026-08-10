@@ -20,7 +20,7 @@
 
 - Remove LiveKit token/room code from the app; calls become **phone calls**, not browser video.
 - One shared Twilio international number is used as caller ID for every outbound call (your cost-safety requirement).
-- Agents work from a web console (Amazon Connect or the built-in agent panel below) and the system dials the member's mobile.
+- Agents work from a web console built into this app (Amazon Connect-style interface, but no Amazon Connect) and the system dials the member's mobile.
 - Booking rules enforced server-side:
   - A call must be scheduled **at least 2 hours ahead**; earlier slots are rejected with a clear message.
   - Reschedules inside the 2h window keep the existing "session marked used" behaviour.
