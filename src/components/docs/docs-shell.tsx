@@ -20,7 +20,6 @@ export const DOC_GROUPS: DocGroup[] = [
     title: "Features",
     links: [
       { to: "/docs/companion", label: "Companion" },
-      { to: "/docs/journal", label: "Journal" },
       { to: "/docs/listeners", label: "Listeners" },
       { to: "/docs/family", label: "Family Circle" },
       { to: "/docs/insights", label: "Insights" },
