@@ -395,14 +395,37 @@ function Landing() {
 
         </section>
 
-        {/* Stats band — vibrant, animated */}
+        {/* Stats band — live numbers from the BesideU database */}
         <section className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-4 sm:gap-4">
           {[
-            { k: "2.4k+", v: "families held close", tone: "gradient-peach", icon: HeartHandshake },
-            { k: "18k", v: "gentle check-ins", tone: "gradient-mint", icon: Heart },
-            { k: "4.9★", v: "listener rating", tone: "gradient-blush", icon: Star },
+            {
+              k: formatCount(stats.members),
+              v: stats.members === 1 ? "member held close" : "members held close",
+              tone: "gradient-peach",
+              icon: HeartHandshake,
+            },
+            {
+              k: formatCount(stats.checkins),
+              v: "gentle check-ins",
+              tone: "gradient-mint",
+              icon: Heart,
+            },
+            stats.avg_rating != null
+              ? {
+                  k: `${stats.avg_rating}★`,
+                  v: `listener rating (${stats.rating_count})`,
+                  tone: "gradient-blush",
+                  icon: Star,
+                }
+              : {
+                  k: formatCount(stats.active_listeners),
+                  v: "listeners on standby",
+                  tone: "gradient-blush",
+                  icon: Star,
+                },
             { k: "24/7", v: "companion, always", tone: "gradient-lilac", icon: Clock },
           ].map((s, i) => (
+
             <div
               key={s.v}
               className={`relative overflow-hidden rounded-3xl p-5 shadow-soft card-hover ${s.tone} animate-fade-up`}
