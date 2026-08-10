@@ -49,13 +49,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "BesideU is a warm family care membership — AI Companion, private journal, human listeners, and a shared circle that keeps your loved ones close.",
+          "BesideU is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { property: "og:title", content: "BesideU — Checking in when they can't" },
       {
         property: "og:description",
         content:
-          "BesideU is a warm family care membership — AI Companion, private journal, human listeners, and a shared circle that keeps your loved ones close.",
+          "BesideU is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
       },
     ],
   }),
@@ -234,7 +234,7 @@ function Landing() {
               </h1>
               <p className="mt-5 max-w-xl text-base text-neutral-800/85 sm:text-lg">
                 BesideU is the gentle heartbeat between your family — an AI companion for tough evenings,
-                a private journal for your own thoughts, and human listeners for the days a real
+                private mood check-ins for your own patterns, and human listeners for the days a real
                 voice matters most.
               </p>
 
@@ -480,7 +480,7 @@ function Landing() {
           <ol className="mt-10 grid gap-4 sm:grid-cols-3">
             {[
               { n: "01", t: "Create your circle", d: "Invite parents, siblings, or your own quiet corner. Everyone chooses what they share.", tone: "gradient-sunrise" },
-              { n: "02", t: "Check in your way", d: "A mood tap, a journal line, or a chat with your Companion — however small.", tone: "gradient-sky" },
+              { n: "02", t: "Check in your way", d: "A mood tap or a chat with your Companion — however small.", tone: "gradient-sky" },
               { n: "03", t: "Feel each other close", d: "Gentle signals travel across the circle. Book a real listener when a voice helps.", tone: "gradient-sage" },
             ].map((s, i) => (
               <li
@@ -519,7 +519,7 @@ function Landing() {
             {[
               {
                 title: "For the one who feels alone",
-                body: "Talk it through with a warm AI Companion at 2 a.m., or write it down in a journal that stays yours.",
+                body: "Talk it through with a warm AI Companion at 2 a.m., or log a quiet mood check-in that stays yours.",
                 icon: MessageCircleHeart,
                 tone: "gradient-peach",
                 emoji: "🌙",
@@ -576,7 +576,7 @@ function Landing() {
                 tone: "gradient-peach",
               },
               {
-                q: "The journal is mine. The circle is ours. That balance is everything.",
+                q: "My check-ins are mine. The circle is ours. That balance is everything.",
                 by: "Priya, 29 — Adult",
                 img: avatarMom,
                 tone: "gradient-blush",
@@ -890,11 +890,11 @@ function Landing() {
                 {[
                   {
                     q: "What exactly does BesideU do?",
-                    a: "BesideU is a gentle family care membership. It combines an AI Companion for late-night worries, a completely private journal, mood check-ins, and human Listeners you can book when a real voice matters. Family plans keep everyone connected under clear roles and consent.",
+                    a: "BesideU is a gentle family care membership. It combines an AI Companion for late-night worries, completely private mood check-ins, and human Listeners you can book when a real voice matters. Family plans keep everyone connected under clear roles and consent.",
                   },
                   {
-                    q: "Is the journal private from family members?",
-                    a: "Yes. Your journal is yours alone. Family members see only the check-in mood signals you choose to share. Listeners never see journal entries unless you explicitly read something aloud during a session.",
+                    q: "Are my mood check-ins private from family members?",
+                    a: "Yes. Your check-ins are yours alone. Family members see only the mood signals you choose to share. Listeners never see them unless you explicitly mention something during a session.",
                   },
                   {
                     q: "How do the 7-day free trial and billing work?",
@@ -906,7 +906,7 @@ function Landing() {
                   },
                   {
                     q: "What are the roles in a Family Circle?",
-                    a: "Owner manages the plan, billing, and session pool. Adults see shared family check-ins and can invite others. Teens keep private journals and can use the Companion and Listeners. Kids are limited to gentle check-ins shared with guardians.",
+                    a: "Owner manages the plan, billing, and session pool. Adults see shared family check-ins and can invite others. Teens keep private check-ins and can use the Companion and Listeners. Kids are limited to gentle check-ins shared with guardians.",
                   },
                   {
                     q: "Are Listener sessions therapy or medical advice?",
@@ -960,7 +960,7 @@ function Landing() {
                 name: "Together",
                 price: "₹799",
                 period: "/mo · $8.99",
-                features: ["1 member", "4 Human Listener sessions / month", "AI Companion, Mood, Journal", "4 free reschedules"],
+                features: ["1 member", "4 Human Listener sessions / month", "AI Companion, Mood insights", "4 free reschedules"],
               },
               {
                 name: "Family",
