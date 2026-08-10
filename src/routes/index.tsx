@@ -81,8 +81,10 @@ const familyAvatars = [
 ];
 
 function Landing() {
+  const stats = Route.useLoaderData();
   const heroRef = useRef<HTMLElement | null>(null);
   const [signedIn, setSignedIn] = useState(false);
+
 
   useEffect(() => {
     let cancelled = false;
