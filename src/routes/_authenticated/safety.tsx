@@ -146,7 +146,7 @@ function SafetyPage() {
           <div>
             <p className="font-semibold">How BesideU handles crisis moments</p>
             <p className="text-sm text-muted-foreground mt-1">
-              When our Companion detects language suggesting self-harm or acute danger, it pauses normal responses and surfaces these resources. Nothing you share here is used to train models, and family members never see your Companion conversations or Journal entries.
+              When our Companion detects language suggesting self-harm or acute danger, it pauses normal responses and surfaces these resources. Nothing you share here is used to train models, and family members never see your Companion conversations or mood check-ins.
             </p>
             <div className="mt-3 flex gap-2 text-sm">
               <Link to="/companion" className="rounded-brand bg-brand-primary px-3 py-1.5 text-primary-foreground font-medium">Talk to Companion</Link>

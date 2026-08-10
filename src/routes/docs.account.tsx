@@ -41,8 +41,8 @@ function Page() {
       </DocSection>
 
       <DocSection title="Delete your account">
-        <p>From <em>Account → Data</em>, choose <strong>Delete account</strong>. This removes your chats, journal, insights, and profile within 30 days.</p>
-        <Callout tone="warn" title="This can't be undone">Consider exporting your journal first if you want a copy.</Callout>
+        <p>From <em>Account → Data</em>, choose <strong>Delete account</strong>. This removes your chats, mood check-ins, insights, and profile within 30 days.</p>
+        <Callout tone="warn" title="This can't be undone">Your data is permanently removed once the 30-day window passes.</Callout>
       </DocSection>
 
       <TryItNow to="/settings" label="Open account settings" />

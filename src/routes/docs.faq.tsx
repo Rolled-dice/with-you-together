@@ -19,8 +19,8 @@ function Page() {
       <DocHeader eyebrow="Help" title="Frequently asked questions" />
       <MiniFaq
         items={[
-          { q: "Is BesideU therapy?", a: "No. BesideU is warm supportive company — chat, journal, and calls with trained listeners. For clinical care, please see a licensed professional." },
-          { q: "Who can read my Companion chats or journal?", a: "Only you. Family members and owners can't read your private content." },
+          { q: "Is BesideU therapy?", a: "No. BesideU is warm supportive company — chat, mood check-ins, and calls with trained listeners. For clinical care, please see a licensed professional." },
+          { q: "Who can read my Companion chats?", a: "Only you. Family members and owners can't read your private content." },
           { q: "Can I use BesideU without a family?", a: "Absolutely — the Together plan works for one person." },
           { q: "How do listener minutes work?", a: "Every plan includes a monthly pool. Any family member can use them until the pool runs out." },
           { q: "What happens after my free trial?", a: "You keep your account and can pick a plan any time. Trial content isn't deleted." },

@@ -24,7 +24,7 @@ function Page() {
 
       <DocSection title="What you'll see">
         <ul className="list-disc space-y-1 pl-5">
-          <li>Weekly mood trend from your journal entries.</li>
+          <li>Weekly mood trend from your mood check-ins.</li>
           <li>Streaks and check-in frequency.</li>
           <li>Gentle nudges when a rough week appears.</li>
         </ul>
@@ -39,7 +39,7 @@ function Page() {
       <DocSection title="Common questions">
         <MiniFaq
           items={[
-            { q: "Do I need to journal every day?", a: "No — even a couple of entries a week shape the trend." },
+            { q: "Do I need to check in every day?", a: "No — even a couple of check-ins a week shape the trend." },
             { q: "Can I turn off Insights?", a: "Yes, from Account → Preferences." },
           ]}
         />

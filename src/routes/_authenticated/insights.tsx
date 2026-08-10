@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { createJournalEntry, listJournalEntries } from "@/lib/journal.functions";
+import { createMoodCheckIn, listMoodCheckIns } from "@/lib/mood.functions";
 import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
@@ -53,26 +53,28 @@ const RANGE_OPTIONS = [
 type RangeKey = (typeof RANGE_OPTIONS)[number]["key"];
 
 function InsightsPage() {
-  const listFn = useServerFn(listJournalEntries);
-  const createFn = useServerFn(createJournalEntry);
+  const listFn = useServerFn(listMoodCheckIns);
+  const createFn = useServerFn(createMoodCheckIn);
   const qc = useQueryClient();
   const [pendingMood, setPendingMood] = useState<number | null>(null);
   const [range, setRange] = useState<RangeKey>("30");
 
   const { data: entries = [], isLoading } = useQuery({
-    queryKey: ["journal"],
+    queryKey: ["mood-checkins"],
     queryFn: () => listFn(),
   });
 
   const todayKey = dayKey(new Date());
-  const todayEntry = entries.find((e) => dayKey(new Date(e.created_at)) === todayKey && e.mood != null);
+  const todayEntry = entries.find(
+    (e) => dayKey(new Date(e.created_at)) === todayKey && e.mood != null,
+  );
 
   const checkInMut = useMutation({
-    mutationFn: (mood: number) => createFn({ data: { mood, title: "", body: "" } }),
+    mutationFn: (mood: number) => createFn({ data: { mood } }),
     onMutate: (mood) => setPendingMood(mood),
     onSuccess: (_, mood) => {
       toast.success(`Checked in as ${MOOD_LABEL[mood].label} ${MOOD_LABEL[mood].emoji}`);
-      qc.invalidateQueries({ queryKey: ["journal"] });
+      qc.invalidateQueries({ queryKey: ["mood-checkins"] });
     },
     onError: (err: Error) => toast.error(err.message || "Couldn't save your check-in"),
     onSettled: () => setPendingMood(null),
@@ -240,12 +242,10 @@ function InsightsPage() {
       ) : entries.length === 0 ? (
         <EmptyState
           icon={<NotebookPen className="h-5 w-5" />}
-          title="No entries yet"
-          description="Add a mood check-in from the Journal to start seeing patterns here."
-          action={
-            <a href="/journal" className="rounded-brand bg-brand-primary px-3 py-1.5 text-sm text-primary-foreground font-medium">Open Journal</a>
-          }
+          title="No check-ins yet"
+          description="Tap a mood above to start seeing your patterns here."
         />
+
 
       ) : (
         <>

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MessageCircleHeart, BookHeart, PhoneCall, Users, LineChart, LifeBuoy, ArrowRight } from "lucide-react";
+import { MessageCircleHeart, PhoneCall, Users, LineChart, LifeBuoy, ArrowRight } from "lucide-react";
 import { DocHeader, DocSection, Steps, TryItNow } from "@/components/docs/docs-shell";
 
 export const Route = createFileRoute("/docs/")({
@@ -16,7 +16,6 @@ export const Route = createFileRoute("/docs/")({
 
 const cards = [
   { to: "/docs/companion", icon: MessageCircleHeart, title: "Companion", body: "A warm AI chat that's always awake." },
-  { to: "/docs/journal", icon: BookHeart, title: "Journal", body: "Private notes and moods, only for you." },
   { to: "/docs/listeners", icon: PhoneCall, title: "Listeners", body: "Book a real human to talk with." },
   { to: "/docs/family", icon: Users, title: "Family Circle", body: "Invite loved ones. Share care." },
   { to: "/docs/insights", icon: LineChart, title: "Insights", body: "See gentle patterns in how you feel." },
