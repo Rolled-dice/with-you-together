@@ -38,8 +38,10 @@ import avatarMom from "@/assets/avatar-mom.png";
 import avatarTeen from "@/assets/avatar-teen.png";
 import avatarKid from "@/assets/avatar-kid.png";
 import { supabase } from "@/integrations/supabase/client";
+import { getPublicStats } from "@/lib/stats.functions";
 
 export const Route = createFileRoute("/")({
+  loader: () => getPublicStats(),
   head: () => ({
     meta: [
       { title: "BesideU — Checking in when they can't" },
@@ -57,7 +59,18 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: Landing,
+  errorComponent: () => null,
+  notFoundComponent: () => null,
 });
+
+function formatCount(n: number) {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}k+`;
+  }
+  return String(n);
+}
+
 
 const familyAvatars = [
   { src: avatarGrandma, name: "Grandma Anu", role: "Cared for" },
@@ -68,8 +81,10 @@ const familyAvatars = [
 ];
 
 function Landing() {
+  const stats = Route.useLoaderData();
   const heroRef = useRef<HTMLElement | null>(null);
   const [signedIn, setSignedIn] = useState(false);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -382,14 +397,37 @@ function Landing() {
 
         </section>
 
-        {/* Stats band — vibrant, animated */}
+        {/* Stats band — live numbers from the BesideU database */}
         <section className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-4 sm:gap-4">
           {[
-            { k: "2.4k+", v: "families held close", tone: "gradient-peach", icon: HeartHandshake },
-            { k: "18k", v: "gentle check-ins", tone: "gradient-mint", icon: Heart },
-            { k: "4.9★", v: "listener rating", tone: "gradient-blush", icon: Star },
+            {
+              k: formatCount(stats.members),
+              v: stats.members === 1 ? "member held close" : "members held close",
+              tone: "gradient-peach",
+              icon: HeartHandshake,
+            },
+            {
+              k: formatCount(stats.checkins),
+              v: "gentle check-ins",
+              tone: "gradient-mint",
+              icon: Heart,
+            },
+            stats.avg_rating != null
+              ? {
+                  k: `${stats.avg_rating}★`,
+                  v: `listener rating (${stats.rating_count})`,
+                  tone: "gradient-blush",
+                  icon: Star,
+                }
+              : {
+                  k: formatCount(stats.active_listeners),
+                  v: "listeners on standby",
+                  tone: "gradient-blush",
+                  icon: Star,
+                },
             { k: "24/7", v: "companion, always", tone: "gradient-lilac", icon: Clock },
           ].map((s, i) => (
+
             <div
               key={s.v}
               className={`relative overflow-hidden rounded-3xl p-5 shadow-soft card-hover ${s.tone} animate-fade-up`}
@@ -692,7 +730,7 @@ function Landing() {
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-semibold text-neutral-900">Neha · Listener</div>
                     <div className="flex items-center gap-1 text-[10px] text-neutral-600">
-                      <Star className="h-3 w-3 text-coral" fill="currentColor" strokeWidth={0} /> 4.9 · 320 sessions
+                      <Star className="h-3 w-3 text-coral" fill="currentColor" strokeWidth={0} /> Verified listener · trained in active listening
                     </div>
                   </div>
                   <span className="rounded-full bg-sage/25 px-2 py-0.5 text-[10px] font-semibold text-neutral-800">
