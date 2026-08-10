@@ -17,7 +17,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as DocsSafetyRouteImport } from './routes/docs.safety'
 import { Route as DocsListenersRouteImport } from './routes/docs.listeners'
-import { Route as DocsJournalRouteImport } from './routes/docs.journal'
 import { Route as DocsInsightsRouteImport } from './routes/docs.insights'
 import { Route as DocsGettingStartedRouteImport } from './routes/docs.getting-started'
 import { Route as DocsFaqRouteImport } from './routes/docs.faq'
@@ -31,14 +30,12 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated/safety'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedListenersRouteImport } from './routes/_authenticated/listeners'
-import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
 import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
 import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated/family'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCompanionRouteImport } from './routes/_authenticated/companion'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
-import { Route as AuthenticatedCareRouteImport } from './routes/_authenticated/care'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedCompanionIndexRouteImport } from './routes/_authenticated/companion.index'
@@ -86,11 +83,6 @@ const DocsSafetyRoute = DocsSafetyRouteImport.update({
 const DocsListenersRoute = DocsListenersRouteImport.update({
   id: '/listeners',
   path: '/listeners',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsJournalRoute = DocsJournalRouteImport.update({
-  id: '/journal',
-  path: '/journal',
   getParentRoute: () => DocsRoute,
 } as any)
 const DocsInsightsRoute = DocsInsightsRouteImport.update({
@@ -158,11 +150,6 @@ const AuthenticatedListenersRoute = AuthenticatedListenersRouteImport.update({
   path: '/listeners',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
-  id: '/journal',
-  path: '/journal',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedInviteRoute = AuthenticatedInviteRouteImport.update({
   id: '/invite',
   path: '/invite',
@@ -191,11 +178,6 @@ const AuthenticatedCompanionRoute = AuthenticatedCompanionRouteImport.update({
 const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedCareRoute = AuthenticatedCareRouteImport.update({
-  id: '/care',
-  path: '/care',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -260,14 +242,12 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/care': typeof AuthenticatedCareRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/companion': typeof AuthenticatedCompanionRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/family': typeof AuthenticatedFamilyRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/invite': typeof AuthenticatedInviteRoute
-  '/journal': typeof AuthenticatedJournalRoute
   '/listeners': typeof AuthenticatedListenersRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/safety': typeof AuthenticatedSafetyRoute
@@ -281,7 +261,6 @@ export interface FileRoutesByFullPath {
   '/docs/faq': typeof DocsFaqRoute
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/insights': typeof DocsInsightsRoute
-  '/docs/journal': typeof DocsJournalRoute
   '/docs/listeners': typeof DocsListenersRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/': typeof DocsIndexRoute
@@ -299,13 +278,11 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/care': typeof AuthenticatedCareRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/family': typeof AuthenticatedFamilyRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/invite': typeof AuthenticatedInviteRoute
-  '/journal': typeof AuthenticatedJournalRoute
   '/listeners': typeof AuthenticatedListenersRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/safety': typeof AuthenticatedSafetyRoute
@@ -319,7 +296,6 @@ export interface FileRoutesByTo {
   '/docs/faq': typeof DocsFaqRoute
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/insights': typeof DocsInsightsRoute
-  '/docs/journal': typeof DocsJournalRoute
   '/docs/listeners': typeof DocsListenersRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs': typeof DocsIndexRoute
@@ -340,14 +316,12 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/_authenticated/care': typeof AuthenticatedCareRoute
   '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/companion': typeof AuthenticatedCompanionRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/family': typeof AuthenticatedFamilyRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/invite': typeof AuthenticatedInviteRoute
-  '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/listeners': typeof AuthenticatedListenersRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/safety': typeof AuthenticatedSafetyRoute
@@ -361,7 +335,6 @@ export interface FileRoutesById {
   '/docs/faq': typeof DocsFaqRoute
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/insights': typeof DocsInsightsRoute
-  '/docs/journal': typeof DocsJournalRoute
   '/docs/listeners': typeof DocsListenersRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/': typeof DocsIndexRoute
@@ -382,14 +355,12 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/care'
     | '/checkout'
     | '/companion'
     | '/dashboard'
     | '/family'
     | '/insights'
     | '/invite'
-    | '/journal'
     | '/listeners'
     | '/onboarding'
     | '/safety'
@@ -403,7 +374,6 @@ export interface FileRouteTypes {
     | '/docs/faq'
     | '/docs/getting-started'
     | '/docs/insights'
-    | '/docs/journal'
     | '/docs/listeners'
     | '/docs/safety'
     | '/docs/'
@@ -421,13 +391,11 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/care'
     | '/checkout'
     | '/dashboard'
     | '/family'
     | '/insights'
     | '/invite'
-    | '/journal'
     | '/listeners'
     | '/onboarding'
     | '/safety'
@@ -441,7 +409,6 @@ export interface FileRouteTypes {
     | '/docs/faq'
     | '/docs/getting-started'
     | '/docs/insights'
-    | '/docs/journal'
     | '/docs/listeners'
     | '/docs/safety'
     | '/docs'
@@ -461,14 +428,12 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/_authenticated/care'
     | '/_authenticated/checkout'
     | '/_authenticated/companion'
     | '/_authenticated/dashboard'
     | '/_authenticated/family'
     | '/_authenticated/insights'
     | '/_authenticated/invite'
-    | '/_authenticated/journal'
     | '/_authenticated/listeners'
     | '/_authenticated/onboarding'
     | '/_authenticated/safety'
@@ -482,7 +447,6 @@ export interface FileRouteTypes {
     | '/docs/faq'
     | '/docs/getting-started'
     | '/docs/insights'
-    | '/docs/journal'
     | '/docs/listeners'
     | '/docs/safety'
     | '/docs/'
@@ -565,13 +529,6 @@ declare module '@tanstack/react-router' {
       path: '/listeners'
       fullPath: '/docs/listeners'
       preLoaderRoute: typeof DocsListenersRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/journal': {
-      id: '/docs/journal'
-      path: '/journal'
-      fullPath: '/docs/journal'
-      preLoaderRoute: typeof DocsJournalRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/insights': {
@@ -665,13 +622,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedListenersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/journal': {
-      id: '/_authenticated/journal'
-      path: '/journal'
-      fullPath: '/journal'
-      preLoaderRoute: typeof AuthenticatedJournalRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/invite': {
       id: '/_authenticated/invite'
       path: '/invite'
@@ -712,13 +662,6 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/care': {
-      id: '/_authenticated/care'
-      path: '/care'
-      fullPath: '/care'
-      preLoaderRoute: typeof AuthenticatedCareRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/.well-known/oauth-protected-resource': {
@@ -804,14 +747,12 @@ const AuthenticatedCompanionRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedCareRoute: typeof AuthenticatedCareRoute
   AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedCompanionRoute: typeof AuthenticatedCompanionRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFamilyRoute: typeof AuthenticatedFamilyRoute
   AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
   AuthenticatedInviteRoute: typeof AuthenticatedInviteRoute
-  AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedListenersRoute: typeof AuthenticatedListenersRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedSafetyRoute: typeof AuthenticatedSafetyRoute
@@ -822,14 +763,12 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedCareRoute: AuthenticatedCareRoute,
   AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedCompanionRoute: AuthenticatedCompanionRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFamilyRoute: AuthenticatedFamilyRoute,
   AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
   AuthenticatedInviteRoute: AuthenticatedInviteRoute,
-  AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedListenersRoute: AuthenticatedListenersRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedSafetyRoute: AuthenticatedSafetyRoute,
@@ -850,7 +789,6 @@ interface DocsRouteChildren {
   DocsFaqRoute: typeof DocsFaqRoute
   DocsGettingStartedRoute: typeof DocsGettingStartedRoute
   DocsInsightsRoute: typeof DocsInsightsRoute
-  DocsJournalRoute: typeof DocsJournalRoute
   DocsListenersRoute: typeof DocsListenersRoute
   DocsSafetyRoute: typeof DocsSafetyRoute
   DocsIndexRoute: typeof DocsIndexRoute
@@ -864,7 +802,6 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsFaqRoute: DocsFaqRoute,
   DocsGettingStartedRoute: DocsGettingStartedRoute,
   DocsInsightsRoute: DocsInsightsRoute,
-  DocsJournalRoute: DocsJournalRoute,
   DocsListenersRoute: DocsListenersRoute,
   DocsSafetyRoute: DocsSafetyRoute,
   DocsIndexRoute: DocsIndexRoute,
