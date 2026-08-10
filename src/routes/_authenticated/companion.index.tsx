@@ -189,7 +189,7 @@ function CompanionEmpty() {
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground/70">
           Quick Access
         </h3>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3">
           <button
             type="button"
             onClick={() => startWith.mutate()}
@@ -210,24 +210,8 @@ function CompanionEmpty() {
               <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
             </div>
           </button>
-
-          <Link
-            to="/listeners"
-            className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/70 p-4 text-left shadow-soft card-tilt card-lift animate-pop-in stagger-2"
-          >
-            <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-full text-white shadow-glow"
-                style={{ background: "linear-gradient(135deg, #ffb08a, #ff6f5a)" }}>
-                <Ear className="h-5 w-5" />
-              </span>
-              <div className="flex-1">
-                <p className="font-semibold text-foreground">Human Listener</p>
-                <p className="text-xs text-muted-foreground">Talk to a real, trained human</p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-            </div>
-          </Link>
         </div>
+
       </div>
 
       {/* Prompt chips */}
