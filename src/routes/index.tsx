@@ -685,24 +685,30 @@ function Landing() {
               </div>
             </FeatureCard>
 
-            {/* 2. Private Journal */}
+            {/* 2. Mood Insights */}
             <FeatureCard
               tone="gradient-mint"
-              icon={BookHeart}
-              title="Private Journal"
-              body="Yours alone. Never shared with family or Listeners."
+              icon={LineChart}
+              title="Mood Insights"
+              body="Private mood check-ins that turn into gentle patterns over time."
               delay={80}
             >
               <div className="mt-4 rounded-2xl bg-white/90 p-3 shadow-soft">
                 <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-neutral-500">
-                  <span>Tue · 9:42 pm</span>
+                  <span>Last 7 days</span>
                   <span className="rounded-full bg-mint/40 px-2 py-0.5 font-semibold text-neutral-700">
                     🔒 private
                   </span>
                 </div>
-                <p className="mt-2 text-xs leading-relaxed text-neutral-800">
-                  Small win: called Mom before dinner. She laughed at the dog story…
-                </p>
+                <div className="mt-3 flex items-end gap-1.5">
+                  {[3, 4, 2, 5, 4, 4, 5].map((v, i) => (
+                    <span
+                      key={i}
+                      className="flex-1 rounded-t bg-sage/60"
+                      style={{ height: `${v * 9}px` }}
+                    />
+                  ))}
+                </div>
                 <div className="mt-3 flex gap-1">
                   {["🙂", "🌱", "💛"].map((e) => (
                     <span key={e} className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs">
@@ -712,6 +718,7 @@ function Landing() {
                 </div>
               </div>
             </FeatureCard>
+
 
             {/* 3. Human Listeners */}
             <FeatureCard
