@@ -20,7 +20,7 @@
 
 - Remove LiveKit token/room code from the app; calls become **phone calls**, not browser video.
 - One shared Twilio international number is used as caller ID for every outbound call (your cost-safety requirement).
-- Agents work from a web console (Amazon Connect or the built-in agent panel below) and the system dials the member's mobile.
+- Agents work from a web console built into this app (Amazon Connect-style interface, but no Amazon Connect) and the system dials the member's mobile.
 - Booking rules enforced server-side:
   - A call must be scheduled **at least 2 hours ahead**; earlier slots are rejected with a clear message.
   - Reschedules inside the 2h window keep the existing "session marked used" behaviour.
@@ -61,7 +61,7 @@ One WhatsApp number, one bot, two jobs:
 1. **Twilio account** — an Account SID and an API key/secret with permission to send/list messages **and read message media** (needed for prescription photos). I'll open a secure form when you're ready.
 2. **Twilio phone number** — the one international number you want to buy/use as caller ID.
 3. **WhatsApp sender** — either a Twilio WhatsApp sender (needs Meta business verification of your business, usually 1–3 days) or the Twilio WhatsApp sandbox to test immediately. Sandbox is fine for building; production needs the verified sender plus approved message templates for the reminders.
-4. **Amazon Connect** — do you already have an instance? If not, I can ship the agent console inside this app first (agent clicks "Call", Twilio dials the member, agent talks in the browser) and add Amazon Connect later. Amazon Connect needs an AWS account, an instance, and agent logins created by you.
+4. **Agent web console** — Amazon Connect was only your reference for the experience, so we won't use it. The agent console is built inside this app: the agent clicks "Call", Twilio dials the member's cell phone, and the agent talks in the browser. Nothing needed from you beyond the Twilio credentials above.
 5. **Agent roster** — names, phone/email, timezones, working hours, and skills for the routing algorithm. A CSV or a list in chat is fine.
 6. **Escalation contacts** — who gets the red SLA/flag alerts (email or WhatsApp).
 
