@@ -1,0 +1,126 @@
+BesideU (withU) - Technology Stack
+==================================
+Generated: 2026-08-23
+
+1. FRONTEND FRAMEWORK
+---------------------
+- React 19.2.0
+- TanStack Router 1.170.16
+- TanStack Start 1.168.26 (full-stack React framework, SSR/SSG, file-based routing)
+- TanStack Query 5.101.1 (server-state management)
+- TypeScript 5.8.3
+- Vite 8.0.16 (build tool)
+
+2. UI / STYLING
+---------------
+- Tailwind CSS 4.2.1
+- TailwindCSS Vite plugin 4.2.1
+- Radix UI primitives (accordion, alert-dialog, avatar, checkbox, dialog, dropdown, popover, select, tabs, tooltip, etc.)
+- shadcn/ui component patterns (class-variance-authority, tailwind-merge, clsx)
+- Lucide React icons 0.575.0
+- Framer Motion / Motion 12.42.2 (animations)
+- Embla Carousel 8.6.0
+- Recharts 2.15.4 (charts)
+- react-day-picker 9.14.0 (date picker)
+- Sonner 2.0.7 (toast notifications)
+
+3. FORMS & VALIDATION
+---------------------
+- React Hook Form 7.71.2
+- Zod 4.4.3
+- @hookform/resolvers 5.2.2
+
+4. BACKEND / SERVER
+-------------------
+- TanStack Start server functions (createServerFn)
+- Nitro 3.0.260603-beta (server runtime, Cloudflare Workers target)
+- Node.js compat enabled for Worker runtime
+- Server routes under src/routes/api/ and src/routes/api/public/
+
+5. DATABASE / AUTH / STORAGE
+----------------------------
+- Supabase (Lovable Cloud managed backend)
+- @supabase/supabase-js 2.110.7
+- PostgreSQL (Supabase managed)
+- Row Level Security (RLS) policies
+- Supabase Auth (email/password, Google OAuth, Apple OAuth)
+- Supabase Realtime (live stats, notifications)
+- pg_cron + pg_net (background scheduled jobs)
+
+6. PAYMENTS
+-----------
+- Stripe 22.0.2
+- @stripe/react-stripe-js 6.2.0
+- @stripe/stripe-js 9.2.0
+- Stripe webhook handling at /api/public/payments/webhook
+
+7. AI / COMPANION
+-----------------
+- AI SDK (ai 7.0.29, @ai-sdk/react 4.0.32)
+- Lovable AI Gateway (https://ai.gateway.lovable.dev/v1)
+- Google Gemini models via gateway (gemini-3.6-flash for OCR/prescription parsing)
+- Stream processing for chat responses (streamdown, react-markdown)
+
+8. VIDEO / VOICE / CALLING
+--------------------------
+- Amazon Chime SDK JS 3.32.0 (call room, audio, data messages)
+- LiveKit client + server SDK (legacy/fallback paths)
+- @livekit/components-react 2.9.23
+
+9. WHATSAPP BOT / MESSAGING
+---------------------------
+- Provider-agnostic outbox pattern (whatsapp_outbox table)
+- Twilio connector support (planned)
+- Plivo REST API support (planned)
+- Webhook endpoint: /api/public/hooks/whatsapp
+- Medication reminder cron: /api/public/hooks/whatsapp-reminders
+
+10. MCP / API EXPOSURE
+----------------------
+- @lovable.dev/mcp-js 0.24.0
+- OAuth-protected MCP tools
+- Tools: app info, crisis hotlines, grounding exercises, membership plans
+
+11. TESTING
+-----------
+- Playwright 1.61.1 (E2E tests)
+- Test suite: tests/e2e/smoke.spec.ts
+
+12. DEVELOPER EXPERIENCE
+------------------------
+- ESLint 9.32.0
+- Prettier 3.7.3
+- TypeScript ESLint 8.56.1
+- Vite TS config paths 6.0.2
+- Bun runtime (bunfig.toml)
+
+13. DEPLOYMENT / HOSTING
+------------------------
+- Lovable Cloud / Lovable preview & publish
+- Cloudflare Workers (Nitro build target)
+- Preview URL: https://id-preview--7a70b00d-f5ae-4cf2-bb4f-e21f807b83ec.lovable.app
+- Published URL: https://with-you-together.lovable.app
+- Custom Domain: https://besideu.rolledice.in
+
+14. KEY PROJECT FILES
+---------------------
+- src/router.tsx            - TanStack Router setup
+- src/routes/__root.tsx     - Root layout
+- src/routes/index.tsx      - Landing page
+- src/start.ts              - TanStack Start instance + middleware
+- vite.config.ts            - Vite + TanStack + MCP plugin config
+- src/integrations/supabase - Auto-generated Supabase clients
+- src/lib/                  - Server functions, business logic, CRM, WhatsApp bot
+- src/components/           - React components
+- supabase/config.toml      - Supabase local/project config
+
+15. EXTERNAL SERVICES / INTEGRATIONS
+------------------------------------
+- Lovable Cloud (backend, auth, storage)
+- Lovable AI Gateway (chat/completions, OCR)
+- Stripe (payments)
+- Twilio / Plivo (voice & WhatsApp - pending credentials)
+- Amazon Chime SDK (voice calls)
+- Google OAuth & Apple OAuth (social login)
+
+END OF FILE
