@@ -99,7 +99,7 @@ Generated: 2026-08-23
 - Lovable Cloud / Lovable preview & publish
 - Cloudflare Workers (Nitro build target)
 - Preview URL: https://id-preview--7a70b00d-f5ae-4cf2-bb4f-e21f807b83ec.lovable.app
-- Published URL: https://with-you-together.lovable.app
+- Published URL: https://someonenear.com
 - Custom Domain: https://someonenear.com
 
 14. KEY PROJECT FILES

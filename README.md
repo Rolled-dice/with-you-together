@@ -4,7 +4,7 @@ Family wellbeing app — live at https://someonenear.com
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://with-you-together.lovable.app
+**Live app**: https://someonenear.com
 
 ## Build with Lovable
 
