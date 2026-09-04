@@ -1094,7 +1094,7 @@ function Landing() {
                 variant="secondary"
                 className="rounded-2xl bg-white/80 text-neutral-900 backdrop-blur hover:bg-white"
               >
-                <a href="mailto:someoneNear.customercare@support.com">
+                <a href="mailto:care@someonenear.com">
                   <Mail className="mr-2 h-4 w-4" /> Email support
                 </a>
               </Button>
@@ -1127,13 +1127,13 @@ function Landing() {
               <ul className="mt-4 space-y-3 text-sm text-neutral-900">
                 <li>
                   <a
-                    href="mailto:someoneNear.customercare@support.com"
+                    href="mailto:care@someonenear.com"
                     className="group inline-flex items-start gap-2 hover:text-coral"
                   >
                     <Mail className="mt-0.5 h-4 w-4 text-coral" />
                     <span>
                       <span className="block font-medium">Email us</span>
-                      <span className="text-xs text-neutral-800/75">someoneNear.customercare@support.com</span>
+                      <span className="text-xs text-neutral-800/75">care@someonenear.com</span>
                     </span>
                   </a>
                 </li>

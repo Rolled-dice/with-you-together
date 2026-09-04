@@ -159,7 +159,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
               </div>
               <div className="flex items-start gap-2.5">
                 <MessageSquareHeart className="mt-0.5 h-4 w-4 shrink-0 text-coral" />
-                <p>Need help now? Email <a className="underline underline-offset-2" href="mailto:someoneNear.customercare@support.com">someoneNear.customercare@support.com</a>.</p>
+                <p>Need help now? Email <a className="underline underline-offset-2" href="mailto:care@someonenear.com">care@someonenear.com</a>.</p>
               </div>
             </div>
 
