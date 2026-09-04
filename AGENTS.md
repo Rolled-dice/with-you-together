@@ -59,6 +59,6 @@ State machine keyed by `whatsapp_sessions` (phone → step). Supports: account l
 ## Conventions
 
 - Semantic design tokens only — no hardcoded color utilities (`text-white`, `bg-[#...]`) in components.
-- Brand is **SomeoneNear** everywhere (renamed from BesideU); heart icon favicon.
+- Brand is **SomeoneNear** everywhere; heart icon favicon. Primary domain: someonenear.com.
 - Prices displayed in USD (Together $8.99, Family $15.99, Care $36.99).
 - Full tech inventory: `techstack.txt`.
