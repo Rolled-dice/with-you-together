@@ -22,8 +22,8 @@ export default defineTool({
         "Crisis resources and grounding exercises",
       ],
       links: {
-        website: "https://ask-if-needed.lovable.app",
-        custom_domain: "https://withu.rolledice.in",
+        website: "https://someonenear.com",
+        custom_domain: "https://someonenear.com",
       },
     };
     return {

@@ -1,4 +1,4 @@
-SomeoneNear (withU) - Technology Stack
+SomeoneNear - Technology Stack
 ==================================
 Generated: 2026-08-23
 
@@ -100,7 +100,7 @@ Generated: 2026-08-23
 - Cloudflare Workers (Nitro build target)
 - Preview URL: https://id-preview--7a70b00d-f5ae-4cf2-bb4f-e21f807b83ec.lovable.app
 - Published URL: https://with-you-together.lovable.app
-- Custom Domain: https://someonenear.rolledice.in
+- Custom Domain: https://someonenear.com
 
 14. KEY PROJECT FILES
 ---------------------
