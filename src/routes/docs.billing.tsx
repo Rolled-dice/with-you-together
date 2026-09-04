@@ -4,10 +4,10 @@ import { DocHeader, DocSection, MiniFaq, TryItNow } from "@/components/docs/docs
 export const Route = createFileRoute("/docs/billing")({
   head: () => ({
     meta: [
-      { title: "Billing & plans — BesideU Docs" },
+      { title: "Billing & plans — SomeoneNear Docs" },
       { name: "description", content: "Plans, prices, upgrades, and refunds — the plain-English version." },
-      { property: "og:title", content: "Billing & plans — BesideU Docs" },
-      { property: "og:description", content: "Plans and prices for BesideU." },
+      { property: "og:title", content: "Billing & plans — SomeoneNear Docs" },
+      { property: "og:description", content: "Plans and prices for SomeoneNear." },
     ],
   }),
   component: Page,

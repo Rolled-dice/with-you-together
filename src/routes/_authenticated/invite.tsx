@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/invite")({
   validateSearch: (s) => z.object({ token: z.string().optional() }).parse(s),
-  head: () => ({ meta: [{ title: "Join family — BesideU" }] }),
+  head: () => ({ meta: [{ title: "Join family — SomeoneNear" }] }),
   component: InvitePage,
 });
 

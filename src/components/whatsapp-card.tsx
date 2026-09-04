@@ -71,7 +71,7 @@ export function WhatsappCard() {
           </div>
         ) : activeCode ? (
           <div className="rounded-brand border border-border bg-surface p-4">
-            <p className="text-sm">Send this code to the BesideU WhatsApp number:</p>
+            <p className="text-sm">Send this code to the SomeoneNear WhatsApp number:</p>
             <div className="mt-2 flex items-center gap-3">
               <span className="font-mono text-2xl font-semibold tracking-[0.3em]">{activeCode}</span>
               <Button

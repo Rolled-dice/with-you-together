@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/listeners")({
   head: () => ({
     meta: [
-      { title: "Listeners — BesideU Docs" },
+      { title: "Listeners — SomeoneNear Docs" },
       { name: "description", content: "Book a real human to talk with, same day or later." },
-      { property: "og:title", content: "Listeners — BesideU Docs" },
+      { property: "og:title", content: "Listeners — SomeoneNear Docs" },
       { property: "og:description", content: "Book a real human to talk with." },
     ],
   }),

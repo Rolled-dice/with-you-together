@@ -67,7 +67,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
     e.preventDefault();
     const age = ageFromDob(dob);
     if (age === null) return toast.error("Please enter your date of birth.");
-    if (age < 13) return toast.error("Sorry — BesideU is not available to users under 13.");
+    if (age < 13) return toast.error("Sorry — SomeoneNear is not available to users under 13.");
     if (age > 120) return toast.error("Please enter a valid date of birth.");
     if (!fullName.trim()) return toast.error("Please enter your name.");
     if (!e164 || !isValidPhoneNumber(phone, country)) {
@@ -97,7 +97,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
       toast.success("Check your email to confirm your account, then sign in.");
       return;
     }
-    toast.success("Welcome to BesideU!");
+    toast.success("Welcome to SomeoneNear!");
     window.location.replace(redirectTo);
   }
 
@@ -120,7 +120,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
       // non-fatal
     }
     setLoading(false);
-    toast.success("Phone verified. Welcome to BesideU.");
+    toast.success("Phone verified. Welcome to SomeoneNear.");
     window.location.replace(redirectTo);
   }
 

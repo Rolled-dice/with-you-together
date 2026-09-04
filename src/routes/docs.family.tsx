@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/family")({
   head: () => ({
     meta: [
-      { title: "Family Circle — BesideU Docs" },
+      { title: "Family Circle — SomeoneNear Docs" },
       { name: "description", content: "Invite loved ones, share your plan, and keep the circle close." },
-      { property: "og:title", content: "Family Circle — BesideU Docs" },
+      { property: "og:title", content: "Family Circle — SomeoneNear Docs" },
       { property: "og:description", content: "Invite loved ones. Share care." },
     ],
   }),
@@ -23,7 +23,7 @@ function Page() {
       />
 
       <DocSection title="What it is">
-        <p>Family Circle is your household on BesideU. The plan owner invites members, and everyone shares the same monthly minute pool for listener calls.</p>
+        <p>Family Circle is your household on SomeoneNear. The plan owner invites members, and everyone shares the same monthly minute pool for listener calls.</p>
       </DocSection>
 
       <DocSection title="Invite someone">
@@ -31,7 +31,7 @@ function Page() {
           items={[
             { title: "Open Family Circle", body: "You'll see everyone who's already in." },
             { title: "Send an invite", body: "Copy the link or share it directly by WhatsApp, SMS, or email." },
-            { title: "They accept", body: "Opening the link brings them to a simple sign-in. If they're new to BesideU, we set them up automatically." },
+            { title: "They accept", body: "Opening the link brings them to a simple sign-in. If they're new to SomeoneNear, we set them up automatically." },
             { title: "Set their role", body: "Choose Owner, Adult, Teen, Kid, or Cared-for." },
           ]}
         />

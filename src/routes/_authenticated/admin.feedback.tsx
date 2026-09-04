@@ -44,7 +44,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const Route = createFileRoute("/_authenticated/admin/feedback")({
   head: () => ({
     meta: [
-      { title: "Product review · BesideU admin" },
+      { title: "Product review · SomeoneNear admin" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -177,7 +177,7 @@ function AdminFeedbackPage() {
           </div>
           <h1 className="text-lg font-semibold">Admins only</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            This dashboard is for the BesideU product team. Ask an owner to grant you the <code>admin</code> role.
+            This dashboard is for the SomeoneNear product team. Ask an owner to grant you the <code>admin</code> role.
           </p>
           <Button asChild variant="ghost" className="mt-4">
             <Link to="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" />Back to dashboard</Link>

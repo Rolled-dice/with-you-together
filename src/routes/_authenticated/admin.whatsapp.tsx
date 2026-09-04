@@ -18,11 +18,11 @@ export const Route = createFileRoute("/_authenticated/admin/whatsapp")({
   component: AdminWhatsappPage,
   head: () => ({
     meta: [
-      { title: "WhatsApp Bot Console · BesideU" },
+      { title: "WhatsApp Bot Console · SomeoneNear" },
       {
         name: "description",
         content:
-          "Test the BesideU WhatsApp assistant, inspect conversations, and monitor the outbound message queue.",
+          "Test the SomeoneNear WhatsApp assistant, inspect conversations, and monitor the outbound message queue.",
       },
     ],
   }),

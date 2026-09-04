@@ -55,7 +55,7 @@ export default defineTool({
   name: "list_grounding_exercises",
   title: "List grounding & calming exercises",
   description:
-    "Returns short grounding and breathing exercises from BesideU's public safety library. Optional id filter returns a single exercise.",
+    "Returns short grounding and breathing exercises from SomeoneNear's public safety library. Optional id filter returns a single exercise.",
   inputSchema: {
     id: z.string().optional().describe("Return a single exercise by id."),
   },

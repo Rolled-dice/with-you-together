@@ -24,7 +24,7 @@ import {
 export const Route = createFileRoute("/_authenticated/insights")({
   head: () => ({
     meta: [
-      { title: "Mood Insights — BesideU" },
+      { title: "Mood Insights — SomeoneNear" },
       { name: "description", content: "See your mood trend, streak, and patterns over time." },
     ],
   }),

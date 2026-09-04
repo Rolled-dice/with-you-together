@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/companion")({
   head: () => ({
     meta: [
-      { title: "Companion — BesideU Docs" },
-      { name: "description", content: "How to chat with your BesideU Companion — a warm AI that's always awake." },
-      { property: "og:title", content: "Companion — BesideU Docs" },
+      { title: "Companion — SomeoneNear Docs" },
+      { name: "description", content: "How to chat with your SomeoneNear Companion — a warm AI that's always awake." },
+      { property: "og:title", content: "Companion — SomeoneNear Docs" },
       { property: "og:description", content: "A warm AI chat, always awake." },
     ],
   }),

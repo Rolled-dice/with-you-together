@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/checkout")({
     price: PriceParam.parse(search.price),
   }),
   head: () => ({
-    meta: [{ title: "Checkout — BesideU" }],
+    meta: [{ title: "Checkout — SomeoneNear" }],
   }),
   component: CheckoutPage,
 });

@@ -1,10 +1,10 @@
-# WithU Connection Hub
+# SomeoneNear
 
-I have to worked on my github project and connected the same https://github.com/Rolled-dice/withU-v1.0.0.1  how we connect and do the work on it
+Family wellbeing app — live at https://someonenear.com
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://with-you-together.lovable.app
+**Live app**: https://someonenear.com
 
 ## Build with Lovable
 

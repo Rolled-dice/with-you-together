@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const CHAT_TOPIC = "besideu-chat";
+export const CHAT_TOPIC = "someonenear-chat";
 
 export type ChatRole = "user" | "listener";
 

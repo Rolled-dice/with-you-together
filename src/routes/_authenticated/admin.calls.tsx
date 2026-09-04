@@ -51,10 +51,10 @@ import {
 export const Route = createFileRoute("/_authenticated/admin/calls")({
   head: () => ({
     meta: [
-      { title: "Call operations · BesideU admin" },
+      { title: "Call operations · SomeoneNear admin" },
       {
         name: "description",
-        content: "Queue, agent routing, SLA tracking and flags for BesideU listener calls.",
+        content: "Queue, agent routing, SLA tracking and flags for SomeoneNear listener calls.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],

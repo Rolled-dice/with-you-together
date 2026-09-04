@@ -113,8 +113,8 @@ async function probeDevices(): Promise<DeviceState> {
 export const Route = createFileRoute("/_authenticated/call/$bookingId")({
   head: () => ({
     meta: [
-      { title: "Session — BesideU" },
-      { name: "description", content: "Your private BesideU session room." },
+      { title: "Session — SomeoneNear" },
+      { name: "description", content: "Your private SomeoneNear session room." },
     ],
   }),
   component: CallPage,
@@ -521,7 +521,7 @@ function CallPage() {
                   <div>
                     <h3 className="text-base font-medium">Recording consent</h3>
                     <p className="text-xs text-muted-foreground">
-                      BesideU does not record by default. Recording requires both
+                      SomeoneNear does not record by default. Recording requires both
                       of you to opt in — either can revoke any time.
                     </p>
                   </div>
