@@ -74,7 +74,7 @@ export async function handleInbound(raw: Inbound) {
   // ---- opt-out / opt-in ----
   if (["stop", "unsubscribe"].includes(lower)) {
     await supabaseAdmin.from("whatsapp_contacts").update({ opted_in: false }).eq("phone", phone);
-    await reply("You're unsubscribed. Reply START any time to hear from BesideU again.");
+    await reply("You're unsubscribed. Reply START any time to hear from SomeoneNear again.");
     return { ok: true };
   }
   if (["start", "resume"].includes(lower)) {
@@ -191,21 +191,21 @@ async function linkFlow({
           opted_in: true,
         })
         .eq("id", match.id);
-      await reply("You're connected to BesideU. " + MENU);
+      await reply("You're connected to SomeoneNear. " + MENU);
       return { ok: true };
     }
     await reply(
-      "That code didn't work — it may have expired. Open BesideU on the web, go to Settings → WhatsApp, and tap “Get a new code”.",
+      "That code didn't work — it may have expired. Open SomeoneNear on the web, go to Settings → WhatsApp, and tap “Get a new code”.",
     );
     return { ok: true };
   }
 
   await reply(
     [
-      "Hello, this is BesideU. 💙",
+      "Hello, this is SomeoneNear. 💙",
       "",
       "To keep things private I need to connect this number to your account.",
-      "Open BesideU on the web → Settings → WhatsApp → Get code, then send me the 6-digit code.",
+      "Open SomeoneNear on the web → Settings → WhatsApp → Get code, then send me the 6-digit code.",
     ].join("\n"),
   );
   return { ok: true };
@@ -443,7 +443,7 @@ async function prescriptionFlow({
 
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) {
-    await reply("I can't read photos right now. Please add the medicine on the BesideU website.");
+    await reply("I can't read photos right now. Please add the medicine on the SomeoneNear website.");
     return { ok: true };
   }
 
@@ -580,7 +580,7 @@ async function prescriptionConfirm({
   await reply(
     added
       ? `Added ${added} medicine${added > 1 ? "s" : ""} with daily reminders. I'll message you when it's time. 💙`
-      : "I couldn't save those. Please add them on the BesideU website.",
+      : "I couldn't save those. Please add them on the SomeoneNear website.",
   );
   return { ok: true };
 }

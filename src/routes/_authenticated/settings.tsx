@@ -55,7 +55,7 @@ import {
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — BesideU" },
+      { title: "Settings — SomeoneNear" },
       {
         name: "description",
         content: "Manage your Care Membership, profile, and consent preferences.",

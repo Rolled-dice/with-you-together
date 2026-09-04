@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /**
  * Amazon Chime SDK meeting hook.
  *
- * NOTE: the production BesideU call flow currently runs on LiveKit
+ * NOTE: the production SomeoneNear call flow currently runs on LiveKit
  * (see src/routes/_authenticated/call.$bookingId.tsx). This hook is the
  * Chime path and is wired to mock credentials until the AWS backend exists.
  */
@@ -26,7 +26,7 @@ export async function fetchChimeTokens(
   return {
     Meeting: {
       MeetingId: `00000000-0000-4000-8000-${bookingId.slice(0, 12).padEnd(12, "0")}`,
-      ExternalMeetingId: `besideu-${bookingId}`,
+      ExternalMeetingId: `someonenear-${bookingId}`,
       MediaRegion: "us-east-1",
       MediaPlacement: {
         AudioHostUrl: "mock.m3.ue1.app.chime.aws:3478",
@@ -40,7 +40,7 @@ export async function fetchChimeTokens(
       },
     },
     Attendee: {
-      ExternalUserId: `besideu-user-${bookingId}`,
+      ExternalUserId: `someonenear-user-${bookingId}`,
       AttendeeId: "mock-attendee-id",
       JoinToken: "mock-join-token-not-valid",
     },
@@ -58,7 +58,7 @@ export type ChatMessage = {
   at: number;
 };
 
-const CHAT_TOPIC = "besideu-chat";
+const CHAT_TOPIC = "someonenear-chat";
 
 export function useChimeMeeting(
   bookingId = "mock-booking",
@@ -171,7 +171,7 @@ export function useChimeMeeting(
       } = await import("amazon-chime-sdk-js");
 
       const tokens = await fetchChimeTokens(bookingId);
-      const logger = new ConsoleLogger("BesideUChime", LogLevel.WARN);
+      const logger = new ConsoleLogger("SomeoneNearChime", LogLevel.WARN);
       const deviceController = new DefaultDeviceController(logger);
       const configuration = new MeetingSessionConfiguration(
         tokens.Meeting,

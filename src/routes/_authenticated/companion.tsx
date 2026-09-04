@@ -15,7 +15,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/companion")({
   head: () => ({
     meta: [
-      { title: "Companion — BesideU" },
+      { title: "Companion — SomeoneNear" },
       { name: "description", content: "A calm AI Companion to talk things through, on your terms." },
     ],
   }),

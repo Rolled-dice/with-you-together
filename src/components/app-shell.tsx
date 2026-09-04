@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
-import { BesideUCursor } from "@/components/besideu-cursor";
+import { SomeoneNearCursor } from "@/components/someonenear-cursor";
 import { NotificationBell } from "@/components/notification-bell";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
@@ -54,7 +54,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
-      <BesideUCursor />
+      <SomeoneNearCursor />
       <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
 
         {/* Sidebar (desktop) */}
@@ -154,10 +154,10 @@ function Brand({ compact = false }: { compact?: boolean }) {
         <Heart className="h-5 w-5" strokeWidth={2.4} />
       </span>
       {!compact && (
-        <span className="text-lg font-semibold tracking-tight text-foreground">BesideU</span>
+        <span className="text-lg font-semibold tracking-tight text-foreground">SomeoneNear</span>
       )}
       {compact && (
-        <span className="text-lg font-semibold tracking-tight text-foreground">BesideU</span>
+        <span className="text-lg font-semibold tracking-tight text-foreground">SomeoneNear</span>
       )}
     </Link>
   );

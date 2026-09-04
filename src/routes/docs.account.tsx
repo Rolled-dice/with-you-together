@@ -4,10 +4,10 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/account")({
   head: () => ({
     meta: [
-      { title: "Your account — BesideU Docs" },
-      { name: "description", content: "Profile, notifications, and deleting your BesideU account." },
-      { property: "og:title", content: "Your account — BesideU Docs" },
-      { property: "og:description", content: "Manage your BesideU account." },
+      { title: "Your account — SomeoneNear Docs" },
+      { name: "description", content: "Profile, notifications, and deleting your SomeoneNear account." },
+      { property: "og:title", content: "Your account — SomeoneNear Docs" },
+      { property: "og:description", content: "Manage your SomeoneNear account." },
     ],
   }),
   component: Page,
@@ -19,7 +19,7 @@ function Page() {
       <DocHeader
         eyebrow="Account"
         title="Your account"
-        intro="Small settings that make BesideU feel like yours."
+        intro="Small settings that make SomeoneNear feel like yours."
       />
 
       <DocSection title="Profile">

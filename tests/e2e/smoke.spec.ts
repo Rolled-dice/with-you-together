@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 /**
- * BesideU smoke tests.
+ * SomeoneNear smoke tests.
  *
  * Requires two env vars for authenticated flows:
  *   TEST_EMAIL     — email of an existing test account
@@ -27,7 +27,7 @@ async function signIn(page: Page) {
 test.describe("public smoke", () => {
   test("landing page loads", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/BesideU/i);
+    await expect(page).toHaveTitle(/SomeoneNear/i);
   });
 
   test("auth page renders sign-in form", async ({ page }) => {

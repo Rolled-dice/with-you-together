@@ -8,10 +8,10 @@ import { useChimeMeeting } from "@/hooks/useChimeMeeting";
 export const Route = createFileRoute("/_authenticated/call-room/$bookingId")({
   head: () => ({
     meta: [
-      { title: "Chime Session — BesideU" },
+      { title: "Chime Session — SomeoneNear" },
       {
         name: "description",
-        content: "Amazon Chime session room for your BesideU call.",
+        content: "Amazon Chime session room for your SomeoneNear call.",
       },
     ],
   }),

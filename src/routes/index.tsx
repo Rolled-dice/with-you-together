@@ -44,17 +44,17 @@ export const Route = createFileRoute("/")({
   loader: () => getPublicStats(),
   head: () => ({
     meta: [
-      { title: "BesideU — Checking in when they can't" },
+      { title: "SomeoneNear — Checking in when they can't" },
       {
         name: "description",
         content:
-          "BesideU is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
+          "SomeoneNear is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
       },
-      { property: "og:title", content: "BesideU — Checking in when they can't" },
+      { property: "og:title", content: "SomeoneNear — Checking in when they can't" },
       {
         property: "og:description",
         content:
-          "BesideU is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
+          "SomeoneNear is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
       },
     ],
   }),
@@ -173,7 +173,7 @@ function Landing() {
             <Heart className="h-5 w-5 animate-heartbeat" strokeWidth={2.6} fill="currentColor" />
             <span className="absolute inset-0 rounded-2xl gradient-sunrise animate-pulse-ring" aria-hidden />
           </span>
-          <span className="text-lg font-semibold tracking-tight">BesideU</span>
+          <span className="text-lg font-semibold tracking-tight">SomeoneNear</span>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" className="rounded-brand hidden sm:inline-flex">
@@ -232,7 +232,7 @@ function Landing() {
                 <span className="relative inline-block">when they can't.</span>
               </h1>
               <p className="mt-5 max-w-xl text-base text-neutral-800/85 sm:text-lg">
-                BesideU is the gentle heartbeat between your family — an AI companion for tough evenings,
+                SomeoneNear is the gentle heartbeat between your family — an AI companion for tough evenings,
                 private mood check-ins for your own patterns, and human listeners for the days a real
                 voice matters most.
               </p>
@@ -397,7 +397,7 @@ function Landing() {
 
         </section>
 
-        {/* Stats band — live numbers from the BesideU database */}
+        {/* Stats band — live numbers from the SomeoneNear database */}
         <section className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-4 sm:gap-4">
           {[
             {
@@ -459,7 +459,7 @@ function Landing() {
                 Distance shouldn’t become disconnection.
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-base text-neutral-800/85 sm:text-lg">
-                People still care. Life just got busy. BesideU exists to keep the people who matter
+                People still care. Life just got busy. SomeoneNear exists to keep the people who matter
                 close — even when the world pulls them apart.
               </p>
             </div>
@@ -498,18 +498,18 @@ function Landing() {
           </ol>
         </section>
 
-        {/* Story / how BesideU cares */}
+        {/* Story / how SomeoneNear cares */}
         <section className="pb-16 sm:pb-24">
           <div className="text-center animate-fade-up">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral">
-              Why BesideU exists
+              Why SomeoneNear exists
             </p>
 
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
               Because "how are you?" deserves a real answer.
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              Distance, time zones, and busy days pull families apart. BesideU stitches the moments
+              Distance, time zones, and busy days pull families apart. SomeoneNear stitches the moments
               back — quietly, with consent, and always at your pace.
             </p>
           </div>
@@ -569,7 +569,7 @@ function Landing() {
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {[
               {
-                q: "My mom lives 8,000 km away. BesideU is how I know she slept okay.",
+                q: "My mom lives 8,000 km away. SomeoneNear is how I know she slept okay.",
                 by: "Rohan, 32 — Owner",
                 img: avatarDad,
                 tone: "gradient-peach",
@@ -851,7 +851,7 @@ function Landing() {
                 Life just got busy.
               </h2>
               <p className="mx-auto mt-5 max-w-2xl text-base text-neutral-800/85 sm:text-lg">
-                BesideU is built for the quiet guilt of not calling enough, the missed birthdays,
+                SomeoneNear is built for the quiet guilt of not calling enough, the missed birthdays,
                 and the late-night worry that sits in your chest. We make it easier to show up —
                 without making anyone feel like a burden.
               </p>
@@ -880,7 +880,7 @@ function Landing() {
                 The things families usually ask us
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-                Everything about privacy, billing, roles, and how BesideU keeps your circle calm and connected.
+                Everything about privacy, billing, roles, and how SomeoneNear keeps your circle calm and connected.
               </p>
             </div>
 
@@ -888,8 +888,8 @@ function Landing() {
               <Accordion type="single" collapsible className="w-full">
                 {[
                   {
-                    q: "What exactly does BesideU do?",
-                    a: "BesideU is a gentle family care membership. It combines an AI Companion for late-night worries, completely private mood check-ins, and human Listeners you can book when a real voice matters. Family plans keep everyone connected under clear roles and consent.",
+                    q: "What exactly does SomeoneNear do?",
+                    a: "SomeoneNear is a gentle family care membership. It combines an AI Companion for late-night worries, completely private mood check-ins, and human Listeners you can book when a real voice matters. Family plans keep everyone connected under clear roles and consent.",
                   },
                   {
                     q: "Are my mood check-ins private from family members?",
@@ -909,7 +909,7 @@ function Landing() {
                   },
                   {
                     q: "Are Listener sessions therapy or medical advice?",
-                    a: "No. BesideU Listeners are trained to offer a calm, non-judgmental ear. They do not diagnose, treat, or provide medical advice. If you are in crisis, we always show local emergency resources and hotlines.",
+                    a: "No. SomeoneNear Listeners are trained to offer a calm, non-judgmental ear. They do not diagnose, treat, or provide medical advice. If you are in crisis, we always show local emergency resources and hotlines.",
                   },
                   {
                     q: "Is my data safe and where is it stored?",
@@ -1011,7 +1011,7 @@ function Landing() {
               className="rounded-2xl gradient-sunrise px-8 text-neutral-900 shadow-glow hover:-translate-y-0.5 transition-transform"
             >
               <Link to={nextStep}>
-                <Sun className="mr-2 h-4 w-4" /> Start your family's BesideU
+                <Sun className="mr-2 h-4 w-4" /> Start your family's SomeoneNear
               </Link>
             </Button>
             <p className="mt-3 text-xs text-muted-foreground">
@@ -1073,7 +1073,7 @@ function Landing() {
                 <HeartHandshake className="h-3.5 w-3.5" /> We're listening
               </p>
               <h2 className="mt-3 max-w-xl text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-                Your voice shapes BesideU.
+                Your voice shapes SomeoneNear.
               </h2>
               <p className="mt-2 max-w-xl text-sm text-neutral-800/85 sm:text-base">
                 Every message — feature idea, bug, or gentle nudge — goes straight into our product review.
@@ -1094,7 +1094,7 @@ function Landing() {
                 variant="secondary"
                 className="rounded-2xl bg-white/80 text-neutral-900 backdrop-blur hover:bg-white"
               >
-                <a href="mailto:besideU.customercare@support.com">
+                <a href="mailto:someoneNear.customercare@support.com">
                   <Mail className="mr-2 h-4 w-4" /> Email support
                 </a>
               </Button>
@@ -1109,13 +1109,13 @@ function Landing() {
                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl gradient-sunrise text-neutral-900 shadow-soft">
                   <Heart className="h-4 w-4" fill="currentColor" />
                 </span>
-                <span className="text-base font-semibold tracking-tight text-neutral-900">BesideU</span>
+                <span className="text-base font-semibold tracking-tight text-neutral-900">SomeoneNear</span>
               </div>
               <p className="mt-3 text-sm text-neutral-800/80">
                 A warm family care membership. Love, on the same page.
               </p>
               <p className="mt-4 text-[11px] text-neutral-800/70">
-                © {new Date().getFullYear()} BesideU. Made with care.
+                © {new Date().getFullYear()} SomeoneNear. Made with care.
               </p>
             </div>
 
@@ -1127,13 +1127,13 @@ function Landing() {
               <ul className="mt-4 space-y-3 text-sm text-neutral-900">
                 <li>
                   <a
-                    href="mailto:besideU.customercare@support.com"
+                    href="mailto:someoneNear.customercare@support.com"
                     className="group inline-flex items-start gap-2 hover:text-coral"
                   >
                     <Mail className="mt-0.5 h-4 w-4 text-coral" />
                     <span>
                       <span className="block font-medium">Email us</span>
-                      <span className="text-xs text-neutral-800/75">besideU.customercare@support.com</span>
+                      <span className="text-xs text-neutral-800/75">someoneNear.customercare@support.com</span>
                     </span>
                   </a>
                 </li>
@@ -1210,7 +1210,7 @@ function Landing() {
 
           {/* Safety disclaimer */}
           <div className="mt-10 rounded-2xl bg-white/60 p-4 text-center text-[11px] text-neutral-800/80 backdrop-blur">
-            BesideU is not therapy, medical care, or an emergency service. If you're in crisis,
+            SomeoneNear is not therapy, medical care, or an emergency service. If you're in crisis,
             please dial your local emergency line.
           </div>
         </footer>

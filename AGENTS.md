@@ -9,9 +9,9 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-# BesideU — Agent Guide
+# SomeoneNear — Agent Guide
 
-BesideU (formerly withU) is a family wellbeing app: an AI companion for emotional check-ins, human listener calls, family circles, medication reminders, and a WhatsApp bot for elders without web access. Tagline: "Checking in when they can't."
+SomeoneNear (formerly withU) is a family wellbeing app: an AI companion for emotional check-ins, human listener calls, family circles, medication reminders, and a WhatsApp bot for elders without web access. Tagline: "Checking in when they can't."
 
 ## Stack
 
@@ -59,6 +59,6 @@ State machine keyed by `whatsapp_sessions` (phone → step). Supports: account l
 ## Conventions
 
 - Semantic design tokens only — no hardcoded color utilities (`text-white`, `bg-[#...]`) in components.
-- Brand is **BesideU** everywhere (renamed from withU); heart icon favicon.
+- Brand is **SomeoneNear** everywhere (renamed from withU); heart icon favicon.
 - Prices displayed in USD (Together $8.99, Family $15.99, Care $36.99).
 - Full tech inventory: `techstack.txt`.

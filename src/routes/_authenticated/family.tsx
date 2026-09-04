@@ -53,7 +53,7 @@ import {
 export const Route = createFileRoute("/_authenticated/family")({
   head: () => ({
     meta: [
-      { title: "Family — BesideU" },
+      { title: "Family — SomeoneNear" },
       {
         name: "description",
         content: "Invite family members, manage roles, and share your Care Membership.",

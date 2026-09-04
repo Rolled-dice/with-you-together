@@ -106,7 +106,7 @@ export function DocsShell() {
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl gradient-sunrise text-neutral-900">
                 <Heart className="h-4 w-4" fill="currentColor" strokeWidth={2.6} />
               </span>
-              <span className="font-semibold tracking-tight">BesideU Docs</span>
+              <span className="font-semibold tracking-tight">SomeoneNear Docs</span>
             </Link>
           </div>
           <div className="flex items-center gap-2">
