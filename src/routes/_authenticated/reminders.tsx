@@ -211,7 +211,7 @@ function RemindersPage() {
         </div>
       ) : rows.length === 0 ? (
         <EmptyState
-          icon={BellRing}
+          icon={<BellRing className="h-5 w-5" />}
           title="No reminders yet"
           description="Add your first nudge above — medicine at 8pm, water at noon, a call home on Sunday."
         />
