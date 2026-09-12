@@ -446,8 +446,13 @@ function SoftphoneDock({
           <Button
             size="sm"
             onClick={async () => {
-              await phone.connect();
-              onGoAvailable();
+              try {
+                await phone.ensureRegistered();
+                onGoAvailable();
+                toast.success("Headset online — you're ready for calls");
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Headset could not come online");
+              }
             }}
           >
             <Headphones className="mr-1.5 h-4 w-4" /> Go available

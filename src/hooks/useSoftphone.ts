@@ -43,9 +43,35 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
     setError(null);
     setStatus("connecting");
     try {
+      // Ask for the microphone BEFORE the SDK enumerates devices. Without an
+      // active permission grant browsers hide audio inputs and the SDK fails
+      // with "Microphone not found".
+      let micId: string | undefined;
+      if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+        throw new Error(
+          "This browser can't use a microphone here. Open the console in Chrome or Safari over https.",
+        );
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((t) => t.stop());
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        micId = devices.find((d) => d.kind === "audioinput" && d.deviceId)?.deviceId;
+      } catch (permErr) {
+        const name = (permErr as { name?: string })?.name;
+        if (name === "NotAllowedError" || name === "SecurityError") {
+          throw new Error(
+            "Microphone blocked. Allow microphone access for this site in your browser, then press Go online again.",
+          );
+        }
+        throw new Error(
+          "No microphone found. Plug in or connect your headset, then press Go online again.",
+        );
+      }
+
       const { token } = await getToken();
       const { TelnyxRTC } = await import("@telnyx/webrtc");
-      const client = new TelnyxRTC({ login_token: token });
+      const client = new TelnyxRTC({ login_token: token, ...(micId ? { micId } : {}) });
       if (audioRef.current) client.remoteElement = audioRef.current;
 
       client.on("telnyx.ready", () => setStatus("registered"));
@@ -81,7 +107,9 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
       clientRef.current = client;
       await client.connect();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start the softphone");
+      clientRef.current = null;
+      errorRef.current = e instanceof Error ? e.message : "Could not start the softphone";
+      setError(errorRef.current);
       setStatus("error");
     }
   }, [getToken]);
