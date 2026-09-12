@@ -107,7 +107,9 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
       clientRef.current = client;
       await client.connect();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start the softphone");
+      clientRef.current = null;
+      errorRef.current = e instanceof Error ? e.message : "Could not start the softphone";
+      setError(errorRef.current);
       setStatus("error");
     }
   }, [getToken]);
