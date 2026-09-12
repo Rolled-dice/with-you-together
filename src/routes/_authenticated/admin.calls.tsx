@@ -242,6 +242,10 @@ function CallsConsole() {
         )}
       </section>
 
+      <SupervisorBoard />
+
+
+
       <section className="mb-8 rounded-brand border border-border bg-card/60 p-4">
         <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
           <Flag className="h-4 w-4" /> Flag inbox
