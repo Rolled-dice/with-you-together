@@ -410,6 +410,30 @@ function QueueCard({
       </p>
       {row.note && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{row.note}</p>}
 
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <label className="text-xs text-muted-foreground">Call number</label>
+        <Input
+          value={phoneDraft}
+          onChange={(e) => setPhoneDraft(e.target.value)}
+          placeholder="+919999612799"
+          inputMode="tel"
+          className="h-9 w-[190px] text-xs"
+        />
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={savingPhone || phoneDraft.trim() === (row.contact_phone ?? "")}
+          onClick={() => onSavePhone(phoneDraft.trim() || null)}
+        >
+          {savingPhone ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+          Save
+        </Button>
+        <span className="text-[11px] text-muted-foreground">
+          {dialTarget ? `Dials ${dialTarget}` : "No number yet — the call can't start"}
+        </span>
+      </div>
+
+
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button size="sm" onClick={onAutoAssign} disabled={busy}>
           {busy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Wand2 className="mr-1.5 h-4 w-4" />}
