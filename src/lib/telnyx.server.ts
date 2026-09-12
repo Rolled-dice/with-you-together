@@ -18,15 +18,18 @@ export type TelnyxConfig = {
 };
 
 export function telnyxConfig(): TelnyxConfig | null {
-  const apiKey = process.env["TELNYX_API_KEY"];
-  const connectionId = process.env["TELNYX_CALL_CONTROL_APP_ID"];
-  const callerId = process.env["TELNYX_PHONE_NUMBER"];
+  const apiKey = process.env["TELNYX_API_KEY"]?.trim();
+  const connectionId = process.env["TELNYX_CALL_CONTROL_APP_ID"]?.trim();
+  let callerId = process.env["TELNYX_PHONE_NUMBER"]?.trim();
   if (!apiKey || !connectionId || !callerId) return null;
+  // Normalize to E.164: +13159978334
+  const digits = callerId.replace(/\D/g, "");
+  callerId = digits.startsWith("1") && !digits.startsWith("+") ? `+${digits}` : `+${digits}`;
   return {
     apiKey,
     connectionId,
     callerId,
-    credentialId: process.env["TELNYX_SIP_CREDENTIAL_ID"] ?? null,
+    credentialId: process.env["TELNYX_SIP_CREDENTIAL_ID"]?.trim() ?? null,
   };
 }
 
