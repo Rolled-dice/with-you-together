@@ -63,14 +63,27 @@ async function telnyx<T>(
 /** Short-lived JWT the browser softphone uses to register. */
 export async function mintAgentToken(cfg: TelnyxConfig) {
   if (!cfg.credentialId) throw new Error("TELNYX_SIP_CREDENTIAL_ID is not configured");
-  const out = await telnyx<{ data: { token?: string } } | { token?: string }>(
-    cfg,
-    `/telephony_credentials/${cfg.credentialId}/token`,
-    { method: "POST" },
-  );
-  const token =
-    (out as { data?: { token?: string } }).data?.token ?? (out as { token?: string }).token;
-  if (!token) throw new Error("Telnyx did not return a softphone token");
+  // Telnyx returns the token as a raw JWT string (text/plain), not JSON.
+  const res = await fetch(`${API}/telephony_credentials/${cfg.credentialId}/token`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${cfg.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: "{}",
+  });
+  const text = (await res.text()).trim();
+  if (!res.ok) {
+    console.error(`Telnyx token mint failed [${res.status}]: ${text.slice(0, 500)}`);
+    throw new Error(`Telnyx token mint failed [${res.status}]`);
+  }
+  // Accept either a raw JWT or a JSON envelope, depending on API version.
+  let token = text;
+  if (text.startsWith("{")) {
+    const out = JSON.parse(text) as { data?: { token?: string }; token?: string };
+    token = out.data?.token ?? out.token ?? "";
+  }
+  if (!token.startsWith("eyJ")) throw new Error("Telnyx did not return a softphone token");
   return token;
 }
 
