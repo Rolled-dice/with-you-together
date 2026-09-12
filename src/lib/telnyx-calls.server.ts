@@ -53,7 +53,7 @@ export async function startBookingCall(context: Ctx, bookingId: string) {
 
   const { data: booking, error } = await context.supabase
     .from("listener_bookings")
-    .select("id, user_id, agent_id, crm_state")
+    .select("id, user_id, agent_id, crm_state, contact_phone")
     .eq("id", bookingId)
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -64,8 +64,13 @@ export async function startBookingCall(context: Ctx, bookingId: string) {
     .select("phone, full_name, display_name")
     .eq("id", booking.user_id)
     .maybeSingle();
-  const memberPhone = profile?.phone?.trim();
-  if (!memberPhone) throw new Error("This member has no phone number on their profile");
+  const memberPhone =
+    ((booking as any).contact_phone as string | null)?.trim() || profile?.phone?.trim();
+  if (!memberPhone)
+    throw new Error(
+      "No number to call. Add a call-back number on this booking (Admin → Calls) or on the member's profile.",
+    );
+
 
   const sip = await agentSipUri(cfg);
   const agentLeg = await dial(cfg, sip, { bookingId, legRole: "agent" });
