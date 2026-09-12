@@ -91,6 +91,7 @@ function SettingsPage() {
   const [intent, setIntent] = useState("");
   const [language, setLanguage] = useState<"en" | "hi">("en");
   const [currency, setCurrency] = useState<Currency>("usd");
+  const [phone, setPhone] = useState("");
 
   useEffect(() => {
     if (!profile) return;
@@ -99,6 +100,7 @@ function SettingsPage() {
     setPronouns(profile.pronouns ?? "");
     setTimezone(profile.timezone ?? "");
     setIntent(profile.care_intent ?? "");
+    setPhone(((profile as any).phone as string | null) ?? "");
     setLanguage(((profile as any).preferred_language as "en" | "hi") ?? "en");
     const prefCur = (profile as any).preferred_currency as Currency | null;
     setCurrency(prefCur ?? currencyForCountry((profile as any).phone_country));
@@ -138,6 +140,7 @@ function SettingsPage() {
           care_intent: intent || null,
           preferred_language: language,
           preferred_currency: currency,
+          phone: phone.trim() || null,
         },
       }),
     onSuccess: () => {
@@ -434,12 +437,16 @@ function SettingsPage() {
                   <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
                 ) : (
                   <PhoneVerifyDialog
-                    phone={(profile as any).phone ?? ""}
+                    phone={phone}
                     country={(profile as any).phone_country ?? "IN"}
                     onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
                   />
                 )}
               </div>
+              <p className="text-[11px] text-muted-foreground">
+                Include your country code. This is the number your listener calls and where
+                reminders go.
+              </p>
             </Field>
             <Field label="What brings you here?">
               <Textarea
