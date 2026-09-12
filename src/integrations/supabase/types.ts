@@ -773,6 +773,7 @@ export type Database = {
           agent_id: string | null
           call_ended_at: string | null
           call_started_at: string | null
+          contact_phone: string | null
           created_at: string
           crm_state: string
           duration_minutes: number
@@ -798,6 +799,7 @@ export type Database = {
           agent_id?: string | null
           call_ended_at?: string | null
           call_started_at?: string | null
+          contact_phone?: string | null
           created_at?: string
           crm_state?: string
           duration_minutes?: number
@@ -823,6 +825,7 @@ export type Database = {
           agent_id?: string | null
           call_ended_at?: string | null
           call_started_at?: string | null
+          contact_phone?: string | null
           created_at?: string
           crm_state?: string
           duration_minutes?: number
