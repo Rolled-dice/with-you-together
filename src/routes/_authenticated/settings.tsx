@@ -436,17 +436,23 @@ function SettingsPage() {
                 {(profile as any).phone_verified && phone === ((profile as any).phone ?? "") ? (
                   <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
                 ) : (
-                  <PhoneVerifyDialog
-                    phone={phone}
-                    country={(profile as any).phone_country ?? "IN"}
-                    onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
-                  />
+                  <>
+                    <Badge variant="secondary" className="rounded-full whitespace-nowrap">
+                      Not verified
+                    </Badge>
+                    <PhoneVerifyDialog
+                      phone={phone}
+                      country={(profile as any).phone_country ?? "IN"}
+                      onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
+                    />
+                  </>
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Include your country code. This is the number your listener calls and where
-                reminders go.
+                reminders go. Just press Save changes — verifying is optional for now.
               </p>
+
             </Field>
             <Field label="What brings you here?">
               <Textarea
