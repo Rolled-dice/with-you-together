@@ -49,6 +49,7 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksWhatsappRemindersRouteImport } from './routes/api/public/hooks/whatsapp-reminders'
 import { Route as ApiPublicHooksWhatsappRouteImport } from './routes/api/public/hooks/whatsapp'
+import { Route as ApiPublicHooksTelnyxRouteImport } from './routes/api/public/hooks/telnyx'
 import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
 
 const McpRoute = McpRouteImport.update({
@@ -261,6 +262,11 @@ const ApiPublicHooksWhatsappRoute = ApiPublicHooksWhatsappRouteImport.update({
   path: '/api/public/hooks/whatsapp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksTelnyxRoute = ApiPublicHooksTelnyxRouteImport.update({
+  id: '/api/public/hooks/telnyx',
+  path: '/api/public/hooks/telnyx',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksCallSlaRoute = ApiPublicHooksCallSlaRouteImport.update({
   id: '/api/public/hooks/call-sla',
   path: '/api/public/hooks/call-sla',
@@ -305,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -345,6 +352,7 @@ export interface FileRoutesByTo {
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -389,6 +397,7 @@ export interface FileRoutesById {
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/_authenticated/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -433,6 +442,7 @@ export interface FileRouteTypes {
     | '/companion/$threadId'
     | '/companion/'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/telnyx'
     | '/api/public/hooks/whatsapp'
     | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
@@ -473,6 +483,7 @@ export interface FileRouteTypes {
     | '/companion/$threadId'
     | '/companion'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/telnyx'
     | '/api/public/hooks/whatsapp'
     | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
@@ -516,6 +527,7 @@ export interface FileRouteTypes {
     | '/_authenticated/companion/$threadId'
     | '/_authenticated/companion/'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/telnyx'
     | '/api/public/hooks/whatsapp'
     | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
@@ -533,6 +545,7 @@ export interface RootRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
+  ApiPublicHooksTelnyxRoute: typeof ApiPublicHooksTelnyxRoute
   ApiPublicHooksWhatsappRoute: typeof ApiPublicHooksWhatsappRoute
   ApiPublicHooksWhatsappRemindersRoute: typeof ApiPublicHooksWhatsappRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -820,6 +833,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWhatsappRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/telnyx': {
+      id: '/api/public/hooks/telnyx'
+      path: '/api/public/hooks/telnyx'
+      fullPath: '/api/public/hooks/telnyx'
+      preLoaderRoute: typeof ApiPublicHooksTelnyxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/call-sla': {
       id: '/api/public/hooks/call-sla'
       path: '/api/public/hooks/call-sla'
@@ -926,6 +946,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutReturnRoute: CheckoutReturnRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
+  ApiPublicHooksTelnyxRoute: ApiPublicHooksTelnyxRoute,
   ApiPublicHooksWhatsappRoute: ApiPublicHooksWhatsappRoute,
   ApiPublicHooksWhatsappRemindersRoute: ApiPublicHooksWhatsappRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
