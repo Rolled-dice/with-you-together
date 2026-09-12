@@ -98,12 +98,14 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
       await connect();
       const deadline = Date.now() + timeoutMs;
       while (Date.now() < deadline) {
-        if (statusRef.current === "registered" || statusRef.current === "on_call") return;
-        if (statusRef.current === "error") {
+        const current: SoftphoneStatus = statusRef.current;
+        if (current === "registered" || current === "on_call") return;
+        if (current === "error") {
           throw new Error(errorRef.current ?? "Softphone could not connect");
         }
         await new Promise((r) => setTimeout(r, 250));
       }
+
       throw new Error("Your browser phone did not come online — check the microphone permission and try again.");
     },
     [connect],
