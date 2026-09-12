@@ -22,9 +22,15 @@ export function telnyxConfig(): TelnyxConfig | null {
   const connectionId = process.env["TELNYX_CALL_CONTROL_APP_ID"]?.trim();
   let callerId = process.env["TELNYX_PHONE_NUMBER"]?.trim();
   if (!apiKey || !connectionId || !callerId) return null;
-  // Normalize to E.164: +13159978334
+  // Normalize to E.164. Accept +1 315-997-8334, (315) 997-8334, etc.
   const digits = callerId.replace(/\D/g, "");
-  callerId = digits.startsWith("1") && !digits.startsWith("+") ? `+${digits}` : `+${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) {
+    callerId = `+${digits}`;
+  } else if (digits.length === 10) {
+    callerId = `+1${digits}`;
+  } else if (!callerId.startsWith("+")) {
+    callerId = `+${digits}`;
+  }
   return {
     apiKey,
     connectionId,
