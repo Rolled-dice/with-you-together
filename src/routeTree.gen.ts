@@ -28,6 +28,7 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated/safety'
+import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedListenersRouteImport } from './routes/_authenticated/listeners'
 import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
@@ -42,6 +43,7 @@ import { Route as AuthenticatedCompanionIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedCompanionThreadIdRouteImport } from './routes/_authenticated/companion.$threadId'
 import { Route as AuthenticatedCallBookingIdRouteImport } from './routes/_authenticated/call.$bookingId'
 import { Route as AuthenticatedCallRoomBookingIdRouteImport } from './routes/_authenticated/call-room.$bookingId'
+import { Route as AuthenticatedAgentConsoleRouteImport } from './routes/_authenticated/agent.console'
 import { Route as AuthenticatedAdminWhatsappRouteImport } from './routes/_authenticated/admin.whatsapp'
 import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authenticated/admin.feedback'
 import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authenticated/admin.calls'
@@ -49,6 +51,7 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksWhatsappRemindersRouteImport } from './routes/api/public/hooks/whatsapp-reminders'
 import { Route as ApiPublicHooksWhatsappRouteImport } from './routes/api/public/hooks/whatsapp'
+import { Route as ApiPublicHooksTelnyxRouteImport } from './routes/api/public/hooks/telnyx'
 import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
 
 const McpRoute = McpRouteImport.update({
@@ -145,6 +148,11 @@ const AuthenticatedSafetyRoute = AuthenticatedSafetyRouteImport.update({
   path: '/safety',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRemindersRoute = AuthenticatedRemindersRouteImport.update({
+  id: '/reminders',
+  path: '/reminders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -221,6 +229,12 @@ const AuthenticatedCallRoomBookingIdRoute =
     path: '/call-room/$bookingId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAgentConsoleRoute =
+  AuthenticatedAgentConsoleRouteImport.update({
+    id: '/agent/console',
+    path: '/agent/console',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminWhatsappRoute =
   AuthenticatedAdminWhatsappRouteImport.update({
     id: '/admin/whatsapp',
@@ -261,6 +275,11 @@ const ApiPublicHooksWhatsappRoute = ApiPublicHooksWhatsappRouteImport.update({
   path: '/api/public/hooks/whatsapp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksTelnyxRoute = ApiPublicHooksTelnyxRouteImport.update({
+  id: '/api/public/hooks/telnyx',
+  path: '/api/public/hooks/telnyx',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksCallSlaRoute = ApiPublicHooksCallSlaRouteImport.update({
   id: '/api/public/hooks/call-sla',
   path: '/api/public/hooks/call-sla',
@@ -282,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof AuthenticatedInviteRoute
   '/listeners': typeof AuthenticatedListenersRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/reminders': typeof AuthenticatedRemindersRoute
   '/safety': typeof AuthenticatedSafetyRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
@@ -300,11 +320,13 @@ export interface FileRoutesByFullPath {
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
+  '/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -322,6 +344,7 @@ export interface FileRoutesByTo {
   '/invite': typeof AuthenticatedInviteRoute
   '/listeners': typeof AuthenticatedListenersRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/reminders': typeof AuthenticatedRemindersRoute
   '/safety': typeof AuthenticatedSafetyRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
@@ -340,11 +363,13 @@ export interface FileRoutesByTo {
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
+  '/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -366,6 +391,7 @@ export interface FileRoutesById {
   '/_authenticated/invite': typeof AuthenticatedInviteRoute
   '/_authenticated/listeners': typeof AuthenticatedListenersRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/reminders': typeof AuthenticatedRemindersRoute
   '/_authenticated/safety': typeof AuthenticatedSafetyRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
@@ -384,11 +410,13 @@ export interface FileRoutesById {
   '/_authenticated/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/_authenticated/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
+  '/_authenticated/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/_authenticated/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/_authenticated/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/_authenticated/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/hooks/whatsapp-reminders': typeof ApiPublicHooksWhatsappRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -410,6 +438,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/listeners'
     | '/onboarding'
+    | '/reminders'
     | '/safety'
     | '/settings'
     | '/api/chat'
@@ -428,11 +457,13 @@ export interface FileRouteTypes {
     | '/admin/calls'
     | '/admin/feedback'
     | '/admin/whatsapp'
+    | '/agent/console'
     | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
     | '/companion/'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/telnyx'
     | '/api/public/hooks/whatsapp'
     | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
@@ -450,6 +481,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/listeners'
     | '/onboarding'
+    | '/reminders'
     | '/safety'
     | '/settings'
     | '/api/chat'
@@ -468,11 +500,13 @@ export interface FileRouteTypes {
     | '/admin/calls'
     | '/admin/feedback'
     | '/admin/whatsapp'
+    | '/agent/console'
     | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
     | '/companion'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/telnyx'
     | '/api/public/hooks/whatsapp'
     | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
@@ -493,6 +527,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invite'
     | '/_authenticated/listeners'
     | '/_authenticated/onboarding'
+    | '/_authenticated/reminders'
     | '/_authenticated/safety'
     | '/_authenticated/settings'
     | '/api/chat'
@@ -511,11 +546,13 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/calls'
     | '/_authenticated/admin/feedback'
     | '/_authenticated/admin/whatsapp'
+    | '/_authenticated/agent/console'
     | '/_authenticated/call-room/$bookingId'
     | '/_authenticated/call/$bookingId'
     | '/_authenticated/companion/$threadId'
     | '/_authenticated/companion/'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/telnyx'
     | '/api/public/hooks/whatsapp'
     | '/api/public/hooks/whatsapp-reminders'
     | '/api/public/payments/webhook'
@@ -533,6 +570,7 @@ export interface RootRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
+  ApiPublicHooksTelnyxRoute: typeof ApiPublicHooksTelnyxRoute
   ApiPublicHooksWhatsappRoute: typeof ApiPublicHooksWhatsappRoute
   ApiPublicHooksWhatsappRemindersRoute: typeof ApiPublicHooksWhatsappRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -673,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSafetyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reminders': {
+      id: '/_authenticated/reminders'
+      path: '/reminders'
+      fullPath: '/reminders'
+      preLoaderRoute: typeof AuthenticatedRemindersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -771,6 +816,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCallRoomBookingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/agent/console': {
+      id: '/_authenticated/agent/console'
+      path: '/agent/console'
+      fullPath: '/agent/console'
+      preLoaderRoute: typeof AuthenticatedAgentConsoleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/whatsapp': {
       id: '/_authenticated/admin/whatsapp'
       path: '/admin/whatsapp'
@@ -820,6 +872,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWhatsappRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/telnyx': {
+      id: '/api/public/hooks/telnyx'
+      path: '/api/public/hooks/telnyx'
+      fullPath: '/api/public/hooks/telnyx'
+      preLoaderRoute: typeof ApiPublicHooksTelnyxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/call-sla': {
       id: '/api/public/hooks/call-sla'
       path: '/api/public/hooks/call-sla'
@@ -855,11 +914,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInviteRoute: typeof AuthenticatedInviteRoute
   AuthenticatedListenersRoute: typeof AuthenticatedListenersRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedRemindersRoute: typeof AuthenticatedRemindersRoute
   AuthenticatedSafetyRoute: typeof AuthenticatedSafetyRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminCallsRoute: typeof AuthenticatedAdminCallsRoute
   AuthenticatedAdminFeedbackRoute: typeof AuthenticatedAdminFeedbackRoute
   AuthenticatedAdminWhatsappRoute: typeof AuthenticatedAdminWhatsappRoute
+  AuthenticatedAgentConsoleRoute: typeof AuthenticatedAgentConsoleRoute
   AuthenticatedCallRoomBookingIdRoute: typeof AuthenticatedCallRoomBookingIdRoute
   AuthenticatedCallBookingIdRoute: typeof AuthenticatedCallBookingIdRoute
 }
@@ -873,11 +934,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInviteRoute: AuthenticatedInviteRoute,
   AuthenticatedListenersRoute: AuthenticatedListenersRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedRemindersRoute: AuthenticatedRemindersRoute,
   AuthenticatedSafetyRoute: AuthenticatedSafetyRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminCallsRoute: AuthenticatedAdminCallsRoute,
   AuthenticatedAdminFeedbackRoute: AuthenticatedAdminFeedbackRoute,
   AuthenticatedAdminWhatsappRoute: AuthenticatedAdminWhatsappRoute,
+  AuthenticatedAgentConsoleRoute: AuthenticatedAgentConsoleRoute,
   AuthenticatedCallRoomBookingIdRoute: AuthenticatedCallRoomBookingIdRoute,
   AuthenticatedCallBookingIdRoute: AuthenticatedCallBookingIdRoute,
 }
@@ -926,6 +989,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutReturnRoute: CheckoutReturnRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
+  ApiPublicHooksTelnyxRoute: ApiPublicHooksTelnyxRoute,
   ApiPublicHooksWhatsappRoute: ApiPublicHooksWhatsappRoute,
   ApiPublicHooksWhatsappRemindersRoute: ApiPublicHooksWhatsappRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,

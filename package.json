@@ -59,6 +59,7 @@
     "@tanstack/react-router": "^1.170.16",
     "@tanstack/react-start": "^1.168.26",
     "@tanstack/router-plugin": "^1.168.18",
+    "@telnyx/webrtc": "^2.27.10",
     "ai": "^7.0.29",
     "amazon-chime-sdk-js": "^3.32.0",
     "class-variance-authority": "^0.7.1",

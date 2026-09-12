@@ -39,7 +39,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Check, HeartHandshake, Loader2, LogOut, Sparkles } from "lucide-react";
 import { WebhookEventsCard } from "@/components/webhook-events-card";
-import { WhatsappCard } from "@/components/whatsapp-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
@@ -460,8 +459,6 @@ function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-
-        <WhatsappCard />
 
         <BillingHistoryCard />
 

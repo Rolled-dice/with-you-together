@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Inbox, MessageCircle } from "lucide-react";
+import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Inbox, BellRing, Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/companion", label: "Companion", icon: MessageCircleHeart },
   { to: "/listeners", label: "Listeners", icon: Users },
+  { to: "/reminders", label: "Reminders", icon: BellRing },
   { to: "/insights", label: "Insights", icon: LineChart },
   { to: "/family", label: "Family", icon: HeartHandshake },
   { to: "/safety", label: "Safety", icon: LifeBuoy },
@@ -23,9 +24,10 @@ const NAV = [
 
 const ADMIN_NAV = [
   { to: "/admin/calls", label: "Call CRM", icon: PhoneCall },
-  { to: "/admin/whatsapp", label: "WhatsApp Bot", icon: MessageCircle },
+  { to: "/agent/console", label: "Agent console", icon: Headphones },
   { to: "/admin/feedback", label: "Feedback", icon: Inbox },
 ] as const;
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
