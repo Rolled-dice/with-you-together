@@ -423,11 +423,14 @@ function SettingsPage() {
             <Field label="Mobile number">
               <div className="flex items-center gap-2">
                 <Input
-                  value={(profile as any).phone ?? ""}
-                  readOnly
-                  className="rounded-brand bg-muted/40"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 555 000 1234"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  className="rounded-brand"
                 />
-                {(profile as any).phone_verified ? (
+                {(profile as any).phone_verified && phone === ((profile as any).phone ?? "") ? (
                   <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
                 ) : (
                   <PhoneVerifyDialog
