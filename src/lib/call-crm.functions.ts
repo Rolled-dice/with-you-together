@@ -26,7 +26,7 @@ export const listCallQueue = createServerFn({ method: "GET" })
         context.supabase
           .from("listener_bookings")
           .select(
-            "id, user_id, requested_at, duration_minutes, note, status, crm_state, sla_deadline, agent_id, listeners(name)",
+            "id, user_id, requested_at, duration_minutes, note, status, crm_state, sla_deadline, agent_id, contact_phone, listeners(name)",
           )
           .order("requested_at", { ascending: true })
           .limit(500),
@@ -43,6 +43,20 @@ export const listCallQueue = createServerFn({ method: "GET" })
       flagCount.set(f.booking_id, (flagCount.get(f.booking_id) ?? 0) + 1);
     }
 
+    // Member profile numbers (fallback dial target) via the admin client.
+    const userIds = Array.from(new Set(((bookings ?? []) as any[]).map((b) => b.user_id)));
+    const profilePhone = new Map<string, string | null>();
+    if (userIds.length > 0) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: profiles } = await supabaseAdmin
+        .from("profiles")
+        .select("id, phone")
+        .in("id", userIds);
+      for (const p of (profiles ?? []) as { id: string; phone: string | null }[]) {
+        profilePhone.set(p.id, p.phone);
+      }
+    }
+
     const rows: QueueRow[] = ((bookings ?? []) as any[]).map((b) => ({
       id: b.id,
       user_id: b.user_id,
@@ -56,9 +70,39 @@ export const listCallQueue = createServerFn({ method: "GET" })
       agent_name: b.agent_id ? agentName.get(b.agent_id) ?? null : null,
       listener_name: b.listeners?.name ?? null,
       open_flags: flagCount.get(b.id) ?? 0,
+      contact_phone: b.contact_phone ?? null,
+      profile_phone: profilePhone.get(b.user_id) ?? null,
     }));
     return { rows };
   });
+
+export const setBookingContactPhone = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        contact_phone: z
+          .string()
+          .trim()
+          .regex(/^\+[1-9]\d{7,14}$/, "Use international format, e.g. +919999612799")
+          .nullable(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("listener_bookings")
+      .update({ contact_phone: data.contact_phone })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await logCallEvent(context, data.id, "contact_phone_updated", {
+      set: Boolean(data.contact_phone),
+    });
+    return { ok: true };
+  });
+
 
 export const listCallAgents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
