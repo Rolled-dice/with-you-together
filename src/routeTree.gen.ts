@@ -40,7 +40,6 @@ import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticat
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedCompanionIndexRouteImport } from './routes/_authenticated/companion.index'
-import { Route as ApiPublicTelnyxSetupRouteImport } from './routes/api/public/telnyx-setup'
 import { Route as AuthenticatedCompanionThreadIdRouteImport } from './routes/_authenticated/companion.$threadId'
 import { Route as AuthenticatedCallBookingIdRouteImport } from './routes/_authenticated/call.$bookingId'
 import { Route as AuthenticatedCallRoomBookingIdRouteImport } from './routes/_authenticated/call-room.$bookingId'
@@ -212,11 +211,6 @@ const AuthenticatedCompanionIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedCompanionRoute,
   } as any)
-const ApiPublicTelnyxSetupRoute = ApiPublicTelnyxSetupRouteImport.update({
-  id: '/api/public/telnyx-setup',
-  path: '/api/public/telnyx-setup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedCompanionThreadIdRoute =
   AuthenticatedCompanionThreadIdRouteImport.update({
     id: '/$threadId',
@@ -330,7 +324,6 @@ export interface FileRoutesByFullPath {
   '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
-  '/api/public/telnyx-setup': typeof ApiPublicTelnyxSetupRoute
   '/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
@@ -374,7 +367,6 @@ export interface FileRoutesByTo {
   '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
-  '/api/public/telnyx-setup': typeof ApiPublicTelnyxSetupRoute
   '/companion': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
@@ -422,7 +414,6 @@ export interface FileRoutesById {
   '/_authenticated/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/_authenticated/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
-  '/api/public/telnyx-setup': typeof ApiPublicTelnyxSetupRoute
   '/_authenticated/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
@@ -470,7 +461,6 @@ export interface FileRouteTypes {
     | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
-    | '/api/public/telnyx-setup'
     | '/companion/'
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/telnyx'
@@ -514,7 +504,6 @@ export interface FileRouteTypes {
     | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
-    | '/api/public/telnyx-setup'
     | '/companion'
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/telnyx'
@@ -561,7 +550,6 @@ export interface FileRouteTypes {
     | '/_authenticated/call-room/$bookingId'
     | '/_authenticated/call/$bookingId'
     | '/_authenticated/companion/$threadId'
-    | '/api/public/telnyx-setup'
     | '/_authenticated/companion/'
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/telnyx'
@@ -581,7 +569,6 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
-  ApiPublicTelnyxSetupRoute: typeof ApiPublicTelnyxSetupRoute
   ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
   ApiPublicHooksTelnyxRoute: typeof ApiPublicHooksTelnyxRoute
   ApiPublicHooksWhatsappRoute: typeof ApiPublicHooksWhatsappRoute
@@ -808,13 +795,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompanionIndexRouteImport
       parentRoute: typeof AuthenticatedCompanionRoute
     }
-    '/api/public/telnyx-setup': {
-      id: '/api/public/telnyx-setup'
-      path: '/api/public/telnyx-setup'
-      fullPath: '/api/public/telnyx-setup'
-      preLoaderRoute: typeof ApiPublicTelnyxSetupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/companion/$threadId': {
       id: '/_authenticated/companion/$threadId'
       path: '/$threadId'
@@ -1008,7 +988,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
-  ApiPublicTelnyxSetupRoute: ApiPublicTelnyxSetupRoute,
   ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
   ApiPublicHooksTelnyxRoute: ApiPublicHooksTelnyxRoute,
   ApiPublicHooksWhatsappRoute: ApiPublicHooksWhatsappRoute,
