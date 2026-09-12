@@ -192,6 +192,16 @@ function CallsConsole() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const savePhone = useMutation({
+    mutationFn: (v: { id: string; contact_phone: string | null }) => phoneFn({ data: v }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Call number saved");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const rows = queue.data?.rows ?? [];
   const visible = useMemo(
     () => (showAll ? rows : rows.filter((r) => ACTIVE_STATES.includes(r.crm_state))),
@@ -245,6 +255,9 @@ function CallsConsole() {
                 onAssign={(agentId) => manualAssign.mutate({ id: row.id, agent_id: agentId })}
                 onState={(s) => setState.mutate({ id: row.id, crm_state: s })}
                 onFlag={() => raise.mutate(row.id)}
+                onSavePhone={(v) => savePhone.mutate({ id: row.id, contact_phone: v })}
+                savingPhone={savePhone.isPending}
+
               />
             ))}
           </div>
