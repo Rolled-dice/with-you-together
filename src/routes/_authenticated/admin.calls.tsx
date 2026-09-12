@@ -26,8 +26,10 @@ import {
   raiseCallFlag,
   resolveCallFlag,
   setBookingCrmState,
+  setBookingContactPhone,
   upsertCallAgent,
 } from "@/lib/call-crm.functions";
+
 import {
   getRoutingConfig,
   getSupervisorSnapshot,
@@ -119,6 +121,8 @@ function CallsConsole() {
   const flagFn = useServerFn(raiseCallFlag);
   const resolveFn = useServerFn(resolveCallFlag);
   const upsertAgentFn = useServerFn(upsertCallAgent);
+  const phoneFn = useServerFn(setBookingContactPhone);
+
 
   const [showAll, setShowAll] = useState(false);
 
