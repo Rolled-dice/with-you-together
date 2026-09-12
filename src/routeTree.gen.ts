@@ -43,6 +43,7 @@ import { Route as AuthenticatedCompanionIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedCompanionThreadIdRouteImport } from './routes/_authenticated/companion.$threadId'
 import { Route as AuthenticatedCallBookingIdRouteImport } from './routes/_authenticated/call.$bookingId'
 import { Route as AuthenticatedCallRoomBookingIdRouteImport } from './routes/_authenticated/call-room.$bookingId'
+import { Route as AuthenticatedAgentConsoleRouteImport } from './routes/_authenticated/agent.console'
 import { Route as AuthenticatedAdminWhatsappRouteImport } from './routes/_authenticated/admin.whatsapp'
 import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authenticated/admin.feedback'
 import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authenticated/admin.calls'
@@ -228,6 +229,12 @@ const AuthenticatedCallRoomBookingIdRoute =
     path: '/call-room/$bookingId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAgentConsoleRoute =
+  AuthenticatedAgentConsoleRouteImport.update({
+    id: '/agent/console',
+    path: '/agent/console',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminWhatsappRoute =
   AuthenticatedAdminWhatsappRouteImport.update({
     id: '/admin/whatsapp',
@@ -313,6 +320,7 @@ export interface FileRoutesByFullPath {
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
+  '/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
@@ -355,6 +363,7 @@ export interface FileRoutesByTo {
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
+  '/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
@@ -401,6 +410,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/_authenticated/admin/whatsapp': typeof AuthenticatedAdminWhatsappRoute
+  '/_authenticated/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/_authenticated/call-room/$bookingId': typeof AuthenticatedCallRoomBookingIdRoute
   '/_authenticated/call/$bookingId': typeof AuthenticatedCallBookingIdRoute
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
@@ -447,6 +457,7 @@ export interface FileRouteTypes {
     | '/admin/calls'
     | '/admin/feedback'
     | '/admin/whatsapp'
+    | '/agent/console'
     | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
@@ -489,6 +500,7 @@ export interface FileRouteTypes {
     | '/admin/calls'
     | '/admin/feedback'
     | '/admin/whatsapp'
+    | '/agent/console'
     | '/call-room/$bookingId'
     | '/call/$bookingId'
     | '/companion/$threadId'
@@ -534,6 +546,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/calls'
     | '/_authenticated/admin/feedback'
     | '/_authenticated/admin/whatsapp'
+    | '/_authenticated/agent/console'
     | '/_authenticated/call-room/$bookingId'
     | '/_authenticated/call/$bookingId'
     | '/_authenticated/companion/$threadId'
@@ -803,6 +816,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCallRoomBookingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/agent/console': {
+      id: '/_authenticated/agent/console'
+      path: '/agent/console'
+      fullPath: '/agent/console'
+      preLoaderRoute: typeof AuthenticatedAgentConsoleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/whatsapp': {
       id: '/_authenticated/admin/whatsapp'
       path: '/admin/whatsapp'
@@ -900,6 +920,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCallsRoute: typeof AuthenticatedAdminCallsRoute
   AuthenticatedAdminFeedbackRoute: typeof AuthenticatedAdminFeedbackRoute
   AuthenticatedAdminWhatsappRoute: typeof AuthenticatedAdminWhatsappRoute
+  AuthenticatedAgentConsoleRoute: typeof AuthenticatedAgentConsoleRoute
   AuthenticatedCallRoomBookingIdRoute: typeof AuthenticatedCallRoomBookingIdRoute
   AuthenticatedCallBookingIdRoute: typeof AuthenticatedCallBookingIdRoute
 }
@@ -919,6 +940,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCallsRoute: AuthenticatedAdminCallsRoute,
   AuthenticatedAdminFeedbackRoute: AuthenticatedAdminFeedbackRoute,
   AuthenticatedAdminWhatsappRoute: AuthenticatedAdminWhatsappRoute,
+  AuthenticatedAgentConsoleRoute: AuthenticatedAgentConsoleRoute,
   AuthenticatedCallRoomBookingIdRoute: AuthenticatedCallRoomBookingIdRoute,
   AuthenticatedCallBookingIdRoute: AuthenticatedCallBookingIdRoute,
 }
