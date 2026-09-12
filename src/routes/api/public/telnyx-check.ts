@@ -25,7 +25,31 @@ export const Route = createFileRoute("/api/public/telnyx-check")({
           });
         } catch (e) {
           const message = e instanceof Error ? e.message : "Token mint failed";
-          return Response.json({ ok: false, config: true, error: message });
+          // Try to fetch the credential record to help diagnose the 400.
+          let credentialCheck = null;
+          try {
+            const res = await fetch(
+              `https://api.telnyx.com/v2/telephony_credentials/${cfg.credentialId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${cfg.apiKey}`,
+                  "Content-Type": "application/json",
+                },
+              },
+            );
+            credentialCheck = {
+              status: res.status,
+              body: await res.text(),
+            };
+          } catch (ce) {
+            credentialCheck = { error: ce instanceof Error ? ce.message : String(ce) };
+          }
+          return Response.json({
+            ok: false,
+            config: true,
+            error: message,
+            credentialCheck,
+          });
         }
       },
     },
