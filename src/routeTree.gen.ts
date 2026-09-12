@@ -28,6 +28,7 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated/safety'
+import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedListenersRouteImport } from './routes/_authenticated/listeners'
 import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
@@ -144,6 +145,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedSafetyRoute = AuthenticatedSafetyRouteImport.update({
   id: '/safety',
   path: '/safety',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRemindersRoute = AuthenticatedRemindersRouteImport.update({
+  id: '/reminders',
+  path: '/reminders',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -288,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof AuthenticatedInviteRoute
   '/listeners': typeof AuthenticatedListenersRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/reminders': typeof AuthenticatedRemindersRoute
   '/safety': typeof AuthenticatedSafetyRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/invite': typeof AuthenticatedInviteRoute
   '/listeners': typeof AuthenticatedListenersRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/reminders': typeof AuthenticatedRemindersRoute
   '/safety': typeof AuthenticatedSafetyRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
@@ -374,6 +382,7 @@ export interface FileRoutesById {
   '/_authenticated/invite': typeof AuthenticatedInviteRoute
   '/_authenticated/listeners': typeof AuthenticatedListenersRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/reminders': typeof AuthenticatedRemindersRoute
   '/_authenticated/safety': typeof AuthenticatedSafetyRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
@@ -419,6 +428,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/listeners'
     | '/onboarding'
+    | '/reminders'
     | '/safety'
     | '/settings'
     | '/api/chat'
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/listeners'
     | '/onboarding'
+    | '/reminders'
     | '/safety'
     | '/settings'
     | '/api/chat'
@@ -504,6 +515,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invite'
     | '/_authenticated/listeners'
     | '/_authenticated/onboarding'
+    | '/_authenticated/reminders'
     | '/_authenticated/safety'
     | '/_authenticated/settings'
     | '/api/chat'
@@ -684,6 +696,13 @@ declare module '@tanstack/react-router' {
       path: '/safety'
       fullPath: '/safety'
       preLoaderRoute: typeof AuthenticatedSafetyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reminders': {
+      id: '/_authenticated/reminders'
+      path: '/reminders'
+      fullPath: '/reminders'
+      preLoaderRoute: typeof AuthenticatedRemindersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -875,6 +894,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInviteRoute: typeof AuthenticatedInviteRoute
   AuthenticatedListenersRoute: typeof AuthenticatedListenersRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedRemindersRoute: typeof AuthenticatedRemindersRoute
   AuthenticatedSafetyRoute: typeof AuthenticatedSafetyRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminCallsRoute: typeof AuthenticatedAdminCallsRoute
@@ -893,6 +913,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInviteRoute: AuthenticatedInviteRoute,
   AuthenticatedListenersRoute: AuthenticatedListenersRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedRemindersRoute: AuthenticatedRemindersRoute,
   AuthenticatedSafetyRoute: AuthenticatedSafetyRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminCallsRoute: AuthenticatedAdminCallsRoute,
