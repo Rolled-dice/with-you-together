@@ -48,7 +48,10 @@ export type QueueRow = {
   agent_name: string | null;
   listener_name: string | null;
   open_flags: number;
+  contact_phone: string | null;
+  profile_phone: string | null;
 };
+
 
 export type CallFlag = {
   id: string;

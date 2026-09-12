@@ -26,8 +26,10 @@ import {
   raiseCallFlag,
   resolveCallFlag,
   setBookingCrmState,
+  setBookingContactPhone,
   upsertCallAgent,
 } from "@/lib/call-crm.functions";
+
 import {
   getRoutingConfig,
   getSupervisorSnapshot,
@@ -119,6 +121,8 @@ function CallsConsole() {
   const flagFn = useServerFn(raiseCallFlag);
   const resolveFn = useServerFn(resolveCallFlag);
   const upsertAgentFn = useServerFn(upsertCallAgent);
+  const phoneFn = useServerFn(setBookingContactPhone);
+
 
   const [showAll, setShowAll] = useState(false);
 
@@ -188,6 +192,16 @@ function CallsConsole() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const savePhone = useMutation({
+    mutationFn: (v: { id: string; contact_phone: string | null }) => phoneFn({ data: v }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Call number saved");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const rows = queue.data?.rows ?? [];
   const visible = useMemo(
     () => (showAll ? rows : rows.filter((r) => ACTIVE_STATES.includes(r.crm_state))),
@@ -241,6 +255,9 @@ function CallsConsole() {
                 onAssign={(agentId) => manualAssign.mutate({ id: row.id, agent_id: agentId })}
                 onState={(s) => setState.mutate({ id: row.id, crm_state: s })}
                 onFlag={() => raise.mutate(row.id)}
+                onSavePhone={(v) => savePhone.mutate({ id: row.id, contact_phone: v })}
+                savingPhone={savePhone.isPending}
+
               />
             ))}
           </div>
@@ -334,6 +351,8 @@ function QueueCard({
   onAssign,
   onState,
   onFlag,
+  onSavePhone,
+  savingPhone,
 }: {
   row: QueueRow;
   agents: { id: string; name: string }[];
@@ -342,11 +361,16 @@ function QueueCard({
   onAssign: (agentId: string) => void;
   onState: (s: CrmState) => void;
   onFlag: () => void;
+  onSavePhone: (phone: string | null) => void;
+  savingPhone: boolean;
 }) {
   const sla = slaLevel(row.requested_at, row.crm_state);
   const slaMeta = SLA_META[sla];
   const stateMeta = STATE_META[row.crm_state];
   const startsAt = new Date(row.requested_at);
+  const [phoneDraft, setPhoneDraft] = useState(row.contact_phone ?? row.profile_phone ?? "");
+  const dialTarget = row.contact_phone ?? row.profile_phone;
+
 
   return (
     <article
@@ -385,6 +409,30 @@ function QueueCard({
         {row.listener_name ?? "—"}
       </p>
       {row.note && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{row.note}</p>}
+
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <label className="text-xs text-muted-foreground">Call number</label>
+        <Input
+          value={phoneDraft}
+          onChange={(e) => setPhoneDraft(e.target.value)}
+          placeholder="+919999612799"
+          inputMode="tel"
+          className="h-9 w-[190px] text-xs"
+        />
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={savingPhone || phoneDraft.trim() === (row.contact_phone ?? "")}
+          onClick={() => onSavePhone(phoneDraft.trim() || null)}
+        >
+          {savingPhone ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+          Save
+        </Button>
+        <span className="text-[11px] text-muted-foreground">
+          {dialTarget ? `Dials ${dialTarget}` : "No number yet — the call can't start"}
+        </span>
+      </div>
+
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button size="sm" onClick={onAutoAssign} disabled={busy}>
