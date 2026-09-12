@@ -590,3 +590,146 @@ function AgentRoster({
     </section>
   );
 }
+
+/** Live agent board, weekly metrics and editable routing rules. */
+function SupervisorBoard() {
+  const qc = useQueryClient();
+  const snapshotFn = useServerFn(getSupervisorSnapshot);
+  const rulesFn = useServerFn(getRoutingConfig);
+  const saveRulesFn = useServerFn(saveRoutingConfig);
+
+  const snapshot = useQuery({
+    queryKey: ["supervisor-snapshot"],
+    queryFn: () => snapshotFn(),
+    refetchInterval: 20_000,
+  });
+  const rules = useQuery({ queryKey: ["routing-rules"], queryFn: () => rulesFn() });
+
+  const [draft, setDraft] = useState<Record<string, number | boolean | null> | null>(null);
+  const current: any = draft ?? rules.data?.rules ?? null;
+
+  const save = useMutation({
+    mutationFn: () =>
+      saveRulesFn({
+        data: {
+          id: current.id,
+          require_skill_match: Boolean(current.require_skill_match),
+          timezone_tolerance_hours: Number(current.timezone_tolerance_hours),
+          enforce_working_hours: Boolean(current.enforce_working_hours),
+          max_concurrent_override: current.max_concurrent_override
+            ? Number(current.max_concurrent_override)
+            : null,
+          skill_weight: Number(current.skill_weight),
+          load_weight: Number(current.load_weight),
+          timezone_weight: Number(current.timezone_weight),
+          fairness_weight: Number(current.fairness_weight),
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Routing rules saved");
+      setDraft(null);
+      qc.invalidateQueries({ queryKey: ["routing-rules"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const m = snapshot.data?.metrics;
+
+  return (
+    <section className="mb-8 space-y-4 rounded-brand border border-border bg-card/60 p-4">
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-sm font-semibold">
+          <Users className="h-4 w-4" /> Live board &amp; routing
+        </h2>
+        <Button variant="outline" size="sm" onClick={() => snapshot.refetch()}>
+          <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
+        </Button>
+      </header>
+
+      {snapshot.isLoading ? (
+        <Skeleton className="h-24 w-full" />
+      ) : (
+        <>
+          <div className="grid gap-2 sm:grid-cols-4">
+            <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Queue depth" value={snapshot.data?.queueDepth ?? 0} />
+            <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Answer rate (7d)" value={`${m?.answerRate ?? 0}%`} />
+            <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Avg talk time" value={`${Math.round((m?.avgTalkSeconds ?? 0) / 60)}m`} />
+            <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breach rate" value={`${m?.breachRate ?? 0}%`} tone={(m?.breachRate ?? 0) > 0 ? "text-red-600" : undefined} />
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xs font-medium text-muted-foreground">Agents</h3>
+            {(snapshot.data?.roster ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">No agents on the roster yet.</p>
+            ) : (
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {(snapshot.data?.roster ?? []).map((a: any) => (
+                  <li
+                    key={a.id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-sm"
+                  >
+                    <span className="truncate">{a.name}</span>
+                    <Badge variant={a.presence === "on_call" ? "default" : "secondary"}>
+                      {a.presence.replace("_", " ")}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
+
+      {current && (
+        <div className="space-y-3 rounded-lg border border-border/70 bg-background/60 p-3">
+          <h3 className="text-xs font-medium text-muted-foreground">Routing rules</h3>
+          <div className="grid gap-3 sm:grid-cols-4">
+            {[
+              ["skill_weight", "Skill weight"],
+              ["load_weight", "Load weight"],
+              ["timezone_weight", "Timezone weight"],
+              ["fairness_weight", "Fairness weight"],
+              ["timezone_tolerance_hours", "Timezone tolerance (h)"],
+              ["max_concurrent_override", "Max concurrent override"],
+            ].map(([key, label]) => (
+              <label key={key} className="space-y-1 text-xs">
+                <span className="text-muted-foreground">{label}</span>
+                <Input
+                  type="number"
+                  value={current[key] ?? ""}
+                  onChange={(e) =>
+                    setDraft({
+                      ...current,
+                      [key]: e.target.value === "" ? null : Number(e.target.value),
+                    })
+                  }
+                />
+              </label>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={Boolean(current.require_skill_match)}
+                onChange={(e) => setDraft({ ...current, require_skill_match: e.target.checked })}
+              />
+              Require skill match
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={Boolean(current.enforce_working_hours)}
+                onChange={(e) => setDraft({ ...current, enforce_working_hours: e.target.checked })}
+              />
+              Enforce working hours
+            </label>
+            <Button size="sm" onClick={() => save.mutate()} disabled={!draft || save.isPending}>
+              {save.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />} Save rules
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
