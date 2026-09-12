@@ -98,8 +98,9 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
       await connect();
       const deadline = Date.now() + timeoutMs;
       while (Date.now() < deadline) {
-        const current: SoftphoneStatus = statusRef.current;
+        const current = String(statusRef.current);
         if (current === "registered" || current === "on_call") return;
+
         if (current === "error") {
           throw new Error(errorRef.current ?? "Softphone could not connect");
         }
