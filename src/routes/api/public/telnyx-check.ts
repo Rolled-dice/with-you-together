@@ -27,11 +27,12 @@ export const Route = createFileRoute('/api/public/telnyx-check')({
           headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({}),
         })
-        const body = await res.json()
+        const text = await res.text()
         if (!res.ok) {
-          return Response.json({ config, token: 'FAILED', status: res.status, detail: body?.errors }, { status: 502 })
+          return Response.json({ config, token: 'FAILED', status: res.status, detail: text.slice(0, 300) }, { status: 502 })
         }
-        return Response.json({ config, token: 'OK (minted, redacted)' })
+        const isJwt = text.trim().startsWith('eyJ')
+        return Response.json({ config, token: isJwt ? 'OK (JWT minted, redacted)' : 'UNEXPECTED_RESPONSE' })
       },
     },
   },
