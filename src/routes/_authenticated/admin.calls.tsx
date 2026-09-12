@@ -351,6 +351,8 @@ function QueueCard({
   onAssign,
   onState,
   onFlag,
+  onSavePhone,
+  savingPhone,
 }: {
   row: QueueRow;
   agents: { id: string; name: string }[];
@@ -359,11 +361,16 @@ function QueueCard({
   onAssign: (agentId: string) => void;
   onState: (s: CrmState) => void;
   onFlag: () => void;
+  onSavePhone: (phone: string | null) => void;
+  savingPhone: boolean;
 }) {
   const sla = slaLevel(row.requested_at, row.crm_state);
   const slaMeta = SLA_META[sla];
   const stateMeta = STATE_META[row.crm_state];
   const startsAt = new Date(row.requested_at);
+  const [phoneDraft, setPhoneDraft] = useState(row.contact_phone ?? row.profile_phone ?? "");
+  const dialTarget = row.contact_phone ?? row.profile_phone;
+
 
   return (
     <article
