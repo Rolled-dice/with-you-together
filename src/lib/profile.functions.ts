@@ -32,9 +32,23 @@ export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ProfileInput.parse(input))
   .handler(async ({ context, data }) => {
+    const patch: z.infer<typeof ProfileInput> & { phone_verified?: boolean } = { ...data };
+
+    // Changing the mobile number invalidates any previous verification.
+    if (data.phone !== undefined) {
+      const { data: current } = await context.supabase
+        .from("profiles")
+        .select("phone")
+        .eq("id", context.userId)
+        .single();
+      const before = (current?.phone ?? "") as string;
+      const after = data.phone ?? "";
+      if (before !== after) patch.phone_verified = false;
+    }
+
     const { error } = await context.supabase
       .from("profiles")
-      .update(data)
+      .update(patch)
       .eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };

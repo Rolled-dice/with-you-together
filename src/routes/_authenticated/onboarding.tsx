@@ -29,6 +29,7 @@ function OnboardingPage() {
     Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC",
   );
   const [careIntent, setCareIntent] = useState("");
+  const [phone, setPhone] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -36,7 +37,7 @@ function OnboardingPage() {
       if (!userData.user) return;
       const { data: profile } = await supabase
         .from("profiles")
-        .select("display_name, pronouns, timezone, care_intent")
+        .select("display_name, pronouns, timezone, care_intent, phone")
         .eq("id", userData.user.id)
         .maybeSingle();
       if (profile) {
@@ -44,6 +45,7 @@ function OnboardingPage() {
         setPronouns(profile.pronouns ?? "");
         setTimezone(profile.timezone ?? timezone);
         setCareIntent(profile.care_intent ?? "");
+        setPhone((profile as { phone?: string | null }).phone ?? "");
       }
       setLoading(false);
     })();
@@ -54,6 +56,11 @@ function OnboardingPage() {
     e.preventDefault();
     if (!displayName.trim()) {
       toast.error("Please share what we can call you.");
+      return;
+    }
+    const trimmedPhone = phone.trim();
+    if (trimmedPhone && !/^\+?[0-9][0-9\s-]{6,17}$/.test(trimmedPhone)) {
+      toast.error("Please enter a valid mobile number with country code.");
       return;
     }
     setSaving(true);
@@ -69,6 +76,7 @@ function OnboardingPage() {
         pronouns: pronouns.trim() || null,
         timezone,
         care_intent: careIntent.trim() || null,
+        phone: trimmedPhone || null,
         onboarding_completed: true,
       })
       .eq("id", userData.user.id);
@@ -125,6 +133,22 @@ function OnboardingPage() {
                   onChange={(e) => setPronouns(e.target.value)}
                   placeholder="e.g. she/her, they/them"
                 />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="phone">Mobile number (optional)</Label>
+                <Input
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 555 000 1234"
+                  inputMode="tel"
+                  autoComplete="tel"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Include your country code. This is where a listener calls you and where reminders
+                  arrive. You can change it any time in Settings.
+                </p>
               </div>
 
               <div className="flex flex-col gap-2">
