@@ -19,7 +19,13 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
   const clientRef = useRef<any>(null);
   const callRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [status, setStatus] = useState<SoftphoneStatus>("idle");
+  const [status, setStatusState] = useState<SoftphoneStatus>("idle");
+  const statusRef = useRef<SoftphoneStatus>("idle");
+  const errorRef = useRef<string | null>(null);
+  const setStatus = useCallback((next: SoftphoneStatus) => {
+    statusRef.current = next;
+    setStatusState(next);
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [held, setHeld] = useState(false);
@@ -44,7 +50,8 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
 
       client.on("telnyx.ready", () => setStatus("registered"));
       client.on("telnyx.error", (e: any) => {
-        setError(e?.error?.message ?? "Softphone connection failed");
+        errorRef.current = e?.error?.message ?? "Softphone connection failed";
+        setError(errorRef.current);
         setStatus("error");
       });
       client.on("telnyx.notification", (notification: any) => {
@@ -78,6 +85,29 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
       setStatus("error");
     }
   }, [getToken]);
+
+  /**
+   * Connects if needed and resolves only once Telnyx has actually registered
+   * the browser leg. Dialling before this point makes the agent leg fail with
+   * `user_busy`, because there is no endpoint to ring yet.
+   */
+  const ensureRegistered = useCallback(
+    async (timeoutMs = 15_000) => {
+      if (statusRef.current === "registered" || statusRef.current === "on_call") return;
+      errorRef.current = null;
+      await connect();
+      const deadline = Date.now() + timeoutMs;
+      while (Date.now() < deadline) {
+        if (statusRef.current === "registered" || statusRef.current === "on_call") return;
+        if (statusRef.current === "error") {
+          throw new Error(errorRef.current ?? "Softphone could not connect");
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      throw new Error("Your browser phone did not come online — check the microphone permission and try again.");
+    },
+    [connect],
+  );
 
   const disconnect = useCallback(async () => {
     try {
@@ -133,6 +163,7 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
     seconds,
     audioRef,
     connect,
+    ensureRegistered,
     disconnect,
     toggleMute,
     toggleHold,

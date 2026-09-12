@@ -118,9 +118,7 @@ function AgentConsolePage() {
 
   const dial = useMutation({
     mutationFn: async (bookingId: string) => {
-      if (phone.status !== "registered" && phone.status !== "on_call") {
-        await phone.connect();
-      }
+      await phone.ensureRegistered();
       await presenceFn({ data: { state: "on_call", booking_id: bookingId } });
       return startFn({ data: { booking_id: bookingId } });
     },
