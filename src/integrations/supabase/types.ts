@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_presence: {
+        Row: {
+          active_booking_id: string | null
+          agent_id: string
+          created_at: string
+          last_heartbeat_at: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          active_booking_id?: string | null
+          agent_id: string
+          created_at?: string
+          last_heartbeat_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          active_booking_id?: string | null
+          agent_id?: string
+          created_at?: string
+          last_heartbeat_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_presence_active_booking_id_fkey"
+            columns: ["active_booking_id"]
+            isOneToOne: false
+            referencedRelation: "listener_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_presence_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "call_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_events: {
         Row: {
           amount_cents: number | null
@@ -119,6 +161,63 @@ export type Database = {
         }
         Relationships: []
       }
+      call_dispositions: {
+        Row: {
+          agent_id: string | null
+          booking_id: string
+          created_at: string
+          created_by: string | null
+          follow_up_needed: boolean
+          id: string
+          notes: string | null
+          outcome: string
+          safety_concern: boolean
+          updated_at: string
+          wrap_up_seconds: number | null
+        }
+        Insert: {
+          agent_id?: string | null
+          booking_id: string
+          created_at?: string
+          created_by?: string | null
+          follow_up_needed?: boolean
+          id?: string
+          notes?: string | null
+          outcome: string
+          safety_concern?: boolean
+          updated_at?: string
+          wrap_up_seconds?: number | null
+        }
+        Update: {
+          agent_id?: string | null
+          booking_id?: string
+          created_at?: string
+          created_by?: string | null
+          follow_up_needed?: boolean
+          id?: string
+          notes?: string | null
+          outcome?: string
+          safety_concern?: boolean
+          updated_at?: string
+          wrap_up_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_dispositions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "call_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_dispositions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "listener_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_events: {
         Row: {
           actor: string | null
@@ -191,6 +290,121 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "call_flags_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "listener_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_legs: {
+        Row: {
+          answered_at: string | null
+          booking_id: string
+          call_control_id: string | null
+          call_leg_id: string | null
+          call_session_id: string | null
+          created_at: string
+          direction: string
+          ended_at: string | null
+          hangup_cause: string | null
+          id: string
+          leg_role: string
+          phone: string | null
+          provider: string
+          started_at: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          answered_at?: string | null
+          booking_id: string
+          call_control_id?: string | null
+          call_leg_id?: string | null
+          call_session_id?: string | null
+          created_at?: string
+          direction?: string
+          ended_at?: string | null
+          hangup_cause?: string | null
+          id?: string
+          leg_role?: string
+          phone?: string | null
+          provider?: string
+          started_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          answered_at?: string | null
+          booking_id?: string
+          call_control_id?: string | null
+          call_leg_id?: string | null
+          call_session_id?: string | null
+          created_at?: string
+          direction?: string
+          ended_at?: string | null
+          hangup_cause?: string | null
+          id?: string
+          leg_role?: string
+          phone?: string | null
+          provider?: string
+          started_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_legs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "listener_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_recordings: {
+        Row: {
+          booking_id: string
+          channels: string | null
+          created_at: string
+          duration_seconds: number | null
+          format: string | null
+          id: string
+          provider: string
+          recorded_at: string | null
+          recording_id: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          booking_id: string
+          channels?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          format?: string | null
+          id?: string
+          provider?: string
+          recorded_at?: string | null
+          recording_id?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          booking_id?: string
+          channels?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          format?: string | null
+          id?: string
+          provider?: string
+          recorded_at?: string | null
+          recording_id?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_recordings_booking_id_fkey"
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "listener_bookings"
@@ -974,6 +1188,54 @@ export type Database = {
         }
         Relationships: []
       }
+      routing_rules: {
+        Row: {
+          created_at: string
+          enforce_working_hours: boolean
+          fairness_weight: number
+          id: string
+          is_active: boolean
+          load_weight: number
+          max_concurrent_override: number | null
+          name: string
+          require_skill_match: boolean
+          skill_weight: number
+          timezone_tolerance_hours: number
+          timezone_weight: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enforce_working_hours?: boolean
+          fairness_weight?: number
+          id?: string
+          is_active?: boolean
+          load_weight?: number
+          max_concurrent_override?: number | null
+          name?: string
+          require_skill_match?: boolean
+          skill_weight?: number
+          timezone_tolerance_hours?: number
+          timezone_weight?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enforce_working_hours?: boolean
+          fairness_weight?: number
+          id?: string
+          is_active?: boolean
+          load_weight?: number
+          max_concurrent_override?: number | null
+          name?: string
+          require_skill_match?: boolean
+          skill_weight?: number
+          timezone_tolerance_hours?: number
+          timezone_weight?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stripe_webhook_events: {
         Row: {
           environment: string
@@ -1292,11 +1554,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_agent_of_booking: { Args: { _booking: string }; Returns: boolean }
       is_family_admin: {
         Args: { _family: string; _uid: string }
         Returns: boolean
       }
       is_family_adult_of: { Args: { _for_user: string }; Returns: boolean }
+      owns_booking: { Args: { _booking: string }; Returns: boolean }
       same_family_as: { Args: { _for_user: string }; Returns: boolean }
     }
     Enums: {
