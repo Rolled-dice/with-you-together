@@ -312,7 +312,7 @@ function StatTile({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: number;
+  value: number | string;
   tone?: string;
 }) {
   return (
