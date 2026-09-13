@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Json } from "@/integrations/supabase/types";
 import { z } from "zod";
 
 const ScheduleInput = z.object({
@@ -41,9 +42,14 @@ export const createMedication = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => MedicationInput.parse(i))
   .handler(async ({ context, data }) => {
     const { schedules, ...med } = data;
+    const medication = {
+      ...med,
+      parsed_data: med.parsed_data as Json | null | undefined,
+      added_by: context.userId,
+    };
     const { data: row, error } = await context.supabase
       .from("medications")
-      .insert({ ...med, added_by: context.userId })
+      .insert(medication)
       .select("id")
       .single();
     if (error) throw new Error(error.message);
