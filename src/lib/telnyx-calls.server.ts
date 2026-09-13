@@ -72,6 +72,15 @@ export async function startBookingCall(context: Ctx, bookingId: string) {
     );
 
 
+  // Clear out member legs left over from earlier attempts, otherwise the
+  // webhook cannot tell which one to dial and skips the member entirely.
+  await supabaseAdmin
+    .from("call_legs")
+    .update({ state: "ended", ended_at: new Date().toISOString(), hangup_cause: "superseded" })
+    .eq("booking_id", bookingId)
+    .eq("leg_role", "member")
+    .eq("state", "pending");
+
   const sip = await agentSipUri(cfg);
   const agentLeg = await dial(cfg, sip, { bookingId, legRole: "agent" });
 
@@ -183,14 +192,24 @@ export async function handleTelnyxEvent(payload: any) {
       .eq("call_control_id", p.call_control_id);
 
     const cfg = telnyxConfig();
-    const { data: memberLeg } = await supabaseAdmin
+    const { data: memberLegs } = await supabaseAdmin
       .from("call_legs")
       .select("id, phone")
       .eq("booking_id", bookingId)
       .eq("leg_role", "member")
       .eq("state", "pending")
-      .maybeSingle();
-    if (cfg && memberLeg?.phone) {
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const memberLeg = memberLegs?.[0];
+    if (!cfg || !memberLeg?.phone) {
+      await supabaseAdmin.from("call_events").insert({
+        booking_id: bookingId,
+        event_type: "member_dial_skipped",
+        detail: { reason: !cfg ? "telnyx_not_configured" : "no_pending_member_leg" },
+      });
+      return { ok: true };
+    }
+    try {
       const leg = await dial(cfg, memberLeg.phone, {
         bookingId,
         legRole: "member",
@@ -205,6 +224,17 @@ export async function handleTelnyxEvent(payload: any) {
           state: "dialing",
           started_at: now,
         })
+        .eq("id", memberLeg.id);
+    } catch (e) {
+      console.error("member dial failed", e);
+      await supabaseAdmin.from("call_events").insert({
+        booking_id: bookingId,
+        event_type: "member_dial_failed",
+        detail: { error: e instanceof Error ? e.message : "dial failed" },
+      });
+      await supabaseAdmin
+        .from("call_legs")
+        .update({ state: "ended", ended_at: now, hangup_cause: "dial_failed" })
         .eq("id", memberLeg.id);
     }
     return { ok: true };
