@@ -12,11 +12,11 @@
  */
 
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { telnyxConfig, type TelnyxConfig } from "@/lib/telnyx.server";
+import { telnyxConfig, pickSmsSender, type TelnyxConfig } from "@/lib/telnyx.server";
 
 const CODE_TTL_MS = 10 * 60 * 1000;
 const RESEND_COOLDOWN_MS = 60 * 1000;
-const MAX_SENDS_PER_HOUR = 5;
+const MAX_SENDS_PER_HOUR = 3;
 const MAX_ATTEMPTS = 5;
 
 export type Channel = "sms" | "call";
