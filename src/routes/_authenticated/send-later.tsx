@@ -144,7 +144,7 @@ function SendLaterPage() {
   const minWhen = new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16);
 
   return (
-    <AppShell title="Send It Later">
+    <AppShell>
       <div className="mx-auto max-w-2xl space-y-8 pb-24">
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 text-muted-foreground text-sm">
