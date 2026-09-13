@@ -11,6 +11,9 @@ export const createSendLater = createServerFn({ method: "POST" })
     const file = formData.get("file");
     return {
       recipientName: z.string().min(1).max(120).parse(formData.get("recipientName")),
+      recipientUserId:
+        z.string().uuid().nullable().parse(formData.get("recipientUserId")) ??
+        undefined,
       kind: kind as "text" | "voice" | "video",
       body: formData.get("body") ? String(formData.get("body")) : undefined,
       scheduledAt: z.string().parse(formData.get("scheduledAt")),
