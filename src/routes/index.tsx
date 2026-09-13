@@ -29,7 +29,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getPublicStats } from "@/lib/stats.functions";
 import { useLiveStats } from "@/hooks/use-live-stats";
-import someoneNearFamilySupport from "@/assets/someone-near-family-support.jpg";
 
 const TITLE = "SomeoneNear | Someone Near When You Need Them";
 const DESCRIPTION =
@@ -234,17 +233,6 @@ function Landing() {
             SomeoneNear gives you a caring check-in, a real listener, and someone near in
             the moments when you don't want to be alone.
           </p>
-          <figure className="mx-auto max-w-md overflow-hidden rounded-3xl border border-border bg-surface shadow-gentle">
-            <img
-              src={someoneNearFamilySupport}
-              alt="A caring family staying close, showing how SomeoneNear helps you find someone near for support"
-              width={1280}
-              height={1280}
-              fetchPriority="high"
-              decoding="async"
-              className="aspect-square h-auto w-full object-cover"
-            />
-          </figure>
           <div className="flex flex-col items-center gap-3 pt-2 sm:flex-row sm:justify-center">
             <Button asChild size="lg" className="w-full rounded-2xl px-8 sm:w-auto">
               <Link to={nextStep}>
