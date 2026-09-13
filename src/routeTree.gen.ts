@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as DocsSafetyRouteImport } from './routes/docs.safety'
+import { Route as DocsMedicationRouteImport } from './routes/docs.medication'
 import { Route as DocsListenersRouteImport } from './routes/docs.listeners'
 import { Route as DocsInsightsRouteImport } from './routes/docs.insights'
 import { Route as DocsGettingStartedRouteImport } from './routes/docs.getting-started'
@@ -88,6 +89,11 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
 const DocsSafetyRoute = DocsSafetyRouteImport.update({
   id: '/safety',
   path: '/safety',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsMedicationRoute = DocsMedicationRouteImport.update({
+  id: '/medication',
+  path: '/medication',
   getParentRoute: () => DocsRoute,
 } as any)
 const DocsListenersRoute = DocsListenersRouteImport.update({
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/insights': typeof DocsInsightsRoute
   '/docs/listeners': typeof DocsListenersRoute
+  '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -372,6 +379,7 @@ export interface FileRoutesByTo {
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/insights': typeof DocsInsightsRoute
   '/docs/listeners': typeof DocsListenersRoute
+  '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -421,6 +429,7 @@ export interface FileRoutesById {
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/insights': typeof DocsInsightsRoute
   '/docs/listeners': typeof DocsListenersRoute
+  '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -470,6 +479,7 @@ export interface FileRouteTypes {
     | '/docs/getting-started'
     | '/docs/insights'
     | '/docs/listeners'
+    | '/docs/medication'
     | '/docs/safety'
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
@@ -515,6 +525,7 @@ export interface FileRouteTypes {
     | '/docs/getting-started'
     | '/docs/insights'
     | '/docs/listeners'
+    | '/docs/medication'
     | '/docs/safety'
     | '/docs'
     | '/.mcp/invoke-tool/$tool'
@@ -563,6 +574,7 @@ export interface FileRouteTypes {
     | '/docs/getting-started'
     | '/docs/insights'
     | '/docs/listeners'
+    | '/docs/medication'
     | '/docs/safety'
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
@@ -650,6 +662,13 @@ declare module '@tanstack/react-router' {
       path: '/safety'
       fullPath: '/docs/safety'
       preLoaderRoute: typeof DocsSafetyRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/medication': {
+      id: '/docs/medication'
+      path: '/medication'
+      fullPath: '/docs/medication'
+      preLoaderRoute: typeof DocsMedicationRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/listeners': {
@@ -998,6 +1017,7 @@ interface DocsRouteChildren {
   DocsGettingStartedRoute: typeof DocsGettingStartedRoute
   DocsInsightsRoute: typeof DocsInsightsRoute
   DocsListenersRoute: typeof DocsListenersRoute
+  DocsMedicationRoute: typeof DocsMedicationRoute
   DocsSafetyRoute: typeof DocsSafetyRoute
   DocsIndexRoute: typeof DocsIndexRoute
 }
@@ -1011,6 +1031,7 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsGettingStartedRoute: DocsGettingStartedRoute,
   DocsInsightsRoute: DocsInsightsRoute,
   DocsListenersRoute: DocsListenersRoute,
+  DocsMedicationRoute: DocsMedicationRoute,
   DocsSafetyRoute: DocsSafetyRoute,
   DocsIndexRoute: DocsIndexRoute,
 }

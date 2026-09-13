@@ -19,7 +19,7 @@ function Page() {
       <DocHeader
         eyebrow="Feature"
         title="Medication reminders"
-        intro="Never wonder \"did they take it?\" again — gentle dose nudges for you or someone you care for."
+        intro="Never wonder “did they take it?” again — gentle dose nudges for you or someone you care for."
       />
 
       <DocSection title="What it is">
