@@ -106,13 +106,26 @@ export async function listReceivedMessages(context: Ctx) {
   const { data, error } = await context.supabase
     .from("scheduled_messages")
     .select(
-      "id, recipient_name, kind, body, s3_key, media_duration_seconds, scheduled_at, delivered_at, status, profiles:user_id(display_name)",
+      "id, user_id, recipient_name, kind, body, s3_key, media_duration_seconds, scheduled_at, delivered_at, status",
     )
     .eq("recipient_user_id", context.userId)
     .eq("status", "delivered")
     .order("delivered_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  const rows = data ?? [];
+  const senderIds = [...new Set(rows.map((r: any) => r.user_id).filter(Boolean))];
+  const names = new Map<string, string>();
+  if (senderIds.length) {
+    const { data: profs } = await context.supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", senderIds);
+    for (const p of profs ?? []) names.set(p.id as string, (p.display_name as string) ?? "");
+  }
+  return rows.map((r: any) => ({
+    ...r,
+    profiles: { display_name: names.get(r.user_id) || null },
+  }));
 }
 
 /** Family members the user can address a message to. */
@@ -124,12 +137,22 @@ export async function listFamilyContacts(context: Ctx) {
   if (famErr || !famId) return [];
   const { data, error } = await context.supabase
     .from("family_members")
-    .select("user_id, profiles:user_id(display_name)")
+    .select("user_id")
     .eq("family_id", famId)
     .neq("user_id", context.userId);
   if (error) throw new Error(error.message);
-  return (data ?? []).map((m: any) => ({
-    userId: m.user_id as string,
-    name: (m.profiles?.display_name as string) || "Family member",
+  const ids = (data ?? []).map((m: any) => m.user_id as string);
+  if (!ids.length) return [];
+  const { data: profs } = await context.supabase
+    .from("profiles")
+    .select("id, display_name")
+    .in("id", ids);
+  const names = new Map<string, string>(
+    (profs ?? []).map((p: any) => [p.id as string, p.display_name as string]),
+  );
+  return ids.map((id) => ({
+    userId: id,
+    name: names.get(id) || "Family member",
   }));
 }
+
