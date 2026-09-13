@@ -333,37 +333,70 @@
 
 
 @utility gradient-sunrise {
-  background-image: linear-gradient(135deg, #ffd28a 0%, #ffb27a 45%, #ff8f6b 100%);
+  background-image: linear-gradient(135deg, #F7E8D6 0%, #EFCFB4 48%, #E0A184 100%);
 }
 @utility gradient-peach {
-  background-image: linear-gradient(135deg, #fff2dc 0%, #ffc89a 100%);
+  background-image: linear-gradient(135deg, #FBF6EF 0%, #F0D6C6 100%);
 }
 @utility gradient-sage {
-  background-image: linear-gradient(135deg, #e6f0dd 0%, #a8c99a 100%);
+  background-image: linear-gradient(135deg, #F1F1E8 0%, #C7D3BC 100%);
 }
 @utility gradient-blush {
-  background-image: linear-gradient(135deg, #ffe4dc 0%, #ffb8a8 100%);
+  background-image: linear-gradient(135deg, #F9EDE5 0%, #EFC9B6 100%);
 }
 @utility gradient-sky {
-  background-image: linear-gradient(135deg, #e2f0fb 0%, #b8d9f0 100%);
+  background-image: linear-gradient(135deg, #F2F4F3 0%, #C6D3DA 100%);
 }
 @utility gradient-lilac {
-  background-image: linear-gradient(135deg, #f0e6ff 0%, #d9c8ef 100%);
+  background-image: linear-gradient(135deg, #F6F1EC 0%, #DCD2CB 100%);
 }
 @utility gradient-mint {
-  background-image: linear-gradient(135deg, #e0f4ea 0%, #b9e3d0 100%);
+  background-image: linear-gradient(135deg, #F0F4EE 0%, #CBD9C9 100%);
 }
 @utility gradient-animated {
-  background: linear-gradient(120deg, #ffd28a, #ffb27a, #ff8f6b, #ffd28a);
+  background: linear-gradient(120deg, #F7E8D6, #EFCFB4, #E0A184, #F7E8D6);
   background-size: 300% 300%;
-  animation: gradient-shift 10s ease infinite;
+  animation: gradient-shift 14s ease infinite;
 }
+/* Very soft flat shadows — presence, never elevation drama */
 @utility shadow-glow {
-  box-shadow: 0 20px 45px -20px rgb(255 143 107 / 0.55);
+  box-shadow: 0 18px 40px -24px rgb(201 113 79 / 0.35);
 }
 @utility shadow-soft {
-  box-shadow: 0 10px 30px -12px rgb(200 120 80 / 0.28);
+  box-shadow: 0 8px 24px -14px rgb(74 64 58 / 0.16);
 }
+@utility shadow-gentle {
+  box-shadow: 0 1px 2px rgb(74 64 58 / 0.04), 0 10px 30px -22px rgb(74 64 58 / 0.22);
+}
+
+/* Gentle nudges — a warm breath, never a red alarm */
+@keyframes gentle-breathe {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.35); }
+}
+@keyframes gentle-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@utility animate-gentle-breathe { animation: gentle-breathe 3.6s ease-in-out infinite; }
+@utility animate-gentle-rise { animation: gentle-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility nudge-dot {
+  position: relative;
+  display: inline-flex;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+}
+.nudge-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+  animation: gentle-breathe 3.6s ease-in-out infinite;
+}
+
 @utility card-hover {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   position: relative;
