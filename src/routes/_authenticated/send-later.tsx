@@ -325,6 +325,45 @@ function SendLaterPage() {
           </div>
         </div>
 
+        {received.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="font-medium">For you 💌</h2>
+            {received.map((m: any) => (
+              <div
+                key={m.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="capitalize">
+                      {m.kind}
+                    </Badge>
+                    <span className="font-medium truncate">
+                      From {m.profiles?.display_name ?? "someone who loves you"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {m.delivered_at
+                      ? format(new Date(m.delivered_at), "d MMMM · h:mm a")
+                      : ""}
+                  </p>
+                  {m.body && <p className="text-sm mt-1">{m.body}</p>}
+                </div>
+                {m.s3_key && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => playMedia(m.id)}
+                    aria-label="Play message"
+                  >
+                    <Play className="size-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="space-y-3">
           <h2 className="font-medium">Your scheduled messages</h2>
           {isLoading ? (
