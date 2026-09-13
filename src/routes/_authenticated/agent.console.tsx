@@ -201,7 +201,7 @@ function AgentConsolePage() {
       <SoftphoneDock phone={phone} onGoAvailable={() => presenceFn({ data: { state: "available" } })} />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[320px_1fr]">
-        <Card className="rounded-brand border-border bg-card">
+        <Card className="rounded-3xl border-border bg-surface shadow-gentle">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">My queue</CardTitle>
           </CardHeader>
@@ -262,7 +262,7 @@ function AgentConsolePage() {
             />
           ) : (
             <>
-              <Card className="rounded-brand border-border bg-card">
+              <Card className="rounded-3xl border-border bg-surface shadow-gentle">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Member context</CardTitle>
                 </CardHeader>
@@ -289,7 +289,7 @@ function AgentConsolePage() {
                         Phone on file: {pop.data?.member?.phone ?? "none"}
                       </p>
                       {pop.data?.booking?.note && (
-                        <p className="rounded-brand bg-muted p-3 text-sm">{pop.data.booking.note}</p>
+                        <p className="rounded-2xl bg-muted p-3 text-sm">{pop.data.booking.note}</p>
                       )}
                       <div>
                         <p className="mb-1 text-xs font-medium text-muted-foreground">
@@ -309,7 +309,7 @@ function AgentConsolePage() {
                         )}
                       </div>
                       {(pop.data?.flags ?? []).some((f: any) => !f.resolved) && (
-                        <p className="flex items-center gap-2 rounded-brand bg-destructive/10 p-3 text-xs text-destructive">
+                        <p className="flex items-center gap-2 rounded-2xl bg-primary/10 p-3 text-xs text-primary">
                           <ShieldAlert className="h-4 w-4" /> This booking has an open flag — read the
                           notes before you dial.
                         </p>
@@ -351,7 +351,7 @@ function AgentConsolePage() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-brand border-border bg-card">
+              <Card className="rounded-3xl border-border bg-surface shadow-gentle">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Wrap-up notes</CardTitle>
                 </CardHeader>
@@ -392,7 +392,7 @@ function AgentConsolePage() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-brand border-border bg-card">
+              <Card className="rounded-3xl border-border bg-surface shadow-gentle">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Call timeline</CardTitle>
                 </CardHeader>
@@ -447,7 +447,7 @@ function SoftphoneDock({
   };
 
   return (
-    <Card className="rounded-brand border-border bg-card">
+    <Card className="rounded-3xl border-border bg-surface shadow-gentle">
       <CardContent className="flex flex-wrap items-center gap-3 p-4">
         <Badge variant={phone.status === "on_call" ? "default" : "secondary"}>
           {label[phone.status]}
