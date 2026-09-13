@@ -76,18 +76,19 @@ export function slaLevel(startsAtIso: string, state: CrmState, now = Date.now())
 }
 
 export const SLA_META: Record<SlaLevel, { label: string; className: string }> = {
-  ok: { label: "On track", className: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-  warn: { label: "T-90m", className: "bg-amber-100 text-amber-800 border-amber-200" },
-  urgent: { label: "T-60m", className: "bg-orange-100 text-orange-900 border-orange-300" },
-  breached: { label: "SLA breached", className: "bg-red-100 text-red-800 border-red-300" },
+  ok: { label: "On track", className: "border-sage/45 bg-sage/15 text-foreground/80" },
+  warn: { label: "T-90m", className: "border-clay-soft/50 bg-clay-soft/18 text-foreground/85" },
+  urgent: { label: "T-60m", className: "border-primary/40 bg-primary/12 text-primary" },
+  breached: { label: "Needs attention", className: "border-primary/60 bg-primary/20 text-primary" },
 };
 
 export const STATE_META: Record<CrmState, { label: string; className: string }> = {
-  requested: { label: "Requested", className: "bg-sky-100 text-sky-800 border-sky-200" },
-  assigned: { label: "Assigned", className: "bg-indigo-100 text-indigo-800 border-indigo-200" },
-  confirmed: { label: "Confirmed", className: "bg-teal-100 text-teal-800 border-teal-200" },
-  in_call: { label: "In call", className: "bg-violet-100 text-violet-800 border-violet-200" },
-  completed: { label: "Completed", className: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-  missed: { label: "Missed", className: "bg-neutral-200 text-neutral-700 border-neutral-300" },
-  escalated: { label: "Escalated", className: "bg-red-100 text-red-800 border-red-300" },
+  requested: { label: "Requested", className: "border-sky/60 bg-sky/25 text-foreground/80" },
+  assigned: { label: "Assigned", className: "border-lilac bg-lilac/35 text-foreground/80" },
+  confirmed: { label: "Confirmed", className: "border-mint bg-mint/30 text-foreground/80" },
+  in_call: { label: "In call", className: "border-primary/45 bg-primary/14 text-primary" },
+  completed: { label: "Completed", className: "border-sage/50 bg-sage/20 text-foreground/80" },
+  missed: { label: "Missed", className: "border-border bg-muted text-muted-foreground" },
+  escalated: { label: "Escalated", className: "border-primary/60 bg-primary/20 text-primary" },
 };
+
