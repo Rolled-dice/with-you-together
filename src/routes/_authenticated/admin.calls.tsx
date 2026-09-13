@@ -385,13 +385,13 @@ function QueueCard({
 
   return (
     <article
-      className={`rounded-brand border p-3 ${
+      className={`rounded-3xl border p-4 shadow-gentle ${
         sla === "breached"
-          ? "border-red-300 bg-red-50/60"
+          ? "border-primary/50 bg-primary/8"
           : sla === "urgent"
-            ? "border-orange-300 bg-orange-50/50"
+            ? "border-primary/35 bg-primary/6"
             : sla === "warn"
-              ? "border-amber-300 bg-amber-50/40"
+              ? "border-clay-soft/50 bg-clay-soft/10"
               : "border-border bg-background/60"
       }`}
     >
@@ -403,10 +403,11 @@ function QueueCard({
           {slaMeta.label}
         </Badge>
         {row.open_flags > 0 && (
-          <Badge variant="outline" className="border-red-200 bg-red-100 text-red-800">
+          <Badge variant="outline" className="border-primary/50 bg-primary/15 text-primary">
             {row.open_flags} flag{row.open_flags > 1 ? "s" : ""}
           </Badge>
         )}
+
         <span className="text-sm font-medium">
           {startsAt.toLocaleString()} · {row.duration_minutes}m
         </span>
