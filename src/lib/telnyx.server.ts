@@ -21,6 +21,12 @@ export type TelnyxConfig = {
   smsAlphaSender: string | null;
   /** Messaging profile that owns the sending route. */
   messagingProfileId: string | null;
+  /** Recording is billed per minute plus storage — can be switched off. */
+  recordCalls: boolean;
+  /** Hard cap so a forgotten open line can never bill indefinitely. */
+  maxCallSeconds: number;
+  /** How long we ring before giving up (shorter = fewer wasted attempts). */
+  ringSeconds: number;
 };
 
 export function telnyxConfig(): TelnyxConfig | null {
@@ -45,7 +51,15 @@ export function telnyxConfig(): TelnyxConfig | null {
     smsShortCode: process.env["TELNYX_SMS_SHORT_CODE"]?.replace(/\D/g, "") || null,
     smsAlphaSender: process.env["TELNYX_SMS_SENDER_ID"]?.trim() || null,
     messagingProfileId: process.env["TELNYX_MESSAGING_PROFILE_ID"]?.trim() || null,
+    recordCalls: (process.env["TELNYX_RECORD_CALLS"] ?? "true").trim().toLowerCase() !== "false",
+    maxCallSeconds: positiveInt(process.env["TELNYX_MAX_CALL_SECONDS"], 1800),
+    ringSeconds: positiveInt(process.env["TELNYX_RING_SECONDS"], 25),
   };
+}
+
+function positiveInt(raw: string | undefined, fallback: number): number {
+  const n = Number((raw ?? "").trim());
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 }
 
 /**
@@ -136,7 +150,10 @@ export async function dial(
     to,
     from: cfg.callerId,
     client_state: btoa(JSON.stringify({ b: opts.bookingId, r: opts.legRole })),
-    timeout_secs: 45,
+    // Short ring window, no answering-machine detection (billed extra) and a
+    // hard time limit so no leg can ever run up minutes unattended.
+    timeout_secs: cfg.ringSeconds,
+    time_limit_secs: cfg.maxCallSeconds,
     answering_machine_detection: "disabled",
   };
   if (opts.sessionId) body["link_to"] = opts.sessionId;
@@ -155,10 +172,12 @@ export async function hangup(cfg: TelnyxConfig, callControlId: string) {
   await telnyx(cfg, `/calls/${callControlId}/actions/hangup`, { method: "POST" });
 }
 
+/** Single-channel mp3 — half the storage of dual, and enough for review. */
 export async function startRecording(cfg: TelnyxConfig, callControlId: string) {
+  if (!cfg.recordCalls) return;
   await telnyx(cfg, `/calls/${callControlId}/actions/record_start`, {
     method: "POST",
-    body: { format: "mp3", channels: "dual" },
+    body: { format: "mp3", channels: "single" },
   });
 }
 

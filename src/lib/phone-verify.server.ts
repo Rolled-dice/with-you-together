@@ -100,7 +100,9 @@ async function placeVoiceOtp(cfg: TelnyxConfig, to: string, code: string) {
       connection_id: cfg.connectionId,
       to,
       from: cfg.callerId,
-      timeout_secs: 45,
+      // The code takes ~15s to read out; cap the leg so a stuck call can't bill on.
+      timeout_secs: Math.min(cfg.ringSeconds, 25),
+      time_limit_secs: 60,
       answering_machine_detection: "disabled",
       client_state: btoa(JSON.stringify({ v: 1, c: code })),
     }),

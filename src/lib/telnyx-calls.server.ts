@@ -283,6 +283,30 @@ export async function handleTelnyxEvent(payload: any) {
       .update({ state: "ended", ended_at: now, hangup_cause: p.hangup_cause ?? null })
       .eq("call_control_id", p.call_control_id);
 
+    // When one side drops, drop the other immediately — an orphan leg keeps
+    // billing minutes for a conversation that can no longer happen.
+    const cfgHangup = telnyxConfig();
+    if (cfgHangup) {
+      const { data: others } = await supabaseAdmin
+        .from("call_legs")
+        .select("id, call_control_id")
+        .eq("booking_id", bookingId)
+        .neq("call_control_id", p.call_control_id)
+        .is("ended_at", null);
+      for (const other of others ?? []) {
+        if (!other.call_control_id) continue;
+        try {
+          await hangup(cfgHangup, other.call_control_id);
+        } catch {
+          /* already gone */
+        }
+        await supabaseAdmin
+          .from("call_legs")
+          .update({ state: "ended", ended_at: now, hangup_cause: "peer_hangup" })
+          .eq("id", other.id);
+      }
+    }
+
     const { data: open } = await supabaseAdmin
       .from("call_legs")
       .select("id")
