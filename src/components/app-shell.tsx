@@ -25,8 +25,11 @@ const NAV = [
 
 const ADMIN_NAV = [
   { to: "/admin/calls", label: "Call CRM", icon: PhoneCall },
-  { to: "/agent/console", label: "Agent console", icon: Headphones },
   { to: "/admin/feedback", label: "Feedback", icon: Inbox },
+] as const;
+
+const AGENT_NAV = [
+  { to: "/agent/console", label: "Agent console", icon: Headphones },
 ] as const;
 
 
@@ -43,8 +46,20 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryFn: () => adminCheck({}),
     staleTime: 5 * 60 * 1000,
   });
+  const agentCheck = useServerFn(isCurrentUserAgent);
+  const agentQ = useQuery({
+    queryKey: ["agent", "role-check"],
+    queryFn: () => agentCheck({}),
+    staleTime: 5 * 60 * 1000,
+  });
   const isAdmin = roleQ.data?.isAdmin === true;
-  const navItems = isAdmin ? [...NAV, ...ADMIN_NAV] : NAV;
+  const isAgent = agentQ.data?.isAgent === true;
+  const navItems = [
+    ...NAV,
+    ...(isAgent ? AGENT_NAV : []),
+    ...(isAdmin ? ADMIN_NAV : []),
+  ];
+
 
   async function signOut() {
     await queryClient.cancelQueries();
