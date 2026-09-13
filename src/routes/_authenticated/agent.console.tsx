@@ -97,23 +97,36 @@ function AgentConsolePage() {
   const getToken = useCallback(async () => tokenFn(), [tokenFn]);
   const phone = useSoftphone(getToken);
 
+  const refreshAll = () => {
+    qc.invalidateQueries({ queryKey: ["agent-queue"] });
+    qc.invalidateQueries({ queryKey: ["agent-screen-pop"] });
+    qc.invalidateQueries({ queryKey: ["agent-timeline"] });
+  };
+
   const queue = useQuery({
     queryKey: ["agent-queue"],
     queryFn: () => queueFn(),
-    refetchInterval: 30_000,
+    refetchInterval: 10_000,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   const pop = useQuery({
     queryKey: ["agent-screen-pop", selected],
     queryFn: () => popFn({ data: { booking_id: selected! } }),
     enabled: Boolean(selected),
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   const timeline = useQuery({
     queryKey: ["agent-timeline", selected],
     queryFn: () => timelineFn({ data: { booking_id: selected! } }),
     enabled: Boolean(selected),
-    refetchInterval: 15_000,
+    refetchInterval: 5_000,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   const dial = useMutation({
@@ -122,7 +135,10 @@ function AgentConsolePage() {
       await presenceFn({ data: { state: "on_call", booking_id: bookingId } });
       return startFn({ data: { booking_id: bookingId } });
     },
-    onSuccess: () => toast.success("Dialling — your headset will ring first, then the member"),
+    onSuccess: () => {
+      toast.success("Dialling — your headset will ring first, then the member");
+      refreshAll();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -134,7 +150,7 @@ function AgentConsolePage() {
     },
     onSuccess: () => {
       toast.success("Call ended — add your notes");
-      qc.invalidateQueries({ queryKey: ["agent-timeline", selected] });
+      refreshAll();
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -144,6 +160,7 @@ function AgentConsolePage() {
     onSuccess: () => {
       setTransferTo("");
       toast.success("Transfer started");
+      refreshAll();
     },
     onError: (e: Error) => toast.error(e.message),
   });
