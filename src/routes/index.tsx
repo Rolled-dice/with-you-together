@@ -29,10 +29,11 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getPublicStats } from "@/lib/stats.functions";
 import { useLiveStats } from "@/hooks/use-live-stats";
+import someoneNearFamilySupport from "@/assets/someone-near-family-support.jpg";
 
-const TITLE = "SomeoneNear — Who do you call when you don't know who to call?";
+const TITLE = "SomeoneNear | Someone Near When You Need Them";
 const DESCRIPTION =
-  "Talk when you want. Get a check-in when you need one. Find someone when you don't want to be alone. SomeoneNear is a quiet, judgement-free place to be heard.";
+  "SomeoneNear helps you find someone near for a caring check-in, a human listener, or quiet companionship whenever you need to feel heard.";
 
 export const Route = createFileRoute("/")({
   loader: () => getPublicStats(),
@@ -43,10 +44,12 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://someonenear.com/" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: TITLE },
       { name: "twitter:description", content: DESCRIPTION },
     ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/" }],
   }),
   component: Landing,
   errorComponent: () => null,
@@ -225,12 +228,23 @@ function Landing() {
             A quiet place to be heard
           </p>
           <h1 className="font-display text-4xl font-semibold leading-[1.15] sm:text-5xl">
-            Who do you call when you don't know who to call?
+            Someone near, whenever you don't know who to call
           </h1>
           <p className="mx-auto max-w-lg text-lg leading-relaxed text-muted-foreground">
-            Talk when you want. Get a check-in when you need one. Find someone when you
-            don't want to be alone.
+            SomeoneNear gives you a caring check-in, a real listener, and someone near in
+            the moments when you don't want to be alone.
           </p>
+          <figure className="mx-auto max-w-md overflow-hidden rounded-3xl border border-border bg-surface shadow-gentle">
+            <img
+              src={someoneNearFamilySupport}
+              alt="A caring family staying close, showing how SomeoneNear helps you find someone near for support"
+              width={1280}
+              height={1280}
+              fetchPriority="high"
+              decoding="async"
+              className="aspect-square h-auto w-full object-cover"
+            />
+          </figure>
           <div className="flex flex-col items-center gap-3 pt-2 sm:flex-row sm:justify-center">
             <Button asChild size="lg" className="w-full rounded-2xl px-8 sm:w-auto">
               <Link to={nextStep}>

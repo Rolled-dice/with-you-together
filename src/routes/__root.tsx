@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "sonner";
+import { OrganizationSchema } from "@/components/organization-schema";
 
 function NotFoundComponent() {
   return (
@@ -96,8 +97,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "SomeoneNear — Checking in when they can't" },
       { name: "twitter:description", content: "SomeoneNear is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d8e1c80-289d-41e7-bc07-16d0391bf521/id-preview-359918ef--7a70b00d-f5ae-4cf2-bb4f-e21f807b83ec.lovable.app-1784612868107.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d8e1c80-289d-41e7-bc07-16d0391bf521/id-preview-359918ef--7a70b00d-f5ae-4cf2-bb4f-e21f807b83ec.lovable.app-1784612868107.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -125,6 +124,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <OrganizationSchema />
       </head>
       <body>
         {children}
