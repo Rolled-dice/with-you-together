@@ -26,6 +26,14 @@ function Page() {
         <p>Update your name, photo, and pronouns from <em>Account → Profile</em>. Changes show up right away in your Companion and Family Circle.</p>
       </DocSection>
 
+      <DocSection title="Mobile number">
+        <p>
+          Your mobile number is where a listener calls you. Add or change it in Settings — when it
+          changes, we'll send a short code by text or a quick call to verify the new number before
+          your next booking.
+        </p>
+      </DocSection>
+
       <DocSection title="Notifications">
         <Steps
           items={[

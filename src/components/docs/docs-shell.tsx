@@ -23,6 +23,7 @@ export const DOC_GROUPS: DocGroup[] = [
       { to: "/docs/listeners", label: "Listeners" },
       { to: "/docs/family", label: "Family Circle" },
       { to: "/docs/insights", label: "Insights" },
+      { to: "/docs/medication", label: "Medication" },
       { to: "/docs/safety", label: "Safety" },
     ],
   },
