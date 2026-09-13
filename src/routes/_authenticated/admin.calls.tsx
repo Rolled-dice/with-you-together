@@ -349,7 +349,7 @@ function StatTile({
         {icon}
         {label}
       </div>
-      <p className={`mt-1 text-2xl font-semibold ${tone ?? ""}`}>{value}</p>
+      <p className={`mt-2 font-display text-2xl font-medium ${tone ?? ""}`}>{value}</p>
     </div>
   );
 }
