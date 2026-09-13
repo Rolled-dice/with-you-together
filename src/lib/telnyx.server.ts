@@ -172,10 +172,12 @@ export async function hangup(cfg: TelnyxConfig, callControlId: string) {
   await telnyx(cfg, `/calls/${callControlId}/actions/hangup`, { method: "POST" });
 }
 
+/** Single-channel mp3 — half the storage of dual, and enough for review. */
 export async function startRecording(cfg: TelnyxConfig, callControlId: string) {
+  if (!cfg.recordCalls) return;
   await telnyx(cfg, `/calls/${callControlId}/actions/record_start`, {
     method: "POST",
-    body: { format: "mp3", channels: "dual" },
+    body: { format: "mp3", channels: "single" },
   });
 }
 
