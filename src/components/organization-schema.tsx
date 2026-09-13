@@ -3,7 +3,7 @@ const organizationSchema = {
   "@type": "Organization",
   "@id": "https://someonenear.com/#organization",
   name: "SomeoneNear",
-  alternateName: ["Someone Near", "Someone Near App"],
+  alternateName: ["Someone", "Someone Near", "Near", "Someone Near App"],
   url: "https://someonenear.com",
   logo: "https://someonenear.com/favicon.png",
   description:
@@ -11,10 +11,5 @@ const organizationSchema = {
 };
 
 export function OrganizationSchema() {
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-    />
-  );
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />;
 }
