@@ -21,6 +21,12 @@ export type TelnyxConfig = {
   smsAlphaSender: string | null;
   /** Messaging profile that owns the sending route. */
   messagingProfileId: string | null;
+  /** Recording is billed per minute plus storage — can be switched off. */
+  recordCalls: boolean;
+  /** Hard cap so a forgotten open line can never bill indefinitely. */
+  maxCallSeconds: number;
+  /** How long we ring before giving up (shorter = fewer wasted attempts). */
+  ringSeconds: number;
 };
 
 export function telnyxConfig(): TelnyxConfig | null {
