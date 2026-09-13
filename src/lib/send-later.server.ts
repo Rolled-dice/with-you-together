@@ -85,15 +85,51 @@ export async function cancelScheduledMessage(context: Ctx, id: string) {
   return { ok: true };
 }
 
-/** Signed playback URL for the owner's own media. */
+/** Signed playback URL for the owner or the recipient. */
 export async function getMediaUrl(context: Ctx, id: string) {
   const { data, error } = await context.supabase
     .from("scheduled_messages")
-    .select("s3_key")
+    .select("s3_key, user_id, recipient_user_id")
     .eq("id", id)
-    .eq("user_id", context.userId)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data?.s3_key) throw new Error("No recording found");
+  if (
+    !data?.s3_key ||
+    (data.user_id !== context.userId && data.recipient_user_id !== context.userId)
+  )
+    throw new Error("No recording found");
   return s3ReadUrl(data.s3_key);
+}
+
+/** Delivered messages addressed to the signed-in user. */
+export async function listReceivedMessages(context: Ctx) {
+  const { data, error } = await context.supabase
+    .from("scheduled_messages")
+    .select(
+      "id, recipient_name, kind, body, s3_key, media_duration_seconds, scheduled_at, delivered_at, status, profiles:user_id(display_name)",
+    )
+    .eq("recipient_user_id", context.userId)
+    .eq("status", "delivered")
+    .order("delivered_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+/** Family members the user can address a message to. */
+export async function listFamilyContacts(context: Ctx) {
+  const { data: famId, error: famErr } = await context.supabase.rpc(
+    "get_user_family_id",
+    { _uid: context.userId },
+  );
+  if (famErr || !famId) return [];
+  const { data, error } = await context.supabase
+    .from("family_members")
+    .select("user_id, profiles:user_id(display_name)")
+    .eq("family_id", famId)
+    .neq("user_id", context.userId);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((m: any) => ({
+    userId: m.user_id as string,
+    name: (m.profiles?.display_name as string) || "Family member",
+  }));
 }
