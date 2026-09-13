@@ -36,8 +36,7 @@ function Page() {
                 <th className="py-2 pr-4">Plan</th>
                 <th className="py-2 pr-4">Seats</th>
                 <th className="py-2 pr-4">Listener minutes</th>
-                <th className="py-2 pr-4">USD</th>
-                <th className="py-2">INR</th>
+                <th className="py-2">Price (USD)</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -46,8 +45,7 @@ function Page() {
                   <td className="py-2 pr-4 font-semibold">{p.name}</td>
                   <td className="py-2 pr-4">{p.seats}</td>
                   <td className="py-2 pr-4">{p.minutes}</td>
-                  <td className="py-2 pr-4">{p.usd}/mo</td>
-                  <td className="py-2">{p.inr}/mo</td>
+                  <td className="py-2">{p.usd}/mo</td>
                 </tr>
               ))}
             </tbody>
@@ -69,7 +67,7 @@ function Page() {
       <DocSection title="Common questions">
         <MiniFaq
           items={[
-            { q: "Can I change currency?", a: "We bill in USD or INR based on your region. Contact us if you need to switch." },
+            { q: "What currency do you bill in?", a: "All plans are billed in US dollars (USD). Your bank handles the conversion if your account is in another currency." },
             { q: "Do unused minutes roll over?", a: "No — the pool resets each month so everyone starts fresh." },
             { q: "Refunds?", a: "If something's wrong, write to us within 14 days and we'll make it right." },
           ]}
