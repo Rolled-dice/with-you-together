@@ -19,7 +19,7 @@ const MedicationInput = z.object({
   end_date: z.string().nullable().optional(),
   refill_date: z.string().nullable().optional(),
   prescription_image_path: z.string().nullable().optional(),
-  parsed_data: z.any().nullable().optional(),
+  parsed_data: z.unknown().nullable().optional(),
   notes: z.string().max(1000).nullable().optional(),
   schedules: z.array(ScheduleInput).default([]),
 });
@@ -157,11 +157,31 @@ export const logDose = createServerFn({ method: "POST" })
 // ---- Prescription parsing via Lovable AI Vision ----
 const ParseInput = z.object({ image_path: z.string().min(1) });
 
+const ParsedMedication = z.object({
+  name: z.string().nullable().optional(),
+  dosage: z.string().nullable().optional(),
+  form: z.string().nullable().optional(),
+  frequency: z.string().nullable().optional(),
+  duration: z.string().nullable().optional(),
+  instructions: z.string().nullable().optional(),
+  times_per_day: z.number().int().min(1).max(6).nullable().optional(),
+  when_to_take: z.union([
+    z.enum(["morning", "afternoon", "evening", "night"]),
+    z.array(z.enum(["morning", "afternoon", "evening", "night"])),
+  ]).nullable().optional(),
+});
+
+const ParsedPrescription = z.object({
+  doctor: z.string().nullable().optional(),
+  date: z.string().nullable().optional(),
+  medications: z.array(ParsedMedication).default([]),
+});
+
 export const parsePrescription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => ParseInput.parse(i))
   .handler(async ({ context, data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured");
 
     const { data: signed, error: sErr } = await context.supabase.storage
@@ -200,19 +220,27 @@ export const parsePrescription = createServerFn({ method: "POST" })
 
     if (!res.ok) {
       const body = await res.text();
-      if (res.status === 429) throw new Error("AI is busy right now. Please try again in a moment.");
-      if (res.status === 402) throw new Error("AI credits exhausted. Please add credits in workspace settings.");
-      throw new Error(`Could not read prescription: ${body.slice(0, 200)}`);
+      let message = body.slice(0, 240);
+      try {
+        const errorBody = JSON.parse(body) as { error?: { message?: string }; message?: string };
+        message = errorBody.error?.message ?? errorBody.message ?? message;
+      } catch {
+        // The plain response text is already captured above.
+      }
+      if (res.status === 429) throw new Error(`The photo reader is busy right now. ${message}`);
+      if (res.status === 402) throw new Error(message || "This workspace needs more AI credits before photos can be read.");
+      if (res.status === 403) throw new Error(message || "Photo reading is paused by the workspace administrator.");
+      if (res.status === 401) throw new Error("Photo reading is not configured correctly yet.");
+      throw new Error(message || "We could not read this prescription photo.");
     }
 
     const json = await res.json();
     const text = json?.choices?.[0]?.message?.content ?? "{}";
-    let parsed: Record<string, any> = { medications: [] };
+    let parsed: z.infer<typeof ParsedPrescription> = { medications: [] };
     try {
-      const p = JSON.parse(text);
-      if (p && typeof p === "object") parsed = p as Record<string, any>;
+      parsed = ParsedPrescription.parse(JSON.parse(text));
     } catch {
-      // keep default
+      throw new Error("We could not confidently read the medicine details. Try a brighter, closer photo.");
     }
     return parsed;
   });
