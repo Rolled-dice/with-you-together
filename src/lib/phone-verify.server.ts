@@ -144,7 +144,7 @@ export async function startVerification(
 
   const code = randomCode();
   const salt = randomSalt();
-  const channel: Channel = channelOverride ?? preferredChannel(phone);
+  const channel: Channel = channelOverride ?? preferredChannel(cfg, phone);
 
   let used: Channel = channel;
   try {
