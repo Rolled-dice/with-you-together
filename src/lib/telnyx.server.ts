@@ -51,7 +51,15 @@ export function telnyxConfig(): TelnyxConfig | null {
     smsShortCode: process.env["TELNYX_SMS_SHORT_CODE"]?.replace(/\D/g, "") || null,
     smsAlphaSender: process.env["TELNYX_SMS_SENDER_ID"]?.trim() || null,
     messagingProfileId: process.env["TELNYX_MESSAGING_PROFILE_ID"]?.trim() || null,
+    recordCalls: (process.env["TELNYX_RECORD_CALLS"] ?? "true").trim().toLowerCase() !== "false",
+    maxCallSeconds: positiveInt(process.env["TELNYX_MAX_CALL_SECONDS"], 1800),
+    ringSeconds: positiveInt(process.env["TELNYX_RING_SECONDS"], 25),
   };
+}
+
+function positiveInt(raw: string | undefined, fallback: number): number {
+  const n = Number((raw ?? "").trim());
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 }
 
 /**
