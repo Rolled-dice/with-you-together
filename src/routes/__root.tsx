@@ -156,7 +156,22 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <Toaster richColors position="top-center" />
+      <Toaster
+        position="top-center"
+        gap={12}
+        duration={5000}
+        toastOptions={{
+          classNames: {
+            toast:
+              "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
+            title: "font-display font-medium",
+            description: "text-muted-foreground",
+            actionButton: "rounded-full bg-primary text-primary-foreground",
+            cancelButton: "rounded-full bg-muted text-muted-foreground",
+          },
+        }}
+      />
+
     </QueryClientProvider>
   );
 }
