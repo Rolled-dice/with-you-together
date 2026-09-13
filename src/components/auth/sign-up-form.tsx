@@ -23,8 +23,8 @@ import {
 import { markPhoneVerified } from "@/lib/profile.functions";
 import { FieldRow } from "@/components/auth/field-row";
 
-const TEST_PHONE_NUMBER = import.meta.env.VITE_PHONE_TEST_NUMBER ?? "+919999999999";
-const TEST_PHONE_CODE = import.meta.env.VITE_PHONE_TEST_CODE ?? "123456";
+const PHONE_PLACEHOLDER = "+91 98765 43210";
+
 
 function ageFromDob(iso: string): number | null {
   if (!iso) return null;
