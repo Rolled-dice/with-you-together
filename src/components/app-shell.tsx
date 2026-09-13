@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
+import { isCurrentUserAgent } from "@/lib/agent-role.functions";
 import { SomeoneNearCursor } from "@/components/someonenear-cursor";
 import { NotificationBell } from "@/components/notification-bell";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
