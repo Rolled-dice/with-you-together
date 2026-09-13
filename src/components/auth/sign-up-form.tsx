@@ -97,6 +97,10 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
     window.location.replace(redirectTo);
   }
 
+  const maxDob = new Date().toISOString().slice(0, 10);
+
+
+
 
   return (
     <motion.form
