@@ -11,6 +11,9 @@ export const createSendLater = createServerFn({ method: "POST" })
     const file = formData.get("file");
     return {
       recipientName: z.string().min(1).max(120).parse(formData.get("recipientName")),
+      recipientUserId:
+        z.string().uuid().nullable().parse(formData.get("recipientUserId")) ??
+        undefined,
       kind: kind as "text" | "voice" | "video",
       body: formData.get("body") ? String(formData.get("body")) : undefined,
       scheduledAt: z.string().parse(formData.get("scheduledAt")),
@@ -38,6 +41,20 @@ export const cancelSendLater = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { cancelScheduledMessage } = await import("@/lib/send-later.server");
     return cancelScheduledMessage(context, data.id);
+  });
+
+export const listReceivedSendLater = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { listReceivedMessages } = await import("@/lib/send-later.server");
+    return listReceivedMessages(context);
+  });
+
+export const listSendLaterContacts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { listFamilyContacts } = await import("@/lib/send-later.server");
+    return listFamilyContacts(context);
   });
 
 export const getSendLaterMedia = createServerFn({ method: "GET" })

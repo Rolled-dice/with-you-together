@@ -23,7 +23,9 @@ import {
   cancelSendLater,
   createSendLater,
   getSendLaterMedia,
+  listReceivedSendLater,
   listSendLater,
+  listSendLaterContacts,
 } from "@/lib/send-later.functions";
 
 export const Route = createFileRoute("/_authenticated/send-later")({
@@ -46,6 +48,7 @@ function SendLaterPage() {
   const queryClient = useQueryClient();
   const [kind, setKind] = useState<Kind>("text");
   const [recipient, setRecipient] = useState("");
+  const [recipientUserId, setRecipientUserId] = useState<string | null>(null);
   const [body, setBody] = useState("");
   const [when, setWhen] = useState("");
   const [recording, setRecording] = useState(false);
@@ -61,6 +64,17 @@ function SendLaterPage() {
     refetchInterval: 30_000,
   });
 
+  const { data: received = [] } = useQuery({
+    queryKey: ["send-later-received"],
+    queryFn: () => listReceivedSendLater(),
+    refetchInterval: 30_000,
+  });
+
+  const { data: contacts = [] } = useQuery({
+    queryKey: ["send-later-contacts"],
+    queryFn: () => listSendLaterContacts(),
+  });
+
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["send-later"] });
 
@@ -68,6 +82,7 @@ function SendLaterPage() {
     mutationFn: async () => {
       const fd = new FormData();
       fd.set("recipientName", recipient);
+      if (recipientUserId) fd.set("recipientUserId", recipientUserId);
       fd.set("kind", kind);
       fd.set("body", body);
       fd.set("scheduledAt", new Date(when).toISOString());
@@ -182,11 +197,39 @@ function SendLaterPage() {
             ))}
           </div>
 
-          <Input
-            placeholder="Send to: choose someone (e.g. Dad)"
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-          />
+          <div className="space-y-2">
+            <Input
+              placeholder="Send to: choose someone (e.g. Dad)"
+              value={recipient}
+              onChange={(e) => {
+                setRecipient(e.target.value);
+                setRecipientUserId(null);
+              }}
+            />
+            {contacts.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {contacts.map((c: any) => (
+                  <Button
+                    key={c.userId}
+                    type="button"
+                    size="sm"
+                    variant={recipientUserId === c.userId ? "default" : "outline"}
+                    onClick={() => {
+                      setRecipient(c.name);
+                      setRecipientUserId(c.userId);
+                    }}
+                  >
+                    {c.name}
+                  </Button>
+                ))}
+              </div>
+            )}
+            {recipientUserId && (
+              <p className="text-xs text-muted-foreground">
+                They'll get a notification in the app when it's delivered.
+              </p>
+            )}
+          </div>
 
           {kind === "text" ? (
             <Textarea
@@ -281,6 +324,45 @@ function SendLaterPage() {
             </Button>
           </div>
         </div>
+
+        {received.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="font-medium">For you 💌</h2>
+            {received.map((m: any) => (
+              <div
+                key={m.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="capitalize">
+                      {m.kind}
+                    </Badge>
+                    <span className="font-medium truncate">
+                      From {m.profiles?.display_name ?? "someone who loves you"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {m.delivered_at
+                      ? format(new Date(m.delivered_at), "d MMMM · h:mm a")
+                      : ""}
+                  </p>
+                  {m.body && <p className="text-sm mt-1">{m.body}</p>}
+                </div>
+                {m.s3_key && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => playMedia(m.id)}
+                    aria-label="Play message"
+                  >
+                    <Play className="size-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="space-y-3">
           <h2 className="font-medium">Your scheduled messages</h2>
