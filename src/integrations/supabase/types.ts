@@ -1654,6 +1654,7 @@ export type Database = {
         Returns: boolean
       }
       is_agent_of_booking: { Args: { _booking: string }; Returns: boolean }
+      is_call_agent: { Args: { _uid: string }; Returns: boolean }
       is_family_admin: {
         Args: { _family: string; _uid: string }
         Returns: boolean
