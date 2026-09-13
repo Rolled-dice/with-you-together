@@ -15,6 +15,12 @@ export type TelnyxConfig = {
   connectionId: string;
   callerId: string;
   credentialId: string | null;
+  /** Optional short code (e.g. 12345) — cheapest per-message route where enabled. */
+  smsShortCode: string | null;
+  /** Optional alphanumeric sender ID (e.g. "SomeNear") — free sender, no number rental. */
+  smsAlphaSender: string | null;
+  /** Messaging profile that owns the sending route. */
+  messagingProfileId: string | null;
 };
 
 export function telnyxConfig(): TelnyxConfig | null {
