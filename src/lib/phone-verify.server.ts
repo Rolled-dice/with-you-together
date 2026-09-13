@@ -12,11 +12,11 @@
  */
 
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { telnyxConfig, type TelnyxConfig } from "@/lib/telnyx.server";
+import { telnyxConfig, pickSmsSender, type TelnyxConfig } from "@/lib/telnyx.server";
 
 const CODE_TTL_MS = 10 * 60 * 1000;
 const RESEND_COOLDOWN_MS = 60 * 1000;
-const MAX_SENDS_PER_HOUR = 5;
+const MAX_SENDS_PER_HOUR = 3;
 const MAX_ATTEMPTS = 5;
 
 export type Channel = "sms" | "call";
@@ -55,23 +55,32 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-/** India (and other alpha-sender-only routes) can't receive SMS from a US long code. */
-function preferredChannel(e164: string): Channel {
-  return e164.startsWith("+91") ? "call" : "sms";
+/**
+ * SMS is far cheaper than a voice call, so it is always preferred when a sender
+ * exists that the destination will accept. India only accepts SMS from a
+ * registered short code / sender ID, so without one we fall back to voice.
+ */
+function preferredChannel(cfg: TelnyxConfig, e164: string): Channel {
+  if (!e164.startsWith("+91")) return "sms";
+  return cfg.smsShortCode || cfg.smsAlphaSender ? "sms" : "call";
 }
 
 async function sendSms(cfg: TelnyxConfig, to: string, code: string) {
+  const body: Record<string, unknown> = {
+    from: pickSmsSender(cfg, to),
+    to,
+    // Kept under 160 GSM-7 characters so it always bills as a single segment.
+    text: `SomeoneNear code: ${code}. Expires in 10 min. Do not share.`,
+    type: "SMS",
+  };
+  if (cfg.messagingProfileId) body["messaging_profile_id"] = cfg.messagingProfileId;
   const res = await fetch("https://api.telnyx.com/v2/messages", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${cfg.apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: cfg.callerId,
-      to,
-      text: `SomeoneNear: your verification code is ${code}. It expires in 10 minutes. Never share this code.`,
-    }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     const text = await res.text();
@@ -135,7 +144,7 @@ export async function startVerification(
 
   const code = randomCode();
   const salt = randomSalt();
-  const channel: Channel = channelOverride ?? preferredChannel(phone);
+  const channel: Channel = channelOverride ?? preferredChannel(cfg, phone);
 
   let used: Channel = channel;
   try {
