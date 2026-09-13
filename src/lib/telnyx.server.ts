@@ -42,7 +42,25 @@ export function telnyxConfig(): TelnyxConfig | null {
     connectionId,
     callerId,
     credentialId: process.env["TELNYX_SIP_CREDENTIAL_ID"]?.trim() ?? null,
+    smsShortCode: process.env["TELNYX_SMS_SHORT_CODE"]?.replace(/\D/g, "") || null,
+    smsAlphaSender: process.env["TELNYX_SMS_SENDER_ID"]?.trim() || null,
+    messagingProfileId: process.env["TELNYX_MESSAGING_PROFILE_ID"]?.trim() || null,
   };
+}
+
+/**
+ * Cheapest usable sender for a destination, in order:
+ *  1. short code — lowest per-message rate and best deliverability where provisioned
+ *  2. alphanumeric sender ID — no number rental cost (not allowed in US/CA/IN)
+ *  3. the long code we already rent
+ */
+export function pickSmsSender(cfg: TelnyxConfig, to: string): string {
+  const isNanp = to.startsWith("+1");
+  const isIndia = to.startsWith("+91");
+  if (cfg.smsShortCode && (isNanp || isIndia)) return cfg.smsShortCode;
+  if (cfg.smsShortCode) return cfg.smsShortCode;
+  if (cfg.smsAlphaSender && !isNanp && !isIndia) return cfg.smsAlphaSender;
+  return cfg.callerId;
 }
 
 async function telnyx<T>(
