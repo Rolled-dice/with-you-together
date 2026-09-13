@@ -14,9 +14,9 @@ export const Route = createFileRoute("/docs/billing")({
 });
 
 const plans = [
-  { name: "Together", seats: "You + 1", minutes: "120 min / mo", usd: "$8.99", inr: "₹799" },
-  { name: "Family", seats: "Up to 5", minutes: "300 min / mo", usd: "$15.99", inr: "₹1,499" },
-  { name: "Care", seats: "Larger families", minutes: "Custom", usd: "$36.99", inr: "₹3,499" },
+  { name: "Together", seats: "You + 1", minutes: "120 min / mo", usd: "$8.99" },
+  { name: "Family", seats: "Up to 5", minutes: "300 min / mo", usd: "$15.99" },
+  { name: "Care", seats: "Larger families", minutes: "Custom", usd: "$36.99" },
 ];
 
 function Page() {
