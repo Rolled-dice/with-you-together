@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AppShell } from "@/components/app-shell";
+import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -17,12 +17,14 @@ import {
   LineChart,
   LifeBuoy,
   Users,
+  PhoneCall,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyAiQuota } from "@/lib/quota.functions";
+import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import heroMug from "@/assets/checkin-hero.png";
 import bloomOrb from "@/assets/bloom-orb.png";
 import avatarGrandma from "@/assets/avatar-grandma.png";
@@ -127,6 +129,12 @@ function Dashboard() {
   const [checkInCount, setCheckInCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const quotaFn = useServerFn(getMyAiQuota);
+  const adminFn = useServerFn(isCurrentUserAdmin);
+  const adminQ = useQuery({
+    queryKey: ["admin", "role-check"],
+    queryFn: () => adminFn({}),
+    staleTime: 5 * 60 * 1000,
+  });
   const { data: quota, isLoading: quotaLoading } = useQuery({
     queryKey: ["ai-quota"],
     queryFn: () => quotaFn(),
@@ -180,7 +188,7 @@ function Dashboard() {
     })();
   }, []);
 
-  if (loading) {
+  if (loading || adminQ.isLoading) {
     return (
       <AppShell>
         <Skeleton className="h-56 w-full rounded-3xl" />
@@ -189,6 +197,34 @@ function Dashboard() {
             <Skeleton key={i} className="h-40 rounded-3xl" />
           ))}
         </div>
+      </AppShell>
+    );
+  }
+
+  if (adminQ.data?.isAdmin) {
+    return (
+      <AppShell>
+        <PageHeader
+          eyebrow="Admin"
+          title="Operations dashboard"
+          description="Manage listener calls and your call team from one focused workspace."
+        />
+        <section className="max-w-2xl rounded-brand border border-border bg-surface p-6 shadow-gentle sm:p-8">
+          <div className="flex items-start gap-4">
+            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-brand bg-primary/10 text-primary">
+              <PhoneCall className="h-6 w-6" />
+            </span>
+            <div>
+              <h2 className="font-display text-xl font-semibold text-foreground">Call CRM</h2>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                Review the call queue, assign agents, monitor service levels, and resolve call flags.
+              </p>
+              <Button asChild className="mt-5">
+                <Link to="/admin/calls">Open Call CRM <ArrowUpRight className="h-4 w-4" /></Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </AppShell>
     );
   }

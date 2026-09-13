@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Inbox, Pill, Headphones, CalendarHeart } from "lucide-react";
+import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Pill, Headphones, CalendarHeart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,8 +25,8 @@ const NAV = [
 ] as const;
 
 const ADMIN_NAV = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/calls", label: "Call CRM", icon: PhoneCall },
-  { to: "/admin/feedback", label: "Feedback", icon: Inbox },
 ] as const;
 
 const AGENT_NAV = [
@@ -55,11 +55,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
   const isAdmin = roleQ.data?.isAdmin === true;
   const isAgent = agentQ.data?.isAgent === true;
-  const navItems = [
-    ...NAV,
-    ...(isAgent ? AGENT_NAV : []),
-    ...(isAdmin ? ADMIN_NAV : []),
-  ];
+  const rolesLoading = roleQ.isLoading || agentQ.isLoading;
+  const isStaff = isAdmin || isAgent;
+  const navItems = isAdmin ? ADMIN_NAV : isAgent ? AGENT_NAV : rolesLoading ? [] : NAV;
 
 
   async function signOut() {
@@ -80,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <aside className="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6">
           <div className="flex items-center justify-between">
             <Brand />
-            <NotificationBell />
+            {!rolesLoading && !isStaff ? <NotificationBell /> : null}
           </div>
 
           <nav className="mt-8 flex flex-1 flex-col gap-1">
@@ -104,10 +102,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               );
             })}
           </nav>
-          <div className="mt-6 rounded-brand bg-sidebar-accent/60 p-4 text-xs text-sidebar-accent-foreground/80">
-            <p className="font-medium text-sidebar-foreground">Care Membership</p>
-            <p className="mt-1">You're on the Together tier.</p>
-          </div>
+          {!rolesLoading && !isStaff ? (
+            <div className="mt-6 rounded-brand bg-sidebar-accent/60 p-4 text-xs text-sidebar-accent-foreground/80">
+              <p className="font-medium text-sidebar-foreground">Care Membership</p>
+              <p className="mt-1">You're on the Together tier.</p>
+            </div>
+          ) : null}
           <button
             onClick={signOut}
             className="mt-3 flex items-center gap-2 rounded-brand px-4 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -122,7 +122,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {/* Mobile top bar */}
           <header className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:hidden">
             <Brand compact />
-            <NotificationBell />
+            {!rolesLoading && !isStaff ? <NotificationBell /> : null}
           </header>
 
 

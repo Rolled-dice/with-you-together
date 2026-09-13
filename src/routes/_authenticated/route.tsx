@@ -45,7 +45,29 @@ export const Route = createFileRoute("/_authenticated")({
       void supabase.auth.refreshSession();
     }
 
-    return { user: session.user };
+    const [{ data: isAdmin }, { data: isAgent }] = await Promise.all([
+      supabase.rpc("has_role", { _user_id: session.user.id, _role: "admin" }),
+      supabase.rpc("is_call_agent", { _uid: session.user.id }),
+    ]);
+
+    const path = location.pathname;
+    const isAdminPage = path === "/dashboard" || path === "/admin/calls";
+    const isAgentPage = path === "/agent/console";
+    const isStaffPage = path.startsWith("/admin/") || path.startsWith("/agent/");
+
+    if (isAdmin && !isAdminPage) {
+      throw redirect({ to: "/dashboard" });
+    }
+
+    if (!isAdmin && isAgent && !isAgentPage) {
+      throw redirect({ to: "/agent/console" });
+    }
+
+    if (!isAdmin && !isAgent && isStaffPage) {
+      throw redirect({ to: "/dashboard" });
+    }
+
+    return { user: session.user, isAdmin: Boolean(isAdmin), isAgent: Boolean(isAgent) };
   },
 
   component: () => <Outlet />,
