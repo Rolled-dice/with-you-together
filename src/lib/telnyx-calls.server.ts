@@ -172,9 +172,21 @@ export async function handleTelnyxEvent(payload: any) {
 
   const event = payload?.data?.event_type as string | undefined;
   const p = payload?.data?.payload ?? {};
-  const state = decodeClientState(p.client_state);
+  const state = decodeClientState(p.client_state) as { b?: string; r?: string; v?: number; c?: string };
   const bookingId = state.b;
   const legRole = state.r;
+
+  // Voice OTP calls: speak the code, then hang up. No booking involved.
+  if (state.v && state.c && p.call_control_id) {
+    const { speakVerificationCode, hangupCall } = await import("@/lib/phone-verify.server");
+    if (event === "call.answered") {
+      await speakVerificationCode(p.call_control_id, state.c);
+    } else if (event === "call.speak.ended") {
+      await hangupCall(p.call_control_id);
+    }
+    return { ok: true };
+  }
+
   if (!event || !bookingId) return { ignored: true };
 
   await supabaseAdmin.from("call_events").insert({

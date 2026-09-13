@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import {
@@ -20,11 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { markPhoneVerified } from "@/lib/profile.functions";
 import { FieldRow } from "@/components/auth/field-row";
 
-const TEST_PHONE_NUMBER = import.meta.env.VITE_PHONE_TEST_NUMBER ?? "+919999999999";
-const TEST_PHONE_CODE = import.meta.env.VITE_PHONE_TEST_CODE ?? "123456";
+const PHONE_PLACEHOLDER = "+91 98765 43210";
+
 
 function ageFromDob(iso: string): number | null {
   if (!iso) return null;
@@ -37,7 +36,6 @@ function ageFromDob(iso: string): number | null {
   return age;
 }
 
-type Stage = "form" | "otp";
 
 export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
   const [fullName, setFullName] = useState("");
@@ -46,8 +44,6 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
   const [dob, setDob] = useState("");
   const [country, setCountry] = useState<CountryCode>("IN");
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [stage, setStage] = useState<Stage>("form");
   const [loading, setLoading] = useState(false);
 
   const countryOptions = useMemo(() => {
@@ -101,106 +97,10 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
     window.location.replace(redirectTo);
   }
 
-  async function verify(e: React.FormEvent) {
-    e.preventDefault();
-    if (!e164) return;
-    setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
-      phone: e164,
-      token: otp,
-      type: "phone_change",
-    });
-    if (error) {
-      setLoading(false);
-      return toast.error(error.message);
-    }
-    try {
-      await markPhoneVerified({ data: { phone: e164, phone_country: country } });
-    } catch {
-      // non-fatal
-    }
-    setLoading(false);
-    toast.success("Phone verified. Welcome to SomeoneNear.");
-    window.location.replace(redirectTo);
-  }
-
-  async function resendOtp() {
-    if (!e164) return;
-    setLoading(true);
-    const { error } = await supabase.auth.updateUser({ phone: e164 });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success(`New code sent to ${e164}`);
-  }
-
   const maxDob = new Date().toISOString().slice(0, 10);
 
-  if (stage === "otp") {
-    return (
-      <motion.form
-        onSubmit={verify}
-        className="space-y-4"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
-      >
-        <div className="rounded-brand border border-border bg-muted/40 p-3 text-sm">
-          <div className="flex items-center gap-2 font-medium">
-            <ShieldCheck className="h-4 w-4 text-brand-accent" />
-            Verify your mobile number
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            We sent a 6-digit code to <strong>{e164}</strong>.
-          </p>
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="otp">Verification code</Label>
-          <Input
-            id="otp"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            required
-            maxLength={6}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-            className="rounded-brand tracking-widest text-center"
-            placeholder={TEST_PHONE_CODE}
-          />
-        </div>
-        <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
-          <Button
-            type="submit"
-            disabled={loading || otp.length < 4}
-            className="w-full rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
-          >
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Verify & continue
-          </Button>
-        </motion.div>
-        <div className="flex items-center justify-between gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            className="flex-1 rounded-brand"
-            onClick={() => setStage("form")}
-            disabled={loading}
-          >
-            Change number
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="flex-1 rounded-brand"
-            onClick={resendOtp}
-            disabled={loading}
-          >
-            Resend code
-          </Button>
-        </div>
-      </motion.form>
-    );
-  }
+
 
   return (
     <motion.form
@@ -257,7 +157,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="rounded-brand flex-1 transition-all focus-visible:ring-2 focus-visible:ring-brand-primary/40"
-            placeholder={TEST_PHONE_NUMBER}
+            placeholder={PHONE_PLACEHOLDER}
           />
         </div>
         <p className="text-[11px] text-muted-foreground">

@@ -96,6 +96,23 @@ export const requestBooking = createServerFn({ method: "POST" })
     }
 
 
+    // A listener calls the member's phone, so the number must be verified first.
+    const { data: me } = await context.supabase
+      .from("profiles")
+      .select("phone, phone_verified")
+      .eq("id", context.userId)
+      .single();
+    if (!me?.phone) {
+      throw new Error(
+        "Please add your mobile number in Settings so a listener can call you.",
+      );
+    }
+    if (!me.phone_verified) {
+      throw new Error(
+        "Please verify your mobile number in Settings before booking a call.",
+      );
+    }
+
     // Auto-assign: least-loaded active listener.
     const { data: listeners, error: lerr } = await context.supabase
       .from("listeners")

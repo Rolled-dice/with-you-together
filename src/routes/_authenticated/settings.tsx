@@ -23,7 +23,11 @@ import {
 } from "@/components/ui/dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getMyProfile, updateMyProfile, markPhoneVerified } from "@/lib/profile.functions";
+import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
+import {
+  startPhoneVerification,
+  confirmPhoneVerification,
+} from "@/lib/phone-verify.functions";
 import {
   listMemories as listMemoriesFn,
   createMemory as createMemoryFn,
@@ -449,8 +453,8 @@ function SettingsPage() {
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Include your country code. This is the number your listener calls and where
-                reminders go. Just press Save changes — verifying is optional for now.
+                Include your country code. Save it first, then verify — a listener can only call a
+                verified number.
               </p>
 
             </Field>
@@ -519,39 +523,43 @@ function PhoneVerifyDialog({
   const [open, setOpen] = useState(false);
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const markFn = useServerFn(markPhoneVerified);
+  const [sentTo, setSentTo] = useState<{ phone: string; channel: string } | null>(null);
+  const startFn = useServerFn(startPhoneVerification);
+  const confirmFn = useServerFn(confirmPhoneVerification);
 
-  async function sendOtp() {
-    if (!phone) return toast.error("No phone number on file.");
+  async function sendOtp(channel?: "sms" | "call") {
+    if (!phone) return toast.error("Please enter your mobile number first.");
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ phone });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success(`Code sent to ${phone}`);
+    try {
+      const res = await startFn({ data: { phone, country, channel } });
+      setSentTo({ phone: res.phone, channel: res.channel });
+      toast.success(
+        res.channel === "call"
+          ? `Calling ${res.phone} with your code`
+          : `Code texted to ${res.phone}`,
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't send the code.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function verify(e: React.FormEvent) {
     e.preventDefault();
-    if (!phone) return;
     setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
-      phone,
-      token: otp,
-      type: "phone_change",
-    });
-    if (error) {
-      setLoading(false);
-      return toast.error(error.message);
-    }
     try {
-      await markFn({ data: { phone, phone_country: country } });
-    } catch {
-      // non-fatal
+      await confirmFn({ data: { code: otp, country } });
+      toast.success("Mobile number verified.");
+      setOpen(false);
+      setOtp("");
+      setSentTo(null);
+      onVerified();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Verification failed.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    toast.success("Phone verified.");
-    setOpen(false);
-    onVerified();
   }
 
   return (
@@ -565,45 +573,64 @@ function PhoneVerifyDialog({
         <DialogHeader>
           <DialogTitle className="text-base font-medium">Verify mobile number</DialogTitle>
           <DialogDescription>
-            We’ll send a one-time code to <strong>{phone || "your number"}</strong>.
+            We’ll send a 6-digit code to <strong>{phone || "your number"}</strong>. Indian numbers
+            receive the code by a short automated call.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={verify} className="space-y-4">
-          <div className="rounded-brand border border-dashed border-brand-accent/40 bg-brand-accent/5 p-3 text-xs text-muted-foreground">
-            <strong className="block text-brand-accent">Test mode</strong>
-            Use the test number configured in Supabase Auth with its fixed code.
-          </div>
+          {sentTo ? (
+            <div className="rounded-brand border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+              Code sent to <strong>{sentTo.phone}</strong> by{" "}
+              {sentTo.channel === "call" ? "phone call" : "text message"}. It expires in 10 minutes.
+            </div>
+          ) : null}
           <div className="space-y-2">
             <Label htmlFor="settings-otp">Verification code</Label>
             <Input
               id="settings-otp"
               inputMode="numeric"
               autoComplete="one-time-code"
-              required
               maxLength={6}
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
               className="rounded-brand tracking-widest text-center"
+              placeholder="123456"
             />
           </div>
           <div className="flex gap-2">
             <Button
               type="button"
               variant="outline"
-              onClick={sendOtp}
+              onClick={() => sendOtp()}
               disabled={loading}
               className="flex-1 rounded-brand"
             >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Send code"}
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : sentTo ? (
+                "Resend code"
+              ) : (
+                "Send code"
+              )}
             </Button>
             <Button
               type="submit"
-              disabled={loading || otp.length < 4}
+              disabled={loading || otp.length < 6}
               className="flex-1 rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
             >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Verify"}
             </Button>
           </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="w-full rounded-brand text-xs"
+            disabled={loading}
+            onClick={() => sendOtp(sentTo?.channel === "call" ? "sms" : "call")}
+          >
+            {sentTo?.channel === "call" ? "Send by text instead" : "Call me with the code instead"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
