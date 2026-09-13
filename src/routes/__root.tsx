@@ -103,9 +103,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Figtree:wght@400;500;600&display=swap",
+      },
       { rel: "preconnect", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co" },
     ],
+
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -149,7 +156,22 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <Toaster richColors position="top-center" />
+      <Toaster
+        position="top-center"
+        gap={12}
+        duration={5000}
+        toastOptions={{
+          classNames: {
+            toast:
+              "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
+            title: "font-display font-medium",
+            description: "text-muted-foreground",
+            actionButton: "rounded-full bg-primary text-primary-foreground",
+            cancelButton: "rounded-full bg-muted text-muted-foreground",
+          },
+        }}
+      />
+
     </QueryClientProvider>
   );
 }
