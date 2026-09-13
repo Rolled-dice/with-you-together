@@ -21,7 +21,7 @@ export type TelnyxConfig = {
   smsAlphaSender: string | null;
   /** Messaging profile that owns the sending route. */
   messagingProfileId: string | null;
-  /** Recording is billed per minute plus storage — can be switched off. */
+  /** Recording is billed per minute plus storage — OFF by default. */
   recordCalls: boolean;
   /** Hard cap so a forgotten open line can never bill indefinitely. */
   maxCallSeconds: number;
@@ -51,7 +51,8 @@ export function telnyxConfig(): TelnyxConfig | null {
     smsShortCode: process.env["TELNYX_SMS_SHORT_CODE"]?.replace(/\D/g, "") || null,
     smsAlphaSender: process.env["TELNYX_SMS_SENDER_ID"]?.trim() || null,
     messagingProfileId: process.env["TELNYX_MESSAGING_PROFILE_ID"]?.trim() || null,
-    recordCalls: (process.env["TELNYX_RECORD_CALLS"] ?? "true").trim().toLowerCase() !== "false",
+    // Set to "true" to turn call recording back on. Default is "false" to save cost.
+    recordCalls: (process.env["TELNYX_RECORD_CALLS"] ?? "false").trim().toLowerCase() === "true",
     maxCallSeconds: positiveInt(process.env["TELNYX_MAX_CALL_SECONDS"], 1800),
     ringSeconds: positiveInt(process.env["TELNYX_RING_SECONDS"], 25),
   };
