@@ -129,18 +129,29 @@ function CallsConsole() {
   const queue = useQuery({
     queryKey: ["call-queue"],
     queryFn: () => queueFn(),
-    refetchInterval: 60_000,
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
-  const agents = useQuery({ queryKey: ["call-agents"], queryFn: () => agentsFn() });
+  const agents = useQuery({
+    queryKey: ["call-agents"],
+    queryFn: () => agentsFn(),
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
   const flags = useQuery({
     queryKey: ["call-flags"],
     queryFn: () => flagsFn(),
-    refetchInterval: 60_000,
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["call-queue"] });
     qc.invalidateQueries({ queryKey: ["call-flags"] });
+    qc.invalidateQueries({ queryKey: ["call-agents"] });
+    qc.invalidateQueries({ queryKey: ["supervisor-snapshot"] });
   };
 
   const autoAssign = useMutation({

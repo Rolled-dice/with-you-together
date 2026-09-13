@@ -182,8 +182,7 @@ function AgentConsolePage() {
       setFollowUp(false);
       setSafety(false);
       await presenceFn({ data: { state: "available", booking_id: null } });
-      qc.invalidateQueries({ queryKey: ["agent-queue"] });
-      qc.invalidateQueries({ queryKey: ["agent-timeline", selected] });
+      refreshAll();
     },
     onError: (e: Error) => toast.error(e.message),
   });
