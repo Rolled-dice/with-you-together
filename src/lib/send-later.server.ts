@@ -150,7 +150,7 @@ export async function listFamilyContacts(context: Ctx) {
   const names = new Map<string, string>(
     (profs ?? []).map((p: any) => [p.id as string, p.display_name as string]),
   );
-  return ids.map((id) => ({
+  return ids.map((id: string) => ({
     userId: id,
     name: names.get(id) || "Family member",
   }));
