@@ -68,7 +68,7 @@ export const Route = createFileRoute("/_authenticated/admin/calls")({
   }),
   component: AdminCallsPage,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-red-600">Something went wrong: {error.message}</div>
+    <div className="p-8 text-sm text-primary">Something went wrong: {error.message}</div>
   ),
 });
 
@@ -233,13 +233,13 @@ function CallsConsole() {
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Active calls in queue" value={rows.filter((r) => ACTIVE_STATES.includes(r.crm_state)).length} />
-        <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breached" value={breached} tone={breached ? "text-red-600" : undefined} />
-        <StatTile icon={<Flag className="h-4 w-4" />} label="Open flags" value={openFlags.length} tone={openFlags.length ? "text-amber-600" : undefined} />
+        <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breached" value={breached} tone={breached ? "text-primary" : undefined} />
+        <StatTile icon={<Flag className="h-4 w-4" />} label="Open flags" value={openFlags.length} tone={openFlags.length ? "text-primary" : undefined} />
       </div>
 
-      <section className="mb-8 rounded-brand border border-border bg-card/60 p-4">
-        <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold">Queue board</h2>
+      <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+        <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-base font-medium">Queue board</h2>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
               {showAll ? "Show active only" : "Show all"}
@@ -279,8 +279,8 @@ function CallsConsole() {
 
 
 
-      <section className="mb-8 rounded-brand border border-border bg-card/60 p-4">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+      <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+        <h2 className="mb-4 flex items-center gap-2 font-display text-base font-medium">
           <Flag className="h-4 w-4" /> Flag inbox
         </h2>
         {flags.isLoading ? (
@@ -344,7 +344,7 @@ function StatTile({
   tone?: string;
 }) {
   return (
-    <div className="rounded-brand border border-border bg-card/60 p-4">
+    <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         {icon}
         {label}
@@ -567,8 +567,8 @@ function AgentRoster({
   };
 
   return (
-    <section className="rounded-brand border border-border bg-card/60 p-4">
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+    <section className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+      <h2 className="mb-4 flex items-center gap-2 font-display text-base font-medium">
         <Users className="h-4 w-4" /> Agent roster
       </h2>
 
@@ -696,7 +696,7 @@ function SupervisorBoard() {
   const m = snapshot.data?.metrics;
 
   return (
-    <section className="mb-8 space-y-4 rounded-brand border border-border bg-card/60 p-4">
+    <section className="mb-8 space-y-4 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <Users className="h-4 w-4" /> Live board &amp; routing
@@ -714,7 +714,7 @@ function SupervisorBoard() {
             <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Queue depth" value={snapshot.data?.queueDepth ?? 0} />
             <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Answer rate (7d)" value={`${m?.answerRate ?? 0}%`} />
             <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Avg talk time" value={`${Math.round((m?.avgTalkSeconds ?? 0) / 60)}m`} />
-            <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breach rate" value={`${m?.breachRate ?? 0}%`} tone={(m?.breachRate ?? 0) > 0 ? "text-red-600" : undefined} />
+            <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breach rate" value={`${m?.breachRate ?? 0}%`} tone={(m?.breachRate ?? 0) > 0 ? "text-primary" : undefined} />
           </div>
 
           <div className="space-y-2">
