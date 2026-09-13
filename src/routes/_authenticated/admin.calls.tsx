@@ -68,7 +68,7 @@ export const Route = createFileRoute("/_authenticated/admin/calls")({
   }),
   component: AdminCallsPage,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-red-600">Something went wrong: {error.message}</div>
+    <div className="p-8 text-sm text-primary">Something went wrong: {error.message}</div>
   ),
 });
 
@@ -233,13 +233,13 @@ function CallsConsole() {
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Active calls in queue" value={rows.filter((r) => ACTIVE_STATES.includes(r.crm_state)).length} />
-        <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breached" value={breached} tone={breached ? "text-red-600" : undefined} />
-        <StatTile icon={<Flag className="h-4 w-4" />} label="Open flags" value={openFlags.length} tone={openFlags.length ? "text-amber-600" : undefined} />
+        <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breached" value={breached} tone={breached ? "text-primary" : undefined} />
+        <StatTile icon={<Flag className="h-4 w-4" />} label="Open flags" value={openFlags.length} tone={openFlags.length ? "text-primary" : undefined} />
       </div>
 
-      <section className="mb-8 rounded-brand border border-border bg-card/60 p-4">
-        <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold">Queue board</h2>
+      <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+        <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-base font-medium">Queue board</h2>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
               {showAll ? "Show active only" : "Show all"}
@@ -279,8 +279,8 @@ function CallsConsole() {
 
 
 
-      <section className="mb-8 rounded-brand border border-border bg-card/60 p-4">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+      <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+        <h2 className="mb-4 flex items-center gap-2 font-display text-base font-medium">
           <Flag className="h-4 w-4" /> Flag inbox
         </h2>
         {flags.isLoading ? (
@@ -292,7 +292,7 @@ function CallsConsole() {
             {(flags.data?.flags ?? []).map((f) => (
               <li
                 key={f.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-sm"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border/70 bg-background/60 px-3 py-2 text-sm"
               >
                 <div className="min-w-0">
                   <span className="font-medium">{f.kind}</span>{" "}
@@ -344,12 +344,12 @@ function StatTile({
   tone?: string;
 }) {
   return (
-    <div className="rounded-brand border border-border bg-card/60 p-4">
+    <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         {icon}
         {label}
       </div>
-      <p className={`mt-1 text-2xl font-semibold ${tone ?? ""}`}>{value}</p>
+      <p className={`mt-2 font-display text-2xl font-medium ${tone ?? ""}`}>{value}</p>
     </div>
   );
 }
@@ -385,13 +385,13 @@ function QueueCard({
 
   return (
     <article
-      className={`rounded-brand border p-3 ${
+      className={`rounded-3xl border p-4 shadow-gentle ${
         sla === "breached"
-          ? "border-red-300 bg-red-50/60"
+          ? "border-primary/50 bg-primary/8"
           : sla === "urgent"
-            ? "border-orange-300 bg-orange-50/50"
+            ? "border-primary/35 bg-primary/6"
             : sla === "warn"
-              ? "border-amber-300 bg-amber-50/40"
+              ? "border-clay-soft/50 bg-clay-soft/10"
               : "border-border bg-background/60"
       }`}
     >
@@ -403,10 +403,11 @@ function QueueCard({
           {slaMeta.label}
         </Badge>
         {row.open_flags > 0 && (
-          <Badge variant="outline" className="border-red-200 bg-red-100 text-red-800">
+          <Badge variant="outline" className="border-primary/50 bg-primary/15 text-primary">
             {row.open_flags} flag{row.open_flags > 1 ? "s" : ""}
           </Badge>
         )}
+
         <span className="text-sm font-medium">
           {startsAt.toLocaleString()} · {row.duration_minutes}m
         </span>
@@ -566,8 +567,8 @@ function AgentRoster({
   };
 
   return (
-    <section className="rounded-brand border border-border bg-card/60 p-4">
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+    <section className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+      <h2 className="mb-4 flex items-center gap-2 font-display text-base font-medium">
         <Users className="h-4 w-4" /> Agent roster
       </h2>
 
@@ -582,7 +583,7 @@ function AgentRoster({
           {agents.map((a) => (
             <li
               key={a.id}
-              className="rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-sm"
+              className="rounded-2xl border border-border/70 bg-background/60 px-3 py-2 text-sm"
             >
               <span className="font-medium">{a.name}</span>{" "}
               <span className="text-xs text-muted-foreground">
@@ -695,9 +696,9 @@ function SupervisorBoard() {
   const m = snapshot.data?.metrics;
 
   return (
-    <section className="mb-8 space-y-4 rounded-brand border border-border bg-card/60 p-4">
+    <section className="mb-8 space-y-4 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 text-sm font-semibold">
+        <h2 className="flex items-center gap-2 font-display text-base font-medium">
           <Users className="h-4 w-4" /> Live board &amp; routing
         </h2>
         <Button variant="outline" size="sm" onClick={() => snapshot.refetch()}>
@@ -713,7 +714,7 @@ function SupervisorBoard() {
             <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Queue depth" value={snapshot.data?.queueDepth ?? 0} />
             <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Answer rate (7d)" value={`${m?.answerRate ?? 0}%`} />
             <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Avg talk time" value={`${Math.round((m?.avgTalkSeconds ?? 0) / 60)}m`} />
-            <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breach rate" value={`${m?.breachRate ?? 0}%`} tone={(m?.breachRate ?? 0) > 0 ? "text-red-600" : undefined} />
+            <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breach rate" value={`${m?.breachRate ?? 0}%`} tone={(m?.breachRate ?? 0) > 0 ? "text-primary" : undefined} />
           </div>
 
           <div className="space-y-2">
@@ -725,7 +726,7 @@ function SupervisorBoard() {
                 {(snapshot.data?.roster ?? []).map((a: any) => (
                   <li
                     key={a.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-2 rounded-2xl border border-border/70 bg-background/60 px-3 py-2 text-sm"
                   >
                     <span className="truncate">{a.name}</span>
                     <Badge variant={a.presence === "on_call" ? "default" : "secondary"}>
@@ -740,7 +741,7 @@ function SupervisorBoard() {
       )}
 
       {current && (
-        <div className="space-y-3 rounded-lg border border-border/70 bg-background/60 p-3">
+        <div className="space-y-3 rounded-2xl border border-border/70 bg-background/60 p-3">
           <h3 className="text-xs font-medium text-muted-foreground">Routing rules</h3>
           <div className="grid gap-3 sm:grid-cols-4">
             {[

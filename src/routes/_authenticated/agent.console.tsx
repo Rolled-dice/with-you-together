@@ -61,7 +61,7 @@ export const Route = createFileRoute("/_authenticated/agent/console")({
   component: AgentConsolePage,
   errorComponent: ({ error }) => (
     <AppShell>
-      <p className="text-sm text-destructive">Something went wrong: {error.message}</p>
+      <p className="text-sm text-primary">Something went wrong: {error.message}</p>
     </AppShell>
   ),
 });
@@ -201,9 +201,9 @@ function AgentConsolePage() {
       <SoftphoneDock phone={phone} onGoAvailable={() => presenceFn({ data: { state: "available" } })} />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[320px_1fr]">
-        <Card className="rounded-brand border-border bg-card">
+        <Card className="rounded-3xl border-border bg-surface shadow-gentle">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">My queue</CardTitle>
+            <CardTitle className="font-display text-base font-medium">My queue</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {queue.isLoading ? (
@@ -231,8 +231,10 @@ function AgentConsolePage() {
                   <button
                     key={r.id}
                     onClick={() => setSelected(r.id)}
-                    className={`w-full rounded-brand border p-3 text-left transition-colors ${
-                      selected === r.id ? "border-brand-primary bg-brand-primary/5" : "border-border"
+                    className={`w-full rounded-2xl border p-4 text-left transition-colors duration-300 ${
+                      selected === r.id
+                        ? "border-primary/45 bg-primary/8"
+                        : "border-border hover:bg-muted/60"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -262,9 +264,9 @@ function AgentConsolePage() {
             />
           ) : (
             <>
-              <Card className="rounded-brand border-border bg-card">
+              <Card className="rounded-3xl border-border bg-surface shadow-gentle">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Member context</CardTitle>
+                  <CardTitle className="font-display text-base font-medium">Member context</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   {pop.isLoading ? (
@@ -289,7 +291,7 @@ function AgentConsolePage() {
                         Phone on file: {pop.data?.member?.phone ?? "none"}
                       </p>
                       {pop.data?.booking?.note && (
-                        <p className="rounded-brand bg-muted p-3 text-sm">{pop.data.booking.note}</p>
+                        <p className="rounded-2xl bg-muted p-3 text-sm">{pop.data.booking.note}</p>
                       )}
                       <div>
                         <p className="mb-1 text-xs font-medium text-muted-foreground">
@@ -309,7 +311,7 @@ function AgentConsolePage() {
                         )}
                       </div>
                       {(pop.data?.flags ?? []).some((f: any) => !f.resolved) && (
-                        <p className="flex items-center gap-2 rounded-brand bg-destructive/10 p-3 text-xs text-destructive">
+                        <p className="flex items-center gap-2 rounded-2xl bg-primary/10 p-3 text-xs text-primary">
                           <ShieldAlert className="h-4 w-4" /> This booking has an open flag — read the
                           notes before you dial.
                         </p>
@@ -351,9 +353,9 @@ function AgentConsolePage() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-brand border-border bg-card">
+              <Card className="rounded-3xl border-border bg-surface shadow-gentle">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Wrap-up notes</CardTitle>
+                  <CardTitle className="font-display text-base font-medium">Wrap-up notes</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Select value={outcome} onValueChange={setOutcome}>
@@ -392,9 +394,9 @@ function AgentConsolePage() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-brand border-border bg-card">
+              <Card className="rounded-3xl border-border bg-surface shadow-gentle">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Call timeline</CardTitle>
+                  <CardTitle className="font-display text-base font-medium">Call timeline</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-xs">
                   {(timeline.data?.recordings ?? []).map((rec: any) => (
@@ -447,7 +449,7 @@ function SoftphoneDock({
   };
 
   return (
-    <Card className="rounded-brand border-border bg-card">
+    <Card className="rounded-3xl border-border bg-surface shadow-gentle">
       <CardContent className="flex flex-wrap items-center gap-3 p-4">
         <Badge variant={phone.status === "on_call" ? "default" : "secondary"}>
           {label[phone.status]}
@@ -495,7 +497,7 @@ function SoftphoneDock({
           </>
         )}
 
-        {phone.error && <span className="text-xs text-destructive">{phone.error}</span>}
+        {phone.error && <span className="text-xs text-muted-foreground">{phone.error}</span>}
         <audio ref={phone.audioRef} autoPlay className="hidden" />
       </CardContent>
     </Card>
