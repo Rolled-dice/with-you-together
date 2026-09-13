@@ -2,60 +2,42 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { toast } from "sonner";
 import { format } from "date-fns";
-import { BellRing, Check, Loader2, Plus, Trash2 } from "lucide-react";
+import { BellRing, Check, Loader2, Pill, Plus, Trash2 } from "lucide-react";
 
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { MedicationOnboarding } from "@/components/medication-onboarding";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { EmptyState } from "@/components/empty-state";
-import {
-  completeReminder,
-  createReminder,
-  deleteReminder,
-  listReminders,
-} from "@/lib/reminders.functions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QuietEmptyState } from "@/components/quiet-empty-state";
+import { gentleProblem, gentleToast } from "@/components/gentle-nudge";
+import { completeReminder, createReminder, deleteReminder, listReminders } from "@/lib/reminders.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/reminders")({
   head: () => ({
     meta: [
-      { title: "Reminders · SomeoneNear" },
-      {
-        name: "description",
-        content:
-          "Gentle nudges for medicine, water, sleep and calling the people you love — set them once and SomeoneNear remembers.",
-      },
-      { property: "og:title", content: "Reminders · SomeoneNear" },
-      {
-        property: "og:description",
-        content: "Set gentle daily reminders for medicine, water, rest and family calls.",
-      },
+      { title: "Medication Reminders · SomeoneNear" },
+      { name: "description", content: "Add prescriptions, set gentle medication check-ins, and keep everyday reminders together with SomeoneNear." },
+      { property: "og:title", content: "Medication Reminders · SomeoneNear" },
+      { property: "og:description", content: "A calm, accessible place for prescriptions, medicines, daily doses, and everyday reminders." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: RemindersPage,
   errorComponent: ({ error }) => (
-    <AppShell>
-      <p className="text-sm text-destructive">Something went wrong: {error.message}</p>
-    </AppShell>
+    <AppShell><div className="rounded-3xl border border-border bg-surface p-6 text-base text-foreground">We could not open your reminders. {error.message}</div></AppShell>
   ),
 });
 
 const CATEGORIES = [
-  { value: "general", label: "Medicine" },
+  { value: "general", label: "Personal" },
   { value: "hydration", label: "Water" },
   { value: "exercise", label: "Move / rest" },
   { value: "appointment", label: "Appointment" },
@@ -70,195 +52,79 @@ const RECURRENCES = [
   { value: "monthly", label: "Every month" },
 ] as const;
 
+type ReminderRow = { id: string; title: string; due_at: string; category: string; recurrence: string | null };
+
 function RemindersPage() {
+  return (
+    <AppShell>
+      <div className="mx-auto max-w-5xl">
+        <PageHeader eyebrow="Care, made lighter" title="Medication & reminders" description="A calm place to remember what matters — for you or someone you love." />
+        <Tabs defaultValue="medication" className="space-y-8">
+          <TabsList className="grid h-auto w-full grid-cols-2 rounded-2xl bg-surface p-1.5 sm:max-w-xl">
+            <TabsTrigger value="medication" className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><Pill className="mr-2 size-5" /> Medication</TabsTrigger>
+            <TabsTrigger value="everyday" className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><BellRing className="mr-2 size-5" /> Everyday reminder</TabsTrigger>
+          </TabsList>
+          <TabsContent value="medication" className="mt-0"><MedicationOnboarding /></TabsContent>
+          <TabsContent value="everyday" className="mt-0"><EverydayReminders /></TabsContent>
+        </Tabs>
+      </div>
+    </AppShell>
+  );
+}
+
+function EverydayReminders() {
   const qc = useQueryClient();
   const listFn = useServerFn(listReminders);
   const createFn = useServerFn(createReminder);
   const doneFn = useServerFn(completeReminder);
   const removeFn = useServerFn(deleteReminder);
-
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<string>("general");
-  const [recurrence, setRecurrence] = useState<string>("daily");
+  const [category, setCategory] = useState("general");
+  const [recurrence, setRecurrence] = useState("daily");
   const [time, setTime] = useState("20:00");
-
   const reminders = useQuery({ queryKey: ["reminders"], queryFn: () => listFn() });
-
   const invalidate = () => qc.invalidateQueries({ queryKey: ["reminders"] });
 
   const create = useMutation({
     mutationFn: async () => {
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth.user?.id;
-      if (!uid) throw new Error("Please sign in again");
-      const [h, m] = time.split(":");
+      if (!uid) throw new Error("Please sign in again.");
+      const [hours, minutes] = time.split(":");
       const due = new Date();
-      due.setHours(Number(h), Number(m ?? 0), 0, 0);
+      due.setHours(Number(hours), Number(minutes ?? 0), 0, 0);
       if (due.getTime() < Date.now()) due.setDate(due.getDate() + 1);
-      return createFn({
-        data: {
-          for_user_id: uid,
-          title: title.trim(),
-          category: category as never,
-          recurrence: recurrence as never,
-          due_at: due.toISOString(),
-        },
-      });
+      return createFn({ data: { for_user_id: uid, title: title.trim(), category: category as never, recurrence: recurrence as never, due_at: due.toISOString() } });
     },
-    onSuccess: () => {
-      setTitle("");
-      toast.success("Reminder saved");
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: () => { setTitle(""); gentleToast("Your reminder is ready"); invalidate(); },
+    onError: (error: Error) => gentleProblem("We could not save this reminder", error.message),
   });
-
-  const complete = useMutation({
-    mutationFn: (id: string) => doneFn({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Nice — marked done");
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const remove = useMutation({
-    mutationFn: (id: string) => removeFn({ data: { id } }),
-    onSuccess: invalidate,
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const rows = reminders.data ?? [];
+  const complete = useMutation({ mutationFn: (id: string) => doneFn({ data: { id } }), onSuccess: () => { gentleToast("Marked as done"); invalidate(); }, onError: (error: Error) => gentleProblem("We could not update it", error.message) });
+  const remove = useMutation({ mutationFn: (id: string) => removeFn({ data: { id } }), onSuccess: invalidate, onError: (error: Error) => gentleProblem("We could not remove it", error.message) });
+  const rows = (reminders.data ?? []) as ReminderRow[];
 
   return (
-    <AppShell>
-      <PageHeader
-        eyebrow="Reminders"
-        title="Gentle nudges, set once"
-        description="Medicine, water, rest, or a call home — SomeoneNear will remember for you."
-      />
-
-      <Card className="mb-6 rounded-brand border-border bg-card">
-        <CardContent className="grid gap-3 p-4 sm:grid-cols-[1fr_auto_auto_auto_auto] sm:items-end">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground" htmlFor="reminder-title">
-              What should we remind you about?
-            </label>
-            <Input
-              id="reminder-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Blood pressure tablet"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">Kind</span>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>
-                    {c.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">Time</span>
-            <Input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-[120px]"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">Repeat</span>
-            <Select value={recurrence} onValueChange={setRecurrence}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {RECURRENCES.map((r) => (
-                  <SelectItem key={r.value} value={r.value}>
-                    {r.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button
-            onClick={() => create.mutate()}
-            disabled={!title.trim() || create.isPending}
-          >
-            {create.isPending ? (
-              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="mr-1.5 h-4 w-4" />
-            )}
-            Add
-          </Button>
-        </CardContent>
-      </Card>
-
-      {reminders.isLoading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
+    <div className="space-y-8 animate-gentle-rise">
+      <section className="rounded-[2.5rem] border border-border bg-card p-5 shadow-gentle sm:p-8" aria-labelledby="everyday-title">
+        <div className="mb-6"><p className="text-sm font-medium text-primary">A gentle nudge</p><h2 id="everyday-title" className="font-display text-2xl font-medium">What would you like to remember?</h2><p className="mt-2 text-base leading-relaxed text-muted-foreground">Water, rest, an appointment, or a call home — set it once and let us hold it for you.</p></div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_auto] lg:items-end">
+          <div className="space-y-2 sm:col-span-2 lg:col-span-1"><label className="text-base font-medium" htmlFor="reminder-title">What should we remind you about?</label><Input id="reminder-title" value={title} maxLength={200} onChange={(event) => setTitle(event.target.value)} placeholder="Drink a glass of water" className="min-h-12 rounded-xl bg-background px-4 text-base md:text-base" /></div>
+          <div className="space-y-2"><span className="text-base font-medium">Kind</span><Select value={category} onValueChange={setCategory}><SelectTrigger className="min-h-12 rounded-xl bg-background px-4 text-base"><SelectValue /></SelectTrigger><SelectContent>{CATEGORIES.map((item) => <SelectItem key={item.value} value={item.value} className="py-3 text-base">{item.label}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><label className="text-base font-medium" htmlFor="reminder-time">Time</label><Input id="reminder-time" type="time" value={time} onChange={(event) => setTime(event.target.value)} className="min-h-12 rounded-xl bg-background px-4 text-base md:text-base" /></div>
+          <div className="space-y-2"><span className="text-base font-medium">Repeat</span><Select value={recurrence} onValueChange={setRecurrence}><SelectTrigger className="min-h-12 rounded-xl bg-background px-4 text-base"><SelectValue /></SelectTrigger><SelectContent>{RECURRENCES.map((item) => <SelectItem key={item.value} value={item.value} className="py-3 text-base">{item.label}</SelectItem>)}</SelectContent></Select></div>
+          <Button className="min-h-12 rounded-xl px-5 text-base" disabled={!title.trim() || create.isPending} onClick={() => create.mutate()}>{create.isPending ? <Loader2 className="animate-spin" /> : <Plus />} Add</Button>
         </div>
-      ) : rows.length === 0 ? (
-        <EmptyState
-          icon={<BellRing className="h-5 w-5" />}
-          title="No reminders yet"
-          description="Add your first nudge above — medicine at 8pm, water at noon, a call home on Sunday."
-        />
+      </section>
+
+      {reminders.isLoading ? <div className="space-y-3"><Skeleton className="h-24 rounded-3xl" /><Skeleton className="h-24 rounded-3xl" /></div> : rows.length === 0 ? (
+        <QuietEmptyState variant="breath" title="Nothing to remember just yet" body="When something comes to mind, add it above. There is no rush." />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {rows.map((r: any) => (
-            <Card key={r.id} className="rounded-brand border-border bg-card">
-              <CardContent className="flex items-start justify-between gap-3 p-4">
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{r.title}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {format(new Date(r.due_at), "EEE d MMM · h:mm a")}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    <Badge variant="secondary">
-                      {CATEGORIES.find((c) => c.value === r.category)?.label ?? r.category}
-                    </Badge>
-                    {r.recurrence && r.recurrence !== "none" && (
-                      <Badge variant="outline">
-                        {RECURRENCES.find((x) => x.value === r.recurrence)?.label ?? r.recurrence}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                <div className="flex shrink-0 gap-1">
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    aria-label="Mark done"
-                    onClick={() => complete.mutate(r.id)}
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    aria-label="Delete reminder"
-                    onClick={() => remove.mutate(r.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {rows.map((reminder) => (
+            <Card key={reminder.id} className="rounded-3xl border-border bg-card shadow-gentle"><CardContent className="flex items-start justify-between gap-4 p-5"><div className="min-w-0"><p className="truncate font-display text-lg font-medium">{reminder.title}</p><p className="mt-1 text-base text-muted-foreground">{format(new Date(reminder.due_at), "EEE d MMM · h:mm a")}</p><div className="mt-3 flex flex-wrap gap-2"><Badge variant="secondary">{CATEGORIES.find((item) => item.value === reminder.category)?.label ?? reminder.category}</Badge>{reminder.recurrence && reminder.recurrence !== "none" && <Badge variant="outline">{RECURRENCES.find((item) => item.value === reminder.recurrence)?.label ?? reminder.recurrence}</Badge>}</div></div><div className="flex shrink-0 gap-1"><Button size="icon" variant="outline" className="min-h-11 min-w-11 rounded-xl" aria-label="Mark done" onClick={() => complete.mutate(reminder.id)}><Check /></Button><Button size="icon" variant="ghost" className="min-h-11 min-w-11 rounded-xl" aria-label="Delete reminder" onClick={() => remove.mutate(reminder.id)}><Trash2 /></Button></div></CardContent></Card>
           ))}
         </div>
       )}
-    </AppShell>
+    </div>
   );
 }
