@@ -3,7 +3,7 @@ const organizationSchema = {
   "@type": "Organization",
   "@id": "https://someonenear.com/#organization",
   name: "SomeoneNear",
-  alternateName: ["Someone", "Someone Near", "Near", "Someone Near App"],
+  alternateName: ["Someone Near", "Someone Near App"],
   url: "https://someonenear.com",
   logo: "https://someonenear.com/favicon.png",
   description:
