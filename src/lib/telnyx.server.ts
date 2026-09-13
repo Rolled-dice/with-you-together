@@ -150,7 +150,10 @@ export async function dial(
     to,
     from: cfg.callerId,
     client_state: btoa(JSON.stringify({ b: opts.bookingId, r: opts.legRole })),
-    timeout_secs: 45,
+    // Short ring window, no answering-machine detection (billed extra) and a
+    // hard time limit so no leg can ever run up minutes unattended.
+    timeout_secs: cfg.ringSeconds,
+    time_limit_secs: cfg.maxCallSeconds,
     answering_machine_detection: "disabled",
   };
   if (opts.sessionId) body["link_to"] = opts.sessionId;
