@@ -324,9 +324,10 @@ function Landing() {
         <section data-reveal className="grid gap-4 sm:grid-cols-3">
           {[
             { label: "People here", value: formatCount(stats.members) },
-            { label: "Conversations held", value: formatCount(stats.conversations) },
-            { label: "Check-ins shared", value: formatCount(stats.checkIns) },
+            { label: "Listener calls held", value: formatCount(stats.sessions) },
+            { label: "Check-ins shared", value: formatCount(stats.checkins) },
           ].map((s) => (
+
             <div
               key={s.label}
               className="rounded-3xl border border-border bg-surface px-6 py-7 text-center shadow-gentle"
