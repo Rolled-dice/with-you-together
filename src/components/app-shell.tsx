@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Inbox, BellRing, Headphones } from "lucide-react";
+import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Inbox, BellRing, Headphones, CalendarHeart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ const NAV = [
   { to: "/companion", label: "Companion", icon: MessageCircleHeart },
   { to: "/listeners", label: "Listeners", icon: Users },
   { to: "/reminders", label: "Reminders", icon: BellRing },
+  { to: "/send-later", label: "Send Later", icon: CalendarHeart },
   { to: "/insights", label: "Insights", icon: LineChart },
   { to: "/family", label: "Family", icon: HeartHandshake },
   { to: "/safety", label: "Safety", icon: LifeBuoy },

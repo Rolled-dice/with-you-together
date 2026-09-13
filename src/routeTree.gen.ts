@@ -27,6 +27,7 @@ import { Route as DocsAccountRouteImport } from './routes/docs.account'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedSendLaterRouteImport } from './routes/_authenticated/send-later'
 import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated/safety'
 import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
@@ -141,6 +142,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSendLaterRoute = AuthenticatedSendLaterRouteImport.update({
+  id: '/send-later',
+  path: '/send-later',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSafetyRoute = AuthenticatedSafetyRouteImport.update({
@@ -303,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/reminders': typeof AuthenticatedRemindersRoute
   '/safety': typeof AuthenticatedSafetyRoute
+  '/send-later': typeof AuthenticatedSendLaterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/reminders': typeof AuthenticatedRemindersRoute
   '/safety': typeof AuthenticatedSafetyRoute
+  '/send-later': typeof AuthenticatedSendLaterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -393,6 +401,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/reminders': typeof AuthenticatedRemindersRoute
   '/_authenticated/safety': typeof AuthenticatedSafetyRoute
+  '/_authenticated/send-later': typeof AuthenticatedSendLaterRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -440,6 +449,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/reminders'
     | '/safety'
+    | '/send-later'
     | '/settings'
     | '/api/chat'
     | '/checkout/return'
@@ -483,6 +493,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/reminders'
     | '/safety'
+    | '/send-later'
     | '/settings'
     | '/api/chat'
     | '/checkout/return'
@@ -529,6 +540,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/reminders'
     | '/_authenticated/safety'
+    | '/_authenticated/send-later'
     | '/_authenticated/settings'
     | '/api/chat'
     | '/checkout/return'
@@ -702,6 +714,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/send-later': {
+      id: '/_authenticated/send-later'
+      path: '/send-later'
+      fullPath: '/send-later'
+      preLoaderRoute: typeof AuthenticatedSendLaterRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/safety': {
@@ -916,6 +935,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRemindersRoute: typeof AuthenticatedRemindersRoute
   AuthenticatedSafetyRoute: typeof AuthenticatedSafetyRoute
+  AuthenticatedSendLaterRoute: typeof AuthenticatedSendLaterRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminCallsRoute: typeof AuthenticatedAdminCallsRoute
   AuthenticatedAdminFeedbackRoute: typeof AuthenticatedAdminFeedbackRoute
@@ -936,6 +956,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRemindersRoute: AuthenticatedRemindersRoute,
   AuthenticatedSafetyRoute: AuthenticatedSafetyRoute,
+  AuthenticatedSendLaterRoute: AuthenticatedSendLaterRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminCallsRoute: AuthenticatedAdminCallsRoute,
   AuthenticatedAdminFeedbackRoute: AuthenticatedAdminFeedbackRoute,

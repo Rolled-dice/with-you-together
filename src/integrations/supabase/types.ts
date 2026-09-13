@@ -1287,6 +1287,54 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_messages: {
+        Row: {
+          body: string | null
+          created_at: string
+          delivered_at: string | null
+          id: string
+          kind: string
+          media_duration_seconds: number | null
+          recipient_name: string
+          recipient_user_id: string | null
+          s3_key: string | null
+          scheduled_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          kind?: string
+          media_duration_seconds?: number | null
+          recipient_name: string
+          recipient_user_id?: string | null
+          s3_key?: string | null
+          scheduled_at: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          kind?: string
+          media_duration_seconds?: number | null
+          recipient_name?: string
+          recipient_user_id?: string | null
+          s3_key?: string | null
+          scheduled_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       stripe_webhook_events: {
         Row: {
           environment: string
