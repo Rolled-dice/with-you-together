@@ -124,17 +124,60 @@ function ProgressRing({
 }
 
 function Dashboard() {
-  const [profile, setProfile] = useState<ProfileSummary | null>(null);
-  const [streak, setStreak] = useState<number>(0);
-  const [checkInCount, setCheckInCount] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-  const quotaFn = useServerFn(getMyAiQuota);
   const adminFn = useServerFn(isCurrentUserAdmin);
   const adminQ = useQuery({
     queryKey: ["admin", "role-check"],
     queryFn: () => adminFn({}),
     staleTime: 5 * 60 * 1000,
   });
+
+  if (adminQ.isLoading) {
+    return (
+      <AppShell>
+        <Skeleton className="h-40 w-full rounded-brand" />
+      </AppShell>
+    );
+  }
+
+  if (adminQ.data?.isAdmin) return <AdminDashboard />;
+
+  return <MemberDashboard />;
+}
+
+function AdminDashboard() {
+  return (
+    <AppShell>
+      <PageHeader
+        eyebrow="Admin"
+        title="Operations dashboard"
+        description="Manage listener calls and your call team from one focused workspace."
+      />
+      <section className="max-w-2xl rounded-brand border border-border bg-surface p-6 shadow-gentle sm:p-8">
+        <div className="flex items-start gap-4">
+          <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-brand bg-primary/10 text-primary">
+            <PhoneCall className="h-6 w-6" />
+          </span>
+          <div>
+            <h2 className="font-display text-xl font-semibold text-foreground">Call CRM</h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              Review the call queue, assign agents, monitor service levels, and resolve call flags.
+            </p>
+            <Button asChild className="mt-5">
+              <Link to="/admin/calls">Open Call CRM <ArrowUpRight className="h-4 w-4" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    </AppShell>
+  );
+}
+
+function MemberDashboard() {
+  const [profile, setProfile] = useState<ProfileSummary | null>(null);
+  const [streak, setStreak] = useState<number>(0);
+  const [checkInCount, setCheckInCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const quotaFn = useServerFn(getMyAiQuota);
   const { data: quota, isLoading: quotaLoading } = useQuery({
     queryKey: ["ai-quota"],
     queryFn: () => quotaFn(),
@@ -188,7 +231,7 @@ function Dashboard() {
     })();
   }, []);
 
-  if (loading || adminQ.isLoading) {
+  if (loading) {
     return (
       <AppShell>
         <Skeleton className="h-56 w-full rounded-3xl" />
@@ -197,34 +240,6 @@ function Dashboard() {
             <Skeleton key={i} className="h-40 rounded-3xl" />
           ))}
         </div>
-      </AppShell>
-    );
-  }
-
-  if (adminQ.data?.isAdmin) {
-    return (
-      <AppShell>
-        <PageHeader
-          eyebrow="Admin"
-          title="Operations dashboard"
-          description="Manage listener calls and your call team from one focused workspace."
-        />
-        <section className="max-w-2xl rounded-brand border border-border bg-surface p-6 shadow-gentle sm:p-8">
-          <div className="flex items-start gap-4">
-            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-brand bg-primary/10 text-primary">
-              <PhoneCall className="h-6 w-6" />
-            </span>
-            <div>
-              <h2 className="font-display text-xl font-semibold text-foreground">Call CRM</h2>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Review the call queue, assign agents, monitor service levels, and resolve call flags.
-              </p>
-              <Button asChild className="mt-5">
-                <Link to="/admin/calls">Open Call CRM <ArrowUpRight className="h-4 w-4" /></Link>
-              </Button>
-            </div>
-          </div>
-        </section>
       </AppShell>
     );
   }

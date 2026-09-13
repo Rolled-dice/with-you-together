@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated")({
   pendingMs: 0,
   wrapInSuspense: true,
   beforeLoad: async ({ location }) => {
-    const session = (await supabase.auth.getSession()).data.session;
+    let session = (await supabase.auth.getSession()).data.session;
 
     if (!session) {
       throw redirect({ to: "/auth", search: { redirect: location.href } });
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated")({
           search: { reason: "session_expired", redirect: location.href },
         });
       }
-      return { user: refreshed.session.user };
+      session = refreshed.session;
     }
 
     // Near-expiry: kick off a background refresh so the token stays fresh
