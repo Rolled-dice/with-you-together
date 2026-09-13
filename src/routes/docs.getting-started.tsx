@@ -23,12 +23,13 @@ function Page() {
       />
 
       <DocSection title="1. Create your account">
-        <p>Use your email or continue with Google. We'll send a magic link — no password to remember.</p>
+        <p>Sign up with your email and a password, or continue with Google or Apple. We'll email you a link to confirm your account.</p>
         <Callout tone="tip" title="Under 13?">SomeoneNear is for people 13 and older. Family members below 13 should be added by a parent as a cared-for profile.</Callout>
       </DocSection>
 
       <DocSection title="2. Finish onboarding">
-        <p>We ask a few short questions — your name, who you're caring for, and how you'd like SomeoneNear to talk to you. It takes about a minute and you can change everything later.</p>
+        <p>We ask a few short questions — your name, your mobile number, who you're caring for, and how you'd like SomeoneNear to talk to you. It takes about a minute and you can change everything later from Settings.</p>
+        <Callout tone="tip" title="Add your mobile number">Your number is how a listener reaches you on a call. You can add or change it any time in Settings, and we verify it with a quick code before your first booking.</Callout>
       </DocSection>
 
       <DocSection title="3. Choose a plan">
