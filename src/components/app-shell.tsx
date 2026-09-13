@@ -135,11 +135,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Mobile bottom nav */}
           <nav
-            className="fixed inset-x-0 bottom-0 z-50 grid overflow-hidden border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
+            className="fixed inset-x-0 bottom-0 z-50 flex overflow-x-auto border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
             style={{
               paddingBottom: "env(safe-area-inset-bottom)",
-              gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))`,
             }}
+            aria-label="Main navigation"
           >
 
             {navItems.map((item) => {
@@ -150,12 +150,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex min-w-0 flex-col items-center justify-center gap-1 px-0.5 py-2 text-[10px] font-medium transition-colors sm:text-[11px]",
+                    "flex min-h-16 min-w-20 flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium transition-colors",
                     active ? "text-brand-accent" : "text-sidebar-foreground/70",
                   )}
                 >
                   <Icon className="h-5 w-5" strokeWidth={2} />
-                  <span className="block max-w-full truncate leading-none">{item.label}</span>
+                  <span className="block max-w-full whitespace-nowrap leading-none">{item.label}</span>
                 </Link>
               );
             })}
