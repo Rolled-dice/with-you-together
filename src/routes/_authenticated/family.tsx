@@ -53,7 +53,7 @@ import {
 export const Route = createFileRoute("/_authenticated/family")({
   head: () => ({
     meta: [
-      { title: "Family — SomeoneNear" },
+      { title: "Family | SomeoneNear" },
       {
         name: "description",
         content: "Invite family members, manage roles, and share your Care Membership.",
@@ -197,7 +197,7 @@ function FamilyView({
     onSuccess: (res) => {
       const link = `${window.location.origin}/invite?token=${res.token}`;
       navigator.clipboard.writeText(link).catch(() => {});
-      toast.success("Invite created — link copied");
+      toast.success("Invite created, link copied");
       setInviteEmail("");
       setInviteOpen(false);
       qc.invalidateQueries({ queryKey: ["family"] });
@@ -282,13 +282,13 @@ function FamilyView({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="adult">Adult — can invite others</SelectItem>
-                            <SelectItem value="teen">Teen — member only</SelectItem>
+                            <SelectItem value="adult">Adult, can invite others</SelectItem>
+                            <SelectItem value="teen">Teen, member only</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Their Companion chats stay private — only the tier and roster
+                        Their Companion chats stay private, only the tier and roster
                         are shared.
                       </p>
                     </div>
@@ -515,7 +515,7 @@ function SessionAllocationPanel() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base font-medium">
           <CalendarCheck className="h-4 w-4 text-brand-accent" />
-          Listener sessions — this month
+          Listener sessions, this month
         </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -594,7 +594,7 @@ function SessionAllocationPanel() {
 
         <p className="text-xs text-muted-foreground">
           The monthly session balance belongs to the family. Allocations reset each
-          month — sessions don't roll over. Rescheduling requires at least 2 hours
+          month, sessions don't roll over. Rescheduling requires at least 2 hours
           before the session.
         </p>
       </CardContent>

@@ -36,7 +36,7 @@ export async function createScheduledMessage(
   if (input.kind !== "text") {
     if (!input.file) throw new Error("Record or upload your message first");
     if (input.file.size > MAX_BYTES)
-      throw new Error("File is too large — keep it under 25 MB");
+      throw new Error("File is too large, keep it under 25 MB");
     const ext = extFor(input.file.type);
     s3Key = `send-later/${context.userId}/${crypto.randomUUID()}.${ext}`;
     await s3Put(s3Key, await input.file.arrayBuffer(), input.file.type);

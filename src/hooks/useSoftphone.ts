@@ -135,7 +135,7 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
         await new Promise((r) => setTimeout(r, 250));
       }
 
-      throw new Error("Your browser phone did not come online — check the microphone permission and try again.");
+      throw new Error("Your browser phone did not come online, check the microphone permission and try again.");
     },
     [connect],
   );

@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Callout, MiniFaq } from "@/components/docs/docs-
 export const Route = createFileRoute("/docs/safety")({
   head: () => ({
     meta: [
-      { title: "Safety — SomeoneNear Docs" },
+      { title: "Safety | SomeoneNear Docs" },
       { name: "description", content: "How to get help fast, and what SomeoneNear is not." },
-      { property: "og:title", content: "Safety — SomeoneNear Docs" },
+      { property: "og:title", content: "Safety | SomeoneNear Docs" },
       { property: "og:description", content: "Crisis resources and safety guidance." },
     ],
   }),
@@ -19,7 +19,7 @@ function Page() {
       <DocHeader
         eyebrow="Important"
         title="Safety"
-        intro="SomeoneNear is a warm space — but it isn't therapy or an emergency service."
+        intro="SomeoneNear is a warm space, but it isn't therapy or an emergency service."
       />
 
       <Callout tone="warn" title="If you're in immediate danger">
@@ -36,14 +36,14 @@ function Page() {
       </DocSection>
 
       <DocSection title="How SomeoneNear supports you">
-        <p>Companion and Listeners are here to be with you — to hear you out, help you slow down, and remind you you're not alone. If a conversation raises concern for your safety, SomeoneNear will always surface these resources.</p>
+        <p>Companion and Listeners are here to be with you, to hear you out, help you slow down, and remind you you're not alone. If a conversation raises concern for your safety, SomeoneNear will always surface these resources.</p>
       </DocSection>
 
       <DocSection title="Common questions">
         <MiniFaq
           items={[
             { q: "Is Companion a therapist?", a: "No. It's a supportive AI companion, not a clinician." },
-            { q: "Are listeners trained?", a: "Yes — in warm, non-judgmental support. They aren't therapists either." },
+            { q: "Are listeners trained?", a: "Yes, in warm, non-judgmental support. They aren't therapists either." },
           ]}
         />
       </DocSection>

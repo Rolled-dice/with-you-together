@@ -58,7 +58,7 @@ import {
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — SomeoneNear" },
+      { title: "Settings | SomeoneNear" },
       {
         name: "description",
         content: "Manage your Care Membership, profile, and consent preferences.",
@@ -194,7 +194,7 @@ function SettingsPage() {
     subscription.status !== "canceled" &&
     subscription.status !== "incomplete_expired";
   // Infer the active plan from the live subscription price when the profile
-  // hasn't synced yet — prevents "no card looks active" state.
+  // hasn't synced yet, prevents "no card looks active" state.
   const subTier: TierId | null = (() => {
     const p = (subscription?.price_id as string | undefined) ?? "";
     if (p.startsWith("care")) return "care";
@@ -218,7 +218,7 @@ function SettingsPage() {
         eyebrow="Settings"
         slogan="Made just for you."
         title="Your preferences"
-        description="Care Membership, profile, and privacy — all in your hands."
+        description="Care Membership, profile, and privacy, all in your hands."
       />
 
       <div className="grid gap-6">
@@ -239,7 +239,7 @@ function SettingsPage() {
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-brand border border-border bg-muted/40 p-3 text-sm">
                 <span className="text-muted-foreground">
                   Active subscription
-                  {subTier ? ` — ${PLAN_DISPLAY[subTier as PlanId].name}` : ""}
+                  {subTier ? `, ${PLAN_DISPLAY[subTier as PlanId].name}` : ""}
                   {subscription?.status === "trialing" ? " (in free trial)" : ""}
                 </span>
                 <Button
@@ -289,7 +289,7 @@ function SettingsPage() {
               </div>
             </div>
 
-            {/* Plans (no free tier — 7-day trial is on Together) */}
+            {/* Plans (no free tier, 7-day trial is on Together) */}
             <div className="grid gap-3 md:grid-cols-3">
 
 
@@ -332,7 +332,7 @@ function SettingsPage() {
                       ))}
                       {showTrialCTA ? (
                         <li className="text-brand-primary">
-                          · Try free for 7 days — auto-billed after, cancel anytime.
+                          · Try free for 7 days, auto-billed after, cancel anytime.
                         </li>
                       ) : null}
                     </ul>
@@ -453,7 +453,7 @@ function SettingsPage() {
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Include your country code. Save it first, then verify — a listener can only call a
+                Include your country code. Save it first, then verify, a listener can only call a
                 verified number.
               </p>
 
@@ -763,7 +763,7 @@ function CompanionMemoryCard() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="text-sm text-muted-foreground">
-          Short notes you'd like the Companion to keep in mind — only you can see these.
+          Short notes you'd like the Companion to keep in mind, only you can see these.
         </p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input

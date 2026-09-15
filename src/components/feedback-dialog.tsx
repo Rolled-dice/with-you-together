@@ -70,7 +70,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim().length < 4) {
-      toast.error("Please share a little more — at least a few words.");
+      toast.error("Please share a little more, at least a few words.");
       return;
     }
     setSubmitting(true);
@@ -117,7 +117,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
               <div className="mx-auto mb-2 inline-flex h-14 w-14 items-center justify-center rounded-full bg-mint/60 text-neutral-900 shadow-soft">
                 <CheckCircle2 className="h-7 w-7" />
               </div>
-              <DialogTitle className="text-xl">Thank you — we've got it</DialogTitle>
+              <DialogTitle className="text-xl">Thank you, we've got it</DialogTitle>
               <DialogDescription>
                 Your feedback is safely in our product review queue. Every note is read by a human.
               </DialogDescription>
@@ -154,7 +154,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
                 <p>
                   {submitted.email
                     ? <>We'll follow up at <strong className="break-all">{submitted.email}</strong> if we need more detail.</>
-                    : <>No email provided — we won't be able to reply, but your note still shapes the roadmap.</>}
+                    : <>No email provided, we won't be able to reply, but your note still shapes the roadmap.</>}
                 </p>
               </div>
               <div className="flex items-start gap-2.5">
@@ -186,7 +186,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
             <DialogHeader>
               <DialogTitle className="text-xl">Help shape SomeoneNear</DialogTitle>
               <DialogDescription>
-                Every note lands in our product review queue. We read them all — promise.
+                Every note lands in our product review queue. We read them all, promise.
               </DialogDescription>
             </DialogHeader>
 

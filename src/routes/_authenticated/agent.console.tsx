@@ -136,7 +136,7 @@ function AgentConsolePage() {
       return startFn({ data: { booking_id: bookingId } });
     },
     onSuccess: () => {
-      toast.success("Dialling — your headset will ring first, then the member");
+      toast.success("Dialling, your headset will ring first, then the member");
       refreshAll();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -149,7 +149,7 @@ function AgentConsolePage() {
       await presenceFn({ data: { state: "wrap_up", booking_id: selected } });
     },
     onSuccess: () => {
-      toast.success("Call ended — add your notes");
+      toast.success("Call ended, add your notes");
       refreshAll();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -312,7 +312,7 @@ function AgentConsolePage() {
                       </div>
                       {(pop.data?.flags ?? []).some((f: any) => !f.resolved) && (
                         <p className="flex items-center gap-2 rounded-2xl bg-primary/10 p-3 text-xs text-primary">
-                          <ShieldAlert className="h-4 w-4" /> This booking has an open flag — read the
+                          <ShieldAlert className="h-4 w-4" /> This booking has an open flag, read the
                           notes before you dial.
                         </p>
                       )}
@@ -467,7 +467,7 @@ function SoftphoneDock({
               try {
                 await phone.ensureRegistered();
                 onGoAvailable();
-                toast.success("Headset online — you're ready for calls");
+                toast.success("Headset online, you're ready for calls");
               } catch (e) {
                 toast.error(e instanceof Error ? e.message : "Headset could not come online");
               }

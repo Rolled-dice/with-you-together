@@ -158,7 +158,7 @@ export function CallChatPanel({
         sync();
         p.addEventListener("change", sync);
       } catch {
-        // Permissions API unsupported — rely on device errors instead.
+        // Permissions API unsupported, rely on device errors instead.
       }
     }
     void watch();

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 /**
- * Inbound WhatsApp webhook — provider agnostic.
+ * Inbound WhatsApp webhook, provider agnostic.
  *
  * Accepts either a provider form post (Twilio/Plivo style: `From`, `Body`,
  * `MediaUrl0`) or a plain JSON body `{ from, body, media_url }` used by the

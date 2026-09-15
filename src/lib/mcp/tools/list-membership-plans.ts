@@ -5,7 +5,7 @@ export default defineTool({
   name: "list_membership_plans",
   title: "List SomeoneNear membership plans",
   description:
-    "Returns SomeoneNear's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data — safe for anyone to read.",
+    "Returns SomeoneNear's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data, safe for anyone to read.",
   inputSchema: {
     currency: z
       .enum(["INR", "USD"])

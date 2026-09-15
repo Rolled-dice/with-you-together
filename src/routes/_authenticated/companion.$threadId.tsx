@@ -150,7 +150,7 @@ function ChatSurface({
         <ConversationContent className="mx-auto w-full max-w-2xl">
           {messages.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              Take a breath. Say whatever's on your mind — even just a word.
+              Take a breath. Say whatever's on your mind, even just a word.
             </div>
           ) : (
             messages.map((m) => {
@@ -194,7 +194,7 @@ function ChatSurface({
           >
             <PromptInputTextarea
               ref={inputRef}
-              placeholder={outOfQuota ? "Limit reached — upgrade to continue" : "What's on your mind?"}
+              placeholder={outOfQuota ? "Limit reached, upgrade to continue" : "What's on your mind?"}
               disabled={busy || outOfQuota}
             />
             <PromptInputFooter className="justify-end">

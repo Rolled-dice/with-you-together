@@ -23,7 +23,7 @@ const FALLBACK: PublicStats = {
 /**
  * Public, aggregate-only stats for the landing page.
  * Reads through a publishable-key client and a security-definer RPC that
- * returns counts only — no user rows, no PII.
+ * returns counts only, no user rows, no PII.
  */
 export const getPublicStats = createServerFn({ method: "GET" }).handler(
   async (): Promise<PublicStats> => {

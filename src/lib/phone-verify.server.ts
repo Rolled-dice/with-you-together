@@ -1,5 +1,5 @@
 /**
- * Mobile number verification — own OTP implementation on top of raw Telnyx
+ * Mobile number verification, own OTP implementation on top of raw Telnyx
  * messaging/voice (no Verify API, so no per-verification platform fee).
  *
  * Security properties:

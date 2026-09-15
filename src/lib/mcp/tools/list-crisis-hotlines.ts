@@ -4,7 +4,7 @@ export default defineTool({
   name: "list_crisis_hotlines",
   title: "List crisis and mental health hotlines",
   description:
-    "Returns a curated list of publicly published mental-health crisis hotlines (India and international) with phone numbers and hours. Public safety information — safe for anyone to read.",
+    "Returns a curated list of publicly published mental-health crisis hotlines (India and international) with phone numbers and hours. Public safety information, safe for anyone to read.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: () => {
@@ -12,7 +12,7 @@ export default defineTool({
       {
         name: "iCall (India)",
         phone: "+91 9152987821",
-        hours: "Mon–Sat, 8am–10pm IST",
+        hours: "Mon-Sat, 8am-10pm IST",
         region: "IN",
         url: "https://icallhelpline.org/",
       },

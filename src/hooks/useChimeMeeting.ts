@@ -18,7 +18,7 @@ export type ChimeTokens = {
 // TODO: Replace with actual API call to AWS ECS backend.
 // Returns a hardcoded, fake meeting/attendee pair so the UI can render and be
 // exercised locally without an AWS control plane. Joining a real media session
-// with these values will fail by design — the SDK is initialized, not connected.
+// with these values will fail by design, the SDK is initialized, not connected.
 export async function fetchChimeTokens(
   bookingId = "mock-booking",
 ): Promise<ChimeTokens> {
@@ -113,7 +113,7 @@ export function useChimeMeeting(
           30000,
         );
       } catch {
-        // data channel unavailable (mock backend) — local echo only
+        // data channel unavailable (mock backend), local echo only
       }
     },
     [selfRole],

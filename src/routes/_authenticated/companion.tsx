@@ -15,7 +15,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/companion")({
   head: () => ({
     meta: [
-      { title: "Companion — SomeoneNear" },
+      { title: "Companion | SomeoneNear" },
       { name: "description", content: "A calm AI Companion to talk things through, on your terms." },
     ],
   }),
@@ -68,7 +68,7 @@ function CompanionLayout() {
           <div className="flex-1 overflow-y-auto rounded-brand border border-border bg-card p-2">
             {conversations.length === 0 ? (
               <p className="p-3 text-xs text-muted-foreground">
-                Your conversations will appear here — always private.
+                Your conversations will appear here, always private.
               </p>
             ) : (
               <ul className="flex flex-col gap-1">

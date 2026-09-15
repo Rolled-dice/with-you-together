@@ -13,7 +13,7 @@ type SendArgs = {
   kind?: string;
   bookingId?: string | null;
   doseId?: string | null;
-  /** Optional idempotency key — a duplicate insert is silently skipped. */
+  /** Optional idempotency key, a duplicate insert is silently skipped. */
   dedupeKey?: string | null;
 };
 
@@ -143,7 +143,7 @@ async function deliver(
   }
 }
 
-/** Retries queued messages — used after a provider is connected. */
+/** Retries queued messages, used after a provider is connected. */
 export async function drainOutbox(limit = 25) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const provider = configuredProvider();

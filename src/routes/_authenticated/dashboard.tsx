@@ -36,7 +36,7 @@ import avatarKid from "@/assets/avatar-kid.png";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — SomeoneNear" },
+      { title: "Dashboard | SomeoneNear" },
       { name: "description", content: "Your calm daily check-in and Care Membership overview." },
     ],
   }),
@@ -58,10 +58,10 @@ const TIER_LABEL: Record<string, string> = {
 };
 
 const QUOTES = [
-  "You showed up today — that already matters.",
+  "You showed up today, that already matters.",
   "Small breaths, small steps. Both count.",
   "Being gentle with yourself is brave.",
-  "Feelings pass through — you don't have to hold them all.",
+  "Feelings pass through, you don't have to hold them all.",
   "Your presence is enough for today.",
   "One kind thought at a time.",
 ];
@@ -338,7 +338,7 @@ function MemberDashboard() {
               className="absolute left-2 top-1 h-16 w-16 animate-bloom opacity-90 sm:-left-2 sm:top-4 sm:h-24 sm:w-24"
             />
 
-            {/* orbit ring — family avatars circling the hero */}
+            {/* orbit ring, family avatars circling the hero */}
             <div
               aria-hidden
               className="hero-orbit-ring orbit-ring pointer-events-none absolute inset-0 [--orbit-r:5.5rem] sm:[--orbit-r:7.5rem] md:[--orbit-r:8.5rem]"
@@ -422,7 +422,7 @@ function MemberDashboard() {
                   / {quota?.limit ?? 0}
                 </span>
               </div>
-              <div className="mt-1 text-[11px] opacity-70">Resets {resetsAt ?? "—"}</div>
+              <div className="mt-1 text-[11px] opacity-70">Resets {resetsAt ?? ", "}</div>
             </div>
             <div className="shrink-0">
               <ProgressRing

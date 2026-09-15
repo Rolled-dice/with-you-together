@@ -305,7 +305,7 @@ function CallsConsole() {
                     </Badge>
                   )}
                   <p className="truncate text-xs text-muted-foreground">
-                    {f.note ?? "—"} · {formatDistanceToNow(new Date(f.created_at), { addSuffix: true })}
+                    {f.note ?? ", "} · {formatDistanceToNow(new Date(f.created_at), { addSuffix: true })}
                   </p>
                 </div>
                 {!f.resolved && (
@@ -418,7 +418,7 @@ function QueueCard({
 
       <p className="mt-1 text-xs text-muted-foreground">
         Agent: <span className="font-medium">{row.agent_name ?? "unassigned"}</span> · Listener:{" "}
-        {row.listener_name ?? "—"}
+        {row.listener_name ?? ", "}
       </p>
       {row.note && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{row.note}</p>}
 
@@ -441,7 +441,7 @@ function QueueCard({
           Save
         </Button>
         <span className="text-[11px] text-muted-foreground">
-          {dialTarget ? `Dials ${dialTarget}` : "No number yet — the call can't start"}
+          {dialTarget ? `Dials ${dialTarget}` : "No number yet, the call can't start"}
         </span>
       </div>
 
@@ -576,7 +576,7 @@ function AgentRoster({
         <Skeleton className="h-20 w-full" />
       ) : agents.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No agents yet — add one below so the router has someone to pick.
+          No agents yet, add one below so the router has someone to pick.
         </p>
       ) : (
         <ul className="mb-4 space-y-2">
@@ -587,7 +587,7 @@ function AgentRoster({
             >
               <span className="font-medium">{a.name}</span>{" "}
               <span className="text-xs text-muted-foreground">
-                · {a.timezone} · {a.work_start.slice(0, 5)}–{a.work_end.slice(0, 5)} · max{" "}
+                · {a.timezone} · {a.work_start.slice(0, 5)}-{a.work_end.slice(0, 5)} · max{" "}
                 {a.max_concurrent}
               </span>
               {a.skills.length > 0 && (

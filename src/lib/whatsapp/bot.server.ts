@@ -1,5 +1,5 @@
 /**
- * WhatsApp bot conversation engine — provider agnostic.
+ * WhatsApp bot conversation engine, provider agnostic.
  *
  * Takes a normalised inbound message and drives a small, elder-friendly state
  * machine: number-linking, booking a listener call, logging medicine doses, and
@@ -195,7 +195,7 @@ async function linkFlow({
       return { ok: true };
     }
     await reply(
-      "That code didn't work — it may have expired. Open SomeoneNear on the web, go to Settings → WhatsApp, and tap “Get a new code”.",
+      "That code didn't work, it may have expired. Open SomeoneNear on the web, go to Settings → WhatsApp, and tap “Get a new code”.",
     );
     return { ok: true };
   }
@@ -372,7 +372,7 @@ async function medsList({
       hour: "numeric",
       minute: "2-digit",
     });
-    return `${i + 1}. ${mark} ${time} — ${med.name ?? "Medicine"}${med.dosage ? ` (${med.dosage})` : ""}`;
+    return `${i + 1}. ${mark} ${time}, ${med.name ?? "Medicine"}${med.dosage ? ` (${med.dosage})` : ""}`;
   });
 
   await saveSession(phone, "meds", "await_action", { ids: doses.map((d) => d.id) });
@@ -439,7 +439,7 @@ async function prescriptionFlow({
   mediaUrl: string;
   reply: (b: string) => Promise<void>;
 }) {
-  await reply("Thank you — reading the prescription now, one moment…");
+  await reply("Thank you, reading the prescription now, one moment…");
 
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) {
@@ -486,7 +486,7 @@ async function prescriptionFlow({
 
     const lines = meds.map(
       (m: Record<string, unknown>, i: number) =>
-        `${i + 1}. ${m.name}${m.dosage ? ` — ${m.dosage}` : ""}${
+        `${i + 1}. ${m.name}${m.dosage ? `, ${m.dosage}` : ""}${
           m.times_per_day ? ` (${m.times_per_day}× a day)` : ""
         }`,
     );

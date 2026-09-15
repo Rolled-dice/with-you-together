@@ -63,7 +63,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
     e.preventDefault();
     const age = ageFromDob(dob);
     if (age === null) return toast.error("Please enter your date of birth.");
-    if (age < 13) return toast.error("Sorry — SomeoneNear is not available to users under 13.");
+    if (age < 13) return toast.error("Sorry, SomeoneNear is not available to users under 13.");
     if (age > 120) return toast.error("Please enter a valid date of birth.");
     if (!fullName.trim()) return toast.error("Please enter your name.");
     if (!e164 || !isValidPhoneNumber(phone, country)) {

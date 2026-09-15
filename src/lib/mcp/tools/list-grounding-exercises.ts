@@ -23,7 +23,7 @@ const EXERCISES = [
       "Hold your breath for 4 counts.",
       "Exhale slowly for 4 counts.",
       "Hold empty for 4 counts.",
-      "Repeat 4–6 rounds.",
+      "Repeat 4-6 rounds.",
     ],
   },
   {
@@ -32,7 +32,7 @@ const EXERCISES = [
     duration_minutes: 5,
     steps: [
       "Sit or lie down comfortably.",
-      "Notice your feet — any tension? Let it soften.",
+      "Notice your feet, any tension? Let it soften.",
       "Move attention up through legs, hips, belly, chest.",
       "Relax shoulders, jaw, and forehead.",
       "Take three slow breaths and open your eyes.",
