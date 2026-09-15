@@ -14,8 +14,8 @@ export const Route = createFileRoute("/docs/billing")({
 });
 
 const plans = [
-  { name: "Care", seats: "You + 1", minutes: "18 Check-Ins / mo (15 min each)", usd: "$49" },
-  { name: "Care Plus", seats: "Up to 5", minutes: "30 Check-Ins / mo (15 min each)", usd: "$79" },
+  { name: "Care", seats: "You + 1", minutes: "18 Check-Ins / mo (15 min each)", ai: "Daily message allowance", usd: "$49" },
+  { name: "Care Plus", seats: "Up to 5", minutes: "30 Check-Ins / mo (15 min each)", ai: "Unlimited", usd: "$79" },
 ];
 
 function Page() {
