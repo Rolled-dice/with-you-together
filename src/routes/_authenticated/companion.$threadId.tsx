@@ -125,12 +125,13 @@ function ChatSurface({
   }, [status, refetchQuota]);
 
   const busy = status === "submitted" || status === "streaming";
-  const outOfQuota = !!quota && quota.remaining <= 0;
-  const lowQuota = !!quota && quota.remaining > 0 && quota.remaining <= 5;
+  const unlimited = !!quota && quota.unlimited;
+  const outOfQuota = !!quota && !unlimited && (quota.remaining ?? 0) <= 0;
+  const lowQuota = !!quota && !unlimited && (quota.remaining ?? 0) > 0 && (quota.remaining ?? 0) <= 5;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {quota && (
+      {quota && !unlimited && (
         <div
           className={
             "border-b border-border px-4 py-2 text-xs " +
