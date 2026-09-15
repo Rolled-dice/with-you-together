@@ -23,6 +23,7 @@ import { Route as DocsGettingStartedRouteImport } from './routes/docs.getting-st
 import { Route as DocsFaqRouteImport } from './routes/docs.faq'
 import { Route as DocsFamilyRouteImport } from './routes/docs.family'
 import { Route as DocsCompanionRouteImport } from './routes/docs.companion'
+import { Route as DocsCheckInRouteImport } from './routes/docs.check-in'
 import { Route as DocsBillingRouteImport } from './routes/docs.billing'
 import { Route as DocsAccountRouteImport } from './routes/docs.account'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
@@ -124,6 +125,11 @@ const DocsFamilyRoute = DocsFamilyRouteImport.update({
 const DocsCompanionRoute = DocsCompanionRouteImport.update({
   id: '/companion',
   path: '/companion',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCheckInRoute = DocsCheckInRouteImport.update({
+  id: '/check-in',
+  path: '/check-in',
   getParentRoute: () => DocsRoute,
 } as any)
 const DocsBillingRoute = DocsBillingRouteImport.update({
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
   '/docs/billing': typeof DocsBillingRoute
+  '/docs/check-in': typeof DocsCheckInRoute
   '/docs/companion': typeof DocsCompanionRoute
   '/docs/family': typeof DocsFamilyRoute
   '/docs/faq': typeof DocsFaqRoute
@@ -373,6 +380,7 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
   '/docs/billing': typeof DocsBillingRoute
+  '/docs/check-in': typeof DocsCheckInRoute
   '/docs/companion': typeof DocsCompanionRoute
   '/docs/family': typeof DocsFamilyRoute
   '/docs/faq': typeof DocsFaqRoute
@@ -423,6 +431,7 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
   '/docs/billing': typeof DocsBillingRoute
+  '/docs/check-in': typeof DocsCheckInRoute
   '/docs/companion': typeof DocsCompanionRoute
   '/docs/family': typeof DocsFamilyRoute
   '/docs/faq': typeof DocsFaqRoute
@@ -473,6 +482,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/docs/account'
     | '/docs/billing'
+    | '/docs/check-in'
     | '/docs/companion'
     | '/docs/family'
     | '/docs/faq'
@@ -519,6 +529,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/docs/account'
     | '/docs/billing'
+    | '/docs/check-in'
     | '/docs/companion'
     | '/docs/family'
     | '/docs/faq'
@@ -568,6 +579,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/docs/account'
     | '/docs/billing'
+    | '/docs/check-in'
     | '/docs/companion'
     | '/docs/family'
     | '/docs/faq'
@@ -711,6 +723,13 @@ declare module '@tanstack/react-router' {
       path: '/companion'
       fullPath: '/docs/companion'
       preLoaderRoute: typeof DocsCompanionRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/check-in': {
+      id: '/docs/check-in'
+      path: '/check-in'
+      fullPath: '/docs/check-in'
+      preLoaderRoute: typeof DocsCheckInRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/billing': {
@@ -1011,6 +1030,7 @@ const AuthenticatedRouteRouteWithChildren =
 interface DocsRouteChildren {
   DocsAccountRoute: typeof DocsAccountRoute
   DocsBillingRoute: typeof DocsBillingRoute
+  DocsCheckInRoute: typeof DocsCheckInRoute
   DocsCompanionRoute: typeof DocsCompanionRoute
   DocsFamilyRoute: typeof DocsFamilyRoute
   DocsFaqRoute: typeof DocsFaqRoute
@@ -1025,6 +1045,7 @@ interface DocsRouteChildren {
 const DocsRouteChildren: DocsRouteChildren = {
   DocsAccountRoute: DocsAccountRoute,
   DocsBillingRoute: DocsBillingRoute,
+  DocsCheckInRoute: DocsCheckInRoute,
   DocsCompanionRoute: DocsCompanionRoute,
   DocsFamilyRoute: DocsFamilyRoute,
   DocsFaqRoute: DocsFaqRoute,

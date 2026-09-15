@@ -14,9 +14,8 @@ export const Route = createFileRoute("/docs/billing")({
 });
 
 const plans = [
-  { name: "Together", seats: "You + 1", minutes: "120 min / mo", usd: "$8.99" },
-  { name: "Family", seats: "Up to 5", minutes: "300 min / mo", usd: "$15.99" },
-  { name: "Care", seats: "Larger families", minutes: "Custom", usd: "$36.99" },
+  { name: "Care", seats: "You + 1", minutes: "18 Check-Ins / mo (15 min each)", usd: "$49" },
+  { name: "Care Plus", seats: "Up to 5", minutes: "30 Check-Ins / mo (15 min each)", usd: "$79" },
 ];
 
 function Page() {
@@ -35,7 +34,7 @@ function Page() {
               <tr>
                 <th className="py-2 pr-4">Plan</th>
                 <th className="py-2 pr-4">Seats</th>
-                <th className="py-2 pr-4">Listener minutes</th>
+                <th className="py-2 pr-4">Included Check-Ins</th>
                 <th className="py-2">Price (USD)</th>
               </tr>
             </thead>
@@ -68,7 +67,7 @@ function Page() {
         <MiniFaq
           items={[
             { q: "What currency do you bill in?", a: "All plans are billed in US dollars (USD). Your bank handles the conversion if your account is in another currency." },
-            { q: "Do unused minutes roll over?", a: "No, the pool resets each month so everyone starts fresh." },
+            { q: "Do unused Check-Ins roll over?", a: "No, your Check-Ins reset each month so everyone starts fresh." },
             { q: "Refunds?", a: "If something's wrong, write to us within 14 days and we'll make it right." },
           ]}
         />

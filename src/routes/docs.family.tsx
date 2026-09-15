@@ -23,7 +23,7 @@ function Page() {
       />
 
       <DocSection title="What it is">
-        <p>Family Circle is your household on SomeoneNear. The plan owner invites members, and everyone shares the same monthly minute pool for listener calls.</p>
+        <p>Family Circle is your household on SomeoneNear. The plan owner invites members, and everyone shares the same monthly Check-In calls.</p>
       </DocSection>
 
       <DocSection title="Invite someone">

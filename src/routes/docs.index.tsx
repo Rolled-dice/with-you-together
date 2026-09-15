@@ -15,6 +15,7 @@ export const Route = createFileRoute("/docs/")({
 });
 
 const cards = [
+  { to: "/docs/check-in", icon: PhoneCall, title: "Check-In", body: "We call your loved one and tell you how they're doing." },
   { to: "/docs/companion", icon: MessageCircleHeart, title: "Companion", body: "A warm AI chat that's always awake." },
   { to: "/docs/listeners", icon: PhoneCall, title: "Listeners", body: "Book a real human to call you." },
   { to: "/docs/family", icon: Users, title: "Family Circle", body: "Invite loved ones. Share care." },
@@ -37,8 +38,8 @@ function Page() {
           items={[
             { title: "Create your account", body: "Sign up with email or Google. No card needed for the trial." },
             { title: "Tell us a little about you", body: "A short onboarding sets your tone and reminders." },
-            { title: "Pick a plan (or stay on the trial)", body: "Together, Family, or Care | switch anytime." },
-            { title: "Invite your family", body: "Send an invite link. Everyone shares your session minutes." },
+            { title: "Pick a plan (or stay on the trial)", body: "Care at $49 or Care Plus at $79, switch anytime." },
+            { title: "Invite your family", body: "Send an invite link. Everyone shares your monthly Check-Ins." },
           ]}
         />
         <TryItNow to="/auth" label="Create my account" />

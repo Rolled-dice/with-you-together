@@ -35,11 +35,14 @@ function Page() {
       <DocSection title="3. Choose a plan">
         <Steps
           items={[
-            { title: "Together", body: "Just you and one loved one." },
-            { title: "Family", body: "Up to 5 people share the same minute pool." },
-            { title: "Care", body: "For larger families or intensive support." },
+            { title: "Care, $49 / month", body: "18 Check-In calls a month, 15 minutes each, for you and one loved one." },
+            { title: "Care Plus, $79 / month", body: "30 Check-In calls a month, 15 minutes each, shared by up to 5 people." },
           ]}
         />
+        <p>
+          A Check-In is a short call from a SomeoneNear team member to your loved one, with a simple
+          update added to your family dashboard afterwards.
+        </p>
         <p className="text-sm text-muted-foreground">Every plan starts with a 7-day free trial. You can cancel any time.</p>
       </DocSection>
 
