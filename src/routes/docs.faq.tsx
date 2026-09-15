@@ -21,7 +21,7 @@ function Page() {
         items={[
           { q: "Is SomeoneNear therapy?", a: "No. SomeoneNear is warm supportive company, chat, mood check-ins, and calls with trained listeners. For clinical care, please see a licensed professional." },
           { q: "Who can read my Companion chats?", a: "Only you. Family members and owners can't read your private content." },
-          { q: "Can I use SomeoneNear without a family?", a: "Absolutely, the Together plan works for one person." },
+          { q: "Can I use SomeoneNear without a family?", a: "Absolutely, the Care plan works for one person and one loved one." },
           { q: "What is a Check-In?", a: "A 15-minute call from a SomeoneNear team member to your loved one, to see how they're doing, and a short update on your family dashboard afterwards. See the Check-In page." },
           { q: "How do Check-Ins work in my plan?", a: "Care includes 18 Check-Ins a month and Care Plus includes 30, each 15 minutes. Any family member can use them until they run out." },
           { q: "How do listener calls reach me?", a: "The listener calls the verified mobile number on your profile, no app or link needed. Bookings need at least two hours' notice." },
