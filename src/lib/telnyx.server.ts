@@ -15,13 +15,13 @@ export type TelnyxConfig = {
   connectionId: string;
   callerId: string;
   credentialId: string | null;
-  /** Optional short code (e.g. 12345) — cheapest per-message route where enabled. */
+  /** Optional short code (e.g. 12345), cheapest per-message route where enabled. */
   smsShortCode: string | null;
-  /** Optional alphanumeric sender ID (e.g. "SomeNear") — free sender, no number rental. */
+  /** Optional alphanumeric sender ID (e.g. "SomeNear"), free sender, no number rental. */
   smsAlphaSender: string | null;
   /** Messaging profile that owns the sending route. */
   messagingProfileId: string | null;
-  /** Recording is billed per minute plus storage — OFF by default. */
+  /** Recording is billed per minute plus storage, OFF by default. */
   recordCalls: boolean;
   /** Hard cap so a forgotten open line can never bill indefinitely. */
   maxCallSeconds: number;
@@ -65,8 +65,8 @@ function positiveInt(raw: string | undefined, fallback: number): number {
 
 /**
  * Cheapest usable sender for a destination, in order:
- *  1. short code — lowest per-message rate and best deliverability where provisioned
- *  2. alphanumeric sender ID — no number rental cost (not allowed in US/CA/IN)
+ *  1. short code, lowest per-message rate and best deliverability where provisioned
+ *  2. alphanumeric sender ID, no number rental cost (not allowed in US/CA/IN)
  *  3. the long code we already rent
  */
 export function pickSmsSender(cfg: TelnyxConfig, to: string): string {
@@ -173,7 +173,7 @@ export async function hangup(cfg: TelnyxConfig, callControlId: string) {
   await telnyx(cfg, `/calls/${callControlId}/actions/hangup`, { method: "POST" });
 }
 
-/** Single-channel mp3 — half the storage of dual, and enough for review. */
+/** Single-channel mp3, half the storage of dual, and enough for review. */
 export async function startRecording(cfg: TelnyxConfig, callControlId: string) {
   if (!cfg.recordCalls) return;
   await telnyx(cfg, `/calls/${callControlId}/actions/record_start`, {

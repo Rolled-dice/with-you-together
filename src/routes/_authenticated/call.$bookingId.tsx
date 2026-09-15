@@ -113,7 +113,7 @@ async function probeDevices(): Promise<DeviceState> {
 export const Route = createFileRoute("/_authenticated/call/$bookingId")({
   head: () => ({
     meta: [
-      { title: "Session — SomeoneNear" },
+      { title: "Session | SomeoneNear" },
       { name: "description", content: "Your private SomeoneNear session room." },
     ],
   }),
@@ -522,7 +522,7 @@ function CallPage() {
                     <h3 className="text-base font-medium">Recording consent</h3>
                     <p className="text-xs text-muted-foreground">
                       SomeoneNear does not record by default. Recording requires both
-                      of you to opt in — either can revoke any time.
+                      of you to opt in, either can revoke any time.
                     </p>
                   </div>
                 </div>
@@ -657,7 +657,7 @@ function statusMeta(state: ConnectionState): StatusMeta {
     case ConnectionState.Reconnecting:
       return {
         label: "Reconnecting…",
-        hint: "Network hiccup — trying to restore the call.",
+        hint: "Network hiccup, trying to restore the call.",
         tone: "warn",
         icon: Loader2,
         pulse: true,
@@ -1065,7 +1065,7 @@ function SessionFeedbackCard({
         <div>
           <h3 className="text-base font-medium">How was your session?</h3>
           <p className="text-xs text-muted-foreground">
-            Private to you — used to improve your matches.
+            Private to you, used to improve your matches.
           </p>
         </div>
         <div className="flex items-center gap-1">

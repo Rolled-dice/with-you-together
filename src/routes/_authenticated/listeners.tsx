@@ -40,7 +40,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/listeners")({
   head: () => ({
     meta: [
-      { title: "Listeners — SomeoneNear" },
+      { title: "Listeners | SomeoneNear" },
       {
         name: "description",
         content:
@@ -152,7 +152,7 @@ function ListenersPage() {
         <RuleTile
           icon={AlarmClockCheck}
           title="Scheduled in advance"
-          body="Choose a preferred day & time in your timezone. Sessions run 30–60 minutes."
+          body="Choose a preferred day & time in your timezone. Sessions run 30-60 minutes."
           delay={1}
         />
         <RuleTile
@@ -229,7 +229,7 @@ function ListenersPage() {
                 rows={3}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="A word or two about how you're feeling — helps your Listener meet you where you are."
+                placeholder="A word or two about how you're feeling, helps your Listener meet you where you are."
               />
             </div>
             <Button
@@ -267,7 +267,7 @@ function ListenersPage() {
             <ol className="space-y-2 text-sm text-foreground">
               <FlowStep n={1} text="Tap 'Request callback' below." />
               <FlowStep n={2} text="Our in-house Listener picks it up (SLA: 10 minutes)." />
-              <FlowStep n={3} text="You'll get a call notification — join when you're ready." />
+              <FlowStep n={3} text="You'll get a call notification, join when you're ready." />
             </ol>
             <div className="rounded-brand border border-destructive/25 bg-destructive/5 p-3 text-xs text-destructive-foreground/90">
               If you're in danger, please call your local emergency line first.{" "}

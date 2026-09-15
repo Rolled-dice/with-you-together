@@ -32,7 +32,7 @@ export async function deliverDueMessages() {
         kind: "send_later",
         severity: "info",
         title: "A message arrived for you 💌",
-        body: `Someone sent you ${kindLabel} — open Send Later to read or play it.`,
+        body: `Someone sent you ${kindLabel}, open Send Later to read or play it.`,
       });
     }
     await supabaseAdmin.from("notifications").insert({

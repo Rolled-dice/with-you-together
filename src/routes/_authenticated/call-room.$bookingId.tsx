@@ -8,7 +8,7 @@ import { useChimeMeeting } from "@/hooks/useChimeMeeting";
 export const Route = createFileRoute("/_authenticated/call-room/$bookingId")({
   head: () => ({
     meta: [
-      { title: "Chime Session — SomeoneNear" },
+      { title: "Chime Session | SomeoneNear" },
       {
         name: "description",
         content: "Amazon Chime session room for your SomeoneNear call.",
@@ -36,7 +36,7 @@ function ChimeCallPage() {
       <PageHeader
         eyebrow="Session"
         title="Chime session room"
-        description="Device check first — then join the room."
+        description="Device check first, then join the room."
       />
       <PreCallCheck meeting={meeting} onJoin={() => setJoined(true)} />
     </AppShell>

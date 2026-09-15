@@ -38,7 +38,7 @@ export async function sendDueDoseReminders() {
     if (!phone) continue;
     const med = (d.medications ?? {}) as { name?: string; dosage?: string; instructions?: string };
     const body = [
-      `Time for your ${med.name ?? "medicine"}${med.dosage ? ` — ${med.dosage}` : ""}. 💙`,
+      `Time for your ${med.name ?? "medicine"}${med.dosage ? `, ${med.dosage}` : ""}. 💙`,
       med.instructions ? med.instructions : null,
       "",
       "Reply TAKEN when you've had it, or SKIP if you're skipping this one.",

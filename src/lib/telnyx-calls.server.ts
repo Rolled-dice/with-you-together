@@ -283,7 +283,7 @@ export async function handleTelnyxEvent(payload: any) {
       .update({ state: "ended", ended_at: now, hangup_cause: p.hangup_cause ?? null })
       .eq("call_control_id", p.call_control_id);
 
-    // When one side drops, drop the other immediately — an orphan leg keeps
+    // When one side drops, drop the other immediately, an orphan leg keeps
     // billing minutes for a conversation that can no longer happen.
     const cfgHangup = telnyxConfig();
     if (cfgHangup) {

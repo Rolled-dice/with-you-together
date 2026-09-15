@@ -29,7 +29,7 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in — SomeoneNear" },
+      { title: "Sign in | SomeoneNear" },
       { name: "description", content: "Sign in or create your SomeoneNear account." },
       { name: "robots", content: "noindex" },
     ],
@@ -443,8 +443,8 @@ function OAuthButton({
         redirect_uri: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
       });
       if (result.error) throw result.error;
-      if (result.redirected) return; // browser navigates away — keep lock held
-      // Popup flow: session is set — navigate immediately.
+      if (result.redirected) return; // browser navigates away, keep lock held
+      // Popup flow: session is set, navigate immediately.
       window.location.replace(redirectTo);
     } catch (err) {
       const info = classifyAuthError(err);

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Supportive empty states. No photographs — a soft SVG mark, one honest line,
+ * Supportive empty states. No photographs, a soft SVG mark, one honest line,
  * and a low-pressure way forward.
  */
 
@@ -68,7 +68,7 @@ export function QuietEmptyState({
   variant = "breath",
   className,
 }: {
-  /** One of the SomeoneNear lines — sits above the title, in the person's own voice. */
+  /** One of the SomeoneNear lines, sits above the title, in the person's own voice. */
   quote?: string;
   title: string;
   body?: string;

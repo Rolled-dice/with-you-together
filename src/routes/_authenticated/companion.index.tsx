@@ -127,7 +127,7 @@ function CompanionEmpty() {
           {greetingText()}, {firstName} <span className="inline-block animate-heartbeat">☀️</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Take a deep breath — you're doing great. A fresh check-in is a step toward peace.
+          Take a deep breath, you're doing great. A fresh check-in is a step toward peace.
         </p>
       </div>
 
@@ -204,7 +204,7 @@ function CompanionEmpty() {
                   <p className="font-semibold text-foreground">AI Companion</p>
                   <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                 </div>
-                <p className="text-xs text-muted-foreground">Chat anytime — private & warm</p>
+                <p className="text-xs text-muted-foreground">Chat anytime, private & warm</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
             </div>

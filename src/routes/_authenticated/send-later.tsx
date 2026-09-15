@@ -32,11 +32,11 @@ export const Route = createFileRoute("/_authenticated/send-later")({
   component: SendLaterPage,
   head: () => ({
     meta: [
-      { title: "Send It Later — SomeoneNear" },
+      { title: "Send It Later | SomeoneNear" },
       {
         name: "description",
         content:
-          "Schedule a text, voice, or video message for someone you love — delivered when it matters most.",
+          "Schedule a text, voice, or video message for someone you love, delivered when it matters most.",
       },
     ],
   }),
@@ -136,8 +136,8 @@ function SendLaterPage() {
     } catch {
       toast.error(
         kind === "video"
-          ? "Camera/microphone blocked — allow access to record a video message."
-          : "Microphone blocked — allow access to record a voice message.",
+          ? "Camera/microphone blocked, allow access to record a video message."
+          : "Microphone blocked, allow access to record a voice message.",
       );
     }
   };
@@ -169,7 +169,7 @@ function SendLaterPage() {
             Write something they'll be happy to receive…
           </h1>
           <p className="text-muted-foreground text-sm">
-            A birthday, a tough day, or “listen when you miss me” — schedule it
+            A birthday, a tough day, or “listen when you miss me”, schedule it
             and we'll keep it safe until it's time.
           </p>
         </div>
@@ -370,7 +370,7 @@ function SendLaterPage() {
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : messages.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nothing scheduled yet — your future hellos will live here.
+              Nothing scheduled yet, your future hellos will live here.
             </p>
           ) : (
             messages.map((m: any) => (

@@ -423,7 +423,7 @@ function FeedbackCard({
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Internal notes — visible only to the product team."
+            placeholder="Internal notes, visible only to the product team."
             className="min-h-[80px] rounded-xl text-sm"
             maxLength={4000}
           />

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Gentle nudges — the SomeoneNear notification language.
+ * Gentle nudges, the SomeoneNear notification language.
  * Never a red dot, never a loud pop. A warm pulse and a quiet sentence.
  */
 
@@ -52,7 +52,7 @@ export function gentleToast(title: string, description?: string) {
   return toast(title, { description, duration: 5000 });
 }
 
-/** For things that genuinely went wrong — still calm, still kind. */
+/** For things that genuinely went wrong, still calm, still kind. */
 export function gentleProblem(title: string, description?: string) {
   return toast(title, {
     description: description ?? "Nothing is lost. You can try again whenever you're ready.",

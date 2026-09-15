@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/getting-started")({
   head: () => ({
     meta: [
-      { title: "Getting started — SomeoneNear Docs" },
+      { title: "Getting started | SomeoneNear Docs" },
       { name: "description", content: "Create your SomeoneNear account, finish onboarding, pick a plan, and invite family." },
-      { property: "og:title", content: "Getting started — SomeoneNear Docs" },
+      { property: "og:title", content: "Getting started, SomeoneNear Docs" },
       { property: "og:description", content: "Set up SomeoneNear in a few minutes." },
     ],
   }),
@@ -28,7 +28,7 @@ function Page() {
       </DocSection>
 
       <DocSection title="2. Finish onboarding">
-        <p>We ask a few short questions — your name, your mobile number, who you're caring for, and how you'd like SomeoneNear to talk to you. It takes about a minute and you can change everything later from Settings.</p>
+        <p>We ask a few short questions, your name, your mobile number, who you're caring for, and how you'd like SomeoneNear to talk to you. It takes about a minute and you can change everything later from Settings.</p>
         <Callout tone="tip" title="Add your mobile number">Your number is how a listener reaches you on a call. You can add or change it any time in Settings, and we verify it with a quick code before your first booking.</Callout>
       </DocSection>
 
@@ -53,8 +53,8 @@ function Page() {
         <MiniFaq
           items={[
             { q: "Do I need a credit card to try?", a: "No. The trial is free and doesn't ask for one." },
-            { q: "Can I switch plans later?", a: "Yes — upgrade or downgrade any time from Billing." },
-            { q: "What if my parent isn't tech-savvy?", a: "Send them the invite link — it opens SomeoneNear directly. The chat and calls are designed to be simple for older adults." },
+            { q: "Can I switch plans later?", a: "Yes, upgrade or downgrade any time from Billing." },
+            { q: "What if my parent isn't tech-savvy?", a: "Send them the invite link, it opens SomeoneNear directly. The chat and calls are designed to be simple for older adults." },
           ]}
         />
       </DocSection>

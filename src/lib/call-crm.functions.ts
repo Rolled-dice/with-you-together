@@ -221,7 +221,7 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
       await logCallEvent(context, data.id, "assignment_failed", {
         reason: "no_eligible_agent",
       });
-      return { ok: false, reason: "No eligible agent — booking flagged for admin." };
+      return { ok: false, reason: "No eligible agent, booking flagged for admin." };
     }
 
     const winner = ranked[0];

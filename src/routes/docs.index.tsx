@@ -5,9 +5,9 @@ import { DocHeader, DocSection, Steps, TryItNow } from "@/components/docs/docs-s
 export const Route = createFileRoute("/docs/")({
   head: () => ({
     meta: [
-      { title: "Welcome to SomeoneNear — Docs" },
+      { title: "Welcome to SomeoneNear | Docs" },
       { name: "description", content: "A quick tour of SomeoneNear and how to get started in under five minutes." },
-      { property: "og:title", content: "Welcome to SomeoneNear — Docs" },
+      { property: "og:title", content: "Welcome to SomeoneNear, Docs" },
       { property: "og:description", content: "A quick tour of SomeoneNear and how to get started." },
     ],
   }),
@@ -29,7 +29,7 @@ function Page() {
       <DocHeader
         eyebrow="Welcome"
         title="SomeoneNear, in five minutes"
-        intro="SomeoneNear helps you check in on the people you love — and helps them feel less alone between calls. These docs show you how each part works and how to get set up fast."
+        intro="SomeoneNear helps you check in on the people you love, and helps them feel less alone between calls. These docs show you how each part works and how to get set up fast."
       />
 
       <DocSection title="Quick start">
@@ -37,7 +37,7 @@ function Page() {
           items={[
             { title: "Create your account", body: "Sign up with email or Google. No card needed for the trial." },
             { title: "Tell us a little about you", body: "A short onboarding sets your tone and reminders." },
-            { title: "Pick a plan (or stay on the trial)", body: "Together, Family, or Care — switch anytime." },
+            { title: "Pick a plan (or stay on the trial)", body: "Together, Family, or Care | switch anytime." },
             { title: "Invite your family", body: "Send an invite link. Everyone shares your session minutes." },
           ]}
         />

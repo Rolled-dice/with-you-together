@@ -4,9 +4,9 @@ import { DocHeader, DocSection, MiniFaq, TryItNow } from "@/components/docs/docs
 export const Route = createFileRoute("/docs/billing")({
   head: () => ({
     meta: [
-      { title: "Billing & plans — SomeoneNear Docs" },
-      { name: "description", content: "Plans, prices, upgrades, and refunds — the plain-English version." },
-      { property: "og:title", content: "Billing & plans — SomeoneNear Docs" },
+      { title: "Billing & plans | SomeoneNear Docs" },
+      { name: "description", content: "Plans, prices, upgrades, and refunds, the plain-English version." },
+      { property: "og:title", content: "Billing & plans, SomeoneNear Docs" },
       { property: "og:description", content: "Plans and prices for SomeoneNear." },
     ],
   }),
@@ -68,7 +68,7 @@ function Page() {
         <MiniFaq
           items={[
             { q: "What currency do you bill in?", a: "All plans are billed in US dollars (USD). Your bank handles the conversion if your account is in another currency." },
-            { q: "Do unused minutes roll over?", a: "No — the pool resets each month so everyone starts fresh." },
+            { q: "Do unused minutes roll over?", a: "No, the pool resets each month so everyone starts fresh." },
             { q: "Refunds?", a: "If something's wrong, write to us within 14 days and we'll make it right." },
           ]}
         />

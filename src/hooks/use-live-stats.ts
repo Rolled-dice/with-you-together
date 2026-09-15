@@ -26,7 +26,7 @@ export function useLiveStats(initial: PublicStats, intervalMs = 20_000) {
         const next = await fetchStats();
         if (!cancelled && next) setStats(next);
       } catch {
-        // transient network issue — keep showing the last known numbers
+        // transient network issue, keep showing the last known numbers
       } finally {
         inFlight.current = false;
       }

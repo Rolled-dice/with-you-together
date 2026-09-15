@@ -24,7 +24,7 @@ import {
 export const Route = createFileRoute("/_authenticated/insights")({
   head: () => ({
     meta: [
-      { title: "Mood Insights — SomeoneNear" },
+      { title: "Mood Insights | SomeoneNear" },
       { name: "description", content: "See your mood trend, streak, and patterns over time." },
     ],
   }),
@@ -193,7 +193,7 @@ function InsightsPage() {
             <p className="text-xs text-muted-foreground mt-0.5">
               {todayEntry
                 ? `You checked in as ${MOOD_LABEL[todayEntry.mood!].label} today. Tap again to add another.`
-                : "One tap saves your mood — no writing needed."}
+                : "One tap saves your mood, no writing needed."}
             </p>
           </div>
           {todayEntry && (
@@ -275,7 +275,7 @@ function InsightsPage() {
                 label: `Average mood (${rangeMeta.label.toLowerCase()})`,
                 value: stats.avgMood
                   ? `${MOOD_LABEL[Math.round(stats.avgMood)].emoji} ${stats.avgMood.toFixed(1)} / 5`
-                  : "—",
+                  : ", ",
                 hint: stats.avgMood ? MOOD_LABEL[Math.round(stats.avgMood)].label : "No moods logged",
               },
               {

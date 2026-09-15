@@ -24,12 +24,12 @@ const PriceParam = z.enum([
 ]);
 
 const PRICE_LABELS: Record<z.infer<typeof PriceParam>, string> = {
-  together_monthly_inr: "Together plan — ₹799 / month",
-  together_monthly_usd: "Together plan — $8.99 / month",
-  family_monthly_inr: "Family plan — ₹1,499 / month",
-  family_monthly_usd: "Family plan — $15.99 / month",
-  care_monthly_inr: "Care plan — ₹3,499 / month",
-  care_monthly_usd: "Care plan — $36.99 / month",
+  together_monthly_inr: "Together plan, ₹799 / month",
+  together_monthly_usd: "Together plan, $8.99 / month",
+  family_monthly_inr: "Family plan, ₹1,499 / month",
+  family_monthly_usd: "Family plan, $15.99 / month",
+  care_monthly_inr: "Care plan, ₹3,499 / month",
+  care_monthly_usd: "Care plan, $36.99 / month",
   together_monthly: "Together plan (monthly)",
   family_monthly: "Family plan (monthly)",
   together_yearly: "Together plan (yearly)",
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/checkout")({
     price: PriceParam.parse(search.price),
   }),
   head: () => ({
-    meta: [{ title: "Checkout — SomeoneNear" }],
+    meta: [{ title: "Checkout | SomeoneNear" }],
   }),
   component: CheckoutPage,
 });
@@ -81,7 +81,7 @@ function CheckoutPage() {
       <PageHeader
         eyebrow="Care Membership"
         title={PRICE_LABELS[price as z.infer<typeof PriceParam>]}
-        description="Secure checkout — cancel anytime from Settings."
+        description="Secure checkout, cancel anytime from Settings."
       />
       <div id="checkout" className="rounded-brand border border-border bg-card p-2">
         <EmbeddedCheckoutProvider stripe={getStripe()} options={options}>

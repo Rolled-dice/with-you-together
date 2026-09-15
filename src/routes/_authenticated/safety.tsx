@@ -32,17 +32,17 @@ const EMERGENCY: { region: string; number: string }[] = [
 const HOTLINES: Resource[] = [
   { region: "United States", name: "988 Suicide & Crisis Lifeline", detail: "24/7 free, confidential support in English & Spanish.", phone: "988", sms: "988", url: "https://988lifeline.org" },
   { region: "United States", name: "Crisis Text Line", detail: "Text HOME to reach a trained volunteer counselor.", sms: "741741", smsBody: "HOME", url: "https://www.crisistextline.org" },
-  { region: "United Kingdom & ROI", name: "Samaritans", detail: "24/7 listening line — you don't have to be suicidal to call.", phone: "116 123", url: "https://www.samaritans.org" },
-  { region: "Canada", name: "Talk Suicide Canada", detail: "24/7 phone; text available 4pm–midnight ET.", phone: "1-833-456-4566", sms: "45645", url: "https://talksuicide.ca" },
+  { region: "United Kingdom & ROI", name: "Samaritans", detail: "24/7 listening line, you don't have to be suicidal to call.", phone: "116 123", url: "https://www.samaritans.org" },
+  { region: "Canada", name: "Talk Suicide Canada", detail: "24/7 phone; text available 4pm-midnight ET.", phone: "1-833-456-4566", sms: "45645", url: "https://talksuicide.ca" },
   { region: "Australia", name: "Lifeline Australia", detail: "24/7 crisis support and suicide prevention.", phone: "13 11 14", sms: "0477 13 11 14", url: "https://www.lifeline.org.au" },
-  { region: "India", name: "iCall", detail: "Mon–Sat, 8am–10pm. Free psychosocial support.", phone: "9152987821", url: "https://icallhelpline.org" },
+  { region: "India", name: "iCall", detail: "Mon-Sat, 8am-10pm. Free psychosocial support.", phone: "9152987821", url: "https://icallhelpline.org" },
   { region: "Global", name: "Find A Helpline", detail: "Verified helplines in 130+ countries.", url: "https://findahelpline.com" },
 ];
 
 const GROUNDING = [
   { title: "5-4-3-2-1", body: "Name 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste." },
   { title: "Box breathing", body: "Inhale 4s → hold 4s → exhale 4s → hold 4s. Repeat 4 rounds." },
-  { title: "Cold water", body: "Splash cold water on your face or hold ice — resets the vagus nerve." },
+  { title: "Cold water", body: "Splash cold water on your face or hold ice | resets the vagus nerve." },
   { title: "One small text", body: "Message one person: 'Thinking of you.' You don't have to explain." },
 ];
 
@@ -53,7 +53,7 @@ function SafetyPage() {
         eyebrow="You're not alone"
         slogan="You are not alone tonight."
         title="Safety & crisis support"
-        description="If you or someone you love is in danger, please reach out to a real person right now. SomeoneNear is a companion — not a replacement for a human in a crisis."
+        description="If you or someone you love is in danger, please reach out to a real person right now. SomeoneNear is a companion, not a replacement for a human in a crisis."
       />
 
       <div className="rounded-brand border border-destructive/30 bg-destructive/5 p-5 mb-8 animate-fade-up">

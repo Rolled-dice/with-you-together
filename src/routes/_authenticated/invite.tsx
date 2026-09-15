@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/invite")({
   validateSearch: (s) => z.object({ token: z.string().optional() }).parse(s),
-  head: () => ({ meta: [{ title: "Join family — SomeoneNear" }] }),
+  head: () => ({ meta: [{ title: "Join family | SomeoneNear" }] }),
   component: InvitePage,
 });
 
@@ -70,7 +70,7 @@ function InvitePage() {
                 {data.current_email && data.current_email !== data.invitation.email && (
                   <>
                     {" "}
-                    — you're signed in as {data.current_email}. Sign in with the invited email to
+, you're signed in as {data.current_email}. Sign in with the invited email to
                     accept.
                   </>
                 )}

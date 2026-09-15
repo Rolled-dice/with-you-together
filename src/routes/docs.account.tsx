@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/account")({
   head: () => ({
     meta: [
-      { title: "Your account — SomeoneNear Docs" },
+      { title: "Your account | SomeoneNear Docs" },
       { name: "description", content: "Profile, notifications, and deleting your SomeoneNear account." },
-      { property: "og:title", content: "Your account — SomeoneNear Docs" },
+      { property: "og:title", content: "Your account, SomeoneNear Docs" },
       { property: "og:description", content: "Manage your SomeoneNear account." },
     ],
   }),
@@ -28,7 +28,7 @@ function Page() {
 
       <DocSection title="Mobile number">
         <p>
-          Your mobile number is where a listener calls you. Add or change it in Settings — when it
+          Your mobile number is where a listener calls you. Add or change it in Settings, when it
           changes, we'll send a short code by text or a quick call to verify the new number before
           your next booking.
         </p>
@@ -38,7 +38,7 @@ function Page() {
         <Steps
           items={[
             { title: "Daily check-in", body: "A gentle reminder at your chosen time." },
-            { title: "Family activity", body: "Only high-level events — never anyone's private content." },
+            { title: "Family activity", body: "Only high-level events | never anyone's private content." },
             { title: "Booking reminders", body: "10 minutes before your listener call." },
           ]}
         />
@@ -59,7 +59,7 @@ function Page() {
         <MiniFaq
           items={[
             { q: "What happens to my family plan if I delete?", a: "Ownership transfers to the next adult in your circle, or the plan ends if you're the only owner." },
-            { q: "Can I pause notifications?", a: "Yes — set quiet hours from Notifications." },
+            { q: "Can I pause notifications?", a: "Yes, set quiet hours from Notifications." },
           ]}
         />
       </DocSection>

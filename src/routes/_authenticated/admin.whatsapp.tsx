@@ -76,7 +76,7 @@ function AdminWhatsappPage() {
         <p className="text-sm">
           Provider:{" "}
           <span className={cn("font-medium", provider ? "text-brand-accent" : "text-amber-600")}>
-            {provider ?? "none connected — replies stay queued"}
+            {provider ?? "none connected, replies stay queued"}
           </span>
         </p>
         <Button

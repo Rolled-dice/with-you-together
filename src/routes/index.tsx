@@ -86,7 +86,7 @@ const features: {
   {
     icon: BellRing,
     title: "Gentle reminders",
-    body: "Medicines, water, appointments — nudges that sound like a friend, not an alarm.",
+    body: "Medicines, water, appointments, nudges that sound like a friend, not an alarm.",
   },
   {
     icon: Users,
@@ -96,7 +96,7 @@ const features: {
   {
     icon: CalendarHeart,
     title: "Send It Later",
-    body: "Leave a message for a future day. Because you can't always be there — but something can.",
+    body: "Leave a message for a future day. Because you can't always be there, but something can.",
   },
 ];
 
@@ -140,7 +140,7 @@ const plans = [
 const faqs = [
   {
     q: "Do I have to explain what's wrong?",
-    a: "No. “I'm fine” is sometimes just easier than explaining what's actually going on — so you can start with nothing at all. A listener will simply stay with you.",
+    a: "No. “I'm fine” is sometimes just easier than explaining what's actually going on, so you can start with nothing at all. A listener will simply stay with you.",
   },
   {
     q: "Is anyone told about my conversations?",
@@ -152,7 +152,7 @@ const faqs = [
   },
   {
     q: "Is this therapy or crisis support?",
-    a: "No. SomeoneNear is company and care, not clinical treatment. If you're in danger, please reach out to your local emergency line — we'll always show you those numbers first.",
+    a: "No. SomeoneNear is company and care, not clinical treatment. If you're in danger, please reach out to your local emergency line, we'll always show you those numbers first.",
   },
 ];
 
@@ -256,7 +256,7 @@ function Landing() {
           </p>
           <p className="mx-auto max-w-md leading-relaxed text-muted-foreground">
             Some people aren't alone. They just don't have anyone available when they need
-            them. Sometimes the hardest part isn't being alone — it's not knowing who to
+            them. Sometimes the hardest part isn't being alone, it's not knowing who to
             call.
           </p>
         </section>
@@ -267,7 +267,7 @@ function Landing() {
             How we reach you
           </h2>
           <GentleNudge
-            title="Just checking in — how are you feeling today?"
+            title="Just checking in, how are you feeling today?"
             body="Answer in a word. Or don't. Either is completely okay."
           />
           <GentleNudge
@@ -310,7 +310,7 @@ function Landing() {
             When there's nothing here yet
           </h2>
           <QuietEmptyState
-            quote="That moment when you want to tell someone about your day — and realise there's no one to tell."
+            quote="That moment when you want to tell someone about your day, and realise there's no one to tell."
             title="This space is waiting for you"
             body="Start with one sentence about today. There's no wrong way to begin, and nobody is keeping score."
             variant="note"
@@ -353,7 +353,7 @@ function Landing() {
             But what if someone could?
           </h2>
           <p className="mx-auto max-w-md leading-relaxed text-ink/75">
-            People still care. Life just got busy. SomeoneNear stands in the gap — quietly,
+            People still care. Life just got busy. SomeoneNear stands in the gap, quietly,
             kindly, whenever it's needed.
           </p>
           <div className="pt-2">

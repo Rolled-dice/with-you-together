@@ -80,23 +80,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SomeoneNear — Checking in when they can't" },
+      { title: "SomeoneNear | Checking in when they can't" },
       {
         name: "description",
         content:
-          "SomeoneNear is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
+          "SomeoneNear is a warm family care membership, AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { name: "author", content: "SomeoneNear" },
-      { property: "og:title", content: "SomeoneNear — Checking in when they can't" },
+      { property: "og:title", content: "SomeoneNear, Checking in when they can't" },
       {
         property: "og:description",
         content:
-          "SomeoneNear is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
+          "SomeoneNear is a warm family care membership, AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "SomeoneNear — Checking in when they can't" },
-      { name: "twitter:description", content: "SomeoneNear is a warm family care membership — AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close." },
+      { name: "twitter:title", content: "SomeoneNear, Checking in when they can't" },
+      { name: "twitter:description", content: "SomeoneNear is a warm family care membership, AI Companion, human listeners, mood insights, and a shared circle that keeps your loved ones close." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

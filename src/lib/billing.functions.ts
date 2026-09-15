@@ -9,7 +9,7 @@ import {
 
 const StripeEnvSchema = z.enum(["sandbox", "live"]);
 
-// New pricing lookup keys (monthly only) — plus legacy keys for existing subs.
+// New pricing lookup keys (monthly only), plus legacy keys for existing subs.
 const PRICE_IDS = [
   "together_monthly_inr",
   "together_monthly_usd",

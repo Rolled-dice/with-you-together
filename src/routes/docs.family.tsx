@@ -4,9 +4,9 @@ import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/comp
 export const Route = createFileRoute("/docs/family")({
   head: () => ({
     meta: [
-      { title: "Family Circle — SomeoneNear Docs" },
+      { title: "Family Circle | SomeoneNear Docs" },
       { name: "description", content: "Invite loved ones, share your plan, and keep the circle close." },
-      { property: "og:title", content: "Family Circle — SomeoneNear Docs" },
+      { property: "og:title", content: "Family Circle, SomeoneNear Docs" },
       { property: "og:description", content: "Invite loved ones. Share care." },
     ],
   }),
@@ -39,14 +39,14 @@ function Page() {
 
       <DocSection title="What each member sees">
         <ul className="list-disc space-y-1 pl-5">
-          <li><strong>You</strong> — your own Companion chats, mood check-ins, insights.</li>
-          <li><strong>Family owner</strong> — plan, billing, invites, session pool usage. Never chats or check-ins.</li>
-          <li><strong>Other members</strong> — their own space, plus the shared listener pool.</li>
+          <li><strong>You</strong>, your own Companion chats, mood check-ins, insights.</li>
+          <li><strong>Family owner</strong>, plan, billing, invites, session pool usage. Never chats or check-ins.</li>
+          <li><strong>Other members</strong>, their own space, plus the shared listener pool.</li>
         </ul>
       </DocSection>
 
       <Callout tone="tip" title="Nobody reads anyone else's chats">
-        Family membership shares the plan and minutes — not your private conversations or check-ins.
+        Family membership shares the plan and minutes, not your private conversations or check-ins.
       </Callout>
 
       <TryItNow to="/family" label="Open Family Circle" />
@@ -55,7 +55,7 @@ function Page() {
         <MiniFaq
           items={[
             { q: "How many people can I add?", a: "Together = 2, Family = up to 5, Care = larger. See Billing." },
-            { q: "Can I remove someone?", a: "Yes — from Family Circle, tap the member and choose Remove." },
+            { q: "Can I remove someone?", a: "Yes, from Family Circle, tap the member and choose Remove." },
             { q: "Can a member leave on their own?", a: "Yes, any member can leave from their Account." },
           ]}
         />

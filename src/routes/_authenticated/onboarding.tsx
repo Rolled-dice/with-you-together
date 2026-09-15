@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
-      { title: "Welcome — SomeoneNear" },
+      { title: "Welcome | SomeoneNear" },
       { name: "description", content: "A few gentle questions to set up your SomeoneNear space." },
     ],
   }),
@@ -108,7 +108,7 @@ function OnboardingPage() {
           <CardHeader>
             <CardTitle className="text-2xl font-semibold">A gentle welcome</CardTitle>
             <CardDescription>
-              A few soft questions so SomeoneNear can meet you where you are. Nothing here is shared —
+              A few soft questions so SomeoneNear can meet you where you are. Nothing here is shared , 
               it's yours.
             </CardDescription>
           </CardHeader>
@@ -169,7 +169,7 @@ function OnboardingPage() {
                   id="intent"
                   value={careIntent}
                   onChange={(e) => setCareIntent(e.target.value)}
-                  placeholder="Optional — a sentence or a whole page, whatever feels right."
+                  placeholder="Optional, a sentence or a whole page, whatever feels right."
                   rows={4}
                 />
               </div>
