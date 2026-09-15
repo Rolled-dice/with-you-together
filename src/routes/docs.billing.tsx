@@ -70,6 +70,7 @@ function Page() {
           items={[
             { q: "What currency do you bill in?", a: "All plans are billed in US dollars (USD). Your bank handles the conversion if your account is in another currency." },
             { q: "Do unused Check-Ins roll over?", a: "No, your Check-Ins reset each month so everyone starts fresh." },
+            { q: "How much Companion chat do I get?", a: "Care includes a daily message allowance that refills every day. Care Plus includes unlimited Companion chat." },
             { q: "Refunds?", a: "If something's wrong, write to us within 14 days and we'll make it right." },
           ]}
         />
