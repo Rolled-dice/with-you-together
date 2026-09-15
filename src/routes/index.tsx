@@ -30,7 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPublicStats } from "@/lib/stats.functions";
 import { useLiveStats } from "@/hooks/use-live-stats";
 
-const TITLE = "SomeoneNear | Someone Near When You Need Them";
+const TITLE = "SomeoneNear";
 const DESCRIPTION =
   "SomeoneNear helps you find someone near for a caring check-in, a human listener, or quiet companionship whenever you need to feel heard.";
 
