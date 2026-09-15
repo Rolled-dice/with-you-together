@@ -1,11 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// Daily AI companion message allowance per tier.
+// care_plus ($79) is unlimited; care ($49) has a daily allowance that refills every day.
+export const UNLIMITED = Number.POSITIVE_INFINITY;
+
+export const DAILY_TIER_LIMITS: Record<string, number> = {
+  free: 5,
+  together: 20,
+  family: 40,
+  care: 40,
+  care_plus: UNLIMITED,
+};
+
+// Legacy monthly limits kept for reference / older callers.
 export const TIER_LIMITS: Record<string, number> = {
   free: 25,
   together: 500,
   family: 1500,
   care: 3000,
+  care_plus: UNLIMITED,
 };
 
 // Human Listener session limits (per family / user per month).
@@ -13,7 +27,8 @@ export const SESSION_LIMITS: Record<string, number> = {
   free: 0,
   together: 4,
   family: 12,
-  care: 24,
+  care: 18,
+  care_plus: 30,
 };
 
 export const RESCHEDULE_LIMITS: Record<string, number> = {
@@ -21,27 +36,34 @@ export const RESCHEDULE_LIMITS: Record<string, number> = {
   together: 4,
   family: 8,
   care: 12,
+  care_plus: 20,
 };
 
 export const MEMBER_LIMITS: Record<string, number> = {
   free: 1,
   together: 1,
   family: 3,
-  care: 4,
+  care: 2,
+  care_plus: 5,
 };
 
 export function getTierLimit(tier: string | null | undefined) {
-  return TIER_LIMITS[tier ?? "free"] ?? TIER_LIMITS.free;
+  const key = tier ?? "free";
+  return DAILY_TIER_LIMITS[key] ?? DAILY_TIER_LIMITS.free;
 }
 
-function periodStart(): Date {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+export function isUnlimitedTier(tier: string | null | undefined) {
+  return getTierLimit(tier) === UNLIMITED;
 }
 
-function periodEnd(): Date {
+function dayStart(): Date {
   const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+function dayEnd(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
 }
 
 export const getMyAiQuota = createServerFn({ method: "GET" })
@@ -57,8 +79,9 @@ export const getMyAiQuota = createServerFn({ method: "GET" })
 
     const tier = profile?.care_tier ?? "free";
     const limit = getTierLimit(tier);
-    const start = periodStart();
-    const resetsAt = periodEnd().toISOString();
+    const unlimited = limit === UNLIMITED;
+    const start = dayStart();
+    const resetsAt = dayEnd().toISOString();
 
     const { count } = await supabase
       .from("messages")
@@ -71,8 +94,10 @@ export const getMyAiQuota = createServerFn({ method: "GET" })
     return {
       tier,
       used,
-      limit,
-      remaining: Math.max(0, limit - used),
+      unlimited,
+      limit: unlimited ? null : limit,
+      remaining: unlimited ? null : Math.max(0, limit - used),
       resets_at: resetsAt,
+      period: "day" as const,
     };
   });

@@ -109,7 +109,7 @@ const plans = [
       "18 Check-In calls a month",
       "15 minutes per call",
       "Family dashboard updates after every call",
-      "Companion chat & gentle reminders",
+      "Companion chat with a daily message allowance",
     ],
   },
   {
@@ -120,6 +120,7 @@ const plans = [
     features: [
       "30 Check-In calls a month",
       "15 minutes per call",
+      "Unlimited Companion chat, no daily cap",
       "Shared circle, up to 5 people",
       "On-demand Check-Ins when a day feels hard",
     ],

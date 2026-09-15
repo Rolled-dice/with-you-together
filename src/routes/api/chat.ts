@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
-import { getTierLimit } from "@/lib/quota.functions";
+import { getTierLimit, UNLIMITED } from "@/lib/quota.functions";
 
 const SYSTEM_PROMPT = `You are the SomeoneNear Companion, a warm, gentle, human-feeling presence.
 
@@ -58,30 +58,31 @@ export const Route = createFileRoute("/api/chat")({
         if (convoError || !convo) {
           return new Response("Conversation not found", { status: 404 });
         }
-        // Enforce per-tier monthly quota
+        // Enforce per-tier daily quota (Care Plus is unlimited)
         const { data: profile } = await supabase
           .from("profiles")
           .select("care_tier, display_name")
           .eq("id", userId)
           .maybeSingle();
         const limit = getTierLimit(profile?.care_tier);
-        const monthStart = new Date();
-        monthStart.setUTCDate(1);
-        monthStart.setUTCHours(0, 0, 0, 0);
-        const { count: usedCount } = await supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .eq("role", "user")
-          .gte("created_at", monthStart.toISOString());
-        if ((usedCount ?? 0) >= limit) {
-          return new Response(
-            JSON.stringify({
-              error: "quota_exceeded",
-              message: `You've reached your monthly Companion limit (${limit} messages). Upgrade your Care Membership for more.`,
-            }),
-            { status: 429, headers: { "Content-Type": "application/json" } },
-          );
+        if (limit !== UNLIMITED) {
+          const dayStart = new Date();
+          dayStart.setUTCHours(0, 0, 0, 0);
+          const { count: usedCount } = await supabase
+            .from("messages")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId)
+            .eq("role", "user")
+            .gte("created_at", dayStart.toISOString());
+          if ((usedCount ?? 0) >= limit) {
+            return new Response(
+              JSON.stringify({
+                error: "quota_exceeded",
+                message: `You've used today's Companion messages (${limit}). Your allowance refills tomorrow, or upgrade to Care Plus for unlimited chats.`,
+              }),
+              { status: 429, headers: { "Content-Type": "application/json" } },
+            );
+          }
         }
 
 

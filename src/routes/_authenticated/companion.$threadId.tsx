@@ -104,7 +104,7 @@ function ChatSurface({
     onError: (err) => {
       const msg = (err as Error).message || "";
       if (msg.includes("quota_exceeded") || msg.includes("429")) {
-        toast.error("You've hit your monthly Companion limit. Upgrade to keep chatting.");
+        toast.error("You've used today's Companion messages. They refill tomorrow, or upgrade to Care Plus.");
       }
       console.error("[chat]", err);
     },
@@ -125,12 +125,13 @@ function ChatSurface({
   }, [status, refetchQuota]);
 
   const busy = status === "submitted" || status === "streaming";
-  const outOfQuota = !!quota && quota.remaining <= 0;
-  const lowQuota = !!quota && quota.remaining > 0 && quota.remaining <= 5;
+  const unlimited = !!quota && quota.unlimited;
+  const outOfQuota = !!quota && !unlimited && (quota.remaining ?? 0) <= 0;
+  const lowQuota = !!quota && !unlimited && (quota.remaining ?? 0) > 0 && (quota.remaining ?? 0) <= 5;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {quota && (
+      {quota && !unlimited && (
         <div
           className={
             "border-b border-border px-4 py-2 text-xs " +
@@ -142,8 +143,8 @@ function ChatSurface({
           }
         >
           {outOfQuota
-            ? `You've used all ${quota.limit} Companion messages this month. Upgrade your Care Membership in Settings to continue.`
-            : `${quota.remaining} of ${quota.limit} Companion messages left this month.`}
+            ? `You've used today's ${quota.limit} Companion messages. They refill tomorrow, or upgrade to Care Plus in Settings for unlimited chats.`
+            : `${quota.remaining} of ${quota.limit} Companion messages left today.`}
         </div>
       )}
       <Conversation className="flex-1">
