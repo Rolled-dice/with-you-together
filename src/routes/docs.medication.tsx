@@ -6,7 +6,7 @@ export const Route = createFileRoute("/docs/medication")({
     meta: [
       { title: "Medication reminders | SomeoneNear Docs" },
       { name: "description", content: "Add medicines from a prescription photo or by hand, and get gentle dose reminders." },
-      { property: "og:title", content: "Medication reminders, SomeoneNear Docs" },
+      { property: "og:title", content: "Medication reminders | SomeoneNear Docs" },
       { property: "og:description", content: "Add medicines from a photo and get gentle dose reminders." },
     ],
   }),

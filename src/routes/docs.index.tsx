@@ -7,7 +7,7 @@ export const Route = createFileRoute("/docs/")({
     meta: [
       { title: "Welcome to SomeoneNear | Docs" },
       { name: "description", content: "A quick tour of SomeoneNear and how to get started in under five minutes." },
-      { property: "og:title", content: "Welcome to SomeoneNear, Docs" },
+      { property: "og:title", content: "Welcome to SomeoneNear | Docs" },
       { property: "og:description", content: "A quick tour of SomeoneNear and how to get started." },
     ],
   }),

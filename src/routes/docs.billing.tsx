@@ -6,7 +6,7 @@ export const Route = createFileRoute("/docs/billing")({
     meta: [
       { title: "Billing & plans | SomeoneNear Docs" },
       { name: "description", content: "Plans, prices, upgrades, and refunds, the plain-English version." },
-      { property: "og:title", content: "Billing & plans, SomeoneNear Docs" },
+      { property: "og:title", content: "Billing & plans | SomeoneNear Docs" },
       { property: "og:description", content: "Plans and prices for SomeoneNear." },
     ],
   }),

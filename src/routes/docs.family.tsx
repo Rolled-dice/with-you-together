@@ -6,7 +6,7 @@ export const Route = createFileRoute("/docs/family")({
     meta: [
       { title: "Family Circle | SomeoneNear Docs" },
       { name: "description", content: "Invite loved ones, share your plan, and keep the circle close." },
-      { property: "og:title", content: "Family Circle, SomeoneNear Docs" },
+      { property: "og:title", content: "Family Circle | SomeoneNear Docs" },
       { property: "og:description", content: "Invite loved ones. Share care." },
     ],
   }),

@@ -6,7 +6,7 @@ export const Route = createFileRoute("/docs/account")({
     meta: [
       { title: "Your account | SomeoneNear Docs" },
       { name: "description", content: "Profile, notifications, and deleting your SomeoneNear account." },
-      { property: "og:title", content: "Your account, SomeoneNear Docs" },
+      { property: "og:title", content: "Your account | SomeoneNear Docs" },
       { property: "og:description", content: "Manage your SomeoneNear account." },
     ],
   }),

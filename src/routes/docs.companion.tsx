@@ -6,7 +6,7 @@ export const Route = createFileRoute("/docs/companion")({
     meta: [
       { title: "Companion | SomeoneNear Docs" },
       { name: "description", content: "How to chat with your SomeoneNear Companion, a warm AI that's always awake." },
-      { property: "og:title", content: "Companion, SomeoneNear Docs" },
+      { property: "og:title", content: "Companion | SomeoneNear Docs" },
       { property: "og:description", content: "A warm AI chat, always awake." },
     ],
   }),
