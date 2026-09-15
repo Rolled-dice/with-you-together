@@ -269,6 +269,52 @@ function Landing() {
           </p>
         </section>
 
+        {/* Check-In */}
+        <section id="check-in" data-reveal className="scroll-mt-24 space-y-6">
+          <div className="space-y-2 text-center">
+            <h2 className="font-display text-3xl font-semibold">
+              Check-In, someone should know how they're doing
+            </h2>
+            <p className="mx-auto max-w-lg leading-relaxed text-muted-foreground">
+              A Check-In is a simple way to make sure someone you care about is doing okay, even
+              when you can't be there yourself.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                <CalendarHeart className="h-5 w-5" />
+              </span>
+              <h3 className="mt-4 font-display text-base font-medium">Scheduled Check-In</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                You pick a time. A SomeoneNear team member calls your loved one, asks how their day
+                went, whether they've eaten, had water, taken their medication, or simply how they're
+                feeling. Afterwards a short update appears on your family dashboard.
+              </p>
+            </div>
+            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                <PhoneCall className="h-5 w-5" />
+              </span>
+              <h3 className="mt-4 font-display text-base font-medium">On-Demand Check-In</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                Some days you don't want to wait. Home early, feeling low, or just wanting someone
+                to talk to, they can ask for an earlier Check-In. If a trained listener is free, the
+                call happens then; otherwise we move it to the nearest time that works.
+              </p>
+            </div>
+          </div>
+          <p className="mx-auto max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
+            It isn't therapy or diagnosis. It's being present, listening, asking the right everyday
+            questions, and giving families a clearer picture of how their loved one is doing.
+          </p>
+          <div className="text-center">
+            <Button asChild variant="ghost" className="rounded-2xl">
+              <Link to="/docs/check-in">Read how Check-Ins work</Link>
+            </Button>
+          </div>
+        </section>
+
         {/* Features */}
         <section data-reveal className="space-y-6">
           <div className="space-y-2 text-center">
