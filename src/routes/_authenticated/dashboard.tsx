@@ -420,20 +420,24 @@ function MemberDashboard() {
                 Companion quota
               </div>
               <div className="mt-1 text-xl font-bold sm:text-2xl">
-                {quotaLoading || !quota ? "…" : quota.remaining}
-                <span className="ml-1 text-sm font-normal opacity-70">
-                  / {quota?.limit ?? 0}
-                </span>
+                {quotaLoading || !quota ? "…" : quotaUnlimited ? "Unlimited" : quota.remaining}
+                {!quotaLoading && quota && !quotaUnlimited && (
+                  <span className="ml-1 text-sm font-normal opacity-70">
+                    / {quota.limit ?? 0}
+                  </span>
+                )}
               </div>
-              <div className="mt-1 text-[11px] opacity-70">Resets {resetsAt ?? ", "}</div>
+              <div className="mt-1 text-[11px] opacity-70">
+                {quotaUnlimited ? "Chat as much as you need" : `Refills ${resetsAt ?? "daily"}`}
+              </div>
             </div>
             <div className="shrink-0">
               <ProgressRing
                 value={quotaPct}
                 size={74}
                 stroke={8}
-                label={`${quotaPct}%`}
-                sub="left"
+                label={quotaUnlimited ? "∞" : `${quotaPct}%`}
+                sub={quotaUnlimited ? "open" : "left"}
               />
             </div>
           </div>
