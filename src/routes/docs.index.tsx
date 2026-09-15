@@ -15,6 +15,7 @@ export const Route = createFileRoute("/docs/")({
 });
 
 const cards = [
+  { to: "/docs/check-in", icon: PhoneCall, title: "Check-In", body: "We call your loved one and tell you how they're doing." },
   { to: "/docs/companion", icon: MessageCircleHeart, title: "Companion", body: "A warm AI chat that's always awake." },
   { to: "/docs/listeners", icon: PhoneCall, title: "Listeners", body: "Book a real human to call you." },
   { to: "/docs/family", icon: Users, title: "Family Circle", body: "Invite loved ones. Share care." },
