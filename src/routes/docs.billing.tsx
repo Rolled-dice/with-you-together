@@ -35,6 +35,7 @@ function Page() {
                 <th className="py-2 pr-4">Plan</th>
                 <th className="py-2 pr-4">Seats</th>
                 <th className="py-2 pr-4">Included Check-Ins</th>
+                <th className="py-2 pr-4">Companion chat</th>
                 <th className="py-2">Price (USD)</th>
               </tr>
             </thead>
