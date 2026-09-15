@@ -45,6 +45,7 @@ function Page() {
                   <td className="py-2 pr-4 font-semibold">{p.name}</td>
                   <td className="py-2 pr-4">{p.seats}</td>
                   <td className="py-2 pr-4">{p.minutes}</td>
+                  <td className="py-2 pr-4">{p.ai}</td>
                   <td className="py-2">{p.usd}/mo</td>
                 </tr>
               ))}
