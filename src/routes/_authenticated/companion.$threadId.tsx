@@ -104,7 +104,7 @@ function ChatSurface({
     onError: (err) => {
       const msg = (err as Error).message || "";
       if (msg.includes("quota_exceeded") || msg.includes("429")) {
-        toast.error("You've hit your monthly Companion limit. Upgrade to keep chatting.");
+        toast.error("You've used today's Companion messages. They refill tomorrow, or upgrade to Care Plus.");
       }
       console.error("[chat]", err);
     },
