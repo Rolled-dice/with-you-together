@@ -38,8 +38,8 @@ function Page() {
           items={[
             { title: "Create your account", body: "Sign up with email or Google. No card needed for the trial." },
             { title: "Tell us a little about you", body: "A short onboarding sets your tone and reminders." },
-            { title: "Pick a plan (or stay on the trial)", body: "Together, Family, or Care | switch anytime." },
-            { title: "Invite your family", body: "Send an invite link. Everyone shares your session minutes." },
+            { title: "Pick a plan (or stay on the trial)", body: "Care at $49 or Care Plus at $79, switch anytime." },
+            { title: "Invite your family", body: "Send an invite link. Everyone shares your monthly Check-Ins." },
           ]}
         />
         <TryItNow to="/auth" label="Create my account" />

@@ -102,37 +102,26 @@ const features: {
 
 const plans = [
   {
-    name: "Together",
-    price: "$8.99",
-    note: "For one person finding their footing",
+    name: "Care",
+    price: "$49",
+    note: "For one loved one you want to keep an eye on",
     features: [
-      "1 member",
-      "4 listener calls a month",
-      "Companion chat & mood check-ins",
-      "4 free reschedules",
+      "18 Check-In calls a month",
+      "15 minutes per call",
+      "Family dashboard updates after every call",
+      "Companion chat & gentle reminders",
     ],
   },
   {
-    name: "Family",
-    price: "$15.99",
-    note: "For a small circle looking out for each other",
+    name: "Care Plus",
+    price: "$79",
+    note: "For families sharing the care between them",
     highlight: true,
     features: [
-      "Up to 3 members",
-      "12 listener calls a month",
-      "Shared circle & check-ins",
-      "8 free reschedules",
-    ],
-  },
-  {
-    name: "Care",
-    price: "$36.99",
-    note: "For elders and long-distance families",
-    features: [
-      "Up to 4 members",
-      "24 listener calls a month",
-      "Priority booking",
-      "12 free reschedules",
+      "30 Check-In calls a month",
+      "15 minutes per call",
+      "Shared circle, up to 5 people",
+      "On-demand Check-Ins when a day feels hard",
     ],
   },
 ];
