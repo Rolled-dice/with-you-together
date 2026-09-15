@@ -143,8 +143,8 @@ function ChatSurface({
           }
         >
           {outOfQuota
-            ? `You've used all ${quota.limit} Companion messages this month. Upgrade your Care Membership in Settings to continue.`
-            : `${quota.remaining} of ${quota.limit} Companion messages left this month.`}
+            ? `You've used today's ${quota.limit} Companion messages. They refill tomorrow, or upgrade to Care Plus in Settings for unlimited chats.`
+            : `${quota.remaining} of ${quota.limit} Companion messages left today.`}
         </div>
       )}
       <Conversation className="flex-1">
