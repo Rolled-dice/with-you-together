@@ -249,8 +249,11 @@ function MemberDashboard() {
   const tierLabel = TIER_LABEL[tier] ?? "No active plan";
   const { text: greetText, icon: GreetIcon } = greeting();
 
+  const quotaUnlimited = !!quota && quota.unlimited;
   const quotaPct = quota
-    ? Math.min(100, Math.round((quota.remaining / Math.max(1, quota.limit)) * 100))
+    ? quotaUnlimited
+      ? 100
+      : Math.min(100, Math.round(((quota.remaining ?? 0) / Math.max(1, quota.limit ?? 1)) * 100))
     : 0;
   const resetsAt = quota
     ? new Date(quota.resets_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })
