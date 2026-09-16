@@ -491,14 +491,29 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-6 py-10 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} SomeoneNear · Checking in when they can't.</p>
+        <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-5 px-6 py-10 text-sm text-muted-foreground">
           <a
-            href="mailto:care@someonenear.com"
-            className="inline-flex items-center gap-2 transition-colors hover:text-primary"
+            href="https://auraplusplus.com/projects/someonenear"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View this project on Aura++"
           >
-            <Mail className="h-4 w-4" /> care@someonenear.com
+            <img
+              src="https://auraplusplus.com/images/badges/featured-on-light.svg"
+              alt="Featured on Aura++"
+              width={265}
+              height={58}
+            />
           </a>
+          <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} SomeoneNear · Checking in when they can't.</p>
+            <a
+              href="mailto:care@someonenear.com"
+              className="inline-flex items-center gap-2 transition-colors hover:text-primary"
+            >
+              <Mail className="h-4 w-4" /> care@someonenear.com
+            </a>
+          </div>
         </div>
       </footer>
     </div>
