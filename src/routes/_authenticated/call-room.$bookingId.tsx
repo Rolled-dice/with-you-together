@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { JsonLd } from "@/components/json-ld";
 import { PreCallCheck } from "@/components/call/PreCallCheck";
 import { CallRoom } from "@/components/call/CallRoom";
 import { useChimeMeeting } from "@/hooks/useChimeMeeting";
@@ -18,6 +19,18 @@ export const Route = createFileRoute("/_authenticated/call-room/$bookingId")({
   component: ChimeCallPage,
 });
 
+const DIALER_SCHEMA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      name: "SomeoneNear Web Dialer",
+      applicationCategory: "CommunicationApplication",
+      operatingSystem: "WebBrowser",
+    },
+  ],
+};
+
 function ChimeCallPage() {
   const { bookingId } = Route.useParams();
   const meeting = useChimeMeeting(bookingId);
@@ -33,6 +46,7 @@ function ChimeCallPage() {
 
   return (
     <AppShell>
+      <JsonLd data={DIALER_SCHEMA} />
       <PageHeader
         eyebrow="Session"
         title="Chime session room"
