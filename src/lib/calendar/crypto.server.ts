@@ -3,6 +3,10 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
+// crypto.subtle wants a BufferSource; a Uint8Array's backing buffer satisfies it
+// across TS lib versions without the ArrayBufferLike variance complaint.
+const buf = (u: Uint8Array): ArrayBuffer => u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength) as ArrayBuffer;
+
 function b64urlEncode(bytes: Uint8Array): string {
   let bin = "";
   for (const b of bytes) bin += String.fromCharCode(b);
@@ -17,7 +21,7 @@ function b64urlDecode(s: string): Uint8Array {
 }
 
 async function aesKey(keyMaterial: string): Promise<CryptoKey> {
-  const digest = await crypto.subtle.digest("SHA-256", enc.encode(keyMaterial));
+  const digest = await crypto.subtle.digest("SHA-256", buf(enc.encode(keyMaterial)));
   return crypto.subtle.importKey("raw", digest, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
 
@@ -25,7 +29,7 @@ export async function encryptSecret(plaintext: string, keyMaterial: string): Pro
   const key = await aesKey(keyMaterial);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = new Uint8Array(
-    await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(plaintext)),
+    await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, buf(enc.encode(plaintext))),
   );
   return `${b64urlEncode(iv)}.${b64urlEncode(ct)}`;
 }
@@ -35,9 +39,9 @@ export async function decryptSecret(payload: string, keyMaterial: string): Promi
   if (!ivPart || !ctPart) throw new Error("Malformed ciphertext");
   const key = await aesKey(keyMaterial);
   const pt = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: b64urlDecode(ivPart) },
+    { name: "AES-GCM", iv: buf(b64urlDecode(ivPart)) },
     key,
-    b64urlDecode(ctPart),
+    buf(b64urlDecode(ctPart)),
   );
   return dec.decode(pt);
 }
@@ -45,7 +49,7 @@ export async function decryptSecret(payload: string, keyMaterial: string): Promi
 async function hmacKey(keyMaterial: string): Promise<CryptoKey> {
   return crypto.subtle.importKey(
     "raw",
-    enc.encode(keyMaterial),
+    buf(enc.encode(keyMaterial)),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign", "verify"],
@@ -56,7 +60,7 @@ export async function signState(payload: object, keyMaterial: string, ttlMs = 60
   const body = { ...payload, exp: Date.now() + ttlMs };
   const bodyB64 = b64urlEncode(enc.encode(JSON.stringify(body)));
   const key = await hmacKey(keyMaterial);
-  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(bodyB64)));
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, buf(enc.encode(bodyB64))));
   return `${bodyB64}.${b64urlEncode(sig)}`;
 }
 
@@ -64,7 +68,7 @@ export async function verifyState(token: string, keyMaterial: string): Promise<R
   const [bodyB64, sigB64] = token.split(".");
   if (!bodyB64 || !sigB64) return null;
   const key = await hmacKey(keyMaterial);
-  const ok = await crypto.subtle.verify("HMAC", key, b64urlDecode(sigB64), enc.encode(bodyB64));
+  const ok = await crypto.subtle.verify("HMAC", key, buf(b64urlDecode(sigB64)), buf(enc.encode(bodyB64)));
   if (!ok) return null;
   try {
     const body = JSON.parse(dec.decode(b64urlDecode(bodyB64))) as Record<string, unknown>;
