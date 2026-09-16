@@ -1,3 +1,5 @@
+import { JsonLd } from "@/components/json-ld";
+
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -11,5 +13,5 @@ const organizationSchema = {
 };
 
 export function OrganizationSchema() {
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />;
+  return <JsonLd data={organizationSchema} />;
 }
