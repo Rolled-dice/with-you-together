@@ -34,6 +34,12 @@ export const createReminder = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+    try {
+      const { syncNow } = await import("@/lib/calendar/sync.server");
+      await syncNow();
+    } catch (e) {
+      console.error("[calendar-sync] createReminder", e);
+    }
     return row;
   });
 
@@ -46,6 +52,12 @@ export const completeReminder = createServerFn({ method: "POST" })
       .update({ status: "done", completed_at: new Date().toISOString() })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    try {
+      const { syncNow } = await import("@/lib/calendar/sync.server");
+      await syncNow();
+    } catch (e) {
+      console.error("[calendar-sync] reminder mutation", e);
+    }
     return { ok: true };
   });
 
@@ -55,5 +67,11 @@ export const deleteReminder = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("reminders").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    try {
+      const { syncNow } = await import("@/lib/calendar/sync.server");
+      await syncNow();
+    } catch (e) {
+      console.error("[calendar-sync] reminder mutation", e);
+    }
     return { ok: true };
   });
