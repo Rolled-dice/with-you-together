@@ -97,6 +97,11 @@ test.describe("authenticated smoke", () => {
     await expect(page.getByRole("heading").first()).toBeVisible({ timeout: 15_000 });
   });
 
+  test("reminders page shows the Google Calendar connect card", async ({ page }) => {
+    await page.goto("/reminders");
+    await expect(page.getByText("Google Calendar").first()).toBeVisible({ timeout: 15_000 });
+  });
+
   test("admin feedback screen renders (either inbox or admins-only gate)", async ({ page }) => {
     await page.goto("/admin/feedback");
     await expect(
