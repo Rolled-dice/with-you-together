@@ -169,15 +169,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2">
-      <span className="inline-flex h-9 w-9 items-center justify-center rounded-brand bg-brand-primary text-primary-foreground shadow-sm">
-        <HeartIcon className="h-5 w-5" strokeWidth={2.4} />
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-brand bg-primary text-primary-foreground">
+        <HeartIcon className="h-5 w-5" weight="fill" />
       </span>
-      {!compact && (
-        <span className="text-lg font-semibold tracking-tight text-foreground">SomeoneNear</span>
-      )}
-      {compact && (
-        <span className="text-lg font-semibold tracking-tight text-foreground">SomeoneNear</span>
-      )}
+      <span className="font-display text-lg font-medium tracking-tight text-foreground">
+        SomeoneNear
+      </span>
     </Link>
   );
 }
@@ -199,18 +196,14 @@ export function PageHeader({
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4 animate-slide-in-up">
       <div>
         {eyebrow && (
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-brand-accent">
-            {eyebrow}
-          </p>
+          <p className="text-sm font-medium text-brand-accent">{eyebrow}</p>
         )}
-        {slogan && (
-          <p className="mt-1 text-[13px] font-medium italic text-brand-accent/80">
-            {slogan}
-          </p>
-        )}
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h1 className="mt-1 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
           {title}
         </h1>
+        {slogan && (
+          <p className="mt-1 text-sm text-muted-foreground">{slogan}</p>
+        )}
         {description && (
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
             {description}
