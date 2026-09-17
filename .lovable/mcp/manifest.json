@@ -36,7 +36,7 @@
       {
         "name": "list_membership_plans",
         "title": "List SomeoneNear membership plans",
-        "description": "Returns SomeoneNear's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data, safe for anyone to read.",
+        "description": "Returns SomeoneNear's two Care Membership plans with monthly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data, safe for anyone to read.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
