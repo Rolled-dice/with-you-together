@@ -69,6 +69,8 @@ export type Database = {
           previous_price_id: string | null
           previous_tier: string | null
           price_id: string | null
+          provider: string
+          razorpay_subscription_id: string | null
           status: string | null
           stripe_event_id: string | null
           stripe_invoice_id: string | null
@@ -87,6 +89,8 @@ export type Database = {
           previous_price_id?: string | null
           previous_tier?: string | null
           price_id?: string | null
+          provider?: string
+          razorpay_subscription_id?: string | null
           status?: string | null
           stripe_event_id?: string | null
           stripe_invoice_id?: string | null
@@ -105,6 +109,8 @@ export type Database = {
           previous_price_id?: string | null
           previous_tier?: string | null
           price_id?: string | null
+          provider?: string
+          razorpay_subscription_id?: string | null
           status?: string | null
           stripe_event_id?: string | null
           stripe_invoice_id?: string | null
@@ -1344,6 +1350,8 @@ export type Database = {
           payload: Json | null
           processed: boolean
           processed_at: string | null
+          provider: string
+          razorpay_subscription_id: string | null
           received_at: string
           stripe_customer_id: string | null
           stripe_event_id: string
@@ -1358,6 +1366,8 @@ export type Database = {
           payload?: Json | null
           processed?: boolean
           processed_at?: string | null
+          provider?: string
+          razorpay_subscription_id?: string | null
           received_at?: string
           stripe_customer_id?: string | null
           stripe_event_id: string
@@ -1372,6 +1382,8 @@ export type Database = {
           payload?: Json | null
           processed?: boolean
           processed_at?: string | null
+          provider?: string
+          razorpay_subscription_id?: string | null
           received_at?: string
           stripe_customer_id?: string | null
           stripe_event_id?: string
@@ -1390,9 +1402,12 @@ export type Database = {
           id: string
           price_id: string
           product_id: string
+          provider: string
+          razorpay_customer_id: string | null
+          razorpay_subscription_id: string | null
           status: string
-          stripe_customer_id: string
-          stripe_subscription_id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1405,9 +1420,12 @@ export type Database = {
           id?: string
           price_id: string
           product_id: string
+          provider?: string
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
           status?: string
-          stripe_customer_id: string
-          stripe_subscription_id: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1420,9 +1438,12 @@ export type Database = {
           id?: string
           price_id?: string
           product_id?: string
+          provider?: string
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
           status?: string
-          stripe_customer_id?: string
-          stripe_subscription_id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
         }
