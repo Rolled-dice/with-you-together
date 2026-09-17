@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,6 +7,7 @@ import { BellRingingIcon, CheckIcon, SpinnerGapIcon, PillIcon, PlusIcon, TrashIc
 
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { MedicationOnboarding } from "@/components/medication-onboarding";
+import { GoogleCalendarCard } from "@/components/google-calendar-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,10 +56,25 @@ const RECURRENCES = [
 type ReminderRow = { id: string; title: string; due_at: string; category: string; recurrence: string | null };
 
 function RemindersPage() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const flag = params.get("calendar");
+    if (flag === "connected") gentleToast("Google Calendar connected", "Your reminders will sync from now on.");
+    else if (flag === "error") gentleProblem("We could not connect Google Calendar", "Please try again.");
+    if (flag) {
+      params.delete("calendar");
+      const qs = params.toString();
+      window.history.replaceState({}, "", window.location.pathname + (qs ? `?${qs}` : ""));
+    }
+  }, []);
+
   return (
     <AppShell>
       <div className="mx-auto max-w-5xl">
         <PageHeader eyebrow="Care, made lighter" title="Medication & reminders" description="A calm place to remember what matters, for you or someone you love." />
+        <div className="mb-8">
+          <GoogleCalendarCard />
+        </div>
         <Tabs defaultValue="medication" className="space-y-8">
           <TabsList className="grid h-auto w-full grid-cols-2 rounded-2xl bg-surface p-1.5 sm:max-w-xl">
             <TabsTrigger value="medication" className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><PillIcon className="mr-2 size-5" /> Medication</TabsTrigger>

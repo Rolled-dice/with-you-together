@@ -61,6 +61,12 @@ export const createMedication = createServerFn({ method: "POST" })
     }
     // Seed today's dose logs
     await seedDoseLogs(context.supabase, row.id);
+    try {
+      const { syncNow } = await import("@/lib/calendar/sync.server");
+      await syncNow();
+    } catch (e) {
+      console.error("[calendar-sync] createMedication", e);
+    }
     return row;
   });
 
@@ -73,6 +79,12 @@ export const deleteMedication = createServerFn({ method: "POST" })
       .update({ is_active: false })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    try {
+      const { syncNow } = await import("@/lib/calendar/sync.server");
+      await syncNow();
+    } catch (e) {
+      console.error("[calendar-sync] medication mutation", e);
+    }
     return { ok: true };
   });
 
@@ -157,6 +169,12 @@ export const logDose = createServerFn({ method: "POST" })
       })
       .eq("id", data.dose_id);
     if (error) throw new Error(error.message);
+    try {
+      const { syncNow } = await import("@/lib/calendar/sync.server");
+      await syncNow();
+    } catch (e) {
+      console.error("[calendar-sync] medication mutation", e);
+    }
     return { ok: true };
   });
 
