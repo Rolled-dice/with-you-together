@@ -1,5 +1,8 @@
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import {
   HeartIcon,
@@ -33,6 +36,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getPublicStats } from "@/lib/stats.functions";
 import { useLiveStats } from "@/hooks/use-live-stats";
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const TITLE = "SomeoneNear";
 const DESCRIPTION =
@@ -144,6 +149,12 @@ function Landing() {
   const stats = useLiveStats(Route.useLoaderData());
   const [signedIn, setSignedIn] = useState(false);
 
+  const rootRef = useRef<HTMLDivElement>(null);
+  const statsSectionRef = useRef<HTMLElement>(null);
+  const statValueRefs = useRef<Array<HTMLParagraphElement | null>>([]);
+  const trustCardsRef = useRef<HTMLDivElement>(null);
+  const hasCountedRef = useRef(false);
+
   useEffect(() => {
     let cancelled = false;
     supabase.auth.getSession().then(({ data }) => {
@@ -158,33 +169,169 @@ function Landing() {
     };
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
-    if (!els.length) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      els.forEach((el) => el.classList.add("in-view"));
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.classList.add("in-view");
-            io.unobserve(e.target);
+  // Unified scroll reveal: one gentle fade + rise per section, once.
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(
+        {
+          reduceMotion: "(prefers-reduced-motion: reduce)",
+          fullMotion: "(prefers-reduced-motion: no-preference)",
+        },
+        (context) => {
+          const { reduceMotion } = context.conditions as { reduceMotion: boolean };
+          const sections = gsap.utils.toArray<HTMLElement>("[data-reveal]");
+          if (!sections.length) return;
+
+          if (reduceMotion) {
+            gsap.set(sections, { autoAlpha: 1, y: 0 });
+            return;
           }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -60px 0px" },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+
+          // Own the hidden initial state synchronously (useGSAP runs in a
+          // layout effect, before paint) so SSR-visible sections don't flash.
+          gsap.set(sections, { autoAlpha: 0, y: 16 });
+
+          ScrollTrigger.batch(sections, {
+            start: "top 88%",
+            once: true,
+            onEnter: (batch) =>
+              gsap.to(batch, {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.5,
+                ease: "power2.out",
+                stagger: 0.08,
+                overwrite: true,
+              }),
+          });
+
+          // Reveal anything already in view on load (batch's onEnter fires on
+          // the first refresh for elements above the start line).
+          ScrollTrigger.refresh();
+        },
+      );
+      return () => mm.revert();
+    },
+    { scope: rootRef },
+  );
+
+  // Count-up settle on the live-stats numbers, once, on first reveal.
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(
+        {
+          reduceMotion: "(prefers-reduced-motion: reduce)",
+          fullMotion: "(prefers-reduced-motion: no-preference)",
+        },
+        (context) => {
+          const { reduceMotion } = context.conditions as { reduceMotion: boolean };
+          if (reduceMotion || !statsSectionRef.current) return;
+
+          const targets = [stats.members, stats.sessions, stats.checkins];
+          ScrollTrigger.create({
+            trigger: statsSectionRef.current,
+            start: "top 85%",
+            once: true,
+            onEnter: () => {
+              if (hasCountedRef.current) return;
+              hasCountedRef.current = true;
+              targets.forEach((target, i) => {
+                const el = statValueRefs.current[i];
+                if (!el) return;
+                const proxy = { val: Math.round(target * 0.7) };
+                gsap.to(proxy, {
+                  val: target,
+                  duration: 1,
+                  ease: "power2.out",
+                  onUpdate: () => {
+                    el.textContent = formatCount(Math.round(proxy.val));
+                  },
+                });
+              });
+            },
+          });
+        },
+      );
+      return () => mm.revert();
+    },
+    { scope: rootRef, dependencies: [] },
+  );
+
+  // Gentle lift-on-hover for trust cards and primary CTAs (fine pointer,
+  // full motion only). No change to the shared Button/Card components.
+  useGSAP(
+    (_context, contextSafe) => {
+      const mm = gsap.matchMedia();
+      mm.add(
+        {
+          hoverable: "(hover: hover) and (pointer: fine)",
+          fullMotion: "(prefers-reduced-motion: no-preference)",
+        },
+        (context) => {
+          const { hoverable, fullMotion } = context.conditions as {
+            hoverable: boolean;
+            fullMotion: boolean;
+          };
+          if (!hoverable || !fullMotion || !contextSafe) return;
+
+          const cards = trustCardsRef.current
+            ? Array.from(trustCardsRef.current.children)
+            : [];
+          const ctas = gsap.utils.toArray<HTMLElement>("[data-cta-lift]");
+          const targets = [...cards, ...ctas] as HTMLElement[];
+          if (!targets.length) return;
+
+          const enter = contextSafe((e: Event) =>
+            gsap.to(e.currentTarget as HTMLElement, {
+              y: -2,
+              boxShadow: "0 12px 24px -12px rgb(43 92 88 / 0.25)",
+              duration: 0.25,
+              ease: "power2.out",
+            }),
+          );
+          const leave = contextSafe((e: Event) =>
+            gsap.to(e.currentTarget as HTMLElement, {
+              y: 0,
+              boxShadow: "0 0px 0px 0px rgb(43 92 88 / 0)",
+              duration: 0.25,
+              ease: "power2.out",
+            }),
+          );
+
+          targets.forEach((t) => {
+            t.addEventListener("pointerenter", enter);
+            t.addEventListener("pointerleave", leave);
+          });
+          return () => {
+            targets.forEach((t) => {
+              t.removeEventListener("pointerenter", enter);
+              t.removeEventListener("pointerleave", leave);
+            });
+          };
+        },
+      );
+      return () => mm.revert();
+    },
+    { scope: rootRef },
+  );
+
+  // Keep stat numbers correct after the one-time count-up when live polls
+  // update them (only relevant after count-up has run).
+  useEffect(() => {
+    if (!hasCountedRef.current) return;
+    const values = [stats.members, stats.sessions, stats.checkins];
+    values.forEach((v, i) => {
+      const el = statValueRefs.current[i];
+      if (el) el.textContent = formatCount(v);
+    });
+  }, [stats]);
 
   const nextStep: "/dashboard" | "/auth" = signedIn ? "/dashboard" : "/auth";
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+    <div ref={rootRef} className="min-h-screen overflow-x-hidden bg-background text-foreground">
       {/* Header */}
       <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-6">
         <Link to="/" className="flex items-center gap-2.5">
@@ -218,7 +365,7 @@ function Landing() {
             the moments when you don't want to be alone.
           </p>
           <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row">
-            <Button asChild size="lg" className="w-full sm:w-auto">
+            <Button asChild size="lg" data-cta-lift className="w-full sm:w-auto">
               <Link to={nextStep}>
                 {signedIn ? "Open SomeoneNear" : "Start your journey"}
                 <ArrowRightIcon className="ml-2 h-4 w-4" />
@@ -266,7 +413,7 @@ function Landing() {
               Before you book anything, here's exactly what happens and who's on the other end.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div ref={trustCardsRef} className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-border bg-surface p-6">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                 <HeadphonesIcon className="h-5 w-5" />
@@ -408,18 +555,24 @@ function Landing() {
         </section>
 
         {/* Quiet live numbers */}
-        <section data-reveal className="grid gap-4 sm:grid-cols-3">
+        <section ref={statsSectionRef} data-reveal className="grid gap-4 sm:grid-cols-3">
           {[
-            { label: "People here", value: formatCount(stats.members) },
-            { label: "Listener calls held", value: formatCount(stats.sessions) },
-            { label: "Check-ins shared", value: formatCount(stats.checkins) },
-          ].map((s) => (
-
+            { label: "People here", value: stats.members },
+            { label: "Listener calls held", value: stats.sessions },
+            { label: "Check-ins shared", value: stats.checkins },
+          ].map((s, i) => (
             <div
               key={s.label}
               className="rounded-xl border border-border bg-surface px-6 py-7 text-center"
             >
-              <p className="font-display text-2xl font-semibold">{s.value}</p>
+              <p
+                ref={(el) => {
+                  statValueRefs.current[i] = el;
+                }}
+                className="font-display text-2xl font-semibold"
+              >
+                {formatCount(s.value)}
+              </p>
               <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
                 {s.label}
               </p>
@@ -439,7 +592,7 @@ function Landing() {
             kindly, whenever it's needed.
           </p>
           <div className="pt-2">
-            <Button asChild size="lg" className="px-8">
+            <Button asChild size="lg" data-cta-lift className="px-8">
               <Link to={nextStep}>Bring someone near</Link>
             </Button>
           </div>
