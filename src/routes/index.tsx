@@ -188,16 +188,16 @@ function Landing() {
       {/* Header */}
       <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-6">
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <HeartIcon className="h-5 w-5" strokeWidth={2.2} fill="currentColor" />
+          <span className="flex h-9 w-9 items-center justify-center rounded-brand bg-primary text-primary-foreground">
+            <HeartIcon className="h-4.5 w-4.5" weight="fill" />
           </span>
-          <span className="font-display text-lg font-semibold tracking-tight">SomeoneNear</span>
+          <span className="font-sans text-lg font-semibold tracking-tight">SomeoneNear</span>
         </Link>
         <div className="flex items-center gap-1.5">
-          <Button asChild variant="ghost" className="rounded-full">
+          <Button asChild variant="ghost">
             <Link to="/docs">Docs</Link>
           </Button>
-          <Button asChild className="rounded-full">
+          <Button asChild>
             <Link to={nextStep}>{signedIn ? "Open app" : "Start gently"}</Link>
           </Button>
         </div>
@@ -205,26 +205,26 @@ function Landing() {
 
       <main className="mx-auto w-full max-w-2xl space-y-20 px-6 pb-28">
         {/* Hero */}
-        <section className="space-y-8 pt-8 text-center">
-          <p className="inline-flex items-center gap-2.5 rounded-full border border-border bg-surface px-4 py-2 text-xs text-muted-foreground">
+        <section data-reveal className="space-y-6 pt-8">
+          <p className="inline-flex items-center gap-2.5 rounded-brand border border-border bg-surface px-4 py-2 text-xs text-muted-foreground">
             <NudgeDot />
             A quiet place to be heard
           </p>
-          <h1 className="font-display text-4xl font-semibold leading-[1.15] sm:text-5xl">
+          <h1 className="font-display text-4xl font-medium leading-[1.15] sm:text-5xl">
             Someone near, whenever you don't know who to call
           </h1>
-          <p className="mx-auto max-w-lg text-lg leading-relaxed text-muted-foreground">
+          <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
             SomeoneNear gives you a caring check-in, a real listener, and someone near in
             the moments when you don't want to be alone.
           </p>
-          <div className="flex flex-col items-center gap-3 pt-2 sm:flex-row sm:justify-center">
-            <Button asChild size="lg" className="w-full rounded-2xl px-8 sm:w-auto">
+          <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row">
+            <Button asChild size="lg" className="w-full sm:w-auto">
               <Link to={nextStep}>
                 {signedIn ? "Open SomeoneNear" : "Start your journey"}
                 <ArrowRightIcon className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="ghost" className="w-full rounded-2xl sm:w-auto">
+            <Button asChild size="lg" variant="ghost" className="w-full sm:w-auto">
               <Link to="/docs">See how it works</Link>
             </Button>
           </div>
@@ -267,7 +267,7 @@ function Landing() {
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+            <div className="rounded-xl border border-border bg-surface p-6">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                 <HeadphonesIcon className="h-5 w-5" />
               </span>
@@ -277,7 +277,7 @@ function Landing() {
                 picks up the phone.
               </p>
             </div>
-            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+            <div className="rounded-xl border border-border bg-surface p-6">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                 <PhoneCallIcon className="h-5 w-5" />
               </span>
@@ -287,7 +287,7 @@ function Landing() {
                 to click.
               </p>
             </div>
-            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+            <div className="rounded-xl border border-border bg-surface p-6">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                 <ShieldCheckIcon className="h-5 w-5" />
               </span>
@@ -331,7 +331,7 @@ function Landing() {
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border border-border bg-surface p-8 shadow-gentle">
+            <div className="rounded-xl border border-border bg-surface p-8">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                 <CalendarHeartIcon className="h-5 w-5" />
               </span>
@@ -342,7 +342,7 @@ function Landing() {
                 feeling. Afterwards a short update appears on your family dashboard.
               </p>
             </div>
-            <div className="rounded-3xl border border-border bg-surface p-8 shadow-gentle">
+            <div className="rounded-xl border border-border bg-surface p-8">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                 <PhoneCallIcon className="h-5 w-5" />
               </span>
@@ -377,7 +377,7 @@ function Landing() {
             {features.map(({ icon: Icon, title, body }) => (
               <div
                 key={title}
-                className="rounded-3xl border border-border bg-surface p-6 shadow-gentle transition-transform duration-500 hover:-translate-y-0.5"
+                className="rounded-xl border border-border bg-surface p-6 transition-colors hover:border-primary/40"
               >
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                   <Icon className="h-5 w-5" />
@@ -417,7 +417,7 @@ function Landing() {
 
             <div
               key={s.label}
-              className="rounded-3xl border border-border bg-surface px-6 py-7 text-center shadow-gentle"
+              className="rounded-xl border border-border bg-surface px-6 py-7 text-center"
             >
               <p className="font-display text-2xl font-semibold">{s.value}</p>
               <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
@@ -428,21 +428,18 @@ function Landing() {
         </section>
 
         {/* Campaign line */}
-        <section
-          data-reveal
-          className="space-y-4 rounded-[2.5rem] gradient-sunrise px-8 py-12 text-center shadow-soft"
-        >
-          <h2 className="font-display text-3xl font-semibold text-ink">
+        <section data-reveal className="space-y-4 rounded-xl border border-primary/20 bg-primary/5 px-8 py-12 text-center">
+          <h2 className="font-display text-3xl font-medium text-foreground">
             You can't always be there.
             <br />
             But what if someone could?
           </h2>
-          <p className="mx-auto max-w-md leading-relaxed text-ink/75">
+          <p className="mx-auto max-w-md leading-relaxed text-muted-foreground">
             People still care. Life just got busy. SomeoneNear stands in the gap, quietly,
             kindly, whenever it's needed.
           </p>
           <div className="pt-2">
-            <Button asChild size="lg" className="rounded-2xl px-8">
+            <Button asChild size="lg" className="px-8">
               <Link to={nextStep}>Bring someone near</Link>
             </Button>
           </div>
@@ -460,7 +457,7 @@ function Landing() {
             {plans.map((p) => (
               <div
                 key={p.name}
-                className={`relative rounded-3xl border p-6 shadow-gentle ${
+                className={`relative rounded-xl border p-6 ${
                   p.highlight ? "border-primary/45 bg-surface" : "border-border bg-card"
                 }`}
               >
@@ -513,7 +510,7 @@ function Landing() {
 
         {/* Safety + contact */}
         <section data-reveal className="space-y-4">
-          <div className="flex items-start gap-4 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+          <div className="flex items-start gap-4 rounded-xl border border-border bg-surface p-6">
             <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <p className="text-sm leading-relaxed text-muted-foreground">
               Private by default. Your conversations are yours; family members see only what
@@ -521,7 +518,7 @@ function Landing() {
               numbers first.
             </p>
           </div>
-          <div className="flex flex-col gap-3 rounded-3xl border border-border bg-surface p-6 shadow-gentle sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-4">
               <ChartLineIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
               <p className="text-sm leading-relaxed text-muted-foreground">
