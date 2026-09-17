@@ -39,7 +39,9 @@ import { formatCount } from "@/lib/format";
 import { getPublicStats } from "@/lib/stats.functions";
 import { useLiveStats } from "@/hooks/use-live-stats";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(useGSAP, ScrollTrigger);
+}
 
 const TITLE = "SomeoneNear";
 const DESCRIPTION =

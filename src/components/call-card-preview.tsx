@@ -5,7 +5,9 @@ import { useGSAP } from "@gsap/react";
 
 import { cn } from "@/lib/utils";
 
-gsap.registerPlugin(useGSAP);
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(useGSAP);
+}
 
 /**
  * A calm, non-technical preview of what a listener call feels like.
