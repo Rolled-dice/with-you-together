@@ -49,9 +49,12 @@ import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authenticated/admin.calls'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicPaymentsRazorpayWebhookRouteImport } from './routes/api/public/payments/razorpay-webhook'
 import { Route as ApiPublicHooksTelnyxRouteImport } from './routes/api/public/hooks/telnyx'
 import { Route as ApiPublicHooksSendLaterRouteImport } from './routes/api/public/hooks/send-later'
 import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
+import { Route as ApiPublicHooksCalendarSyncRouteImport } from './routes/api/public/hooks/calendar-sync'
+import { Route as ApiPublicGoogleCalendarCallbackRouteImport } from './routes/api/public/google-calendar/callback'
 
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
@@ -260,6 +263,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPaymentsRazorpayWebhookRoute =
+  ApiPublicPaymentsRazorpayWebhookRouteImport.update({
+    id: '/api/public/payments/razorpay-webhook',
+    path: '/api/public/payments/razorpay-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksTelnyxRoute = ApiPublicHooksTelnyxRouteImport.update({
   id: '/api/public/hooks/telnyx',
   path: '/api/public/hooks/telnyx',
@@ -275,6 +284,18 @@ const ApiPublicHooksCallSlaRoute = ApiPublicHooksCallSlaRouteImport.update({
   path: '/api/public/hooks/call-sla',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksCalendarSyncRoute =
+  ApiPublicHooksCalendarSyncRouteImport.update({
+    id: '/api/public/hooks/calendar-sync',
+    path: '/api/public/hooks/calendar-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicGoogleCalendarCallbackRoute =
+  ApiPublicGoogleCalendarCallbackRouteImport.update({
+    id: '/api/public/google-calendar/callback',
+    path: '/api/public/google-calendar/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -315,9 +336,12 @@ export interface FileRoutesByFullPath {
   '/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion/': typeof AuthenticatedCompanionIndexRoute
+  '/api/public/google-calendar/callback': typeof ApiPublicGoogleCalendarCallbackRoute
+  '/api/public/hooks/calendar-sync': typeof ApiPublicHooksCalendarSyncRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
+  '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -357,9 +381,12 @@ export interface FileRoutesByTo {
   '/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/companion': typeof AuthenticatedCompanionIndexRoute
+  '/api/public/google-calendar/callback': typeof ApiPublicGoogleCalendarCallbackRoute
+  '/api/public/hooks/calendar-sync': typeof ApiPublicHooksCalendarSyncRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
+  '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -403,9 +430,12 @@ export interface FileRoutesById {
   '/_authenticated/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
   '/_authenticated/companion/': typeof AuthenticatedCompanionIndexRoute
+  '/api/public/google-calendar/callback': typeof ApiPublicGoogleCalendarCallbackRoute
+  '/api/public/hooks/calendar-sync': typeof ApiPublicHooksCalendarSyncRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
+  '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -449,9 +479,12 @@ export interface FileRouteTypes {
     | '/agent/console'
     | '/companion/$threadId'
     | '/companion/'
+    | '/api/public/google-calendar/callback'
+    | '/api/public/hooks/calendar-sync'
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
+    | '/api/public/payments/razorpay-webhook'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -491,9 +524,12 @@ export interface FileRouteTypes {
     | '/agent/console'
     | '/companion/$threadId'
     | '/companion'
+    | '/api/public/google-calendar/callback'
+    | '/api/public/hooks/calendar-sync'
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
+    | '/api/public/payments/razorpay-webhook'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -536,9 +572,12 @@ export interface FileRouteTypes {
     | '/_authenticated/agent/console'
     | '/_authenticated/companion/$threadId'
     | '/_authenticated/companion/'
+    | '/api/public/google-calendar/callback'
+    | '/api/public/hooks/calendar-sync'
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
+    | '/api/public/payments/razorpay-webhook'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -553,9 +592,12 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicGoogleCalendarCallbackRoute: typeof ApiPublicGoogleCalendarCallbackRoute
+  ApiPublicHooksCalendarSyncRoute: typeof ApiPublicHooksCalendarSyncRoute
   ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
   ApiPublicHooksSendLaterRoute: typeof ApiPublicHooksSendLaterRoute
   ApiPublicHooksTelnyxRoute: typeof ApiPublicHooksTelnyxRoute
+  ApiPublicPaymentsRazorpayWebhookRoute: typeof ApiPublicPaymentsRazorpayWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -841,6 +883,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/razorpay-webhook': {
+      id: '/api/public/payments/razorpay-webhook'
+      path: '/api/public/payments/razorpay-webhook'
+      fullPath: '/api/public/payments/razorpay-webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsRazorpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/telnyx': {
       id: '/api/public/hooks/telnyx'
       path: '/api/public/hooks/telnyx'
@@ -860,6 +909,20 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/call-sla'
       fullPath: '/api/public/hooks/call-sla'
       preLoaderRoute: typeof ApiPublicHooksCallSlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/calendar-sync': {
+      id: '/api/public/hooks/calendar-sync'
+      path: '/api/public/hooks/calendar-sync'
+      fullPath: '/api/public/hooks/calendar-sync'
+      preLoaderRoute: typeof ApiPublicHooksCalendarSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/google-calendar/callback': {
+      id: '/api/public/google-calendar/callback'
+      path: '/api/public/google-calendar/callback'
+      fullPath: '/api/public/google-calendar/callback'
+      preLoaderRoute: typeof ApiPublicGoogleCalendarCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -964,9 +1027,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicGoogleCalendarCallbackRoute: ApiPublicGoogleCalendarCallbackRoute,
+  ApiPublicHooksCalendarSyncRoute: ApiPublicHooksCalendarSyncRoute,
   ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
   ApiPublicHooksSendLaterRoute: ApiPublicHooksSendLaterRoute,
   ApiPublicHooksTelnyxRoute: ApiPublicHooksTelnyxRoute,
+  ApiPublicPaymentsRazorpayWebhookRoute: ApiPublicPaymentsRazorpayWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

@@ -36,6 +36,7 @@ import {
 import {
   createBillingPortalSession,
   getMySubscription,
+  cancelRazorpaySubscription,
 } from "@/lib/billing.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { useEffect, useState } from "react";
@@ -74,6 +75,7 @@ function SettingsPage() {
   const profileFn = useServerFn(getMyProfile);
   const updateFn = useServerFn(updateMyProfile);
   const portalFn = useServerFn(createBillingPortalSession);
+  const cancelRzpFn = useServerFn(cancelRazorpaySubscription);
   const subFn = useServerFn(getMySubscription);
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -171,6 +173,30 @@ function SettingsPage() {
     onError: (e) => toast.error((e as Error).message),
   });
 
+  // Razorpay has no hosted billing portal, so cancellation is a direct action
+  // (keeps access until the paid period ends). The webhook records the change.
+  const cancelRzpMut = useMutation({
+    mutationFn: async () => {
+      const res = await cancelRzpFn({
+        data: { environment: getStripeEnvironment() },
+      });
+      if ("error" in res) throw new Error(res.error);
+      return res;
+    },
+    onSuccess: () => {
+      toast.success("Your membership will end at the close of this billing period.");
+      qc.invalidateQueries({ queryKey: ["my-subscription"] });
+      refetchSub();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  // Route "manage/cancel" to the provider that owns the active subscription.
+  const isRazorpaySub =
+    (subscription as { provider?: string } | null | undefined)?.provider === "razorpay";
+  const manageMut = isRazorpaySub ? cancelRzpMut : portalMut;
+  const manageLabel = isRazorpaySub ? "Cancel membership" : "Manage or cancel";
+
   async function handleSignOut() {
     await supabase.auth.signOut();
     qc.clear();
@@ -245,14 +271,14 @@ function SettingsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => portalMut.mutate()}
-                  disabled={portalMut.isPending}
+                  onClick={() => manageMut.mutate()}
+                  disabled={manageMut.isPending}
                   className="rounded-brand"
                 >
-                  {portalMut.isPending ? (
+                  {manageMut.isPending ? (
                     <SpinnerGapIcon className="mr-2 h-3 w-3 animate-spin" />
                   ) : null}
-                  Manage or cancel
+                  {manageLabel}
                 </Button>
               </div>
             ) : null}
@@ -340,21 +366,26 @@ function SettingsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => portalMut.mutate()}
-                        disabled={portalMut.isPending}
+                        onClick={() => manageMut.mutate()}
+                        disabled={manageMut.isPending}
                         className="rounded-brand"
                       >
-                        {portalMut.isPending ? (
+                        {manageMut.isPending ? (
                           <SpinnerGapIcon className="mr-2 h-3 w-3 animate-spin" />
                         ) : null}
-                        Manage or cancel
+                        {manageLabel}
                       </Button>
                     ) : (
                       <Button
                         size="sm"
                         onClick={() =>
                           hasPaidSub
-                            ? portalMut.mutate()
+                            ? isRazorpaySub
+                              ? navigate({
+                                  to: "/checkout",
+                                  search: { price: priceId as any },
+                                })
+                              : portalMut.mutate()
                             : navigate({
                                 to: "/checkout",
                                 search: { price: priceId as any },
@@ -364,7 +395,9 @@ function SettingsPage() {
                       >
                         <SparkleIcon className="mr-2 h-3 w-3" />
                         {hasPaidSub
-                          ? "Switch in billing portal"
+                          ? isRazorpaySub
+                            ? "Switch plan"
+                            : "Switch in billing portal"
                           : showTrialCTA
                             ? "Start 7-day free trial"
                             : "Choose plan"}
