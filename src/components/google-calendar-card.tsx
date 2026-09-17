@@ -42,9 +42,9 @@ export function GoogleCalendarCard() {
       <div className="flex items-start gap-3">
         <div className="mt-0.5 text-primary">
           {data?.connected ? (
-            <CalendarCheck className="size-5" />
+            <CalendarCheckIcon className="size-5" />
           ) : (
-            <CalendarPlus className="size-5" />
+            <CalendarPlusIcon className="size-5" />
           )}
         </div>
         <div className="flex-1">
