@@ -172,7 +172,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
       <span className="inline-flex h-9 w-9 items-center justify-center rounded-brand bg-primary text-primary-foreground">
         <HeartIcon className="h-5 w-5" weight="fill" />
       </span>
-      <span className="font-display text-lg font-medium tracking-tight text-foreground">
+      <span className="font-sans text-lg font-semibold tracking-tight text-foreground">
         SomeoneNear
       </span>
     </Link>
