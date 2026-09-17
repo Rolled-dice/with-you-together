@@ -9,13 +9,17 @@ import {
   markNotificationsRead,
 } from "@/lib/notifications.functions";
 import { cn } from "@/lib/utils";
+import { NotificationList } from "@/components/notifications/notification-list";
 
-const SEVERITY_CLASS: Record<string, string> = {
-  info: "border-border",
-  warning: "border-amber-300 bg-amber-50/60",
-  critical: "border-red-300 bg-red-50/60",
-};
-
+/**
+ * CONTAINER (data + platform coupled — Tier 2/3, see
+ * docs/architecture/expo-readiness.md). Owns the Supabase realtime
+ * subscription, the server-fn data layer, and the web dropdown/popover
+ * chrome. Delegates the actual thread rendering to the presentational
+ * <NotificationList>, which is portable. On a future Expo port this file is
+ * rewritten (native data + a bottom sheet or screen), while NotificationList
+ * carries over.
+ */
 export function NotificationBell({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
@@ -81,44 +85,15 @@ export function NotificationBell({ className }: { className?: string }) {
               <XIcon className="h-4 w-4" />
             </button>
           </div>
-          <div className="max-h-80 overflow-y-auto p-2">
-            {items.length === 0 ? (
-              <p className="px-2 py-6 text-center text-sm text-muted-foreground">
-                Nothing yet. Call reminders will appear here.
-              </p>
-            ) : (
-              items.map((n) => (
-                <div
-                  key={n.id}
-                  className={cn(
-                    "mb-2 rounded-brand border p-3 last:mb-0",
-                    SEVERITY_CLASS[n.severity] ?? "border-border",
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-medium text-foreground">{n.title}</p>
-                    <button
-                      aria-label="Dismiss"
-                      onClick={() =>
-                        dismiss({ data: { id: n.id } }).then(() =>
-                          qc.invalidateQueries({ queryKey: ["notifications"] }),
-                        )
-                      }
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <XIcon className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  {n.body && (
-                    <p className="mt-1 text-xs text-muted-foreground">{n.body}</p>
-                  )}
-                  <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground/70">
-                    {new Date(n.created_at).toLocaleString()}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
+          <NotificationList
+            className="max-h-80 overflow-y-auto p-2"
+            items={items}
+            onDismiss={(id) =>
+              dismiss({ data: { id } }).then(() =>
+                qc.invalidateQueries({ queryKey: ["notifications"] }),
+              )
+            }
+          />
         </div>
       )}
     </div>

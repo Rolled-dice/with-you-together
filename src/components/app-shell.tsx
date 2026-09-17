@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { HeartIcon, SquaresFourIcon, ChatCircleIcon, UsersIcon, GearIcon, SignOutIcon, HandHeartIcon, LifebuoyIcon, ChartLineIcon, PhoneCallIcon, PillIcon, HeadphonesIcon, CalendarHeartIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,8 +38,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const mobileNavRef = useRef<HTMLElement>(null);
   usePointerParallax();
   useCardInteractions();
+
+  // Keep the active tab visible in the horizontally-scrollable mobile nav.
+  useEffect(() => {
+    const active = mobileNavRef.current?.querySelector<HTMLElement>('[data-active="true"]');
+    active?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [pathname]);
 
   const adminCheck = useServerFn(isCurrentUserAdmin);
   const roleQ = useQuery({
@@ -120,7 +127,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* Main */}
         <div className="flex flex-1 flex-col">
           {/* Mobile top bar */}
-          <header className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:hidden">
+          <header
+            className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:hidden"
+            style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}
+          >
             <Brand compact />
             {!rolesLoading && !isStaff ? <NotificationBell /> : null}
           </header>
@@ -135,7 +145,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Mobile bottom nav */}
           <nav
-            className="fixed inset-x-0 bottom-0 z-50 flex overflow-x-auto border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
+            ref={mobileNavRef}
+            className="fixed inset-x-0 bottom-0 z-50 flex overflow-x-auto overscroll-x-contain border-t border-border bg-sidebar/95 backdrop-blur [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden"
             style={{
               paddingBottom: "env(safe-area-inset-bottom)",
             }}
@@ -149,8 +160,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  data-active={active ? "true" : undefined}
                   className={cn(
-                    "flex min-h-16 min-w-20 flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium transition-colors",
+                    "flex min-h-16 min-w-20 flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium transition-colors active:bg-sidebar-accent/60",
                     active ? "text-brand-accent" : "text-sidebar-foreground/70",
                   )}
                 >

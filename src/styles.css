@@ -4,6 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Touch devices: used to raise tap targets to >=44px only on coarse pointers,
+ * so desktop density (Harbor) is unchanged. */
+@custom-variant coarse (@media (pointer: coarse));
+
 /*
  * SomeoneNear design system — warm, calm, safe, friendly, human, minimal.
  * All colors in oklch. Semantic tokens only; never hardcode colors in components.
