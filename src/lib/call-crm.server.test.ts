@@ -188,4 +188,29 @@ describe("scoreAgents", () => {
     expect(result[0].score).toBe(150);
     expect(result[1].score).toBe(130);
   });
+
+  it("handles an overnight shift that wraps past midnight (work_start > work_end)", () => {
+    // Night shift 22:00–06:00 (UTC). The in-hours test is
+    // `mins >= start || mins < end` when start > end.
+    const nightAgent = makeAgent({ work_start: "22:00", work_end: "06:00" });
+    // 03:00 UTC == 180 min: < 06:00 end → inside the overnight window → +30.
+    const inside = scoreAgents([nightAgent], {
+      startsAt: new Date("2026-01-01T03:00:00.000Z"),
+      wantedSkills: [],
+      load: new Map(),
+      recent: new Map(),
+    });
+    expect(inside[0].score).toBe(130);
+    expect(inside[0].reasons).toContain("in working hours");
+
+    // 12:00 UTC == 720 min: neither >= 22:00 nor < 06:00 → outside → -45.
+    const outside = scoreAgents([nightAgent], {
+      startsAt: new Date("2026-01-01T12:00:00.000Z"),
+      wantedSkills: [],
+      load: new Map(),
+      recent: new Map(),
+    });
+    expect(outside[0].score).toBe(55);
+    expect(outside[0].reasons).toContain("outside working hours");
+  });
 });

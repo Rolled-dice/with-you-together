@@ -60,4 +60,12 @@ describe("combineToUtc", () => {
       "2026-06-15T06:45:30.000Z",
     );
   });
+
+  it("throws on an invalid timezone (no fail-soft — Intl rejects the zone)", () => {
+    // combineToUtc constructs Intl.DateTimeFormat directly with no try/catch,
+    // so an unknown IANA zone throws a RangeError rather than falling back.
+    // (The fail-soft-to-0 behavior lives in tzOffsetMinutes in call-crm.server.ts,
+    // a separate function — not here.) Pinning the real contract: it throws.
+    expect(() => combineToUtc("2026-06-15", "09:00", "Not/AZone")).toThrow();
+  });
 });
