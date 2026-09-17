@@ -15,16 +15,14 @@ import {
 import { priceIdFor, type PlanId } from "@/lib/currency";
 
 const StripeEnvSchema = z.enum(["sandbox", "live"]);
-const PlanIdSchema = z.enum(["together", "family", "care"]);
+const PlanIdSchema = z.enum(["care", "care_plus"]);
 
 // Current pricing lookup keys — one per plan × currency (monthly recurring).
 const PRICE_IDS = [
-  "together_monthly_inr",
-  "together_monthly_usd",
-  "family_monthly_inr",
-  "family_monthly_usd",
   "care_monthly_inr",
   "care_monthly_usd",
+  "care_plus_monthly_inr",
+  "care_plus_monthly_usd",
 ] as const;
 
 async function resolveOrCreateCustomer(
@@ -90,40 +88,16 @@ export const createMembershipCheckout = createServerFn({ method: "POST" })
         userId: context.userId,
       });
 
-      // 7-day free trial only on the Together plan (₹799 / $8.99 monthly),
-      // and only for first-time subscribers (no prior subscription rows).
-      const isTogetherMonthly =
-        data.priceId === "together_monthly_inr" ||
-        data.priceId === "together_monthly_usd";
-
-      let offerTrial = false;
-      if (isTogetherMonthly) {
-        const { data: prior } = await context.supabase
-          .from("subscriptions")
-          .select("id")
-          .eq("user_id", context.userId)
-          .limit(1)
-          .maybeSingle();
-        offerTrial = !prior;
-      }
-
       const session = await stripe.checkout.sessions.create({
         line_items: [{ price: stripePrice.id, quantity: 1 }],
         mode: "subscription",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
-        // Always collect a payment method so billing auto-starts after the trial.
         payment_method_collection: "always",
         metadata: { userId: context.userId },
         subscription_data: {
           metadata: { userId: context.userId },
-          ...(offerTrial && {
-            trial_period_days: 7,
-            trial_settings: {
-              end_behavior: { missing_payment_method: "cancel" },
-            },
-          }),
         },
       } as any);
 

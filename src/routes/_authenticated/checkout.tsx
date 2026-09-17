@@ -19,21 +19,17 @@ import { toast } from "sonner";
 import type { PlanId } from "@/lib/currency";
 
 const PriceParam = z.enum([
-  "together_monthly_inr",
-  "together_monthly_usd",
-  "family_monthly_inr",
-  "family_monthly_usd",
   "care_monthly_inr",
   "care_monthly_usd",
+  "care_plus_monthly_inr",
+  "care_plus_monthly_usd",
 ]);
 
 const PRICE_LABELS: Record<z.infer<typeof PriceParam>, string> = {
-  together_monthly_inr: "Together plan, ₹799 / month",
-  together_monthly_usd: "Together plan, $8.99 / month",
-  family_monthly_inr: "Family plan, ₹1,499 / month",
-  family_monthly_usd: "Family plan, $15.99 / month",
-  care_monthly_inr: "Care plan, ₹3,499 / month",
-  care_monthly_usd: "Care plan, $36.99 / month",
+  care_monthly_inr: "Care plan, ₹3,999 / month",
+  care_monthly_usd: "Care plan, $49 / month",
+  care_plus_monthly_inr: "Care Plus plan, ₹6,499 / month",
+  care_plus_monthly_usd: "Care Plus plan, $79 / month",
 };
 
 export const Route = createFileRoute("/_authenticated/checkout")({
@@ -51,9 +47,10 @@ function CheckoutPage() {
   const navigate = useNavigate();
 
   // INR prices are billed through Razorpay; USD through Stripe. The price key
-  // encodes the currency suffix (e.g. care_monthly_inr).
+  // encodes the currency suffix (e.g. care_plus_monthly_inr).
   const isInr = price.endsWith("_inr");
-  const plan = price.split("_")[0] as PlanId;
+  // Extract plan id: everything before "_monthly_"
+  const plan = price.replace(/_monthly_(inr|usd)$/, "") as PlanId;
 
   return (
     <AppShell>

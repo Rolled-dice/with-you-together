@@ -5,7 +5,7 @@ export default defineTool({
   name: "list_membership_plans",
   title: "List SomeoneNear membership plans",
   description:
-    "Returns SomeoneNear's Care Membership tiers with monthly and yearly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data, safe for anyone to read.",
+    "Returns SomeoneNear's two Care Membership plans with monthly pricing in INR and USD, AI-companion quotas, and included features. Public catalog data, safe for anyone to read.",
   inputSchema: {
     currency: z
       .enum(["INR", "USD"])
@@ -16,46 +16,41 @@ export default defineTool({
   handler: ({ currency }) => {
     const plans = [
       {
-        id: "gentle_start",
-        name: "Gentle Start",
-        blurb: "Solo mood check-ins + light AI conversations.",
-        ai_messages_per_month: 25,
-        pricing: { INR: { monthly: 299, yearly: 2990 }, USD: { monthly: 4.99, yearly: 49 } },
-        features: ["Mood check-ins", "Mood trends", "25 AI companion messages / month", "Safety resources"],
-      },
-      {
-        id: "together",
-        name: "Together",
-        blurb: "Full AI companion, listener sessions, insights.",
-        ai_messages_per_month: 500,
-        trial_days: 7,
-        pricing: { INR: { monthly: 799, yearly: 7990 }, USD: { monthly: 12.99, yearly: 129 } },
+        id: "care",
+        name: "Care",
+        blurb: "For one loved one you want to keep an eye on.",
+        ai_messages_per_day: 40,
+        sessions_per_month: 18,
+        members: 1,
+        pricing: { INR: { monthly: 3999 }, USD: { monthly: 49 } },
         features: [
-          "Everything in Gentle Start",
-          "500 AI companion messages / month",
-          "Human listener sessions",
-          "Insights & mood trends",
-          "7-day free trial",
+          "18 Check-In calls a month",
+          "15 minutes per call",
+          "Family dashboard updates after every call",
+          "Companion chat with a daily message allowance",
         ],
       },
       {
-        id: "family",
-        name: "Family",
-        blurb: "Shared circle for up to 5 members with pooled sessions.",
-        ai_messages_per_month: 2000,
-        pricing: { INR: { monthly: 1499, yearly: 14990 }, USD: { monthly: 24.99, yearly: 249 } },
+        id: "care_plus",
+        name: "Care Plus",
+        blurb: "For families sharing the care between them.",
+        highlight: true,
+        ai_messages_per_day: null, // unlimited
+        sessions_per_month: 30,
+        members: 5,
+        pricing: { INR: { monthly: 6499 }, USD: { monthly: 79 } },
         features: [
-          "Everything in Together",
-          "Up to 5 family members",
-          "2000 AI messages / month (pooled)",
-          "Shared listener session pool",
-          "Family circle dashboard",
+          "30 Check-In calls a month",
+          "15 minutes per call",
+          "Unlimited Companion chat, no daily cap",
+          "Shared circle, up to 5 people",
+          "On-demand Check-Ins when a day feels hard",
         ],
       },
     ];
 
     const shaped = plans.map((p) =>
-      currency ? { ...p, pricing: { [currency]: p.pricing[currency] } } : p,
+      currency ? { ...p, pricing: { [currency]: p.pricing[currency as "INR" | "USD"] } } : p,
     );
 
     return {

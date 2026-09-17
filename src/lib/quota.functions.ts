@@ -7,43 +7,33 @@ export const UNLIMITED = Number.POSITIVE_INFINITY;
 
 export const DAILY_TIER_LIMITS: Record<string, number> = {
   free: 5,
-  together: 20,
-  family: 40,
   care: 40,
   care_plus: UNLIMITED,
 };
 
-// Legacy monthly limits kept for reference / older callers.
+// Monthly limits kept for reference / older callers.
 export const TIER_LIMITS: Record<string, number> = {
   free: 25,
-  together: 500,
-  family: 1500,
   care: 3000,
   care_plus: UNLIMITED,
 };
 
-// Human Listener session limits (per family / user per month).
+// Human Listener Check-In call limits per month.
 export const SESSION_LIMITS: Record<string, number> = {
   free: 0,
-  together: 4,
-  family: 12,
   care: 18,
   care_plus: 30,
 };
 
 export const RESCHEDULE_LIMITS: Record<string, number> = {
   free: 0,
-  together: 4,
-  family: 8,
   care: 12,
   care_plus: 20,
 };
 
 export const MEMBER_LIMITS: Record<string, number> = {
   free: 1,
-  together: 1,
-  family: 3,
-  care: 2,
+  care: 1,
   care_plus: 5,
 };
 

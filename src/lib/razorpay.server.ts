@@ -234,11 +234,11 @@ export function mapRazorpayStatus(status: string): string {
 /**
  * Resolves the Razorpay Plan ID for a tier. Plan IDs are created on the
  * Razorpay dashboard (they cannot be created at build time) and supplied via
- * env, e.g. RAZORPAY_PLAN_TOGETHER, RAZORPAY_PLAN_FAMILY, RAZORPAY_PLAN_CARE
+ * env, e.g. RAZORPAY_PLAN_CARE, RAZORPAY_PLAN_CARE_PLUS
  * (test) and RAZORPAY_LIVE_PLAN_* for live mode. Razorpay is INR-only here.
  */
 export function getRazorpayPlanId(env: RazorpayEnv, plan: PlanId): string {
-  const suffix = plan.toUpperCase(); // TOGETHER | FAMILY | CARE
+  const suffix = plan.toUpperCase().replace(/-/g, "_"); // CARE | CARE_PLUS
   if (env === "live") return getEnv(`RAZORPAY_LIVE_PLAN_${suffix}`);
   return process.env[`RAZORPAY_TEST_PLAN_${suffix}`] ?? getEnv(`RAZORPAY_PLAN_${suffix}`);
 }

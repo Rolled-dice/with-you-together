@@ -69,7 +69,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
 
-type TierId = "free" | "together" | "family" | "care";
+type TierId = "free" | "care" | "care_plus";
 
 function SettingsPage() {
   const profileFn = useServerFn(getMyProfile);
@@ -223,9 +223,8 @@ function SettingsPage() {
   // hasn't synced yet, prevents "no card looks active" state.
   const subTier: TierId | null = (() => {
     const p = (subscription?.price_id as string | undefined) ?? "";
+    if (p.startsWith("care_plus")) return "care_plus";
     if (p.startsWith("care")) return "care";
-    if (p.startsWith("family")) return "family";
-    if (p.startsWith("together")) return "together";
     return null;
   })();
   const activeTier: TierId =
@@ -235,7 +234,7 @@ function SettingsPage() {
       ? new Date(subscription.current_period_end as string).toLocaleDateString()
       : null;
 
-  const plans: PlanId[] = ["together", "family", "care"];
+  const plans: PlanId[] = ["care", "care_plus"];
 
   return (
     <AppShell>
@@ -315,15 +314,12 @@ function SettingsPage() {
               </div>
             </div>
 
-            {/* Plans (no free tier, 7-day trial is on Together) */}
-            <div className="grid gap-3 md:grid-cols-3">
-
-
+            {/* Plans */}
+            <div className="grid gap-3 md:grid-cols-2">
               {plans.map((plan) => {
                 const info = PLAN_DISPLAY[plan];
                 const active = activeTier === plan;
                 const priceId = priceIdFor(plan, currency);
-                const showTrialCTA = plan === "together" && !hasPaidSub;
                 return (
                   <div
                     key={plan}
@@ -331,18 +327,23 @@ function SettingsPage() {
                       "flex flex-col gap-3 rounded-brand border p-4",
                       active
                         ? "border-brand-primary bg-brand-primary/5"
-                        : "border-border",
+                        : info.highlight
+                          ? "border-brand-accent/40 bg-brand-accent/5"
+                          : "border-border",
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{info.name}</span>
+                      <div>
+                        <span className="text-sm font-medium">{info.name}</span>
+                        {info.highlight && !active ? (
+                          <span className="ml-2 rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">
+                            Most chosen
+                          </span>
+                        ) : null}
+                      </div>
                       {active ? (
                         <Badge className="rounded-full bg-brand-primary text-primary-foreground">
                           <CheckIcon className="mr-1 h-3 w-3" /> Current
-                        </Badge>
-                      ) : showTrialCTA ? (
-                        <Badge variant="secondary" className="rounded-full">
-                          7-day free trial
                         </Badge>
                       ) : null}
                     </div>
@@ -356,11 +357,6 @@ function SettingsPage() {
                       {info.bullets.map((b) => (
                         <li key={b}>· {b}</li>
                       ))}
-                      {showTrialCTA ? (
-                        <li className="text-brand-primary">
-                          · Try free for 7 days, auto-billed after, cancel anytime.
-                        </li>
-                      ) : null}
                     </ul>
                     {active ? (
                       <Button
@@ -398,9 +394,7 @@ function SettingsPage() {
                           ? isRazorpaySub
                             ? "Switch plan"
                             : "Switch in billing portal"
-                          : showTrialCTA
-                            ? "Start 7-day free trial"
-                            : "Choose plan"}
+                          : "Choose plan"}
                       </Button>
                     )}
                   </div>

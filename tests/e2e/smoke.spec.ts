@@ -83,7 +83,7 @@ test.describe("authenticated smoke", () => {
   });
 
   test("checkout screen loads", async ({ page }) => {
-    await page.goto("/checkout?plan=care&currency=usd");
+    await page.goto("/checkout?price=care_monthly_usd");
     // Either the embedded Stripe iframe mounts, or a friendly error surfaces —
     // both prove the route rendered without crashing.
     await expect(page.locator("body")).toBeVisible();

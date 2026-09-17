@@ -27,10 +27,9 @@ Create three test plans and three live plans, then set:
 
 | Env var | Tier |
 | --- | --- |
-| `RAZORPAY_PLAN_TOGETHER` (or `RAZORPAY_TEST_PLAN_TOGETHER`) | Together — ₹799/mo |
-| `RAZORPAY_PLAN_FAMILY` (or `RAZORPAY_TEST_PLAN_FAMILY`) | Family — ₹1,499/mo |
-| `RAZORPAY_PLAN_CARE` (or `RAZORPAY_TEST_PLAN_CARE`) | Care — ₹3,499/mo |
-| `RAZORPAY_LIVE_PLAN_TOGETHER` / `_FAMILY` / `_CARE` | Live equivalents |
+| `RAZORPAY_PLAN_CARE` (or `RAZORPAY_TEST_PLAN_CARE`) | Care — ₹3,999/mo |
+| `RAZORPAY_PLAN_CARE_PLUS` (or `RAZORPAY_TEST_PLAN_CARE_PLUS`) | Care Plus — ₹6,499/mo |
+| `RAZORPAY_LIVE_PLAN_CARE` / `_CARE_PLUS` | Live equivalents |
 
 ## 2. Browser env var
 
