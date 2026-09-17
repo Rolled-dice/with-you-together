@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Star } from "lucide-react";
+import { SpinnerGapIcon, StarIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,7 +60,7 @@ export function PostCallFeedbackCard({
               aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
               className="p-1"
             >
-              <Star
+              <StarIcon
                 className={`h-6 w-6 transition-colors ${
                   rating >= n
                     ? "fill-brand-primary text-brand-primary"
@@ -95,7 +95,7 @@ export function PostCallFeedbackCard({
             disabled={rating === 0 || mut.isPending}
             className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
           >
-            {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {mut.isPending && <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />}
             Submit feedback
           </Button>
           <Button variant="ghost" onClick={onDone}>

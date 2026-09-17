@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bug, Lightbulb, MessageSquareHeart, Sparkles, Headphones, LifeBuoy, Send, CheckCircle2, Mail, Clock } from "lucide-react";
+import { BugIcon, LightbulbIcon, ChatCircleTextIcon, SparkleIcon, HeadphonesIcon, LifebuoyIcon, PaperPlaneRightIcon, CheckCircleIcon, EnvelopeSimpleIcon, ClockIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -29,15 +29,15 @@ const CATEGORIES: {
   value: Category;
   label: string;
   hint: string;
-  Icon: typeof Bug;
+  Icon: typeof BugIcon;
   tone: string;
 }[] = [
-  { value: "feature_request", label: "Feature request", hint: "Something you wish SomeoneNear could do", Icon: Lightbulb, tone: "bg-mint/40 text-neutral-900" },
-  { value: "bug_report", label: "Bug report", hint: "Something looks or works wrong", Icon: Bug, tone: "bg-blush/50 text-neutral-900" },
-  { value: "product_feedback", label: "Product feedback", hint: "General thoughts on SomeoneNear", Icon: MessageSquareHeart, tone: "bg-peach/60 text-neutral-900" },
-  { value: "ai_feedback", label: "AI Companion", hint: "How the AI felt to you", Icon: Sparkles, tone: "bg-lilac/40 text-neutral-900" },
-  { value: "listener_feedback", label: "Listener feedback", hint: "About a listener session", Icon: Headphones, tone: "bg-sage/40 text-neutral-900" },
-  { value: "support", label: "Support / help", hint: "You need a hand from our team", Icon: LifeBuoy, tone: "bg-sunrise/40 text-neutral-900" },
+  { value: "feature_request", label: "Feature request", hint: "Something you wish SomeoneNear could do", Icon: LightbulbIcon, tone: "bg-mint/40 text-neutral-900" },
+  { value: "bug_report", label: "Bug report", hint: "Something looks or works wrong", Icon: BugIcon, tone: "bg-blush/50 text-neutral-900" },
+  { value: "product_feedback", label: "Product feedback", hint: "General thoughts on SomeoneNear", Icon: ChatCircleTextIcon, tone: "bg-peach/60 text-neutral-900" },
+  { value: "ai_feedback", label: "AI Companion", hint: "How the AI felt to you", Icon: SparkleIcon, tone: "bg-lilac/40 text-neutral-900" },
+  { value: "listener_feedback", label: "Listener feedback", hint: "About a listener session", Icon: HeadphonesIcon, tone: "bg-sage/40 text-neutral-900" },
+  { value: "support", label: "Support / help", hint: "You need a hand from our team", Icon: LifebuoyIcon, tone: "bg-sunrise/40 text-neutral-900" },
 ];
 
 type Props = {
@@ -115,7 +115,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
           <div className="space-y-5">
             <DialogHeader className="items-center text-center">
               <div className="mx-auto mb-2 inline-flex h-14 w-14 items-center justify-center rounded-full bg-mint/60 text-neutral-900 shadow-soft">
-                <CheckCircle2 className="h-7 w-7" />
+                <CheckCircleIcon className="h-7 w-7" />
               </div>
               <DialogTitle className="text-xl">Thank you, we've got it</DialogTitle>
               <DialogDescription>
@@ -146,11 +146,11 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
             <div className="space-y-2 rounded-2xl bg-peach/25 p-4 text-sm">
               <div className="text-xs font-semibold uppercase tracking-wider text-neutral-700">What happens next</div>
               <div className="flex items-start gap-2.5">
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-coral" />
+                <ClockIcon className="mt-0.5 h-4 w-4 shrink-0 text-coral" />
                 <p>Our team reviews new feedback within <strong>2 business days</strong>.</p>
               </div>
               <div className="flex items-start gap-2.5">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-coral" />
+                <EnvelopeSimpleIcon className="mt-0.5 h-4 w-4 shrink-0 text-coral" />
                 <p>
                   {submitted.email
                     ? <>We'll follow up at <strong className="break-all">{submitted.email}</strong> if we need more detail.</>
@@ -158,7 +158,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
                 </p>
               </div>
               <div className="flex items-start gap-2.5">
-                <MessageSquareHeart className="mt-0.5 h-4 w-4 shrink-0 text-coral" />
+                <ChatCircleTextIcon className="mt-0.5 h-4 w-4 shrink-0 text-coral" />
                 <p>Need help now? Email <a className="underline underline-offset-2" href="mailto:care@someonenear.com">care@someonenear.com</a>.</p>
               </div>
             </div>
@@ -260,7 +260,7 @@ export function FeedbackDialog({ trigger, defaultCategory = "product_feedback" }
 
               <DialogFooter>
                 <Button type="submit" disabled={submitting} className="rounded-2xl bg-neutral-900 text-white hover:bg-neutral-800">
-                  <Send className="mr-2 h-4 w-4" />
+                  <PaperPlaneRightIcon className="mr-2 h-4 w-4" />
                   {submitting ? "Sending..." : "Send feedback"}
                 </Button>
               </DialogFooter>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, X } from "lucide-react";
+import { BellIcon, XIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   dismissNotification,
@@ -61,7 +61,7 @@ export function NotificationBell({ className }: { className?: string }) {
         }}
         className="relative inline-flex h-9 w-9 items-center justify-center rounded-brand text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       >
-        <Bell className="h-4.5 w-4.5" />
+        <BellIcon className="h-4.5 w-4.5" />
         {unread > 0 && (
           <span className="absolute right-1 top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
             {unread > 9 ? "9+" : unread}
@@ -78,7 +78,7 @@ export function NotificationBell({ className }: { className?: string }) {
               className="text-muted-foreground hover:text-foreground"
               aria-label="Close notifications"
             >
-              <X className="h-4 w-4" />
+              <XIcon className="h-4 w-4" />
             </button>
           </div>
           <div className="max-h-80 overflow-y-auto p-2">
@@ -106,7 +106,7 @@ export function NotificationBell({ className }: { className?: string }) {
                       }
                       className="text-muted-foreground hover:text-foreground"
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <XIcon className="h-3.5 w-3.5" />
                     </button>
                   </div>
                   {n.body && (

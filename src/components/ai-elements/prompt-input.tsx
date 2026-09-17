@@ -42,13 +42,13 @@ import {
 import { cn } from "@/lib/utils";
 import type { ChatStatus, FileUIPart, SourceDocumentUIPart } from "ai";
 import {
-  CornerDownLeftIcon,
+  ArrowBendDownLeftIcon,
   ImageIcon,
-  Monitor,
+  MonitorIcon,
   PlusIcon,
-  SquareIcon,
+  StopIcon,
   XIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { nanoid } from "nanoid";
 import type {
   ChangeEvent,
@@ -475,7 +475,7 @@ export const PromptInputActionAddScreenshot = ({
 
   return (
     <DropdownMenuItem {...props} onSelect={handleSelect}>
-      <Monitor className="mr-2 size-4" />
+      <MonitorIcon className="mr-2 size-4" />
       {label}
     </DropdownMenuItem>
   );
@@ -1225,12 +1225,12 @@ export const PromptInputSubmit = ({
 }: PromptInputSubmitProps) => {
   const isGenerating = status === "submitted" || status === "streaming";
 
-  let Icon = <CornerDownLeftIcon className="size-4" />;
+  let Icon = <ArrowBendDownLeftIcon className="size-4" />;
 
   if (status === "submitted") {
     Icon = <Spinner />;
   } else if (status === "streaming") {
-    Icon = <SquareIcon className="size-4" />;
+    Icon = <StopIcon className="size-4" />;
   } else if (status === "error") {
     Icon = <XIcon className="size-4" />;
   }

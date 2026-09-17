@@ -2,22 +2,22 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Camera,
-  Check,
-  Clock3,
-  ImagePlus,
-  Loader2,
-  MoonStar,
-  Pill,
-  Plus,
-  ScanLine,
-  Sparkles,
-  Sun,
-  Sunrise,
-  Trash2,
-  Utensils,
-  X,
-} from "lucide-react";
+  CameraIcon,
+  CheckIcon,
+  ClockIcon,
+  ImageIcon,
+  SpinnerGapIcon,
+  MoonStarsIcon,
+  PillIcon,
+  PlusIcon,
+  ScanIcon,
+  SparkleIcon,
+  SunIcon,
+  SunHorizonIcon,
+  TrashIcon,
+  ForkKnifeIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,7 +41,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 
 type SetupMode = "scan" | "manual";
-type TimeChoice = { id: string; label: string; time: string; icon: typeof Sun };
+type TimeChoice = { id: string; label: string; time: string; icon: typeof SunIcon };
 type ScheduleDraft = { id: string; time: string; withFood: boolean };
 type MedicationRow = {
   id: string;
@@ -60,10 +60,10 @@ type DoseRow = {
 };
 
 const PRESET_TIMES: TimeChoice[] = [
-  { id: "morning", label: "Morning", time: "08:00", icon: Sunrise },
-  { id: "afternoon", label: "Afternoon", time: "13:00", icon: Sun },
-  { id: "evening", label: "Evening", time: "18:00", icon: Sparkles },
-  { id: "bedtime", label: "Bedtime", time: "21:00", icon: MoonStar },
+  { id: "morning", label: "Morning", time: "08:00", icon: SunHorizonIcon },
+  { id: "afternoon", label: "Afternoon", time: "13:00", icon: SunIcon },
+  { id: "evening", label: "Evening", time: "18:00", icon: SparkleIcon },
+  { id: "bedtime", label: "Bedtime", time: "21:00", icon: MoonStarsIcon },
 ];
 
 const FORMS = ["Tablet", "Capsule", "Liquid", "Drops", "Inhaler", "Injection", "Other"];
@@ -272,7 +272,7 @@ export function MedicationOnboarding() {
         <div className="border-b border-border bg-surface px-5 py-6 sm:px-8">
           <div className="flex items-start gap-4">
             <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary" aria-hidden>
-              <Pill className="size-6" />
+              <PillIcon className="size-6" />
             </span>
             <div>
               <p className="text-sm font-medium text-primary">Medication check-in</p>
@@ -295,7 +295,7 @@ export function MedicationOnboarding() {
               onClick={() => setMode("scan")}
               aria-pressed={mode === "scan"}
             >
-              <ScanLine /> <span className="hidden sm:inline">Scan prescription</span><span className="sm:hidden">Scan</span>
+              <ScanIcon /> <span className="hidden sm:inline">Scan prescription</span><span className="sm:hidden">Scan</span>
             </Button>
             <Button
               type="button"
@@ -304,7 +304,7 @@ export function MedicationOnboarding() {
               onClick={() => setMode("manual")}
               aria-pressed={mode === "manual"}
             >
-              <Pill /> <span className="hidden sm:inline">Enter manually</span><span className="sm:hidden">Manual</span>
+              <PillIcon /> <span className="hidden sm:inline">Enter manually</span><span className="sm:hidden">Manual</span>
             </Button>
           </div>
 
@@ -325,13 +325,13 @@ export function MedicationOnboarding() {
                   <>
                     <img src={previewUrl} alt="Prescription selected for review" className="max-h-60 w-auto max-w-full rounded-2xl object-contain shadow-soft" />
                     <Button type="button" variant="secondary" className="mt-5 min-h-11 rounded-xl" onClick={() => fileInputRef.current?.click()}>
-                      <ImagePlus /> Choose a different photo
+                      <ImageIcon /> Choose a different photo
                     </Button>
                   </>
                 ) : (
                   <>
                     <span className="flex size-16 items-center justify-center rounded-full bg-surface text-primary shadow-soft" aria-hidden>
-                      <ImagePlus className="size-7" />
+                      <ImageIcon className="size-7" />
                     </span>
                     <h3 className="mt-5 font-display text-xl font-medium text-foreground">Add a clear photo</h3>
                     <p className="mt-2 max-w-md text-base leading-relaxed text-muted-foreground">
@@ -339,10 +339,10 @@ export function MedicationOnboarding() {
                     </p>
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Button type="button" className="min-h-11 rounded-xl px-5 text-base" onClick={() => fileInputRef.current?.click()}>
-                        <ImagePlus /> Choose photo
+                        <ImageIcon /> Choose photo
                       </Button>
                       <Button type="button" variant="outline" className="min-h-11 rounded-xl px-5 text-base" onClick={() => cameraInputRef.current?.click()}>
-                        <Camera /> Use camera
+                        <CameraIcon /> Use camera
                       </Button>
                     </div>
                   </>
@@ -353,7 +353,7 @@ export function MedicationOnboarding() {
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">JPG, PNG, WEBP or HEIC · up to 10 MB</p>
                 <Button type="button" className="min-h-12 rounded-xl px-6 text-base" disabled={!file || scan.isPending} onClick={() => scan.mutate()}>
-                  {scan.isPending ? <><Loader2 className="animate-spin" /> Reading the photo…</> : <><Sparkles /> Read this photo</>}
+                  {scan.isPending ? <><SpinnerGapIcon className="animate-spin" /> Reading the photo…</> : <><SparkleIcon /> Read this photo</>}
                 </Button>
               </div>
               <div role="status" aria-live="polite" className="sr-only">{scan.isPending ? "Uploading and reading your prescription photo" : ""}</div>
@@ -382,11 +382,11 @@ export function MedicationOnboarding() {
             <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
               {isReviewingScan ? (
                 <Button type="button" variant="ghost" className="min-h-11 rounded-xl" onClick={() => { setParsedData(null); setName(""); setDosage(""); setInstructions(""); }}>
-                  <X /> Try another photo
+                  <XIcon /> Try another photo
                 </Button>
               ) : <span />}
               <Button type="button" className="min-h-12 rounded-xl px-7 text-base" disabled={!name.trim() || create.isPending} onClick={() => create.mutate()}>
-                {create.isPending ? <><Loader2 className="animate-spin" /> Saving gently…</> : <><Check /> Save my check-in</>}
+                {create.isPending ? <><SpinnerGapIcon className="animate-spin" /> Saving gently…</> : <><CheckIcon /> Save my check-in</>}
               </Button>
               <div role="status" aria-live="polite" className="sr-only">{create.isPending ? "Saving medication and reminder times" : ""}</div>
             </div>
@@ -412,18 +412,18 @@ export function MedicationOnboarding() {
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2"><Pill className="size-5 text-primary" /><h3 className="truncate font-display text-lg font-medium">{medication.name}</h3></div>
+                      <div className="flex items-center gap-2"><PillIcon className="size-5 text-primary" /><h3 className="truncate font-display text-lg font-medium">{medication.name}</h3></div>
                       <p className="mt-1 text-base text-muted-foreground">{[medication.dosage, medication.form].filter(Boolean).join(" · ") || "Dose not added"}</p>
                     </div>
                     <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11 rounded-xl" aria-label={`Remove ${medication.name}`} disabled={removeMedication.isPending} onClick={() => removeMedication.mutate(medication.id)}>
-                      <Trash2 />
+                      <TrashIcon />
                     </Button>
                   </div>
                   {medication.medication_schedules && medication.medication_schedules.length > 0 && (
                     <div className="mt-4 flex flex-wrap gap-2">
                       {medication.medication_schedules.map((schedule) => (
                         <span key={schedule.id} className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-sm text-foreground">
-                          <Clock3 className="size-4 text-primary" /> {timeLabel(schedule.time_of_day)} {schedule.with_food ? "· with food" : ""}
+                          <ClockIcon className="size-4 text-primary" /> {timeLabel(schedule.time_of_day)} {schedule.with_food ? "· with food" : ""}
                         </span>
                       ))}
                     </div>
@@ -532,16 +532,16 @@ function MedicationForm({
                 <Input id={`medication-time-${schedule.id}`} type="time" value={schedule.time} onChange={(event) => setSchedules((current) => current.map((item) => item.id === schedule.id ? { ...item, time: event.target.value } : item))} className="min-h-12 rounded-xl bg-background px-4 text-base md:text-base" />
               </div>
               <Button type="button" variant={schedule.withFood ? "secondary" : "outline"} className="min-h-12 rounded-xl px-4 text-base" onClick={() => setSchedules((current) => current.map((item) => item.id === schedule.id ? { ...item, withFood: !item.withFood } : item))} aria-pressed={schedule.withFood}>
-                <Utensils /> {schedule.withFood ? "With food" : "Add with food"}
+                <ForkKnifeIcon /> {schedule.withFood ? "With food" : "Add with food"}
               </Button>
               <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11 rounded-xl justify-self-end sm:self-end" aria-label={`Remove reminder ${index + 1}`} disabled={schedules.length === 1} onClick={() => setSchedules((current) => current.filter((item) => item.id !== schedule.id))}>
-                <Trash2 />
+                <TrashIcon />
               </Button>
             </div>
           ))}
         </div>
         <Button type="button" variant="outline" className="min-h-11 rounded-xl text-base" onClick={() => setSchedules((current) => [...current, newSchedule("12:00")])}>
-          <Plus /> Add another time
+          <PlusIcon /> Add another time
         </Button>
       </fieldset>
     </div>
@@ -564,12 +564,12 @@ function TodayDoses({ rows, isLoading, onLog, isPending }: { rows: DoseRow[]; is
             return (
               <div key={dose.id} className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-5 shadow-gentle sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
-                  <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-2xl", dose.status === "taken" ? "bg-mint text-foreground" : "bg-surface text-primary")} aria-hidden>{dose.status === "taken" ? <Check /> : <Pill />}</span>
+                  <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-2xl", dose.status === "taken" ? "bg-mint text-foreground" : "bg-surface text-primary")} aria-hidden>{dose.status === "taken" ? <CheckIcon /> : <PillIcon />}</span>
                   <div><h3 className="font-display text-lg font-medium">{dose.medications?.name ?? "Medicine"}</h3><p className="text-base text-muted-foreground">{timeLabel(new Date(dose.scheduled_at).toTimeString().slice(0, 5))}{dose.medications?.dosage ? ` · ${dose.medications.dosage}` : ""}</p></div>
                 </div>
                 {isDone ? <span className="rounded-full bg-surface px-4 py-2 text-sm font-medium capitalize text-muted-foreground">{dose.status}</span> : (
                   <div className="flex gap-2">
-                    <Button type="button" className="min-h-11 flex-1 rounded-xl sm:flex-none" disabled={isPending} onClick={() => onLog(dose.id, "taken")}><Check /> Taken</Button>
+                    <Button type="button" className="min-h-11 flex-1 rounded-xl sm:flex-none" disabled={isPending} onClick={() => onLog(dose.id, "taken")}><CheckIcon /> Taken</Button>
                     <Button type="button" variant="ghost" className="min-h-11 flex-1 rounded-xl sm:flex-none" disabled={isPending} onClick={() => onLog(dose.id, "skipped")}>Skip</Button>
                   </div>
                 )}

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { SpinnerGapIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import {
@@ -197,7 +197,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
             disabled={loading}
             className="w-full rounded-brand bg-brand-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-primary/90 hover:shadow-md"
           >
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {loading ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
             Create account
           </Button>
         </motion.div>

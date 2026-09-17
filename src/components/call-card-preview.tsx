@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Mic, PhoneOff } from "lucide-react";
+import { MicrophoneIcon, PhoneDisconnectIcon } from "@phosphor-icons/react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -74,7 +74,7 @@ export function CallCardPreview({ className }: { className?: string }) {
 
       <div className="mt-6 flex items-center gap-3">
         <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-          <Mic className="h-5 w-5" />
+          <MicrophoneIcon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
           <p className="font-display text-base font-medium text-foreground">Your listener</p>
@@ -92,7 +92,7 @@ export function CallCardPreview({ className }: { className?: string }) {
           className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground"
           tabIndex={-1}
         >
-          <Mic className="h-4 w-4" />
+          <MicrophoneIcon className="h-4 w-4" />
         </button>
         <button
           type="button"
@@ -101,7 +101,7 @@ export function CallCardPreview({ className }: { className?: string }) {
           className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground"
           tabIndex={-1}
         >
-          <PhoneOff className="h-4 w-4" />
+          <PhoneDisconnectIcon className="h-4 w-4" />
         </button>
         <p className="text-xs text-muted-foreground">A preview, not a live call</p>
       </div>

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Heart, Menu, ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
+import { HeartIcon, ListIcon, ArrowLeftIcon, ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -96,7 +96,7 @@ export function DocsShell() {
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open docs menu">
-                  <Menu className="h-5 w-5" />
+                  <ListIcon className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-80 overflow-y-auto p-4">
@@ -106,7 +106,7 @@ export function DocsShell() {
             </Sheet>
             <Link to="/" className="flex items-center gap-2">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl gradient-sunrise text-neutral-900">
-                <Heart className="h-4 w-4" fill="currentColor" strokeWidth={2.6} />
+                <HeartIcon className="h-4 w-4" fill="currentColor" strokeWidth={2.6} />
               </span>
               <span className="font-semibold tracking-tight">SomeoneNear Docs</span>
             </Link>
@@ -135,7 +135,7 @@ export function DocsShell() {
             <Link to="/docs" className="hover:text-foreground">Docs</Link>
             {current && current.to !== "/docs" && (
               <>
-                <ChevronRight className="h-3 w-3" />
+                <CaretRightIcon className="h-3 w-3" />
                 <span className="text-foreground">{current.label}</span>
               </>
             )}
@@ -154,7 +154,7 @@ export function DocsShell() {
                   className="group rounded-2xl border p-4 transition hover:border-coral hover:bg-coral/5"
                 >
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <ArrowLeft className="h-3 w-3" /> Previous
+                    <ArrowLeftIcon className="h-3 w-3" /> Previous
                   </div>
                   <div className="mt-1 font-semibold group-hover:text-coral">{prev.label}</div>
                 </Link>
@@ -165,7 +165,7 @@ export function DocsShell() {
                   className="group rounded-2xl border p-4 text-right transition hover:border-coral hover:bg-coral/5 sm:text-right"
                 >
                   <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
-                    Next <ArrowRight className="h-3 w-3" />
+                    Next <ArrowRightIcon className="h-3 w-3" />
                   </div>
                   <div className="mt-1 font-semibold group-hover:text-coral">{next.label}</div>
                 </Link>
@@ -260,7 +260,7 @@ export function MiniFaq({ items }: { items: { q: string; a: ReactNode }[] }) {
         <details key={i} className="group p-4">
           <summary className="cursor-pointer list-none font-medium marker:hidden">
             <span className="inline-flex items-center gap-2">
-              <ChevronRight className="h-4 w-4 transition group-open:rotate-90" />
+              <CaretRightIcon className="h-4 w-4 transition group-open:rotate-90" />
               {it.q}
             </span>
           </summary>

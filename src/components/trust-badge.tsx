@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheckIcon } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,7 @@ export function TrustBadge({ className }: { className?: string }) {
         className,
       )}
     >
-      <ShieldCheck className="h-4 w-4 text-primary" />
+      <ShieldCheckIcon className="h-4 w-4 text-primary" />
       Private by design · audio-only calls · nothing shared without your say
     </div>
   );

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { MessageCircleHeart } from "lucide-react";
+import { ChatCircleIcon } from "@phosphor-icons/react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -63,7 +63,7 @@ export function AiSnippetPreview({ className }: { className?: string }) {
     >
       <div className="flex items-center gap-2.5">
         <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-          <MessageCircleHeart className="h-4 w-4" />
+          <ChatCircleIcon className="h-4 w-4" />
         </span>
         <p className="font-display text-sm font-medium text-foreground">Your companion</p>
       </div>

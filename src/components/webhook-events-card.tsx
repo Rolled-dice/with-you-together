@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { ArrowClockwiseIcon, CheckCircleIcon, WarningCircleIcon, ClockIcon } from "@phosphor-icons/react";
 
 type Row = {
   id: string;
@@ -60,7 +60,7 @@ export function WebhookEventsCard({ userId }: { userId: string }) {
           </CardDescription>
         </div>
         <Button size="sm" variant="outline" onClick={load} disabled={refreshing}>
-          <RefreshCw className={`h-4 w-4 mr-1 ${refreshing ? "animate-spin" : ""}`} />
+          <ArrowClockwiseIcon className={`h-4 w-4 mr-1 ${refreshing ? "animate-spin" : ""}`} />
           Refresh
         </Button>
       </CardHeader>
@@ -81,11 +81,11 @@ export function WebhookEventsCard({ userId }: { userId: string }) {
               <li key={r.id} className="py-2 flex items-start gap-3 text-sm">
                 <div className="mt-0.5">
                   {r.error ? (
-                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <WarningCircleIcon className="h-4 w-4 text-destructive" />
                   ) : r.processed ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
                   ) : (
-                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <ClockIcon className="h-4 w-4 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">

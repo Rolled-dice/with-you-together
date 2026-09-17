@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Heart, LayoutDashboard, MessageCircleHeart, Users, Settings, LogOut, HeartHandshake, LifeBuoy, LineChart, PhoneCall, Pill, Headphones, CalendarHeart } from "lucide-react";
+import { HeartIcon, SquaresFourIcon, ChatCircleIcon, UsersIcon, GearIcon, SignOutIcon, HandHeartIcon, LifebuoyIcon, ChartLineIcon, PhoneCallIcon, PillIcon, HeadphonesIcon, CalendarHeartIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,24 +13,24 @@ import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
 
 const NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/companion", label: "Companion", icon: MessageCircleHeart },
-  { to: "/listeners", label: "Listeners", icon: Users },
-  { to: "/reminders", label: "Medication", icon: Pill },
-  { to: "/send-later", label: "Send Later", icon: CalendarHeart },
-  { to: "/insights", label: "Insights", icon: LineChart },
-  { to: "/family", label: "Family", icon: HeartHandshake },
-  { to: "/safety", label: "Safety", icon: LifeBuoy },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
+  { to: "/companion", label: "Companion", icon: ChatCircleIcon },
+  { to: "/listeners", label: "Listeners", icon: UsersIcon },
+  { to: "/reminders", label: "Medication", icon: PillIcon },
+  { to: "/send-later", label: "Send Later", icon: CalendarHeartIcon },
+  { to: "/insights", label: "Insights", icon: ChartLineIcon },
+  { to: "/family", label: "Family", icon: HandHeartIcon },
+  { to: "/safety", label: "Safety", icon: LifebuoyIcon },
+  { to: "/settings", label: "Settings", icon: GearIcon },
 ] as const;
 
 const ADMIN_NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/admin/calls", label: "Call CRM", icon: PhoneCall },
+  { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
+  { to: "/admin/calls", label: "Call CRM", icon: PhoneCallIcon },
 ] as const;
 
 const AGENT_NAV = [
-  { to: "/agent/console", label: "Agent console", icon: Headphones },
+  { to: "/agent/console", label: "Agent console", icon: HeadphonesIcon },
 ] as const;
 
 
@@ -112,7 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             onClick={signOut}
             className="mt-3 flex items-center gap-2 rounded-brand px-4 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
-            <LogOut className="h-4 w-4" /> Sign out
+            <SignOutIcon className="h-4 w-4" /> Sign out
           </button>
         </aside>
 
@@ -170,7 +170,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2">
       <span className="inline-flex h-9 w-9 items-center justify-center rounded-brand bg-brand-primary text-primary-foreground shadow-sm">
-        <Heart className="h-5 w-5" strokeWidth={2.4} />
+        <HeartIcon className="h-5 w-5" strokeWidth={2.4} />
       </span>
       {!compact && (
         <span className="text-lg font-semibold tracking-tight text-foreground">SomeoneNear</span>
