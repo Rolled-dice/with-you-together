@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { JsonLd } from "@/components/json-ld";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +53,20 @@ export const Route = createFileRoute("/_authenticated/listeners")({
   }),
   component: ListenersPage,
 });
+
+const SERVICE_SCHEMA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://someonenear.com/services/#listener",
+      name: "Human Listener Sessions",
+      description:
+        "Real-time voice sessions for emotional care, facilitated through secure, browser-based calls.",
+      serviceType: "Emotional Support",
+    },
+  ],
+};
 
 const TIMEZONES = [
   "Asia/Kolkata",
@@ -147,6 +162,7 @@ function ListenersPage() {
 
   return (
     <AppShell>
+      <JsonLd data={SERVICE_SCHEMA} />
       <PageHeader
         eyebrow="Listeners"
         slogan="Real ears. Real hearts."

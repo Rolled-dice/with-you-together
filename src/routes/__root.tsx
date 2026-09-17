@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "sonner";
-import { OrganizationSchema } from "@/components/organization-schema";
+
 
 function NotFoundComponent() {
   return (
@@ -124,7 +124,6 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
-        <OrganizationSchema />
       </head>
       <body>
         {children}

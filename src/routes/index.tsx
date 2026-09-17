@@ -22,6 +22,7 @@ import {
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { GentleNudge, NudgeDot } from "@/components/gentle-nudge";
+import { JsonLd } from "@/components/json-ld";
 import { QuietEmptyState } from "@/components/quiet-empty-state";
 import { CallCardPreview } from "@/components/call-card-preview";
 import { AiSnippetPreview } from "@/components/ai-snippet-preview";
@@ -42,6 +43,31 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 const TITLE = "SomeoneNear";
 const DESCRIPTION =
   "SomeoneNear helps you find someone near for a caring check-in, a human listener, or quiet companionship whenever you need to feel heard.";
+
+const SCHEMA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://someonenear.com/#website",
+      url: "https://someonenear.com/",
+      name: "SomeoneNear",
+      description:
+        "A web-based platform for emotional care, family check-ins, and human listener sessions.",
+      inLanguage: ["en", "hi"],
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://someonenear.com/#organization",
+      name: "SomeoneNear",
+      url: "https://someonenear.com/",
+      founder: {
+        "@type": "Person",
+        name: "Mohit Dutt",
+      },
+    },
+  ],
+};
 
 export const Route = createFileRoute("/")({
   loader: () => getPublicStats(),
@@ -332,6 +358,7 @@ function Landing() {
 
   return (
     <div ref={rootRef} className="min-h-screen overflow-x-hidden bg-background text-foreground">
+      <JsonLd data={SCHEMA} />
       {/* Header */}
       <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-6">
         <Link to="/" className="flex items-center gap-2.5">
