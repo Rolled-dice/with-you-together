@@ -1,19 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  Outlet,
-  Link,
-  createRootRouteWithContext,
-  useRouter,
-  HeadContent,
-  Scripts,
-} from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "sonner";
-
 
 function NotFoundComponent() {
   return (
@@ -47,9 +39,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
@@ -80,7 +70,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SomeoneNear — Checking in when they can't" },
+      { title: "SomeoneNear Checking in when they can't" },
       {
         name: "description",
         content:
@@ -96,7 +86,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "SomeoneNear — Checking in when they can't" },
-      { name: "twitter:description", content: "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, human listener calls, mood insights, and a shared circle that keeps your loved ones close." },
+      {
+        name: "twitter:description",
+        content:
+          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, human listener calls, mood insights, and a shared circle that keeps your loved ones close.",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -111,7 +105,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co" },
     ],
-
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -139,12 +132,7 @@ function RootComponent() {
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (
-        event !== "SIGNED_IN" &&
-        event !== "SIGNED_OUT" &&
-        event !== "USER_UPDATED"
-      )
-        return;
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
@@ -161,8 +149,7 @@ function RootComponent() {
         duration={5000}
         toastOptions={{
           classNames: {
-            toast:
-              "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
+            toast: "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
             title: "font-display font-medium",
             description: "text-muted-foreground",
             actionButton: "rounded-full bg-primary text-primary-foreground",
@@ -170,8 +157,6 @@ function RootComponent() {
           },
         }}
       />
-
     </QueryClientProvider>
   );
 }
-
