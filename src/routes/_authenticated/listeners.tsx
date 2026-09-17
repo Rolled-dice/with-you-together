@@ -21,6 +21,8 @@ import {
   requestBooking,
   rescheduleBooking,
 } from "@/lib/listeners.functions";
+import { getFeedbackPrompt } from "@/lib/session-feedback.functions";
+import { PostCallFeedbackCard } from "@/components/post-call-feedback-card";
 import {
   AlarmClockCheck,
   CalendarClock,
@@ -79,8 +81,13 @@ function ListenersPage() {
   const requestFn = useServerFn(requestBooking);
   const cancelFn = useServerFn(cancelBooking);
   const rescheduleFn = useServerFn(rescheduleBooking);
+  const feedbackPromptFn = useServerFn(getFeedbackPrompt);
 
   const bookings = useQuery({ queryKey: ["listener-bookings"], queryFn: () => listBookingsFn() });
+  const feedbackPrompt = useQuery({
+    queryKey: ["session-feedback-prompt"],
+    queryFn: () => feedbackPromptFn(),
+  });
 
   const [day, setDay] = useState(todayIso());
   const [time, setTime] = useState("18:00");
@@ -146,6 +153,16 @@ function ListenersPage() {
         title="Book a Listener"
         description="Our in-house team is trained to just… listen. Book ahead, and we'll match you with someone from the SomeoneNear roster."
       />
+
+      {feedbackPrompt.data && (
+        <div className="mb-6">
+          <PostCallFeedbackCard
+            bookingId={feedbackPrompt.data.id}
+            listenerName={feedbackPrompt.data.listeners?.name ?? "your listener"}
+            onDone={() => qc.invalidateQueries({ queryKey: ["session-feedback-prompt"] })}
+          />
+        </div>
+      )}
 
       {/* SLA + Rules strip */}
       <div className="mb-6 grid gap-3 sm:grid-cols-3">

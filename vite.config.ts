@@ -4,8 +4,50 @@
 //     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
+import { sep } from "node:path";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
+
+// On Windows, Vite normalizes `config.root` to forward slashes (e.g. C:/Users/...),
+// but @lovable.dev/mcp-js internally uses Node's path.resolve() which produces
+// backslash paths (C:\Users\...). Its `assertContains` check then fails because it
+// compares a forward-slash parent against a backslash child. We wrap the plugin so
+// that, on Windows, both its `config` and `configResolved` hooks see a `config.root`
+// using OS-native separators. `vite build` runs multiple builder passes, so we patch
+// every hook that reads the root rather than relying on a single call.
+function windowsPathFixMcpPlugin() {
+  const plugin = mcpPlugin();
+  if (sep !== "\\") return plugin;
+
+  const nativeRoot = (config: { root?: string }) =>
+    config && typeof config.root === "string"
+      ? new Proxy(config, {
+          get(target, prop, receiver) {
+            if (prop === "root") return (target.root as string).split("/").join(sep);
+            return Reflect.get(target, prop, receiver);
+          },
+        })
+      : config;
+
+  const wrap = (hookName: "config" | "configResolved") => {
+    const original = (plugin as Record<string, unknown>)[hookName];
+    if (typeof original !== "function") return;
+    (plugin as Record<string, unknown>)[hookName] = function patched(
+      config: { root?: string },
+      ...rest: unknown[]
+    ) {
+      return (original as (c: unknown, ...a: unknown[]) => unknown).call(
+        this,
+        nativeRoot(config),
+        ...rest,
+      );
+    };
+  };
+
+  wrap("config");
+  wrap("configResolved");
+  return plugin;
+}
 
 export default defineConfig({
   tanstackStart: {
@@ -14,6 +56,6 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    plugins: [mcpPlugin()],
+    plugins: [windowsPathFixMcpPlugin()],
   },
 });

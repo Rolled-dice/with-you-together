@@ -61,11 +61,12 @@ Generated: 2026-08-23
 - Google Gemini models via gateway (gemini-3.6-flash for OCR/prescription parsing)
 - Stream processing for chat responses (streamdown, react-markdown)
 
-8. VIDEO / VOICE / CALLING
---------------------------
-- Amazon Chime SDK JS 3.32.0 (call room, audio, data messages)
-- LiveKit client + server SDK (legacy/fallback paths)
-- @livekit/components-react 2.9.23
+8. VOICE / CALLING
+------------------
+- Telnyx WebRTC (@telnyx/webrtc), outbound-only
+- Agent talks in-browser over WebRTC; member is dialled on their phone (PSTN)
+- Telnyx Call Control bridges the two legs (dial, answer, bridge, transfer, hangup, recording, DTMF)
+- No browser call room for members (no LiveKit, no Amazon Chime)
 
 9. WHATSAPP BOT / MESSAGING
 ---------------------------
@@ -119,8 +120,7 @@ Generated: 2026-08-23
 - Lovable Cloud (backend, auth, storage)
 - Lovable AI Gateway (chat/completions, OCR)
 - Stripe (payments)
-- Twilio / Plivo (voice & WhatsApp - pending credentials)
-- Amazon Chime SDK (voice calls)
+- Telnyx (outbound voice calling)
 - Google OAuth & Apple OAuth (social login)
 
 END OF FILE

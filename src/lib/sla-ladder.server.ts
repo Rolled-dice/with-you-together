@@ -69,25 +69,6 @@ export async function evaluateSlaLadder(_client: unknown, userId?: string) {
     });
     if (!insErr) created += 1;
 
-    // Mirror the same warning to WhatsApp when the member has a verified number.
-    const { data: contact } = await supabaseAdmin
-      .from("whatsapp_contacts")
-      .select("phone")
-      .eq("user_id", b.user_id)
-      .eq("opted_in", true)
-      .not("verified_at", "is", null)
-      .maybeSingle();
-    if (contact?.phone) {
-      const { enqueueMessage } = await import("@/lib/whatsapp/provider.server");
-      await enqueueMessage({
-        phone: contact.phone,
-        body: `${copy.title}\n\n${copy.body(when)}`,
-        kind,
-        bookingId: b.id,
-        dedupeKey: `${kind}:${b.id}`,
-      });
-    }
-
     if (kind === "sla_breach" && b.crm_state !== "escalated") {
       await supabaseAdmin
         .from("listener_bookings")

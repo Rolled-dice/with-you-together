@@ -21,7 +21,7 @@ SomeoneNear is a family wellbeing app: an AI companion for emotional check-ins, 
 - **Styling**: Tailwind CSS v4 via `src/styles.css` (`@theme` tokens, no tailwind.config.js); shadcn/ui + Radix; Framer Motion; Lucide icons; Sonner toasts
 - **AI**: Lovable AI Gateway (`src/lib/ai-gateway.server.ts`), Google Gemini models (chat streaming at `/api/chat`, Gemini vision for prescription OCR)
 - **Payments**: Stripe (invite-only in India; Paddle under consideration as alternative)
-- **Calling**: Amazon Chime SDK (`src/hooks/useChimeMeeting.ts`, `CallRoom.tsx`) with LiveKit as legacy/fallback; Twilio or Plivo planned for phone calls (provider undecided)
+- **Calling**: Telnyx, outbound-only. Agent talks in-browser over WebRTC (`src/hooks/useSoftphone.ts`, `@telnyx/webrtc`); the member is dialled on their phone (PSTN) and the two legs are bridged via Telnyx Call Control (`src/lib/telnyx.server.ts`, `telnyx-calls.server.ts`). No browser call room for members.
 - **WhatsApp**: provider-agnostic outbox pattern (`whatsapp_outbox` table); bot state machine in `src/lib/whatsapp/bot.server.ts`; works in simulation until Twilio/Plivo credentials are added
 - **Testing**: Playwright (`tests/e2e/smoke.spec.ts`)
 
@@ -38,8 +38,8 @@ SomeoneNear is a family wellbeing app: an AI companion for emotional check-ins, 
 
 - `src/routes/index.tsx` — landing page (live stats via `public.get_public_stats()` RPC + `use-live-stats` polling)
 - `src/routes/_authenticated/companion.*` — AI companion chat (streams via `/api/chat`, per-tier monthly quota in `src/lib/quota.functions.ts`)
-- `src/routes/_authenticated/listeners.tsx` — listener call booking; **2-hour minimum lead time enforced server-side**; users are called on their phone (no video join link)
-- `src/routes/_authenticated/call-room.$bookingId.tsx` + `src/components/call/CallRoom.tsx` — Chime call room with mic controls, audio visualizer, recording banner, data-message chat sidebar
+- `src/routes/_authenticated/listeners.tsx` — listener call booking; **2-hour minimum lead time enforced server-side**; users are called on their phone (no video join link); also surfaces `PostCallFeedbackCard` for the most recently completed call
+- `src/routes/_authenticated/agent.console.tsx` + `src/hooks/useSoftphone.ts` — agent softphone (Telnyx WebRTC), member screen-pop, wrap-up disposition, call timeline
 - `src/routes/_authenticated/admin.calls.tsx` — Call CRM: queue board (requested → assigned → confirmed → in_call → completed/missed/escalated), agent roster, scoring-based assignment (`src/lib/call-crm.server.ts`), flag inbox, SLA coloring (T-90m amber, T-60m orange, past = red)
 - `src/routes/_authenticated/admin.whatsapp.tsx` — WhatsApp console with live bot simulator
 - `src/routes/_authenticated/admin.feedback.tsx` — feedback inbox

@@ -3,10 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 import {
   Heart,
-  MessageCircleHeart,
   Users,
   LineChart,
   Shield,
+  ShieldCheck,
   PhoneCall,
   BellRing,
   CalendarHeart,
@@ -14,11 +14,15 @@ import {
   ArrowRight,
   Mail,
   MessageSquareHeart,
+  Headphones,
 } from "lucide-react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { GentleNudge, NudgeDot } from "@/components/gentle-nudge";
 import { QuietEmptyState } from "@/components/quiet-empty-state";
+import { CallCardPreview } from "@/components/call-card-preview";
+import { AiSnippetPreview } from "@/components/ai-snippet-preview";
+import { TrustBadge } from "@/components/trust-badge";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -68,16 +72,6 @@ const features: {
   title: string;
   body: string;
 }[] = [
-  {
-    icon: MessageCircleHeart,
-    title: "Talk anytime",
-    body: "A companion that answers at 2am, without needing you to explain yourself first.",
-  },
-  {
-    icon: PhoneCall,
-    title: "A real human",
-    body: "Book a trained listener and we call your phone. No links, no cameras, no audience.",
-  },
   {
     icon: Heart,
     title: "Daily check-ins",
@@ -239,6 +233,19 @@ function Landing() {
           </p>
         </section>
 
+        {/* Experience Preview */}
+        <section data-reveal className="space-y-6">
+          <div className="space-y-2 text-center">
+            <h2 className="font-display text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              What it feels like
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <CallCardPreview />
+            <AiSnippetPreview />
+          </div>
+        </section>
+
         {/* Quiet truth */}
         <section data-reveal className="space-y-6 text-center">
           <p className="font-display text-2xl leading-snug sm:text-[1.7rem]">
@@ -249,6 +256,48 @@ function Landing() {
             them. Sometimes the hardest part isn't being alone, it's not knowing who to
             call.
           </p>
+        </section>
+
+        {/* Trust & credibility */}
+        <section data-reveal className="space-y-6">
+          <div className="space-y-2 text-center">
+            <h2 className="font-display text-3xl font-semibold">Who answers, and how it works</h2>
+            <p className="mx-auto max-w-lg leading-relaxed text-muted-foreground">
+              Before you book anything, here's exactly what happens and who's on the other end.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                <Headphones className="h-5 w-5" />
+              </span>
+              <h3 className="mt-4 font-display text-base font-medium">Vetted listeners</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                Every listener is trained before they take their first call. Nobody unqualified
+                picks up the phone.
+              </p>
+            </div>
+            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                <PhoneCall className="h-5 w-5" />
+              </span>
+              <h3 className="mt-4 font-display text-base font-medium">Just a phone call</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                Audio only. It rings like any normal call, no app to download, no camera, no link
+                to click.
+              </p>
+            </div>
+            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                <ShieldCheck className="h-5 w-5" />
+              </span>
+              <h3 className="mt-4 font-display text-base font-medium">Private by design</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                Conversations are yours. Family only ever sees what you choose to share, nothing
+                more.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* A gentle nudge, shown as itself */}
@@ -271,7 +320,7 @@ function Landing() {
         </section>
 
         {/* Check-In */}
-        <section id="check-in" data-reveal className="scroll-mt-24 space-y-6">
+        <section id="check-in" data-reveal className="scroll-mt-24 space-y-8 py-4">
           <div className="space-y-2 text-center">
             <h2 className="font-display text-3xl font-semibold">
               Check-In, someone should know how they're doing
@@ -282,7 +331,7 @@ function Landing() {
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+            <div className="rounded-3xl border border-border bg-surface p-8 shadow-gentle">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                 <CalendarHeart className="h-5 w-5" />
               </span>
@@ -293,7 +342,7 @@ function Landing() {
                 feeling. Afterwards a short update appears on your family dashboard.
               </p>
             </div>
-            <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+            <div className="rounded-3xl border border-border bg-surface p-8 shadow-gentle">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                 <PhoneCall className="h-5 w-5" />
               </span>
@@ -492,19 +541,7 @@ function Landing() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-5 px-6 py-10 text-sm text-muted-foreground">
-          <a
-            href="https://auraplusplus.com/projects/someonenear"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="View this project on Aura++"
-          >
-            <img
-              src="https://auraplusplus.com/images/badges/featured-on-light.svg"
-              alt="Featured on Aura++"
-              width={265}
-              height={58}
-            />
-          </a>
+          <TrustBadge />
           <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p>© {new Date().getFullYear()} SomeoneNear · Checking in when they can't.</p>
             <a
