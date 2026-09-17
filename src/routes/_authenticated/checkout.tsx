@@ -25,11 +25,6 @@ const PriceParam = z.enum([
   "family_monthly_usd",
   "care_monthly_inr",
   "care_monthly_usd",
-  // legacy
-  "together_monthly",
-  "family_monthly",
-  "together_yearly",
-  "family_yearly",
 ]);
 
 const PRICE_LABELS: Record<z.infer<typeof PriceParam>, string> = {
@@ -39,10 +34,6 @@ const PRICE_LABELS: Record<z.infer<typeof PriceParam>, string> = {
   family_monthly_usd: "Family plan, $15.99 / month",
   care_monthly_inr: "Care plan, ₹3,499 / month",
   care_monthly_usd: "Care plan, $36.99 / month",
-  together_monthly: "Together plan (monthly)",
-  family_monthly: "Family plan (monthly)",
-  together_yearly: "Together plan (yearly)",
-  family_yearly: "Family plan (yearly)",
 };
 
 export const Route = createFileRoute("/_authenticated/checkout")({

@@ -17,7 +17,7 @@ import { priceIdFor, type PlanId } from "@/lib/currency";
 const StripeEnvSchema = z.enum(["sandbox", "live"]);
 const PlanIdSchema = z.enum(["together", "family", "care"]);
 
-// New pricing lookup keys (monthly only), plus legacy keys for existing subs.
+// Current pricing lookup keys — one per plan × currency (monthly recurring).
 const PRICE_IDS = [
   "together_monthly_inr",
   "together_monthly_usd",
@@ -25,11 +25,6 @@ const PRICE_IDS = [
   "family_monthly_usd",
   "care_monthly_inr",
   "care_monthly_usd",
-  // legacy
-  "together_monthly",
-  "family_monthly",
-  "together_yearly",
-  "family_yearly",
 ] as const;
 
 async function resolveOrCreateCustomer(
