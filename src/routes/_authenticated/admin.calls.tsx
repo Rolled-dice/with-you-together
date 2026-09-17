@@ -3,15 +3,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  ArrowLeft,
-  Flag,
-  Loader2,
-  PhoneCall,
-  RefreshCw,
-  ShieldAlert,
-  Users,
-  Wand2,
-} from "lucide-react";
+  ArrowLeftIcon,
+  FlagIcon,
+  SpinnerGapIcon,
+  PhoneCallIcon,
+  ArrowClockwiseIcon,
+  ShieldWarningIcon,
+  UsersIcon,
+  MagicWandIcon,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -101,7 +101,7 @@ function AdminCallsPage() {
           description="You don't have access to this panel."
         />
         <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm underline">
-          <ArrowLeft className="h-4 w-4" /> Back to dashboard
+          <ArrowLeftIcon className="h-4 w-4" /> Back to dashboard
         </Link>
       </AppShell>
     );
@@ -232,9 +232,9 @@ function CallsConsole() {
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Active calls in queue" value={rows.filter((r) => ACTIVE_STATES.includes(r.crm_state)).length} />
-        <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breached" value={breached} tone={breached ? "text-primary" : undefined} />
-        <StatTile icon={<Flag className="h-4 w-4" />} label="Open flags" value={openFlags.length} tone={openFlags.length ? "text-primary" : undefined} />
+        <StatTile icon={<PhoneCallIcon className="h-4 w-4" />} label="Active calls in queue" value={rows.filter((r) => ACTIVE_STATES.includes(r.crm_state)).length} />
+        <StatTile icon={<ShieldWarningIcon className="h-4 w-4" />} label="SLA breached" value={breached} tone={breached ? "text-primary" : undefined} />
+        <StatTile icon={<FlagIcon className="h-4 w-4" />} label="Open flags" value={openFlags.length} tone={openFlags.length ? "text-primary" : undefined} />
       </div>
 
       <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
@@ -245,7 +245,7 @@ function CallsConsole() {
               {showAll ? "Show active only" : "Show all"}
             </Button>
             <Button variant="outline" size="sm" onClick={() => queue.refetch()}>
-              <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
+              <ArrowClockwiseIcon className="mr-1.5 h-4 w-4" /> Refresh
             </Button>
           </div>
         </header>
@@ -281,7 +281,7 @@ function CallsConsole() {
 
       <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
         <h2 className="mb-4 flex items-center gap-2 font-display text-base font-medium">
-          <Flag className="h-4 w-4" /> Flag inbox
+          <FlagIcon className="h-4 w-4" /> Flag inbox
         </h2>
         {flags.isLoading ? (
           <Skeleton className="h-20 w-full" />
@@ -437,7 +437,7 @@ function QueueCard({
           disabled={savingPhone || phoneDraft.trim() === (row.contact_phone ?? "")}
           onClick={() => onSavePhone(phoneDraft.trim() || null)}
         >
-          {savingPhone ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+          {savingPhone ? <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" /> : null}
           Save
         </Button>
         <span className="text-[11px] text-muted-foreground">
@@ -448,7 +448,7 @@ function QueueCard({
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button size="sm" onClick={onAutoAssign} disabled={busy}>
-          {busy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Wand2 className="mr-1.5 h-4 w-4" />}
+          {busy ? <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" /> : <MagicWandIcon className="mr-1.5 h-4 w-4" />}
           Auto-assign
         </Button>
 
@@ -485,7 +485,7 @@ function QueueCard({
         </Select>
 
         <Button size="sm" variant="outline" onClick={onFlag}>
-          <Flag className="mr-1.5 h-4 w-4" /> Flag
+          <FlagIcon className="mr-1.5 h-4 w-4" /> Flag
         </Button>
       </div>
     </article>
@@ -569,7 +569,7 @@ function AgentRoster({
   return (
     <section className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
       <h2 className="mb-4 flex items-center gap-2 font-display text-base font-medium">
-        <Users className="h-4 w-4" /> Agent roster
+        <UsersIcon className="h-4 w-4" /> Agent roster
       </h2>
 
       {loading ? (
@@ -645,7 +645,7 @@ function AgentRoster({
         />
       </div>
       <Button className="mt-3" size="sm" onClick={save} disabled={saving}>
-        {saving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />} Add agent
+        {saving && <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />} Add agent
       </Button>
     </section>
   );
@@ -699,10 +699,10 @@ function SupervisorBoard() {
     <section className="mb-8 space-y-4 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-display text-base font-medium">
-          <Users className="h-4 w-4" /> Live board &amp; routing
+          <UsersIcon className="h-4 w-4" /> Live board &amp; routing
         </h2>
         <Button variant="outline" size="sm" onClick={() => snapshot.refetch()}>
-          <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
+          <ArrowClockwiseIcon className="mr-1.5 h-4 w-4" /> Refresh
         </Button>
       </header>
 
@@ -711,10 +711,10 @@ function SupervisorBoard() {
       ) : (
         <>
           <div className="grid gap-2 sm:grid-cols-4">
-            <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Queue depth" value={snapshot.data?.queueDepth ?? 0} />
-            <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Answer rate (7d)" value={`${m?.answerRate ?? 0}%`} />
-            <StatTile icon={<PhoneCall className="h-4 w-4" />} label="Avg talk time" value={`${Math.round((m?.avgTalkSeconds ?? 0) / 60)}m`} />
-            <StatTile icon={<ShieldAlert className="h-4 w-4" />} label="SLA breach rate" value={`${m?.breachRate ?? 0}%`} tone={(m?.breachRate ?? 0) > 0 ? "text-primary" : undefined} />
+            <StatTile icon={<PhoneCallIcon className="h-4 w-4" />} label="Queue depth" value={snapshot.data?.queueDepth ?? 0} />
+            <StatTile icon={<PhoneCallIcon className="h-4 w-4" />} label="Answer rate (7d)" value={`${m?.answerRate ?? 0}%`} />
+            <StatTile icon={<PhoneCallIcon className="h-4 w-4" />} label="Avg talk time" value={`${Math.round((m?.avgTalkSeconds ?? 0) / 60)}m`} />
+            <StatTile icon={<ShieldWarningIcon className="h-4 w-4" />} label="SLA breach rate" value={`${m?.breachRate ?? 0}%`} tone={(m?.breachRate ?? 0) > 0 ? "text-primary" : undefined} />
           </div>
 
           <div className="space-y-2">
@@ -785,7 +785,7 @@ function SupervisorBoard() {
               Enforce working hours
             </label>
             <Button size="sm" onClick={() => save.mutate()} disabled={!draft || save.isPending}>
-              {save.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />} Save rules
+              {save.isPending && <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />} Save rules
             </Button>
           </div>
         </div>

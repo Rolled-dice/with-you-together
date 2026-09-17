@@ -24,16 +24,16 @@ import {
 import { getFeedbackPrompt } from "@/lib/session-feedback.functions";
 import { PostCallFeedbackCard } from "@/components/post-call-feedback-card";
 import {
-  AlarmClockCheck,
-  CalendarClock,
-  Ear,
-  HeartHandshake,
-  Loader2,
-  Phone,
-  PhoneCall,
-  ShieldCheck,
-  X,
-} from "lucide-react";
+  AlarmIcon,
+  CalendarDotIcon,
+  EarIcon,
+  HandHeartIcon,
+  SpinnerGapIcon,
+  PhoneIcon,
+  PhoneCallIcon,
+  ShieldCheckIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { useMemo, useState } from "react";
@@ -167,19 +167,19 @@ function ListenersPage() {
       {/* SLA + Rules strip */}
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         <RuleTile
-          icon={AlarmClockCheck}
+          icon={AlarmIcon}
           title="Scheduled in advance"
           body="Choose a preferred day & time in your timezone. Sessions run 30-60 minutes."
           delay={1}
         />
         <RuleTile
-          icon={ShieldCheck}
+          icon={ShieldCheckIcon}
           title="In-house team, SLA-backed"
           body="Every booking is picked up by a SomeoneNear Listener. Confirmed within 15 minutes."
           delay={2}
         />
         <RuleTile
-          icon={CalendarClock}
+          icon={CalendarDotIcon}
           title="2-hour reschedule rule"
           body="Reschedule up to 2 hours before the start. Later than that, the session counts as used."
           delay={3}
@@ -191,7 +191,7 @@ function ListenersPage() {
         <Card className="rounded-brand border-border bg-card animate-slide-in-up stagger-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
-              <HeartHandshake className="h-4 w-4 text-brand-accent" />
+              <HandHeartIcon className="h-4 w-4 text-brand-accent" />
               Schedule your next session
             </CardTitle>
           </CardHeader>
@@ -263,7 +263,7 @@ function ListenersPage() {
               disabled={book.isPending}
               className="w-full rounded-brand bg-neutral-900 text-white hover:-translate-y-0.5 hover:bg-neutral-900"
             >
-              {book.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Ear className="mr-2 h-4 w-4" />}
+              {book.isPending ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : <EarIcon className="mr-2 h-4 w-4" />}
               Book with the in-house team
             </Button>
             <p className="text-xs text-muted-foreground">
@@ -276,7 +276,7 @@ function ListenersPage() {
         <Card className="rounded-brand border-2 border-brand-primary/40 bg-gradient-to-br from-brand-primary/10 to-brand-accent/5 animate-slide-in-up stagger-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
-              <PhoneCall className="h-4 w-4 text-brand-accent" />
+              <PhoneCallIcon className="h-4 w-4 text-brand-accent" />
               Need someone right now?
             </CardTitle>
           </CardHeader>
@@ -315,7 +315,7 @@ function ListenersPage() {
                     disabled={book.isPending}
                     className="flex-1 rounded-brand gradient-sunrise text-white"
                   >
-                    {book.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PhoneCall className="mr-2 h-4 w-4" />}
+                    {book.isPending ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : <PhoneCallIcon className="mr-2 h-4 w-4" />}
                     Request callback
                   </Button>
                   <Button
@@ -332,7 +332,7 @@ function ListenersPage() {
                 onClick={() => setEmergencyOpen(true)}
                 className="w-full rounded-brand gradient-sunrise text-white"
               >
-                <PhoneCall className="mr-2 h-4 w-4" />
+                <PhoneCallIcon className="mr-2 h-4 w-4" />
                 Request an emergency callback
               </Button>
             )}
@@ -350,7 +350,7 @@ function ListenersPage() {
           </div>
         ) : upcoming.length === 0 && past.length === 0 ? (
           <EmptyState
-            icon={<CalendarClock className="h-6 w-6" />}
+            icon={<CalendarDotIcon className="h-6 w-6" />}
             title="Nothing on the calendar yet"
             description="Book your first session above. Our in-house Listener team takes it from there."
           />
@@ -481,7 +481,7 @@ function BookingRow({
         {!past && (
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-brand border border-border bg-surface px-2.5 py-1.5 text-xs text-muted-foreground">
-              <Phone className="h-3.5 w-3.5 text-brand-accent" />
+              <PhoneIcon className="h-3.5 w-3.5 text-brand-accent" />
               Your listener will call your phone at this time
             </span>
 
@@ -500,7 +500,7 @@ function BookingRow({
                 className="rounded-brand text-destructive"
                 onClick={onCancel}
               >
-                <X className="mr-1 h-4 w-4" /> Cancel
+                <XIcon className="mr-1 h-4 w-4" /> Cancel
               </Button>
             )}
           </div>

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
-import { LifeBuoy, Phone, MessageSquare, Globe, ShieldCheck, HeartPulse } from "lucide-react";
+import { LifebuoyIcon, PhoneIcon, ChatIcon, GlobeIcon, ShieldCheckIcon, HeartbeatIcon } from "@phosphor-icons/react";
 
 export const Route = createFileRoute("/_authenticated/safety")({
   component: SafetyPage,
@@ -58,7 +58,7 @@ function SafetyPage() {
 
       <div className="rounded-brand border border-destructive/30 bg-destructive/5 p-5 mb-8 animate-fade-up">
         <div className="flex gap-4">
-          <LifeBuoy className="h-6 w-6 shrink-0 text-destructive mt-0.5 animate-heartbeat" />
+          <LifebuoyIcon className="h-6 w-6 shrink-0 text-destructive mt-0.5 animate-heartbeat" />
           <div className="flex-1">
             <p className="font-semibold text-foreground">In immediate danger? Tap to call your local emergency line.</p>
             <p className="text-sm text-muted-foreground mt-1">
@@ -73,7 +73,7 @@ function SafetyPage() {
                   style={{ animationDelay: `${i * 70}ms` }}
                   className="flex flex-col items-center justify-center rounded-brand bg-destructive px-3 py-3 text-destructive-foreground font-semibold shadow-sm hover:opacity-90 active:scale-[0.98] transition animate-pop-in card-lift"
                 >
-                  <span className="flex items-center gap-1.5 text-base"><Phone className="h-4 w-4" /> {e.number}</span>
+                  <span className="flex items-center gap-1.5 text-base"><PhoneIcon className="h-4 w-4" /> {e.number}</span>
                   <span className="text-[11px] opacity-90 font-normal mt-0.5">{e.region}</span>
                 </a>
               ))}
@@ -83,7 +83,7 @@ function SafetyPage() {
       </div>
 
       <section className="mb-10 animate-fade-up" style={{ animationDelay: "120ms" }}>
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Phone className="h-4 w-4 text-brand-accent" /> Hotlines & text lines</h2>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><PhoneIcon className="h-4 w-4 text-brand-accent" /> Hotlines & text lines</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {HOTLINES.map((r, i) => (
             <div
@@ -101,7 +101,7 @@ function SafetyPage() {
                     aria-label={`Call ${r.name} at ${r.phone}`}
                     className="inline-flex items-center justify-center gap-2 rounded-brand bg-brand-primary px-3 py-2.5 text-primary-foreground font-semibold text-sm shadow-sm hover:opacity-90 active:scale-[0.98] transition"
                   >
-                    <Phone className="h-4 w-4" /> Call {r.phone}
+                    <PhoneIcon className="h-4 w-4" /> Call {r.phone}
                   </a>
                 )}
                 {r.sms && (
@@ -110,12 +110,12 @@ function SafetyPage() {
                     aria-label={`Text ${r.name} at ${r.sms}`}
                     className="inline-flex items-center justify-center gap-2 rounded-brand bg-brand-accent px-3 py-2.5 text-white font-semibold text-sm shadow-sm hover:opacity-90 active:scale-[0.98] transition"
                   >
-                    <MessageSquare className="h-4 w-4" /> Text {r.sms}
+                    <ChatIcon className="h-4 w-4" /> Text {r.sms}
                   </a>
                 )}
                 {r.url && (
                   <a href={r.url} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-brand border border-border px-3 py-2 text-muted-foreground hover:text-foreground text-sm sm:col-span-2">
-                    <Globe className="h-3.5 w-3.5" /> Visit website
+                    <GlobeIcon className="h-3.5 w-3.5" /> Visit website
                   </a>
                 )}
               </div>
@@ -125,7 +125,7 @@ function SafetyPage() {
       </section>
 
       <section className="mb-10 animate-fade-up" style={{ animationDelay: "200ms" }}>
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><HeartPulse className="h-4 w-4 text-brand-accent" /> Grounding right now</h2>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><HeartbeatIcon className="h-4 w-4 text-brand-accent" /> Grounding right now</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {GROUNDING.map((g, i) => (
             <div
@@ -142,7 +142,7 @@ function SafetyPage() {
 
       <section className="rounded-brand border border-border bg-surface p-5 animate-fade-up" style={{ animationDelay: "280ms" }}>
         <div className="flex items-start gap-3">
-          <ShieldCheck className="h-5 w-5 text-brand-accent mt-0.5" />
+          <ShieldCheckIcon className="h-5 w-5 text-brand-accent mt-0.5" />
           <div>
             <p className="font-semibold">How SomeoneNear handles crisis moments</p>
             <p className="text-sm text-muted-foreground mt-1">

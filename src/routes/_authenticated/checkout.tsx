@@ -7,7 +7,7 @@ import { createMembershipCheckout } from "@/lib/billing.functions";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeftIcon } from "@phosphor-icons/react";
 
 const PriceParam = z.enum([
   "together_monthly_inr",
@@ -75,7 +75,7 @@ function CheckoutPage() {
           onClick={() => navigate({ to: "/settings" })}
           className="rounded-brand"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to settings
+          <ArrowLeftIcon className="mr-2 h-4 w-4" /> Back to settings
         </Button>
       </div>
       <PageHeader

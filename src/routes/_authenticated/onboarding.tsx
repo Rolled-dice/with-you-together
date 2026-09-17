@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Heart, Loader2 } from "lucide-react";
+import { HeartIcon, SpinnerGapIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
@@ -92,7 +92,7 @@ function OnboardingPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-primary" />
+        <SpinnerGapIcon className="h-6 w-6 animate-spin text-brand-primary" />
       </div>
     );
   }
@@ -101,7 +101,7 @@ function OnboardingPage() {
     <div className="min-h-screen bg-background px-4 py-12">
       <div className="mx-auto flex max-w-xl flex-col gap-6">
         <div className="flex items-center gap-2 text-brand-primary">
-          <Heart className="h-5 w-5" />
+          <HeartIcon className="h-5 w-5" />
           <span className="text-sm font-medium tracking-wide">SomeoneNear</span>
         </div>
         <Card className="rounded-brand border-border bg-card">
@@ -179,7 +179,7 @@ function OnboardingPage() {
                 disabled={saving}
                 className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
               >
-                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {saving ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Enter SomeoneNear
               </Button>
             </form>

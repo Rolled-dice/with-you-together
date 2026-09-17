@@ -2,20 +2,20 @@ import { useEffect, useState, type ComponentType } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import {
-  Heart,
-  Users,
-  LineChart,
-  Shield,
-  ShieldCheck,
-  PhoneCall,
-  BellRing,
-  CalendarHeart,
-  Check,
-  ArrowRight,
-  Mail,
-  MessageSquareHeart,
-  Headphones,
-} from "lucide-react";
+  HeartIcon,
+  UsersIcon,
+  ChartLineIcon,
+  ShieldIcon,
+  ShieldCheckIcon,
+  PhoneCallIcon,
+  BellRingingIcon,
+  CalendarHeartIcon,
+  CheckIcon,
+  ArrowRightIcon,
+  EnvelopeSimpleIcon,
+  ChatCircleTextIcon,
+  HeadphonesIcon,
+} from "@phosphor-icons/react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { GentleNudge, NudgeDot } from "@/components/gentle-nudge";
@@ -73,22 +73,22 @@ const features: {
   body: string;
 }[] = [
   {
-    icon: Heart,
+    icon: HeartIcon,
     title: "Daily check-ins",
     body: "One small question a day. Answer in a word, or skip it. Nothing is scored.",
   },
   {
-    icon: BellRing,
+    icon: BellRingingIcon,
     title: "Gentle reminders",
     body: "Medicines, water, appointments, nudges that sound like a friend, not an alarm.",
   },
   {
-    icon: Users,
+    icon: UsersIcon,
     title: "Family circle",
     body: "Keep the people you trust close, and only share what you actually want to share.",
   },
   {
-    icon: CalendarHeart,
+    icon: CalendarHeartIcon,
     title: "Send It Later",
     body: "Leave a message for a future day. Because you can't always be there, but something can.",
   },
@@ -189,7 +189,7 @@ function Landing() {
       <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-6">
         <Link to="/" className="flex items-center gap-2.5">
           <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <Heart className="h-5 w-5" strokeWidth={2.2} fill="currentColor" />
+            <HeartIcon className="h-5 w-5" strokeWidth={2.2} fill="currentColor" />
           </span>
           <span className="font-display text-lg font-semibold tracking-tight">SomeoneNear</span>
         </Link>
@@ -221,7 +221,7 @@ function Landing() {
             <Button asChild size="lg" className="w-full rounded-2xl px-8 sm:w-auto">
               <Link to={nextStep}>
                 {signedIn ? "Open SomeoneNear" : "Start your journey"}
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRightIcon className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="ghost" className="w-full rounded-2xl sm:w-auto">
@@ -269,7 +269,7 @@ function Landing() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <Headphones className="h-5 w-5" />
+                <HeadphonesIcon className="h-5 w-5" />
               </span>
               <h3 className="mt-4 font-display text-base font-medium">Vetted listeners</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -279,7 +279,7 @@ function Landing() {
             </div>
             <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <PhoneCall className="h-5 w-5" />
+                <PhoneCallIcon className="h-5 w-5" />
               </span>
               <h3 className="mt-4 font-display text-base font-medium">Just a phone call</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -289,7 +289,7 @@ function Landing() {
             </div>
             <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <ShieldCheck className="h-5 w-5" />
+                <ShieldCheckIcon className="h-5 w-5" />
               </span>
               <h3 className="mt-4 font-display text-base font-medium">Private by design</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -333,7 +333,7 @@ function Landing() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-3xl border border-border bg-surface p-8 shadow-gentle">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <CalendarHeart className="h-5 w-5" />
+                <CalendarHeartIcon className="h-5 w-5" />
               </span>
               <h3 className="mt-4 font-display text-base font-medium">Scheduled Check-In</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -344,7 +344,7 @@ function Landing() {
             </div>
             <div className="rounded-3xl border border-border bg-surface p-8 shadow-gentle">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <PhoneCall className="h-5 w-5" />
+                <PhoneCallIcon className="h-5 w-5" />
               </span>
               <h3 className="mt-4 font-display text-base font-medium">On-Demand Check-In</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -482,7 +482,7 @@ function Landing() {
                 <ul className="mt-5 grid gap-2 sm:grid-cols-2">
                   {p.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                       <span>{f}</span>
                     </li>
                   ))}
@@ -514,7 +514,7 @@ function Landing() {
         {/* Safety + contact */}
         <section data-reveal className="space-y-4">
           <div className="flex items-start gap-4 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
-            <Shield className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <p className="text-sm leading-relaxed text-muted-foreground">
               Private by default. Your conversations are yours; family members see only what
               you choose to share. If you're ever in danger, we'll show your local emergency
@@ -523,7 +523,7 @@ function Landing() {
           </div>
           <div className="flex flex-col gap-3 rounded-3xl border border-border bg-surface p-6 shadow-gentle sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-4">
-              <LineChart className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <ChartLineIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Something felt off, or missing? Tell us. We read every message.
               </p>
@@ -531,7 +531,7 @@ function Landing() {
             <FeedbackDialog
               trigger={
                 <Button variant="secondary" className="rounded-2xl">
-                  <MessageSquareHeart className="mr-2 h-4 w-4" /> Send feedback
+                  <ChatCircleTextIcon className="mr-2 h-4 w-4" /> Send feedback
                 </Button>
               }
             />
@@ -548,7 +548,7 @@ function Landing() {
               href="mailto:care@someonenear.com"
               className="inline-flex items-center gap-2 transition-colors hover:text-primary"
             >
-              <Mail className="h-4 w-4" /> care@someonenear.com
+              <EnvelopeSimpleIcon className="h-4 w-4" /> care@someonenear.com
             </a>
           </div>
         </div>

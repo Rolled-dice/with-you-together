@@ -3,20 +3,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  AlertCircle,
-  ArrowLeft,
-  Bug,
-  Filter,
-  Flame,
-  Headphones,
-  Inbox,
-  LifeBuoy,
-  Lightbulb,
-  Loader2,
-  MessageSquareHeart,
-  ShieldAlert,
-  Sparkles,
-} from "lucide-react";
+  WarningCircleIcon,
+  ArrowLeftIcon,
+  BugIcon,
+  FunnelIcon,
+  FireIcon,
+  HeadphonesIcon,
+  TrayIcon,
+  LifebuoyIcon,
+  LightbulbIcon,
+  SpinnerGapIcon,
+  ChatCircleTextIcon,
+  ShieldWarningIcon,
+  SparkleIcon,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -55,13 +55,13 @@ export const Route = createFileRoute("/_authenticated/admin/feedback")({
   notFoundComponent: () => <div className="p-8 text-sm">Not found.</div>,
 });
 
-const CATEGORY_META: Record<FeedbackCategory, { label: string; Icon: typeof Bug; tone: string }> = {
-  feature_request: { label: "Feature request", Icon: Lightbulb, tone: "bg-mint/40" },
-  bug_report: { label: "Bug", Icon: Bug, tone: "bg-blush/50" },
-  product_feedback: { label: "Product", Icon: MessageSquareHeart, tone: "bg-peach/60" },
-  ai_feedback: { label: "AI Companion", Icon: Sparkles, tone: "bg-lilac/40" },
-  listener_feedback: { label: "Listener", Icon: Headphones, tone: "bg-sage/40" },
-  support: { label: "Support", Icon: LifeBuoy, tone: "bg-sunrise/40" },
+const CATEGORY_META: Record<FeedbackCategory, { label: string; Icon: typeof BugIcon; tone: string }> = {
+  feature_request: { label: "Feature request", Icon: LightbulbIcon, tone: "bg-mint/40" },
+  bug_report: { label: "Bug", Icon: BugIcon, tone: "bg-blush/50" },
+  product_feedback: { label: "Product", Icon: ChatCircleTextIcon, tone: "bg-peach/60" },
+  ai_feedback: { label: "AI Companion", Icon: SparkleIcon, tone: "bg-lilac/40" },
+  listener_feedback: { label: "Listener", Icon: HeadphonesIcon, tone: "bg-sage/40" },
+  support: { label: "Support", Icon: LifebuoyIcon, tone: "bg-sunrise/40" },
 };
 
 const PRIORITY_META: Record<FeedbackPriority, { label: string; className: string; rank: number }> = {
@@ -173,14 +173,14 @@ function AdminFeedbackPage() {
       <PageShell>
         <div className="mx-auto max-w-lg rounded-3xl border bg-card p-8 text-center shadow-soft">
           <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-blush/50">
-            <ShieldAlert className="h-6 w-6" />
+            <ShieldWarningIcon className="h-6 w-6" />
           </div>
           <h1 className="text-lg font-semibold">Admins only</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             This dashboard is for the SomeoneNear product team. Ask an owner to grant you the <code>admin</code> role.
           </p>
           <Button asChild variant="ghost" className="mt-4">
-            <Link to="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" />Back to dashboard</Link>
+            <Link to="/dashboard"><ArrowLeftIcon className="mr-2 h-4 w-4" />Back to dashboard</Link>
           </Button>
         </div>
       </PageShell>
@@ -198,15 +198,15 @@ function AdminFeedbackPage() {
           </p>
         </div>
         <Button asChild variant="ghost" size="sm">
-          <Link to="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" />Dashboard</Link>
+          <Link to="/dashboard"><ArrowLeftIcon className="mr-2 h-4 w-4" />Dashboard</Link>
         </Button>
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Total" value={counts.total} Icon={Inbox} tone="bg-mint/40" />
-        <StatCard label="New" value={counts.new} Icon={AlertCircle} tone="bg-sky-100" />
-        <StatCard label="Open" value={counts.open} Icon={Filter} tone="bg-peach/50" />
-        <StatCard label="Urgent" value={counts.urgent} Icon={Flame} tone="bg-red-100" />
+        <StatCard label="Total" value={counts.total} Icon={TrayIcon} tone="bg-mint/40" />
+        <StatCard label="New" value={counts.new} Icon={WarningCircleIcon} tone="bg-sky-100" />
+        <StatCard label="Open" value={counts.open} Icon={FunnelIcon} tone="bg-peach/50" />
+        <StatCard label="Urgent" value={counts.urgent} Icon={FireIcon} tone="bg-red-100" />
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border bg-card p-3 shadow-soft">
@@ -285,7 +285,7 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  Icon: typeof Bug;
+  Icon: typeof BugIcon;
   tone: string;
 }) {
   return (
@@ -362,7 +362,7 @@ function FeedbackCard({
             <span className="text-xs text-muted-foreground">
               {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
             </span>
-            {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+            {saving && <SpinnerGapIcon className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
           </div>
           {row.subject && <h3 className="mt-1.5 font-semibold leading-snug">{row.subject}</h3>}
           <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800">{row.message}</p>

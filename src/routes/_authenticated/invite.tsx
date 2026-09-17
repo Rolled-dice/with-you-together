@@ -9,7 +9,7 @@ import {
   acceptFamilyInvite,
   getInvitationByToken,
 } from "@/lib/family.functions";
-import { Loader2, Users } from "lucide-react";
+import { SpinnerGapIcon, UsersIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/invite")({
@@ -48,13 +48,13 @@ function InvitePage() {
       <Card className="rounded-brand border-border bg-card max-w-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base font-medium">
-            <Users className="h-4 w-4 text-brand-accent" />
+            <UsersIcon className="h-4 w-4 text-brand-accent" />
             Invitation
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm">
           {!token && <p className="text-muted-foreground">No invitation token provided.</p>}
-          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-brand-primary" />}
+          {isLoading && <SpinnerGapIcon className="h-4 w-4 animate-spin text-brand-primary" />}
           {error && <p className="text-destructive">{(error as Error).message}</p>}
           {data && !data.invitation && (
             <p className="text-muted-foreground">This invitation link is not valid.</p>
@@ -82,7 +82,7 @@ function InvitePage() {
                   className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
                 >
                   {acceptMut.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
                   Accept invitation
                 </Button>

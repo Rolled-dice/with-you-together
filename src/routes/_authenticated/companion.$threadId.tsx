@@ -7,7 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getConversationMessages } from "@/lib/conversations.functions";
 import { getMyAiQuota } from "@/lib/quota.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { SpinnerGapIcon } from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import {
@@ -50,7 +50,7 @@ function CompanionThread() {
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-brand-primary" />
+        <SpinnerGapIcon className="h-5 w-5 animate-spin text-brand-primary" />
       </div>
     );
   }

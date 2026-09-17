@@ -41,7 +41,7 @@ import { getStripeEnvironment } from "@/lib/stripe";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, HeartHandshake, Loader2, LogOut, Sparkles } from "lucide-react";
+import { CheckIcon, HandHeartIcon, SpinnerGapIcon, SignOutIcon, SparkleIcon } from "@phosphor-icons/react";
 import { WebhookEventsCard } from "@/components/webhook-events-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -225,7 +225,7 @@ function SettingsPage() {
         <Card className="rounded-brand border-border bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
-              <HeartHandshake className="h-4 w-4 text-brand-accent" />
+              <HandHeartIcon className="h-4 w-4 text-brand-accent" />
               Care Membership
             </CardTitle>
           </CardHeader>
@@ -250,7 +250,7 @@ function SettingsPage() {
                   className="rounded-brand"
                 >
                   {portalMut.isPending ? (
-                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                    <SpinnerGapIcon className="mr-2 h-3 w-3 animate-spin" />
                   ) : null}
                   Manage or cancel
                 </Button>
@@ -312,7 +312,7 @@ function SettingsPage() {
                       <span className="text-sm font-medium">{info.name}</span>
                       {active ? (
                         <Badge className="rounded-full bg-brand-primary text-primary-foreground">
-                          <Check className="mr-1 h-3 w-3" /> Current
+                          <CheckIcon className="mr-1 h-3 w-3" /> Current
                         </Badge>
                       ) : showTrialCTA ? (
                         <Badge variant="secondary" className="rounded-full">
@@ -345,7 +345,7 @@ function SettingsPage() {
                         className="rounded-brand"
                       >
                         {portalMut.isPending ? (
-                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          <SpinnerGapIcon className="mr-2 h-3 w-3 animate-spin" />
                         ) : null}
                         Manage or cancel
                       </Button>
@@ -362,7 +362,7 @@ function SettingsPage() {
                         }
                         className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
                       >
-                        <Sparkles className="mr-2 h-3 w-3" />
+                        <SparkleIcon className="mr-2 h-3 w-3" />
                         {hasPaidSub
                           ? "Switch in billing portal"
                           : showTrialCTA
@@ -472,7 +472,7 @@ function SettingsPage() {
                 className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
               >
                 {saveMut.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
                 Save changes
               </Button>
@@ -490,7 +490,7 @@ function SettingsPage() {
           </CardHeader>
           <CardContent>
             <Button variant="outline" onClick={handleSignOut} className="rounded-brand">
-              <LogOut className="mr-2 h-4 w-4" />
+              <SignOutIcon className="mr-2 h-4 w-4" />
               Sign out
             </Button>
           </CardContent>
@@ -606,7 +606,7 @@ function PhoneVerifyDialog({
               className="flex-1 rounded-brand"
             >
               {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
               ) : sentTo ? (
                 "Resend code"
               ) : (
@@ -618,7 +618,7 @@ function PhoneVerifyDialog({
               disabled={loading || otp.length < 6}
               className="flex-1 rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
             >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Verify"}
+              {loading ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : "Verify"}
             </Button>
           </div>
           <Button
@@ -778,7 +778,7 @@ function CompanionMemoryCard() {
             disabled={!content.trim() || addMut.isPending}
             className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
           >
-            {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
+            {addMut.isPending ? <SpinnerGapIcon className="h-4 w-4 animate-spin" /> : "Add"}
           </Button>
         </div>
         {isLoading ? (

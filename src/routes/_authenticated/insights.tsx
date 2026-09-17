@@ -6,7 +6,7 @@ import { createMoodCheckIn, listMoodCheckIns } from "@/lib/mood.functions";
 import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
-import { Sparkles, TrendingUp, Flame, NotebookPen, Check, Loader2 } from "lucide-react";
+import { SparkleIcon, TrendUpIcon, FireIcon, NotebookIcon, CheckIcon, SpinnerGapIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -198,7 +198,7 @@ function InsightsPage() {
           </div>
           {todayEntry && (
             <span className="inline-flex items-center gap-1 rounded-brand bg-brand-primary/10 px-2.5 py-1 text-xs font-medium text-brand-primary">
-              <Check className="h-3.5 w-3.5" /> Done today
+              <CheckIcon className="h-3.5 w-3.5" /> Done today
             </span>
           )}
         </div>
@@ -222,7 +222,7 @@ function InsightsPage() {
                 )}
               >
                 <span className="text-2xl" aria-hidden>
-                  {isPending ? <Loader2 className="h-6 w-6 animate-spin" /> : m.emoji}
+                  {isPending ? <SpinnerGapIcon className="h-6 w-6 animate-spin" /> : m.emoji}
                 </span>
                 <span className="text-[11px] font-medium text-foreground">{m.label}</span>
               </button>
@@ -241,7 +241,7 @@ function InsightsPage() {
         </div>
       ) : entries.length === 0 ? (
         <EmptyState
-          icon={<NotebookPen className="h-5 w-5" />}
+          icon={<NotebookIcon className="h-5 w-5" />}
           title="No check-ins yet"
           description="Tap a mood above to start seeing your patterns here."
         />
@@ -271,7 +271,7 @@ function InsightsPage() {
           <div className="grid gap-4 sm:grid-cols-3 mb-6">
             {[
               {
-                icon: Sparkles,
+                icon: SparkleIcon,
                 label: `Average mood (${rangeMeta.label.toLowerCase()})`,
                 value: stats.avgMood
                   ? `${MOOD_LABEL[Math.round(stats.avgMood)].emoji} ${stats.avgMood.toFixed(1)} / 5`
@@ -279,13 +279,13 @@ function InsightsPage() {
                 hint: stats.avgMood ? MOOD_LABEL[Math.round(stats.avgMood)].label : "No moods logged",
               },
               {
-                icon: Flame,
+                icon: FireIcon,
                 label: "Current streak",
                 value: `${stats.streak} day${stats.streak === 1 ? "" : "s"}`,
                 hint: stats.streak >= 3 ? "You're showing up for yourself." : "One entry today keeps it going.",
               },
               {
-                icon: TrendingUp,
+                icon: TrendUpIcon,
                 label: `Entries (${rangeMeta.label.toLowerCase()})`,
                 value: String(stats.windowCount),
                 hint: `${stats.totalEntries} total`,

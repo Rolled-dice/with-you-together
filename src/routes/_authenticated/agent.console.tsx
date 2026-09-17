@@ -5,17 +5,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import {
-  Headphones,
-  Loader2,
-  Mic,
-  MicOff,
-  Pause,
-  Phone,
-  PhoneCall,
-  PhoneOff,
-  Play,
-  ShieldAlert,
-} from "lucide-react";
+  HeadphonesIcon,
+  SpinnerGapIcon,
+  MicrophoneIcon,
+  MicrophoneSlashIcon,
+  PauseIcon,
+  PhoneIcon,
+  PhoneCallIcon,
+  PhoneDisconnectIcon,
+  PlayIcon,
+  ShieldWarningIcon,
+} from "@phosphor-icons/react";
 
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -213,13 +213,13 @@ function AgentConsolePage() {
               </>
             ) : !queue.data?.agent ? (
               <EmptyState
-                icon={<Headphones className="h-5 w-5" />}
+                icon={<HeadphonesIcon className="h-5 w-5" />}
                 title="You're not on the agent roster"
                 description="An admin can add you in Call CRM → Agents, then this console fills with your calls."
               />
             ) : rows.length === 0 ? (
               <EmptyState
-                icon={<PhoneCall className="h-5 w-5" />}
+                icon={<PhoneCallIcon className="h-5 w-5" />}
                 title="Nothing assigned"
                 description="Assigned calls appear here with their SLA countdown."
               />
@@ -258,7 +258,7 @@ function AgentConsolePage() {
         <div className="space-y-4">
           {!selected ? (
             <EmptyState
-              icon={<PhoneCall className="h-5 w-5" />}
+              icon={<PhoneCallIcon className="h-5 w-5" />}
               title="Pick a call"
               description="Choose someone from your queue to see their context and start the call."
             />
@@ -312,7 +312,7 @@ function AgentConsolePage() {
                       </div>
                       {(pop.data?.flags ?? []).some((f: any) => !f.resolved) && (
                         <p className="flex items-center gap-2 rounded-2xl bg-primary/10 p-3 text-xs text-primary">
-                          <ShieldAlert className="h-4 w-4" /> This booking has an open flag, read the
+                          <ShieldWarningIcon className="h-4 w-4" /> This booking has an open flag, read the
                           notes before you dial.
                         </p>
                       )}
@@ -325,14 +325,14 @@ function AgentConsolePage() {
                       disabled={dial.isPending || phone.status === "on_call"}
                     >
                       {dial.isPending ? (
-                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                        <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />
                       ) : (
-                        <Phone className="mr-1.5 h-4 w-4" />
+                        <PhoneIcon className="mr-1.5 h-4 w-4" />
                       )}
                       Call member
                     </Button>
                     <Button variant="destructive" onClick={() => end.mutate()} disabled={end.isPending}>
-                      <PhoneOff className="mr-1.5 h-4 w-4" /> End call
+                      <PhoneDisconnectIcon className="mr-1.5 h-4 w-4" /> End call
                     </Button>
                     <div className="flex gap-2">
                       <Input
@@ -388,7 +388,7 @@ function AgentConsolePage() {
                     Safety concern (raises an urgent flag)
                   </label>
                   <Button onClick={() => saveNotes.mutate()} disabled={saveNotes.isPending}>
-                    {saveNotes.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                    {saveNotes.isPending && <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />}
                     Save and go available
                   </Button>
                 </CardContent>
@@ -401,7 +401,7 @@ function AgentConsolePage() {
                 <CardContent className="space-y-2 text-xs">
                   {(timeline.data?.recordings ?? []).map((rec: any) => (
                     <div key={rec.id} className="flex items-center gap-2">
-                      <Play className="h-3.5 w-3.5" />
+                      <PlayIcon className="h-3.5 w-3.5" />
                       {rec.url ? (
                         <a className="underline" href={rec.url} target="_blank" rel="noreferrer">
                           Recording ({rec.duration_seconds ?? "?"}s)
@@ -473,23 +473,23 @@ function SoftphoneDock({
               }
             }}
           >
-            <Headphones className="mr-1.5 h-4 w-4" /> Go available
+            <HeadphonesIcon className="mr-1.5 h-4 w-4" /> Go available
           </Button>
         ) : (
           <>
             <Button size="sm" variant="outline" onClick={phone.toggleMute}>
               {phone.muted ? (
-                <MicOff className="mr-1.5 h-4 w-4" />
+                <MicrophoneSlashIcon className="mr-1.5 h-4 w-4" />
               ) : (
-                <Mic className="mr-1.5 h-4 w-4" />
+                <MicrophoneIcon className="mr-1.5 h-4 w-4" />
               )}
               {phone.muted ? "Unmute" : "Mute"}
             </Button>
             <Button size="sm" variant="outline" onClick={() => void phone.toggleHold()}>
-              <Pause className="mr-1.5 h-4 w-4" /> {phone.held ? "Resume" : "Hold"}
+              <PauseIcon className="mr-1.5 h-4 w-4" /> {phone.held ? "Resume" : "Hold"}
             </Button>
             <Button size="sm" variant="destructive" onClick={() => void phone.hangup()}>
-              <PhoneOff className="mr-1.5 h-4 w-4" /> Hang up
+              <PhoneDisconnectIcon className="mr-1.5 h-4 w-4" /> Hang up
             </Button>
             <Button size="sm" variant="ghost" onClick={() => void phone.disconnect()}>
               Go offline

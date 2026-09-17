@@ -3,16 +3,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { format } from "date-fns";
 import {
-  CalendarHeart,
-  Mic,
-  Video,
-  Type,
-  Square,
-  Trash2,
-  Play,
-  Loader2,
-  Mail,
-} from "lucide-react";
+  CalendarHeartIcon,
+  MicrophoneIcon,
+  VideoCameraIcon,
+  TextTIcon,
+  StopIcon,
+  TrashIcon,
+  PlayIcon,
+  SpinnerGapIcon,
+  EnvelopeSimpleIcon,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -163,7 +163,7 @@ function SendLaterPage() {
       <div className="mx-auto max-w-2xl space-y-8 pb-24">
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 text-muted-foreground text-sm">
-            <Mail className="size-4" /> A little presence. A lot of difference.
+            <EnvelopeSimpleIcon className="size-4" /> A little presence. A lot of difference.
           </div>
           <h1 className="text-2xl font-semibold">
             Write something they'll be happy to receive…
@@ -178,9 +178,9 @@ function SendLaterPage() {
           <div className="flex gap-2">
             {(
               [
-                ["text", Type, "Text"],
-                ["voice", Mic, "Voice"],
-                ["video", Video, "Video"],
+                ["text", TextTIcon, "Text"],
+                ["voice", MicrophoneIcon, "Voice"],
+                ["video", VideoCameraIcon, "Video"],
               ] as const
             ).map(([k, Icon, label]) => (
               <Button
@@ -254,7 +254,7 @@ function SendLaterPage() {
                         window.open(url, "_blank");
                       }}
                     >
-                      <Play className="size-4" /> Preview
+                      <PlayIcon className="size-4" /> Preview
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => setBlob(null)}>
                       Re-record
@@ -263,12 +263,12 @@ function SendLaterPage() {
                 </div>
               ) : recording ? (
                 <Button variant="destructive" onClick={stopRecording}>
-                  <Square className="size-4" /> Stop recording
+                  <StopIcon className="size-4" /> Stop recording
                 </Button>
               ) : (
                 <div className="flex justify-center gap-2">
                   <Button variant="outline" onClick={startRecording}>
-                    <Mic className="size-4" /> Record {kind}
+                    <MicrophoneIcon className="size-4" /> Record {kind}
                   </Button>
                   <Button
                     variant="ghost"
@@ -316,9 +316,9 @@ function SendLaterPage() {
               onClick={() => createMut.mutate()}
             >
               {createMut.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
+                <SpinnerGapIcon className="size-4 animate-spin" />
               ) : (
-                <CalendarHeart className="size-4" />
+                <CalendarHeartIcon className="size-4" />
               )}
               Schedule it
             </Button>
@@ -356,7 +356,7 @@ function SendLaterPage() {
                     onClick={() => playMedia(m.id)}
                     aria-label="Play message"
                   >
-                    <Play className="size-4" />
+                    <PlayIcon className="size-4" />
                   </Button>
                 )}
               </div>
@@ -403,7 +403,7 @@ function SendLaterPage() {
                       onClick={() => playMedia(m.id)}
                       aria-label="Play recording"
                     >
-                      <Play className="size-4" />
+                      <PlayIcon className="size-4" />
                     </Button>
                   )}
                   {m.status === "scheduled" && (
@@ -413,7 +413,7 @@ function SendLaterPage() {
                       onClick={() => cancelMut.mutate(m.id)}
                       aria-label="Cancel message"
                     >
-                      <Trash2 className="size-4" />
+                      <TrashIcon className="size-4" />
                     </Button>
                   )}
                 </div>

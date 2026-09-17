@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { CheckIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/checkout/return")({
@@ -16,7 +16,7 @@ function CheckoutReturn() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md rounded-brand border border-border bg-card p-8 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary">
-          <Check className="h-6 w-6" />
+          <CheckIcon className="h-6 w-6" />
         </div>
         <h1 className="mt-4 text-xl font-semibold">
           {session_id ? "Welcome to your new Care Membership" : "Checkout complete"}

@@ -3,22 +3,22 @@ import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Sparkles,
-  HeartHandshake,
-  MessageCircleHeart,
-  Ear,
-  ArrowUpRight,
-  Flame,
-  Trophy,
-  Star,
-  Sun,
-  Moon,
-  Cloud,
-  LineChart,
-  LifeBuoy,
-  Users,
-  PhoneCall,
-} from "lucide-react";
+  SparkleIcon,
+  HandHeartIcon,
+  ChatCircleIcon,
+  EarIcon,
+  ArrowUpRightIcon,
+  FireIcon,
+  TrophyIcon,
+  StarIcon,
+  SunIcon,
+  MoonIcon,
+  CloudIcon,
+  ChartLineIcon,
+  LifebuoyIcon,
+  UsersIcon,
+  PhoneCallIcon,
+} from "@phosphor-icons/react";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -66,11 +66,11 @@ const QUOTES = [
   "One kind thought at a time.",
 ];
 
-function greeting(): { text: string; icon: typeof Sun } {
+function greeting(): { text: string; icon: typeof SunIcon } {
   const h = new Date().getHours();
-  if (h < 12) return { text: "Good morning", icon: Sun };
-  if (h < 18) return { text: "Good afternoon", icon: Cloud };
-  return { text: "Good evening", icon: Moon };
+  if (h < 12) return { text: "Good morning", icon: SunIcon };
+  if (h < 18) return { text: "Good afternoon", icon: CloudIcon };
+  return { text: "Good evening", icon: MoonIcon };
 }
 
 function ProgressRing({
@@ -155,7 +155,7 @@ function AdminDashboard() {
       <section className="max-w-2xl rounded-brand border border-border bg-surface p-6 shadow-gentle sm:p-8">
         <div className="flex items-start gap-4">
           <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-brand bg-primary/10 text-primary">
-            <PhoneCall className="h-6 w-6" />
+            <PhoneCallIcon className="h-6 w-6" />
           </span>
           <div>
             <h2 className="font-display text-xl font-semibold text-foreground">Call CRM</h2>
@@ -163,7 +163,7 @@ function AdminDashboard() {
               Review the call queue, assign agents, monitor service levels, and resolve call flags.
             </p>
             <Button asChild className="mt-5">
-              <Link to="/admin/calls">Open Call CRM <ArrowUpRight className="h-4 w-4" /></Link>
+              <Link to="/admin/calls">Open Call CRM <ArrowUpRightIcon className="h-4 w-4" /></Link>
             </Button>
           </div>
         </div>
@@ -303,7 +303,7 @@ function MemberDashboard() {
                 className="w-full rounded-2xl bg-neutral-900 px-6 text-white shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-neutral-800 sm:w-auto"
               >
                 <Link to="/companion">
-                  <Sparkles className="mr-2 h-4 w-4" /> Start today's check-in
+                  <SparkleIcon className="mr-2 h-4 w-4" /> Start today's check-in
                 </Link>
               </Button>
               <Button
@@ -313,7 +313,7 @@ function MemberDashboard() {
                 className="w-full rounded-2xl bg-white/70 text-neutral-900 backdrop-blur hover:bg-white sm:w-auto"
               >
                 <Link to="/insights">
-                  <LineChart className="mr-2 h-4 w-4" /> Quick mood check-in
+                  <ChartLineIcon className="mr-2 h-4 w-4" /> Quick mood check-in
                 </Link>
               </Button>
             </div>
@@ -394,21 +394,21 @@ function MemberDashboard() {
       <section className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 [&>*]:animate-pop-in [&>*:nth-child(1)]:[animation-delay:60ms] [&>*:nth-child(2)]:[animation-delay:140ms] [&>*:nth-child(3)]:[animation-delay:220ms] [&>*:nth-child(4)]:[animation-delay:300ms]">
         <StatTile
           gradient="gradient-blush"
-          icon={<Flame className="h-5 w-5 text-coral" />}
+          icon={<FireIcon className="h-5 w-5 text-coral" />}
           label="Current streak"
           value={`${streak} ${streak === 1 ? "day" : "days"}`}
           hint={streak > 0 ? "Keep it going!" : "Start today"}
         />
         <StatTile
           gradient="gradient-mint"
-          icon={<LineChart className="h-5 w-5 text-sage" />}
+          icon={<ChartLineIcon className="h-5 w-5 text-sage" />}
           label="Mood check-ins"
           value={`${checkInCount}`}
           hint="private & yours"
         />
         <StatTile
           gradient="gradient-sky"
-          icon={<HeartHandshake className="h-5 w-5 text-neutral-700" />}
+          icon={<HandHeartIcon className="h-5 w-5 text-neutral-700" />}
           label="Membership"
           value={tierLabel}
           hint={profile?.care_status ?? "active"}
@@ -457,28 +457,28 @@ function MemberDashboard() {
           <QuickTile
             to="/companion"
             gradient="gradient-peach"
-            icon={<MessageCircleHeart className="h-6 w-6" />}
+            icon={<ChatCircleIcon className="h-6 w-6" />}
             title="AI Companion"
             desc="Talk it through, gently."
           />
           <QuickTile
             to="/listeners"
             gradient="gradient-blush"
-            icon={<Ear className="h-6 w-6" />}
+            icon={<EarIcon className="h-6 w-6" />}
             title="Human Listener"
             desc="A real person, on your schedule."
           />
           <QuickTile
             to="/insights"
             gradient="gradient-mint"
-            icon={<LineChart className="h-6 w-6" />}
+            icon={<ChartLineIcon className="h-6 w-6" />}
             title="Mood Insights"
             desc="See your patterns over time."
           />
           <QuickTile
             to="/family"
             gradient="gradient-sky"
-            icon={<Users className="h-6 w-6" />}
+            icon={<UsersIcon className="h-6 w-6" />}
             title="Family Circle"
             desc="Share only what you choose."
           />
@@ -490,13 +490,13 @@ function MemberDashboard() {
         <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h3 className="flex items-center gap-2 text-base font-semibold">
-              <Trophy className="h-4 w-4 text-coral" /> Achievements
+              <TrophyIcon className="h-4 w-4 text-coral" /> Achievements
             </h3>
             <Link
               to="/insights"
               className="inline-flex items-center gap-1 text-xs font-medium text-coral hover:underline"
             >
-              View all <ArrowUpRight className="h-3 w-3" />
+              View all <ArrowUpRightIcon className="h-3 w-3" />
             </Link>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-4 sm:gap-3">
@@ -513,7 +513,7 @@ function MemberDashboard() {
                     b.earned ? "bg-white/70 text-coral" : "bg-white/40 text-muted-foreground"
                   }`}
                 >
-                  <Star className={`h-5 w-5 sm:h-6 sm:w-6 ${b.earned ? "fill-coral" : ""}`} />
+                  <StarIcon className={`h-5 w-5 sm:h-6 sm:w-6 ${b.earned ? "fill-coral" : ""}`} />
                 </div>
                 <span className="text-[11px] font-medium leading-tight text-neutral-800 sm:text-xs">
                   {b.label}
@@ -544,7 +544,7 @@ function MemberDashboard() {
               </div>
             </div>
             <div className="grid h-12 w-12 place-items-center rounded-full bg-white/70 text-sage transition-transform group-hover:scale-110">
-              <LineChart className="h-5 w-5" />
+              <ChartLineIcon className="h-5 w-5" />
             </div>
           </Link>
 
@@ -562,7 +562,7 @@ function MemberDashboard() {
               </div>
             </div>
             <div className="grid h-12 w-12 place-items-center rounded-full bg-white/70 text-coral transition-transform group-hover:scale-110">
-              <LifeBuoy className="h-5 w-5" />
+              <LifebuoyIcon className="h-5 w-5" />
             </div>
           </Link>
         </div>
@@ -628,7 +628,7 @@ function QuickTile({
       </div>
       <div className="mt-4 text-base font-semibold text-neutral-900">{title}</div>
       <div className="mt-1 text-xs text-neutral-800/70">{desc}</div>
-      <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 text-neutral-800/50 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+      <ArrowUpRightIcon className="absolute right-4 top-4 h-4 w-4 text-neutral-800/50 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
     </Link>
   );
 }

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Heart, Loader2, AlertCircle, WifiOff } from "lucide-react";
+import { HeartIcon, SpinnerGapIcon, WarningCircleIcon, WifiSlashIcon } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,7 +106,7 @@ function AuthPage() {
   if (checkingSession) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-primary" />
+        <SpinnerGapIcon className="h-6 w-6 animate-spin text-brand-primary" />
       </div>
     );
   }
@@ -140,7 +140,7 @@ function AuthPage() {
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 15 }}
           >
-            <Heart className="h-5 w-5" strokeWidth={2.4} />
+            <HeartIcon className="h-5 w-5" strokeWidth={2.4} />
           </motion.span>
           <span className="text-lg font-semibold tracking-tight">SomeoneNear</span>
         </Link>
@@ -161,7 +161,7 @@ function AuthPage() {
               role="status"
               className="mt-4 flex items-start gap-2 rounded-brand border border-amber-300/60 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
             >
-              <WifiOff className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <WifiSlashIcon className="mt-0.5 h-4 w-4 flex-shrink-0" />
               <div>
                 <p className="font-medium">You're offline</p>
                 <p className="text-xs opacity-90">
@@ -176,7 +176,7 @@ function AuthPage() {
               role="alert"
               className="mt-4 flex items-start gap-2 rounded-brand border border-brand-primary/30 bg-brand-primary/5 p-3 text-sm text-foreground"
             >
-              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-primary" />
+              <WarningCircleIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-primary" />
               <div>
                 <p className="font-medium">Your session expired</p>
                 <p className="text-xs text-muted-foreground">
@@ -386,7 +386,7 @@ function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }
           >
             {busy ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
                 Signing in…
               </>
             ) : (
@@ -491,7 +491,7 @@ function OAuthButton({
         <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-brand-primary/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         <span className="relative flex items-center justify-center gap-2">
           {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <SpinnerGapIcon className="h-4 w-4 animate-spin" />
           ) : provider === "google" ? (
             <GoogleIcon className="h-4 w-4" />
           ) : (

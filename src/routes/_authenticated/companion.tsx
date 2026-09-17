@@ -8,7 +8,7 @@ import {
   createConversation,
   deleteConversation,
 } from "@/lib/conversations.functions";
-import { MessageCircleHeart, Plus, Trash2 } from "lucide-react";
+import { ChatCircleIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -62,7 +62,7 @@ function CompanionLayout() {
             disabled={createMut.isPending}
             className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <PlusIcon className="mr-2 h-4 w-4" />
             New conversation
           </Button>
           <div className="flex-1 overflow-y-auto rounded-brand border border-border bg-card p-2">
@@ -99,7 +99,7 @@ function CompanionLayout() {
                         className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-background hover:text-foreground group-hover:opacity-100"
                         aria-label="Delete conversation"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <TrashIcon className="h-3.5 w-3.5" />
                       </button>
                     </li>
                   );
@@ -115,7 +115,7 @@ function CompanionLayout() {
 
         <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-brand border border-border bg-card card-lift animate-slide-in-up">
           <header className="flex items-center gap-2 border-b border-border px-4 py-3">
-            <MessageCircleHeart className="h-4 w-4 text-brand-accent" />
+            <ChatCircleIcon className="h-4 w-4 text-brand-accent" />
             <h1 className="text-sm font-medium">Companion</h1>
             <Button
               size="sm"
@@ -124,7 +124,7 @@ function CompanionLayout() {
               onClick={() => createMut.mutate()}
               disabled={createMut.isPending}
             >
-              <Plus className="mr-1 h-3.5 w-3.5" /> New
+              <PlusIcon className="mr-1 h-3.5 w-3.5" /> New
             </Button>
           </header>
           <Outlet />

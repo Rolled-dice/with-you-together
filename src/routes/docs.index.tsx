@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MessageCircleHeart, PhoneCall, Users, LineChart, LifeBuoy, Pill, ArrowRight } from "lucide-react";
+import { ChatCircleIcon, PhoneCallIcon, UsersIcon, ChartLineIcon, LifebuoyIcon, PillIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { DocHeader, DocSection, Steps, TryItNow } from "@/components/docs/docs-shell";
 
 export const Route = createFileRoute("/docs/")({
@@ -15,13 +15,13 @@ export const Route = createFileRoute("/docs/")({
 });
 
 const cards = [
-  { to: "/docs/check-in", icon: PhoneCall, title: "Check-In", body: "We call your loved one and tell you how they're doing." },
-  { to: "/docs/companion", icon: MessageCircleHeart, title: "Companion", body: "A warm AI chat that's always awake." },
-  { to: "/docs/listeners", icon: PhoneCall, title: "Listeners", body: "Book a real human to call you." },
-  { to: "/docs/family", icon: Users, title: "Family Circle", body: "Invite loved ones. Share care." },
-  { to: "/docs/insights", icon: LineChart, title: "Insights", body: "See gentle patterns in how you feel." },
-  { to: "/docs/medication", icon: Pill, title: "Medication", body: "Dose reminders, with or without a prescription photo." },
-  { to: "/docs/safety", icon: LifeBuoy, title: "Safety", body: "Crisis help when it matters most." },
+  { to: "/docs/check-in", icon: PhoneCallIcon, title: "Check-In", body: "We call your loved one and tell you how they're doing." },
+  { to: "/docs/companion", icon: ChatCircleIcon, title: "Companion", body: "A warm AI chat that's always awake." },
+  { to: "/docs/listeners", icon: PhoneCallIcon, title: "Listeners", body: "Book a real human to call you." },
+  { to: "/docs/family", icon: UsersIcon, title: "Family Circle", body: "Invite loved ones. Share care." },
+  { to: "/docs/insights", icon: ChartLineIcon, title: "Insights", body: "See gentle patterns in how you feel." },
+  { to: "/docs/medication", icon: PillIcon, title: "Medication", body: "Dose reminders, with or without a prescription photo." },
+  { to: "/docs/safety", icon: LifebuoyIcon, title: "Safety", body: "Crisis help when it matters most." },
 ];
 
 function Page() {
@@ -58,7 +58,7 @@ function Page() {
               </span>
               <div className="min-w-0">
                 <div className="flex items-center gap-1 font-semibold group-hover:text-coral">
-                  {c.title} <ArrowRight className="h-3.5 w-3.5 opacity-0 transition group-hover:opacity-100" />
+                  {c.title} <ArrowRightIcon className="h-3.5 w-3.5 opacity-0 transition group-hover:opacity-100" />
                 </div>
                 <div className="text-sm text-muted-foreground">{c.body}</div>
               </div>

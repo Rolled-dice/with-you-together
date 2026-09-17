@@ -37,17 +37,17 @@ import { getMyProfile } from "@/lib/profile.functions";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  CalendarCheck,
-  Copy,
-  Crown,
-  Loader2,
-  Mail,
-  ShieldCheck,
-  Trash2,
-  UserMinus,
-  UserPlus,
-  Users,
-} from "lucide-react";
+  CalendarCheckIcon,
+  CopyIcon,
+  CrownIcon,
+  SpinnerGapIcon,
+  EnvelopeSimpleIcon,
+  ShieldCheckIcon,
+  TrashIcon,
+  UserMinusIcon,
+  UserPlusIcon,
+  UsersIcon,
+} from "@phosphor-icons/react";
 
 
 export const Route = createFileRoute("/_authenticated/family")({
@@ -74,7 +74,7 @@ function FamilyPage() {
     return (
       <AppShell>
         <div className="flex h-40 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-brand-primary" />
+          <SpinnerGapIcon className="h-5 w-5 animate-spin text-brand-primary" />
         </div>
       </AppShell>
     );
@@ -123,7 +123,7 @@ function EmptyState({ hasFamilyTier }: { hasFamilyTier: boolean }) {
     <Card className="rounded-brand border-border bg-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base font-medium">
-          <Users className="h-4 w-4 text-brand-accent" />
+          <UsersIcon className="h-4 w-4 text-brand-accent" />
           Start a family circle
         </CardTitle>
       </CardHeader>
@@ -150,7 +150,7 @@ function EmptyState({ hasFamilyTier }: { hasFamilyTier: boolean }) {
                 onClick={() => mut.mutate()}
                 className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
               >
-                {mut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {mut.isPending ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Create circle
               </Button>
             </div>
@@ -212,7 +212,7 @@ function FamilyView({
       <Card className="rounded-brand border-border bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base font-medium">
-            <Users className="h-4 w-4 text-brand-accent" />
+            <UsersIcon className="h-4 w-4 text-brand-accent" />
             {family!.name}
           </CardTitle>
         </CardHeader>
@@ -250,7 +250,7 @@ function FamilyView({
                       size="sm"
                       className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
                     >
-                      <UserPlus className="mr-2 h-4 w-4" /> Invite
+                      <UserPlusIcon className="mr-2 h-4 w-4" /> Invite
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="rounded-brand">
@@ -299,9 +299,9 @@ function FamilyView({
                         className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
                       >
                         {inviteMut.isPending ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
                         ) : (
-                          <Mail className="mr-2 h-4 w-4" />
+                          <EnvelopeSimpleIcon className="mr-2 h-4 w-4" />
                         )}
                         Send invite
                       </Button>
@@ -318,11 +318,11 @@ function FamilyView({
                 >
                   <div className="flex items-center gap-2 text-sm">
                     {m.role === "owner" ? (
-                      <Crown className="h-4 w-4 text-brand-accent" />
+                      <CrownIcon className="h-4 w-4 text-brand-accent" />
                     ) : m.role === "adult" ? (
-                      <ShieldCheck className="h-4 w-4 text-brand-accent" />
+                      <ShieldCheckIcon className="h-4 w-4 text-brand-accent" />
                     ) : (
-                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <UsersIcon className="h-4 w-4 text-muted-foreground" />
                     )}
                     <span>{m.display_name ?? "Member"}</span>
                     <Badge variant="secondary" className="rounded-full text-[10px] uppercase">
@@ -344,7 +344,7 @@ function FamilyView({
                         }
                       }}
                     >
-                      <UserMinus className="h-4 w-4" />
+                      <UserMinusIcon className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
@@ -362,7 +362,7 @@ function FamilyView({
                     className="flex items-center justify-between rounded-brand border border-dashed border-border px-3 py-2 text-sm"
                   >
                     <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <EnvelopeSimpleIcon className="h-4 w-4 text-muted-foreground" />
                       <span>{inv.email}</span>
                       <Badge variant="secondary" className="rounded-full text-[10px] uppercase">
                         {inv.role}
@@ -377,7 +377,7 @@ function FamilyView({
                           toast.success("Link copied");
                         }}
                       >
-                        <Copy className="h-4 w-4" />
+                        <CopyIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -391,7 +391,7 @@ function FamilyView({
                             .catch((e) => toast.error((e as Error).message));
                         }}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -416,7 +416,7 @@ function FamilyView({
                   }
                 }}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
+                <TrashIcon className="mr-2 h-4 w-4" />
                 Delete family
               </Button>
             ) : (
@@ -495,7 +495,7 @@ function SessionAllocationPanel() {
     return (
       <Card className="rounded-brand border-border bg-card">
         <CardContent className="flex h-24 items-center justify-center">
-          <Loader2 className="h-4 w-4 animate-spin text-brand-primary" />
+          <SpinnerGapIcon className="h-4 w-4 animate-spin text-brand-primary" />
         </CardContent>
       </Card>
     );
@@ -514,7 +514,7 @@ function SessionAllocationPanel() {
     <Card className="rounded-brand border-border bg-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base font-medium">
-          <CalendarCheck className="h-4 w-4 text-brand-accent" />
+          <CalendarCheckIcon className="h-4 w-4 text-brand-accent" />
           Listener sessions, this month
         </CardTitle>
       </CardHeader>
@@ -585,7 +585,7 @@ function SessionAllocationPanel() {
                 disabled={mut.isPending || overAllocated}
                 className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
               >
-                {mut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {mut.isPending ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Save allocation
               </Button>
             </div>

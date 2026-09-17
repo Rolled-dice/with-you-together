@@ -3,16 +3,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  HeartHandshake,
-  MessageCircle,
-  Moon,
-  Sun,
-  Sparkles,
-  Bot,
-  Flame,
-  Star,
-  ArrowRight,
-} from "lucide-react";
+  HandHeartIcon,
+  ChatCircleIcon,
+  MoonIcon,
+  SunIcon,
+  SparkleIcon,
+  RobotIcon,
+  FireIcon,
+  StarIcon,
+  ArrowRightIcon,
+} from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createConversation } from "@/lib/conversations.functions";
@@ -24,10 +24,10 @@ export const Route = createFileRoute("/_authenticated/companion/")({
 });
 
 const PROMPTS = [
-  { icon: Moon, label: "Rough evening", tone: "from-indigo-100 to-rose-100" },
-  { icon: MessageCircle, label: "Vent for 2 min", tone: "from-amber-100 to-orange-100" },
-  { icon: HeartHandshake, label: "Help me sleep", tone: "from-violet-100 to-pink-100" },
-  { icon: Sun, label: "Something happy", tone: "from-yellow-100 to-amber-100" },
+  { icon: MoonIcon, label: "Rough evening", tone: "from-indigo-100 to-rose-100" },
+  { icon: ChatCircleIcon, label: "Vent for 2 min", tone: "from-amber-100 to-orange-100" },
+  { icon: HandHeartIcon, label: "Help me sleep", tone: "from-violet-100 to-pink-100" },
+  { icon: SunIcon, label: "Something happy", tone: "from-yellow-100 to-amber-100" },
 ];
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -146,7 +146,7 @@ function CompanionEmpty() {
               disabled={startWith.isPending}
               className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-soft transition-transform hover:-translate-y-0.5"
             >
-              <Sparkles className="h-4 w-4 text-brand-accent" />
+              <SparkleIcon className="h-4 w-4 text-brand-accent" />
               Start check-in
             </button>
           </div>
@@ -173,7 +173,7 @@ function CompanionEmpty() {
             className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-glow transition-transform hover:-translate-y-0.5"
             style={{ background: "linear-gradient(135deg, #ff8a65, #e85d3a)" }}
           >
-            <Bot className="h-4 w-4" /> Start AI Check-in
+            <RobotIcon className="h-4 w-4" /> Start AI Check-in
           </button>
           <img
             src={bloomOrb}
@@ -197,16 +197,16 @@ function CompanionEmpty() {
             <div className="flex items-start gap-3">
               <span className="grid h-11 w-11 place-items-center rounded-full text-white shadow-glow"
                 style={{ background: "linear-gradient(135deg, #a8c3ff, #6d8bff)" }}>
-                <Bot className="h-5 w-5" />
+                <RobotIcon className="h-5 w-5" />
               </span>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <p className="font-semibold text-foreground">AI Companion</p>
-                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                  <StarIcon className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                 </div>
                 <p className="text-xs text-muted-foreground">Chat anytime, private & warm</p>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              <ArrowRightIcon className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
             </div>
           </button>
         </div>
@@ -278,7 +278,7 @@ function CompanionEmpty() {
               </div>
               <div>
                 <div className="flex items-center gap-1 text-amber-500">
-                  <Flame className="h-4 w-4" />
+                  <FireIcon className="h-4 w-4" />
                   <span className="text-sm font-semibold text-foreground">Keep it warm</span>
                 </div>
                 <p className="text-xs text-muted-foreground">A little every day adds up.</p>
@@ -291,7 +291,7 @@ function CompanionEmpty() {
             <div className="mt-2 flex items-center gap-3">
               <div className="grid h-16 w-16 place-items-center rounded-full text-amber-500"
                 style={{ background: "conic-gradient(#ffb28a 0 60%, #ffe6d1 60% 100%)" }}>
-                <Star className="h-6 w-6 fill-amber-400 text-amber-400" />
+                <StarIcon className="h-6 w-6 fill-amber-400 text-amber-400" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">Bright & steady</p>
