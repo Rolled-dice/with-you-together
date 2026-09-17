@@ -44,7 +44,7 @@ const BookingInput = z.object({
   booking_type: z.enum(["scheduled", "emergency_callback"]).default("scheduled"),
 });
 
-function combineToUtc(day: string, time: string, timeZone: string): string {
+export function combineToUtc(day: string, time: string, timeZone: string): string {
   // Interpret day+time in the user's timezone and convert to a real UTC instant.
   // Uses Intl trick: build a Date that we believe is UTC, then figure the local offset.
   const iso = `${day}T${time.length === 5 ? time + ":00" : time}`;

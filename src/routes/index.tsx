@@ -35,6 +35,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
+import { formatCount } from "@/lib/format";
 import { getPublicStats } from "@/lib/stats.functions";
 import { useLiveStats } from "@/hooks/use-live-stats";
 
@@ -89,14 +90,6 @@ export const Route = createFileRoute("/")({
   errorComponent: () => null,
   notFoundComponent: () => null,
 });
-
-function formatCount(n: number) {
-  if (n >= 1000) {
-    const k = n / 1000;
-    return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}k+`;
-  }
-  return String(n);
-}
 
 const features: {
   icon: ComponentType<{ className?: string }>;
