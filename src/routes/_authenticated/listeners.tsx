@@ -188,7 +188,7 @@ function ListenersPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
         {/* Booking form */}
-        <Card className="rounded-brand border-border bg-card animate-slide-in-up stagger-1">
+        <Card className="rounded-brand border-border bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
               <HandHeartIcon className="h-4 w-4 text-brand-accent" />
@@ -273,7 +273,7 @@ function ListenersPage() {
         </Card>
 
         {/* Emergency callback */}
-        <Card className="rounded-brand border-2 border-brand-primary/40 bg-gradient-to-br from-brand-primary/10 to-brand-accent/5 animate-slide-in-up stagger-2">
+        <Card className="rounded-brand border-2 border-primary/30 bg-primary/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
               <PhoneCallIcon className="h-4 w-4 text-brand-accent" />
@@ -313,7 +313,7 @@ function ListenersPage() {
                       })
                     }
                     disabled={book.isPending}
-                    className="flex-1 rounded-brand gradient-sunrise text-white"
+                    className="flex-1"
                   >
                     {book.isPending ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : <PhoneCallIcon className="mr-2 h-4 w-4" />}
                     Request callback
@@ -330,7 +330,7 @@ function ListenersPage() {
             ) : (
               <Button
                 onClick={() => setEmergencyOpen(true)}
-                className="w-full rounded-brand gradient-sunrise text-white"
+                className="w-full"
               >
                 <PhoneCallIcon className="mr-2 h-4 w-4" />
                 Request an emergency callback
@@ -355,7 +355,7 @@ function ListenersPage() {
             description="Book your first session above. Our in-house Listener team takes it from there."
           />
         ) : (
-          <div className="grid gap-3">
+          <div className="divide-y divide-border rounded-xl border border-border bg-card">
             {upcoming.map((b, i) => (
               <BookingRow
                 key={b.id}
@@ -394,7 +394,7 @@ function RuleTile({
   delay: number;
 }) {
   return (
-    <div className={`rounded-brand border border-border bg-card p-4 card-lift animate-slide-in-up stagger-${delay}`}>
+    <div className="rounded-brand border border-border bg-card p-4">
       <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary/15 text-brand-accent">
         <Icon className="h-4 w-4" />
       </div>
@@ -447,10 +447,8 @@ function BookingRow({
   );
 
   return (
-    <Card
-      className={`rounded-brand border-border bg-card animate-slide-in-up stagger-${Math.min(delay, 6)} ${past ? "opacity-70" : ""}`}
-    >
-      <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+    <div className={`p-4 ${past ? "opacity-60" : ""}`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
             <p className="font-medium text-foreground">
@@ -530,7 +528,7 @@ function BookingRow({
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
