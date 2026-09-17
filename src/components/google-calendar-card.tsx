@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarCheck, CalendarPlus } from "lucide-react";
+import { CalendarCheckIcon, CalendarPlusIcon } from "@phosphor-icons/react";
 import {
   getGoogleCalendarStatus,
   startGoogleCalendarConnect,
