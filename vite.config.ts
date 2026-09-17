@@ -29,10 +29,11 @@ function windowsPathFixMcpPlugin() {
         })
       : config;
 
+  const mutablePlugin = plugin as unknown as Record<string, unknown>;
   const wrap = (hookName: "config" | "configResolved") => {
-    const original = (plugin as Record<string, unknown>)[hookName];
+    const original = mutablePlugin[hookName];
     if (typeof original !== "function") return;
-    (plugin as Record<string, unknown>)[hookName] = function patched(
+    mutablePlugin[hookName] = function patched(
       config: { root?: string },
       ...rest: unknown[]
     ) {

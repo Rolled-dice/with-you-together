@@ -6,7 +6,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { cn } from "@/lib/utils";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(useGSAP, ScrollTrigger);
+}
 
 const lines: { from: "user" | "companion"; text: string }[] = [
   { from: "user", text: "Can't sleep again." },
