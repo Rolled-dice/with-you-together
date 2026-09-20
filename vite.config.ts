@@ -51,6 +51,13 @@ function windowsPathFixMcpPlugin() {
   return plugin;
 }
 
+// Load non-VITE_ env vars into process.env so server routes (e.g. email webhooks) can read them.
+// Never expose these to the client bundle.
+Object.assign(
+  process.env,
+  loadEnv(process.env["NODE_ENV"] === "production" ? "production" : "development", process.cwd(), ""),
+);
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
