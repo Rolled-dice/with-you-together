@@ -94,14 +94,18 @@ export function AppShell({ children }: { children: ReactNode }) {
       <DevViewAsSwitcher />
       <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
 
-        {/* Sidebar (desktop) */}
-        <aside className="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6">
-          <div className="flex items-center justify-between">
+        {/* Sidebar (desktop).
+            Sized for older eyes and less precise pointing: 16px labels,
+            48px-tall rows, 20px icons. The active row is a solid navy pill
+            because a tinted background alone is easy to miss with reduced
+            contrast sensitivity. */}
+        <aside className="hidden flex-col border-r border-sidebar-border bg-sidebar md:flex md:w-72 lg:w-[19rem]">
+          <div className="flex items-center justify-between gap-2 border-b border-sidebar-border px-5 py-5">
             <Brand />
             {!rolesLoading && !isStaff ? <NotificationBell /> : null}
           </div>
 
-          <nav className="mt-8 flex flex-1 flex-col gap-1">
+          <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
             {navItems.map((item) => {
               const active = pathname === item.to || pathname.startsWith(item.to + "/");
               const Icon = item.icon;
@@ -109,35 +113,44 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-brand px-4 py-3 text-sm font-medium transition-colors",
+                    "flex min-h-12 items-center gap-3.5 rounded-2xl px-4 text-[15px] transition-colors",
                     active
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      ? "bg-sidebar-primary font-bold text-sidebar-primary-foreground"
+                      : "font-semibold text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                   )}
                 >
-                  <Icon className="h-4 w-4" strokeWidth={2} />
+                  <Icon className="h-5 w-5 shrink-0" strokeWidth={2} />
                   {item.label}
                 </Link>
               );
             })}
           </nav>
-          {!rolesLoading && !isStaff ? (
-            <div className="mt-6 rounded-brand bg-sidebar-accent/60 p-4 text-xs text-sidebar-accent-foreground/80">
-              <p className="font-medium text-sidebar-foreground">Care Membership</p>
-              {/* The shell doesn't load the profile, so it can't name the tier
-               * without inventing one. Point at Settings instead. */}
-              <Link to="/settings" className="mt-1 block underline underline-offset-2">
-                View your plan
-              </Link>
-            </div>
-          ) : null}
-          <button
-            onClick={signOut}
-            className="mt-3 flex items-center gap-2 rounded-brand px-4 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          >
-            <SignOutIcon className="h-4 w-4" /> Sign out
-          </button>
+
+          <div className="px-3 pb-4">
+            {!rolesLoading && !isStaff ? (
+              <div className="rounded-2xl border border-sidebar-border bg-card px-4 py-3.5">
+                <p className="text-sm font-bold text-sidebar-foreground">
+                  Care Membership
+                </p>
+                {/* The shell doesn't load the profile, so it can't name the tier
+                 * without inventing one. Point at Settings instead. */}
+                <Link
+                  to="/settings"
+                  className="mt-0.5 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  View your plan
+                </Link>
+              </div>
+            ) : null}
+            <button
+              onClick={signOut}
+              className="mt-2 flex min-h-12 w-full items-center gap-3.5 rounded-2xl px-4 text-[15px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            >
+              <SignOutIcon className="h-5 w-5 shrink-0" /> Sign out
+            </button>
+          </div>
         </aside>
 
 

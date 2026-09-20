@@ -5,8 +5,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   SparkleIcon,
   HandHeartIcon,
-  ChatCircleIcon,
-  EarIcon,
   ArrowUpRightIcon,
   FireIcon,
   TrophyIcon,
@@ -16,7 +14,6 @@ import {
   CloudIcon,
   ChartLineIcon,
   LifebuoyIcon,
-  UsersIcon,
   PhoneCallIcon,
 } from "@phosphor-icons/react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -26,7 +23,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getMyAiQuota } from "@/lib/quota.functions";
 import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import { PLAN_DISPLAY } from "@/lib/currency";
-import { Orb, OrbSparkle, type OrbTone } from "@/components/landing/playroom-orb";
+import { Orb, type OrbTone } from "@/components/landing/playroom-orb";
 import { useDashboardMotion } from "@/hooks/use-dashboard-motion";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -218,68 +215,67 @@ function MemberDashboard() {
   return (
     <AppShell>
       <div ref={rootRef}>
-      {/* HERO CHECK-IN — saffron plate, borrowed from the marketing page so the
-          product doesn't change character the moment you sign in. */}
-      <section className="relative overflow-hidden rounded-[28px] bg-plate-saffron px-6 py-8 text-ink sm:px-9 sm:py-10">
-        {/* Scenery. Faceless on purpose — these are not characters. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div data-dash-orb className="absolute -right-6 -top-6 opacity-90">
-            <Orb tone="terracotta" face="smile" className="h-28 w-28" />
-          </div>
-          <div data-dash-orb className="absolute bottom-4 right-16 hidden sm:block">
-            <Orb tone="navy" face="calm" className="h-12 w-12" />
-          </div>
-          <div data-dash-orb className="absolute right-40 top-8 hidden lg:block">
-            <OrbSparkle className="h-5 w-5 text-ink/40" />
-          </div>
+      {/* HERO CHECK-IN.
+          Deliberately calm: a warm cream card, not a saturated plate. Many
+          members are elderly, so this screen prioritises readable type and
+          high contrast over decoration. Colour appears once, as a single
+          friendly orb — boldness spent in one place rather than spread across
+          the page. */}
+      <section className="relative overflow-hidden rounded-[24px] border border-border bg-surface px-6 py-8 sm:px-9 sm:py-10">
+        <div
+          aria-hidden="true"
+          data-dash-orb
+          className="pointer-events-none absolute -right-8 -top-8 hidden sm:block"
+        >
+          <Orb tone="saffron" face="smile" className="h-32 w-32 opacity-80" />
         </div>
 
         <div className="relative max-w-xl">
           <div
             data-dash-pill
-            className="inline-flex items-center gap-2 rounded-full bg-ink/10 px-3 py-1 text-xs font-bold text-ink"
+            className="inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-sm font-semibold text-muted-foreground"
           >
-            <GreetIcon className="h-3.5 w-3.5" />
+            <GreetIcon className="h-4 w-4" />
             {greetText}
           </div>
 
           <h1
             data-dash-headline
-            className="mt-4 text-[2rem] font-extrabold leading-[1.05] tracking-tight sm:text-[2.6rem]"
+            className="mt-4 text-[1.9rem] font-extrabold leading-[1.1] tracking-tight sm:text-[2.4rem]"
           >
             {greetText}, {firstName}
           </h1>
 
           <div data-dash-sub>
-            <p className="mt-2.5 text-[0.95rem] font-medium leading-relaxed text-ink/75">
+            {/* 17px body, not 15px: this is the reading size for the whole app. */}
+            <p className="mt-3 max-w-lg text-[1.0625rem] leading-relaxed text-muted-foreground">
               A few minutes for you can make a big difference. Ready for today&apos;s
               check-in?
             </p>
-            <blockquote className="mt-3 border-l-2 border-ink/25 pl-3 text-sm italic text-ink/70">
+            <blockquote className="mt-4 border-l-[3px] border-orb-terracotta/50 pl-3.5 text-base italic text-muted-foreground">
               &ldquo;{quote}&rdquo;
             </blockquote>
           </div>
 
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+            {/* Tall targets: 52px clears the 44px minimum comfortably. */}
             <Button
               asChild
-              size="lg"
               data-dash-cta
-              className="rounded-full bg-ink px-6 font-bold text-background hover:bg-ink/90"
+              className="h-[52px] rounded-full px-7 text-base font-bold"
             >
               <Link to="/companion">
-                <SparkleIcon className="mr-2 h-4 w-4" /> Start today&apos;s check-in
+                <SparkleIcon className="mr-2 h-5 w-5" /> Start today&apos;s check-in
               </Link>
             </Button>
             <Button
               asChild
-              size="lg"
               data-dash-cta
-              variant="ghost"
-              className="rounded-full font-bold text-ink hover:bg-ink/10"
+              variant="outline"
+              className="h-[52px] rounded-full border-2 px-7 text-base font-bold"
             >
               <Link to="/insights">
-                <ChartLineIcon className="mr-2 h-4 w-4" /> Quick mood check-in
+                <ChartLineIcon className="mr-2 h-5 w-5" /> Quick mood check-in
               </Link>
             </Button>
           </div>
@@ -324,49 +320,40 @@ function MemberDashboard() {
         />
       </section>
 
-      {/* QUICK ACCESS — full-colour plates, so the four destinations are
-          distinguishable at a glance rather than four identical grey cards. */}
-      <section data-dash-section className="mt-8">
-        <div className="mb-3 flex items-baseline justify-between gap-3">
-          <h2 className="text-lg font-extrabold tracking-tight">Quick access</h2>
-          <span className="hidden text-xs text-muted-foreground sm:inline">
+      {/* QUICK ACCESS.
+          Cards stay white with a single coloured orb per destination. Four
+          full-bleed plates read as a rainbow and flattened the hierarchy —
+          colour works better here as a way to tell items apart at a glance
+          than as a background. */}
+      <section data-dash-section className="mt-10">
+        <div className="mb-4 flex items-baseline justify-between gap-3">
+          <h2 className="text-xl font-extrabold tracking-tight">Quick access</h2>
+          <span className="hidden text-sm text-muted-foreground sm:inline">
             Everything a tap away
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <QuickTile
             to="/companion"
-            plate="bg-plate-navy"
-            ink="text-background"
-            orb="saffron"
-            icon={<ChatCircleIcon className="h-5 w-5" />}
+            orb="navy"
             title="AI Companion"
             desc="Talk it through, gently."
           />
           <QuickTile
             to="/listeners"
-            plate="bg-plate-saffron"
-            ink="text-ink"
             orb="terracotta"
-            icon={<EarIcon className="h-5 w-5" />}
             title="Human Listener"
             desc="A real person, on your schedule."
           />
           <QuickTile
             to="/insights"
-            plate="bg-plate-periwinkle"
-            ink="text-ink"
-            orb="navy"
-            icon={<ChartLineIcon className="h-5 w-5" />}
+            orb="periwinkle"
             title="Mood Insights"
             desc="See your patterns over time."
           />
           <QuickTile
             to="/family"
-            plate="bg-plate-pink"
-            ink="text-ink"
             orb="grass"
-            icon={<UsersIcon className="h-5 w-5" />}
             title="Family Circle"
             desc="Share only what you choose."
           />
@@ -486,44 +473,38 @@ function StatCard({
       >
         {icon}
       </span>
-      <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-0.5 flex items-baseline gap-1 text-2xl font-extrabold tracking-tight">
+      {/* Sentence case at 15px rather than tracked-out 11px caps. Small caps
+          are markedly harder to read with reduced vision. */}
+      <p className="mt-3.5 text-sm font-semibold text-muted-foreground">{label}</p>
+      <p className="mt-1 flex items-baseline gap-1.5 font-extrabold tracking-tight">
         {countTo !== undefined ? (
           <>
-            {/* The number itself carries the counter hook; the markup still
-                ships the real value so it is correct without JS. */}
-            <span data-dash-counter={countTo} className="tabular-nums">
+            {/* The number carries the counter hook; the markup still ships the
+                real value so it stays correct without JS. */}
+            <span data-dash-counter={countTo} className="text-[2rem] tabular-nums">
               {countTo.toLocaleString()}
             </span>
             {unit && (
-              <span className="text-sm font-bold text-muted-foreground">{unit}</span>
+              <span className="text-base font-bold text-muted-foreground">{unit}</span>
             )}
           </>
         ) : (
           <span className="truncate text-xl">{value}</span>
         )}
       </p>
-      <p className="mt-0.5 truncate text-xs text-muted-foreground">{hint}</p>
+      <p className="mt-1 truncate text-sm text-muted-foreground">{hint}</p>
     </div>
   );
 }
 
 function QuickTile({
   to,
-  plate,
-  ink,
   orb,
-  icon,
   title,
   desc,
 }: {
   to: string;
-  plate: string;
-  ink: string;
   orb: OrbTone;
-  icon: React.ReactNode;
   title: string;
   desc: string;
 }) {
@@ -531,24 +512,22 @@ function QuickTile({
     <Link
       to={to as "/companion"}
       data-dash-tile
-      className={`group relative overflow-hidden rounded-[22px] p-5 transition-transform hover:-translate-y-1 ${plate} ${ink}`}
+      // 1px border and a hairline lift on hover. No colour fill, no shadow
+      // drama — the orb is the only thing distinguishing one card from another.
+      className="group flex items-center gap-4 rounded-[20px] border border-border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-ink/25 sm:flex-col sm:items-start sm:gap-0"
     >
-      {/* Oversized orb bleeding off the corner, echoing the marketing plates */}
       <Orb
         tone={orb}
         face="calm"
-        className="pointer-events-none absolute -bottom-6 -right-5 h-20 w-20 opacity-90 transition-transform duration-500 group-hover:scale-110"
+        className="h-11 w-11 shrink-0 transition-transform duration-300 group-hover:scale-105"
       />
-      <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-current/15">
-        <span className="opacity-90">{icon}</span>
-      </span>
-      <div className="relative mt-4 text-[0.95rem] font-extrabold leading-tight">
-        {title}
+      <div className="min-w-0 sm:mt-4">
+        <div className="text-base font-bold leading-tight">{title}</div>
+        {/* Full muted-foreground, not reduced opacity: 15px at 60% opacity is
+            a common readability failure for older eyes. */}
+        <div className="mt-1 text-sm leading-snug text-muted-foreground">{desc}</div>
       </div>
-      <div className="relative mt-1 max-w-[85%] text-xs leading-snug opacity-75">
-        {desc}
-      </div>
-      <ArrowUpRightIcon className="absolute right-4 top-4 h-4 w-4 opacity-40 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      <ArrowUpRightIcon className="ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 sm:hidden" />
     </Link>
   );
 }
