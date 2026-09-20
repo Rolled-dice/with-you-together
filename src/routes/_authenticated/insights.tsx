@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { JournalSection } from "@/components/insights/journal-section";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createMoodCheckIn, listMoodCheckIns } from "@/lib/mood.functions";
@@ -186,19 +187,22 @@ function InsightsPage() {
         description="A gentle look at how you've been. Only visible to you."
       />
 
-      <section className="rounded-brand border border-border bg-surface p-4 sm:p-5 mb-6 animate-fade-up card-lift">
-        <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
+      {/* One consistent vertical rhythm for the whole page, instead of each
+          section carrying its own ad-hoc mb-4/mb-6. */}
+      <div className="space-y-8">
+      <section data-page-reveal className="rounded-[20px] border border-border bg-card p-5 sm:p-6">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="font-semibold text-foreground">Today's check-in</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <h2 className="text-lg font-bold text-foreground">Today's check-in</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {todayEntry
                 ? `You checked in as ${MOOD_LABEL[todayEntry.mood!].label} today. Tap again to add another.`
                 : "One tap saves your mood, no writing needed."}
             </p>
           </div>
           {todayEntry && (
-            <span className="inline-flex items-center gap-1 rounded-brand bg-brand-primary/10 px-2.5 py-1 text-xs font-medium text-brand-primary">
-              <CheckIcon className="h-3.5 w-3.5" /> Done today
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-primary/10 px-3 py-1.5 text-sm font-semibold text-brand-primary">
+              <CheckIcon className="h-4 w-4" /> Done today
             </span>
           )}
         </div>
@@ -215,22 +219,29 @@ function InsightsPage() {
                 disabled={checkInMut.isPending}
                 aria-label={`Check in as ${m.label}`}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-brand border px-2 py-3 transition active:scale-[0.97] disabled:opacity-60",
+                  "flex flex-col items-center gap-1.5 rounded-2xl border px-2 py-4 transition active:scale-[0.97] disabled:opacity-60",
                   isTodayMood
                     ? "border-brand-primary bg-brand-primary/10 text-brand-primary"
                     : "border-border bg-background hover:border-brand-primary/50 hover:bg-brand-primary/5",
                 )}
               >
-                <span className="text-2xl" aria-hidden>
-                  {isPending ? <SpinnerGapIcon className="h-6 w-6 animate-spin" /> : m.emoji}
+                <span className="text-3xl" aria-hidden>
+                  {isPending ? <SpinnerGapIcon className="h-7 w-7 animate-spin" /> : m.emoji}
                 </span>
-                <span className="text-[11px] font-medium text-foreground">{m.label}</span>
+                <span className="text-sm font-semibold text-foreground">{m.label}</span>
               </button>
             );
           })}
         </div>
       </section>
 
+      {/* Journal sits directly under the check-in, above the charts, so writing
+          an entry is one of the first things a member sees rather than
+          something buried below every graph. Saving invalidates the
+          mood-checkins query so the streak and entry counts update. */}
+      <JournalSection
+        onEntrySaved={() => qc.invalidateQueries({ queryKey: ["mood-checkins"] })}
+      />
 
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-3">
@@ -248,16 +259,18 @@ function InsightsPage() {
 
 
       ) : (
-        <>
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground mr-1">Time range:</span>
+        <div className="space-y-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-sm font-medium text-muted-foreground">
+              Time range:
+            </span>
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.key}
                 type="button"
                 onClick={() => setRange(opt.key)}
                 className={cn(
-                  "rounded-brand border px-3 py-1.5 text-xs font-medium transition",
+                  "rounded-full border px-3.5 py-2 text-sm font-medium transition",
                   range === opt.key
                     ? "border-brand-primary bg-brand-primary/10 text-brand-primary"
                     : "border-border bg-background text-foreground hover:border-brand-primary/50",
@@ -268,7 +281,7 @@ function InsightsPage() {
             ))}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3 mb-6">
+          <div className="grid gap-4 sm:grid-cols-3">
             {[
               {
                 icon: SparkleIcon,
@@ -290,17 +303,21 @@ function InsightsPage() {
                 value: String(stats.windowCount),
                 hint: `${stats.totalEntries} total`,
               },
-            ].map((s, i) => (
-              <div key={s.label} style={{ animationDelay: `${i * 80}ms` }} className="animate-pop-in">
-                <StatCard icon={s.icon} label={s.label} value={s.value} hint={s.hint} />
-              </div>
+            ].map((s) => (
+              <StatCard
+                key={s.label}
+                icon={s.icon}
+                label={s.label}
+                value={s.value}
+                hint={s.hint}
+              />
             ))}
           </div>
 
-          <section className="rounded-brand border border-border bg-surface p-4 sm:p-5 mb-6 animate-fade-up card-lift" style={{ animationDelay: "240ms" }}>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold">Mood over the {rangeMeta.label.toLowerCase()}</h2>
-              <span className="text-xs text-muted-foreground">Daily average</span>
+          <section data-page-reveal className="rounded-[20px] border border-border bg-card p-5 sm:p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold">Mood over the {rangeMeta.label.toLowerCase()}</h2>
+              <span className="text-sm text-muted-foreground">Daily average</span>
             </div>
 
             <div className="h-64 w-full">
@@ -343,10 +360,10 @@ function InsightsPage() {
             </div>
           </section>
 
-          <section className="rounded-brand border border-border bg-surface p-4 sm:p-5 animate-fade-up card-lift" style={{ animationDelay: "320ms" }}>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold">Mood distribution</h2>
-              <span className="text-xs text-muted-foreground">{rangeMeta.label}</span>
+          <section data-page-reveal className="rounded-[20px] border border-border bg-card p-5 sm:p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold">Mood distribution</h2>
+              <span className="text-sm text-muted-foreground">{rangeMeta.label}</span>
             </div>
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -367,8 +384,9 @@ function InsightsPage() {
               </ResponsiveContainer>
             </div>
           </section>
-        </>
+        </div>
       )}
+      </div>
     </AppShell>
   );
 }
@@ -385,12 +403,14 @@ function StatCard({
   hint?: string;
 }) {
   return (
-    <div className="rounded-brand border border-border bg-surface p-4 card-lift h-full">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-brand-accent font-medium">
-        <Icon className="h-3.5 w-3.5" /> {label}
+    <div className="h-full rounded-[20px] border border-border bg-card p-5">
+      <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+        <Icon className="h-4 w-4 text-orb-terracotta" /> {label}
       </div>
-      <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
-      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+      <p className="mt-2 text-[2rem] font-extrabold tracking-tight text-foreground">
+        {value}
+      </p>
+      {hint && <p className="mt-1 text-sm text-muted-foreground">{hint}</p>}
     </div>
   );
 }

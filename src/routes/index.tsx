@@ -1,32 +1,32 @@
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import {
-  HeartIcon,
-  UsersIcon,
-  ChartLineIcon,
-  ShieldIcon,
-  ShieldCheckIcon,
-  PhoneCallIcon,
-  BellRingingIcon,
-  CalendarHeartIcon,
-  CheckIcon,
   ArrowRightIcon,
-  EnvelopeSimpleIcon,
+  CaretRightIcon,
   ChatCircleTextIcon,
+  CheckIcon,
+  EnvelopeSimpleIcon,
   HeadphonesIcon,
+  PhoneCallIcon,
+  ShieldCheckIcon,
 } from "@phosphor-icons/react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
-import { GentleNudge, NudgeDot } from "@/components/gentle-nudge";
 import { JsonLd } from "@/components/json-ld";
-import { QuietEmptyState } from "@/components/quiet-empty-state";
-import { CallCardPreview } from "@/components/call-card-preview";
-import { AiSnippetPreview } from "@/components/ai-snippet-preview";
-import { TrustBadge } from "@/components/trust-badge";
+import { Wordmark } from "@/components/landing/brand-mark";
+import { FeatureCarousel } from "@/components/landing/feature-carousel";
+import { RotatingHeadline } from "@/components/landing/rotating-headline";
+import {
+  DashboardMockup,
+  ListenerCallMockup,
+} from "@/components/landing/hero-mockups";
+import {
+  Orb,
+  OrbCloud,
+  OrbSparkle,
+  type OrbTone,
+} from "@/components/landing/playroom-orb";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -34,18 +34,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { supabase } from "@/integrations/supabase/client";
-import { formatCount } from "@/lib/format";
-import { getPublicStats } from "@/lib/stats.functions";
+import { useLandingMotion } from "@/hooks/use-landing-motion";
 import { useLiveStats } from "@/hooks/use-live-stats";
+import { supabase } from "@/integrations/supabase/client";
+import { PLAN_DISPLAY } from "@/lib/currency";
+import { getPublicStats } from "@/lib/stats.functions";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(useGSAP, ScrollTrigger);
-}
-
-const TITLE = "SomeoneNear";
+const TITLE = "SomeoneNear — we call your parents, so you know they're okay";
 const DESCRIPTION =
-  "SomeoneNear helps you find someone near for a caring check-in, a human listener, or quiet companionship whenever you need to feel heard.";
+  "A trained listener phones your elderly parent on a schedule you set, on their ordinary phone. After every call you get a short update on how they're really doing.";
 
 const SCHEMA = {
   "@context": "https://schema.org",
@@ -56,7 +53,7 @@ const SCHEMA = {
       url: "https://someonenear.com/",
       name: "SomeoneNear",
       description:
-        "A web-based platform for emotional care, family check-ins, and human listener sessions.",
+        "Scheduled check-in calls for elderly parents, with a written update to the family after every call.",
       inLanguage: ["en", "hi"],
     },
     {
@@ -64,10 +61,7 @@ const SCHEMA = {
       "@id": "https://someonenear.com/#organization",
       name: "SomeoneNear",
       url: "https://someonenear.com/",
-      founder: {
-        "@type": "Person",
-        name: "Mohit Dutt",
-      },
+      founder: { "@type": "Person", name: "Mohit Dutt" },
     },
   ],
 };
@@ -93,88 +87,180 @@ export const Route = createFileRoute("/")({
   notFoundComponent: () => null,
 });
 
-const features: {
-  icon: ComponentType<{ className?: string }>;
-  title: string;
-  body: string;
-}[] = [
+/* -------------------------------------------------------------------------- *
+ * Content
+ * -------------------------------------------------------------------------- */
+
+const HERO_PROOF = [
+  "Trained, vetted listeners",
+  "Nothing for them to install",
+  "An update after every call",
+];
+
+/** The worry, in the visitor's own words — not our feature names. */
+const WORRIES: { label: string; answer: string; tone: OrbTone }[] = [
   {
-    icon: HeartIcon,
-    title: "Daily check-ins",
-    body: "One small question a day. Answer in a word, or skip it. Nothing is scored.",
+    label: "They live far away",
+    answer: "We call, so the distance feels smaller.",
+    tone: "saffron",
   },
   {
-    icon: BellRingingIcon,
-    title: "Gentle reminders",
-    body: "Medicines, water, appointments, nudges that sound like a friend, not an alarm.",
+    label: "They seem lonely",
+    answer: "A warm conversation, on their own phone.",
+    tone: "pink",
   },
   {
-    icon: UsersIcon,
-    title: "Family circle",
-    body: "Keep the people you trust close, and only share what you actually want to share.",
+    label: "They forget medication",
+    answer: "Gentle reminders, and every dose logged.",
+    tone: "aqua",
   },
   {
-    icon: CalendarHeartIcon,
-    title: "Send It Later",
-    body: "Leave a message for a future day. Because you can't always be there, but something can.",
+    label: "I can't call every day",
+    answer: "We keep the routine when life gets busy.",
+    tone: "grass",
+  },
+  {
+    label: "Nobody tells me how they are",
+    answer: "A short update after every single call.",
+    tone: "navy",
+  },
+  {
+    label: "They won't use an app",
+    answer: "They never have to. It's just a phone call.",
+    tone: "terracotta",
   },
 ];
 
-const plans = [
+const STEPS = [
   {
-    name: "Care",
-    price: "$49",
-    note: "For one loved one you want to keep an eye on",
-    features: [
-      "18 Check-In calls a month",
-      "15 minutes per call",
-      "Family dashboard updates after every call",
-      "Companion chat with a daily message allowance",
-    ],
+    title: "You pick a schedule",
+    body: "Daily, a few times a week, or only when you need it. Change it whenever.",
   },
   {
-    name: "Care Plus",
-    price: "$79",
-    note: "For families sharing the care between them",
-    highlight: true,
-    features: [
-      "30 Check-In calls a month",
-      "15 minutes per call",
-      "Unlimited Companion chat, no daily cap",
-      "Shared circle, up to 5 people",
-      "On-demand Check-Ins when a day feels hard",
-    ],
+    title: "We make the call",
+    body: "A trained listener rings their ordinary phone. No app, no login, no setup on their end.",
+  },
+  {
+    title: "You get an update",
+    body: "A short note on how they really are, waiting for you when you next look.",
   },
 ];
 
-const faqs = [
+const VOICES = [
   {
-    q: "Do I have to explain what's wrong?",
-    a: "No. “I'm fine” is sometimes just easier than explaining what's actually going on, so you can start with nothing at all. A listener will simply stay with you.",
+    quote:
+      "I used to ring at 9pm out of guilt and get 'I'm fine' every time. Now I actually know she's been out in the garden.",
+    who: "Daughter, two time zones away",
+    tone: "saffron" as OrbTone,
   },
   {
-    q: "Is anyone told about my conversations?",
-    a: "No. Your companion chats and calls are private to you. Family members only ever see what you explicitly choose to share.",
+    quote:
+      "Dad won't touch a smartphone. This was the only thing that didn't ask him to learn anything.",
+    who: "Son, primary carer",
+    tone: "aqua" as OrbTone,
   },
   {
-    q: "How soon can I speak to a person?",
-    a: "Listener calls are booked at least two hours ahead so a real, prepared human is ready for you. The companion is there in the meantime, always.",
+    quote:
+      "The update after each call is the part I didn't expect to need. It's three lines and it settles my whole evening.",
+    who: "Daughter, sharing care with her brother",
+    tone: "pink" as OrbTone,
+  },
+];
+
+const TRUST = [
+  {
+    icon: HeadphonesIcon,
+    title: "Vetted and trained",
+    body: "Every listener is trained before their first call. Nobody unqualified picks up the phone.",
+  },
+  {
+    icon: PhoneCallIcon,
+    title: "Just a phone call",
+    body: "Audio only. It rings like any normal call — no camera, no app, no link to click.",
+  },
+  {
+    icon: ShieldCheckIcon,
+    title: "Private by design",
+    body: "Conversations belong to them. The family sees only what they choose to share.",
+  },
+];
+
+/**
+ * Pricing is read from the plan catalogue rather than retyped here, so the
+ * marketing page can never drift from what billing actually charges.
+ */
+const PLANS = (["care", "care_plus"] as const).map((id) => {
+  const plan = PLAN_DISPLAY[id];
+  return {
+    name: plan.name,
+    price: plan.usdLabel,
+    note: plan.note,
+    highlight: plan.highlight ?? false,
+    features: plan.bullets,
+  };
+});
+
+const FAQS = [
+  {
+    q: "Does my parent need a smartphone or an app?",
+    a: "No. We ring whatever phone they already use — a landline is completely fine. There is nothing to download, nothing to log into, and nothing for them to learn.",
+  },
+  {
+    q: "Who actually makes the call?",
+    a: "A trained SomeoneNear listener. They're vetted and trained before taking their first call, and they know how to ask the everyday questions that tell you how someone is really doing.",
+  },
+  {
+    q: "What if they don't want to talk that day?",
+    a: "Then they don't. A listener will never push. A two-minute call that ends early still tells us something, and we'll note it honestly rather than dress it up.",
+  },
+  {
+    q: "How soon can a call happen?",
+    a: "Check-in calls are booked at least two hours ahead so a real, prepared person is ready. On Care Plus you can also ask for an on-demand call when a day turns hard.",
   },
   {
     q: "Is this therapy or crisis support?",
-    a: "No. SomeoneNear is company and care, not clinical treatment. If you're in danger, please reach out to your local emergency line, we'll always show you those numbers first.",
+    a: "No. This is company and awareness, not clinical treatment. If anyone is in danger we show local emergency numbers first, every time.",
+  },
+  {
+    q: "What does the family get to see?",
+    a: "A short update after each call: how they sounded, whether they ate, drank water and took medication, plus any notes worth passing on. Never a transcript.",
   },
 ];
+
+/* -------------------------------------------------------------------------- *
+ * Small building blocks
+ * -------------------------------------------------------------------------- */
+
+/** The near-black pill used inside cards and plates. */
+function InkButton({
+  to,
+  children,
+}: {
+  to: "/dashboard" | "/auth";
+  children: React.ReactNode;
+}) {
+  return (
+    <Button
+      asChild
+      size="lg"
+      data-magnetic
+      className="rounded-full bg-ink px-7 text-base font-bold text-background hover:bg-ink/90"
+    >
+      <Link to={to}>{children}</Link>
+    </Button>
+  );
+}
+
+/* -------------------------------------------------------------------------- *
+ * Page
+ * -------------------------------------------------------------------------- */
 
 function Landing() {
   const stats = useLiveStats(Route.useLoaderData());
   const [signedIn, setSignedIn] = useState(false);
-
   const rootRef = useRef<HTMLDivElement>(null);
-  const statsSectionRef = useRef<HTMLElement>(null);
-  const statValueRefs = useRef<Array<HTMLParagraphElement | null>>([]);
-  const trustCardsRef = useRef<HTMLDivElement>(null);
-  const hasCountedRef = useRef(false);
+
+  useLandingMotion(rootRef);
 
   useEffect(() => {
     let cancelled = false;
@@ -190,538 +276,558 @@ function Landing() {
     };
   }, []);
 
-  // Unified scroll reveal: one gentle fade + rise per section, once.
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(
-        {
-          reduceMotion: "(prefers-reduced-motion: reduce)",
-          fullMotion: "(prefers-reduced-motion: no-preference)",
-        },
-        (context) => {
-          const { reduceMotion } = context.conditions as { reduceMotion: boolean };
-          const sections = gsap.utils.toArray<HTMLElement>("[data-reveal]");
-          if (!sections.length) return;
-
-          if (reduceMotion) {
-            gsap.set(sections, { autoAlpha: 1, y: 0 });
-            return;
-          }
-
-          // Own the hidden initial state synchronously (useGSAP runs in a
-          // layout effect, before paint) so SSR-visible sections don't flash.
-          gsap.set(sections, { autoAlpha: 0, y: 16 });
-
-          ScrollTrigger.batch(sections, {
-            start: "top 88%",
-            once: true,
-            onEnter: (batch) =>
-              gsap.to(batch, {
-                autoAlpha: 1,
-                y: 0,
-                duration: 0.5,
-                ease: "power2.out",
-                stagger: 0.08,
-                overwrite: true,
-              }),
-          });
-
-          // Reveal anything already in view on load (batch's onEnter fires on
-          // the first refresh for elements above the start line).
-          ScrollTrigger.refresh();
-        },
-      );
-      return () => mm.revert();
-    },
-    { scope: rootRef },
-  );
-
-  // Count-up settle on the live-stats numbers, once, on first reveal.
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(
-        {
-          reduceMotion: "(prefers-reduced-motion: reduce)",
-          fullMotion: "(prefers-reduced-motion: no-preference)",
-        },
-        (context) => {
-          const { reduceMotion } = context.conditions as { reduceMotion: boolean };
-          if (reduceMotion || !statsSectionRef.current) return;
-
-          const targets = [stats.members, stats.sessions, stats.checkins];
-          ScrollTrigger.create({
-            trigger: statsSectionRef.current,
-            start: "top 85%",
-            once: true,
-            onEnter: () => {
-              if (hasCountedRef.current) return;
-              hasCountedRef.current = true;
-              targets.forEach((target, i) => {
-                const el = statValueRefs.current[i];
-                if (!el) return;
-                const proxy = { val: Math.round(target * 0.7) };
-                gsap.to(proxy, {
-                  val: target,
-                  duration: 1,
-                  ease: "power2.out",
-                  onUpdate: () => {
-                    el.textContent = formatCount(Math.round(proxy.val));
-                  },
-                });
-              });
-            },
-          });
-        },
-      );
-      return () => mm.revert();
-    },
-    { scope: rootRef, dependencies: [] },
-  );
-
-  // Gentle lift-on-hover for trust cards and primary CTAs (fine pointer,
-  // full motion only). No change to the shared Button/Card components.
-  useGSAP(
-    (_context, contextSafe) => {
-      const mm = gsap.matchMedia();
-      mm.add(
-        {
-          hoverable: "(hover: hover) and (pointer: fine)",
-          fullMotion: "(prefers-reduced-motion: no-preference)",
-        },
-        (context) => {
-          const { hoverable, fullMotion } = context.conditions as {
-            hoverable: boolean;
-            fullMotion: boolean;
-          };
-          if (!hoverable || !fullMotion || !contextSafe) return;
-
-          const cards = trustCardsRef.current
-            ? Array.from(trustCardsRef.current.children)
-            : [];
-          const ctas = gsap.utils.toArray<HTMLElement>("[data-cta-lift]");
-          const targets = [...cards, ...ctas] as HTMLElement[];
-          if (!targets.length) return;
-
-          const enter = contextSafe((e: Event) =>
-            gsap.to(e.currentTarget as HTMLElement, {
-              y: -2,
-              boxShadow: "0 12px 24px -12px rgb(43 92 88 / 0.25)",
-              duration: 0.25,
-              ease: "power2.out",
-            }),
-          );
-          const leave = contextSafe((e: Event) =>
-            gsap.to(e.currentTarget as HTMLElement, {
-              y: 0,
-              boxShadow: "0 0px 0px 0px rgb(43 92 88 / 0)",
-              duration: 0.25,
-              ease: "power2.out",
-            }),
-          );
-
-          targets.forEach((t) => {
-            t.addEventListener("pointerenter", enter);
-            t.addEventListener("pointerleave", leave);
-          });
-          return () => {
-            targets.forEach((t) => {
-              t.removeEventListener("pointerenter", enter);
-              t.removeEventListener("pointerleave", leave);
-            });
-          };
-        },
-      );
-      return () => mm.revert();
-    },
-    { scope: rootRef },
-  );
-
-  // Keep stat numbers correct after the one-time count-up when live polls
-  // update them (only relevant after count-up has run).
-  useEffect(() => {
-    if (!hasCountedRef.current) return;
-    const values = [stats.members, stats.sessions, stats.checkins];
-    values.forEach((v, i) => {
-      const el = statValueRefs.current[i];
-      if (el) el.textContent = formatCount(v);
-    });
-  }, [stats]);
-
   const nextStep: "/dashboard" | "/auth" = signedIn ? "/dashboard" : "/auth";
 
   return (
-    <div ref={rootRef} className="min-h-screen overflow-x-hidden bg-background text-foreground">
+    <div ref={rootRef} className="min-h-screen bg-background text-foreground">
       <JsonLd data={SCHEMA} />
-      {/* Header */}
-      <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-6">
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-brand bg-primary text-primary-foreground">
-            <HeartIcon className="h-4.5 w-4.5" weight="fill" />
-          </span>
-          <span className="font-sans text-lg font-semibold tracking-tight">SomeoneNear</span>
-        </Link>
-        <div className="flex items-center gap-1.5">
-          <Button asChild variant="ghost">
-            <Link to="/docs">Docs</Link>
-          </Button>
-          <Button asChild>
-            <Link to={nextStep}>{signedIn ? "Open app" : "Start gently"}</Link>
-          </Button>
-        </div>
-      </header>
 
-      <main className="mx-auto w-full max-w-2xl space-y-20 px-6 pb-28">
-        {/* Hero */}
-        <section data-reveal className="space-y-6 pt-8">
-          <p className="inline-flex items-center gap-2.5 rounded-brand border border-border bg-surface px-4 py-2 text-xs text-muted-foreground">
-            <NudgeDot />
-            A quiet place to be heard
-          </p>
-          <h1 className="font-display text-4xl font-medium leading-[1.15] sm:text-5xl">
-            Someone near, whenever you don't know who to call
-          </h1>
-          <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
-            SomeoneNear gives you a caring check-in, a real listener, and someone near in
-            the moments when you don't want to be alone.
-          </p>
-          <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row">
-            <Button asChild size="lg" data-cta-lift className="w-full sm:w-auto">
+      {/* Announcement ---------------------------------------------------- */}
+      <div className="bg-primary px-4 py-2.5 text-center text-sm text-primary-foreground">
+        Medication reminders now land straight on their phone.{" "}
+        <Link to="/docs" className="font-semibold underline underline-offset-2">
+          See how
+        </Link>
+      </div>
+
+      {/* Nav ------------------------------------------------------------- */}
+      <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
+        {/* 72px so the 40px mark has room to breathe rather than filling the bar */}
+        <nav className="mx-auto flex h-[4.5rem] w-full max-w-6xl items-center justify-between gap-6 px-6">
+          <Link to="/" aria-label="SomeoneNear home">
+            <Wordmark />
+          </Link>
+
+          <div className="hidden items-center gap-7 text-sm font-semibold text-muted-foreground lg:flex">
+            <a href="#worries" className="transition-colors hover:text-foreground">
+              For families
+            </a>
+            <a href="#included" className="transition-colors hover:text-foreground">
+              What's included
+            </a>
+            <a
+              href="#how-it-works"
+              className="transition-colors hover:text-foreground"
+            >
+              How it works
+            </a>
+            <a href="#pricing" className="transition-colors hover:text-foreground">
+              Plans
+            </a>
+            <Link to="/docs" className="transition-colors hover:text-foreground">
+              Docs
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Signed in, the ghost link and the button both pointed at the app,
+                so the nav showed "Open app" twice. Signed in needs only the one
+                button; the "Log in" link is only meaningful when signed out. */}
+            {!signedIn && (
+              <Button
+                asChild
+                variant="ghost"
+                className="hidden rounded-full font-semibold sm:inline-flex"
+              >
+                <Link to={nextStep}>Log in</Link>
+              </Button>
+            )}
+            <Button
+              asChild
+              data-magnetic
+              className="rounded-full px-5 font-bold"
+            >
               <Link to={nextStep}>
-                {signedIn ? "Open SomeoneNear" : "Start your journey"}
-                <ArrowRightIcon className="ml-2 h-4 w-4" />
+                {signedIn ? "Open app" : "Try for free"}
               </Link>
             </Button>
-            <Button asChild size="lg" variant="ghost" className="w-full sm:w-auto">
-              <Link to="/docs">See how it works</Link>
-            </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            No pressure. No performance. Leave whenever you like.
-          </p>
-        </section>
+        </nav>
+      </header>
 
-        {/* Experience Preview */}
-        <section data-reveal className="space-y-6">
-          <div className="space-y-2 text-center">
-            <h2 className="font-display text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              What it feels like
-            </h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <CallCardPreview />
-            <AiSnippetPreview />
-          </div>
-        </section>
-
-        {/* Quiet truth */}
-        <section data-reveal className="space-y-6 text-center">
-          <p className="font-display text-2xl leading-snug sm:text-[1.7rem]">
-            “I'm fine” is sometimes just easier than explaining what's actually going on.
-          </p>
-          <p className="mx-auto max-w-md leading-relaxed text-muted-foreground">
-            Some people aren't alone. They just don't have anyone available when they need
-            them. Sometimes the hardest part isn't being alone, it's not knowing who to
-            call.
-          </p>
-        </section>
-
-        {/* Trust & credibility */}
-        <section data-reveal className="space-y-6">
-          <div className="space-y-2 text-center">
-            <h2 className="font-display text-3xl font-semibold">Who answers, and how it works</h2>
-            <p className="mx-auto max-w-lg leading-relaxed text-muted-foreground">
-              Before you book anything, here's exactly what happens and who's on the other end.
-            </p>
-          </div>
-          <div ref={trustCardsRef} className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-border bg-surface p-6">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <HeadphonesIcon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-4 font-display text-base font-medium">Vetted listeners</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Every listener is trained before they take their first call. Nobody unqualified
-                picks up the phone.
-              </p>
+      <main>
+        {/* Hero -------------------------------------------------------- */}
+        <section className="relative overflow-hidden px-6 pb-16 pt-14 sm:pt-20">
+          {/* Background orbs. Scenery, so they stay faceless and far back. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10"
+          >
+            {/* These two watch the cursor. Scenery that notices you is on-theme
+                for a product about being checked in on. */}
+            <div data-drift className="absolute left-[6%] top-[14%] opacity-70">
+              <Orb tone="saffron" face="plain" gaze className="h-16 w-16" />
             </div>
-            <div className="rounded-xl border border-border bg-surface p-6">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <PhoneCallIcon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-4 font-display text-base font-medium">Just a phone call</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Audio only. It rings like any normal call, no app to download, no camera, no link
-                to click.
-              </p>
+            <div data-drift className="absolute right-[8%] top-[9%] opacity-70">
+              <Orb tone="periwinkle" face="plain" gaze className="h-11 w-11" />
             </div>
-            <div className="rounded-xl border border-border bg-surface p-6">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <ShieldCheckIcon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-4 font-display text-base font-medium">Private by design</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Conversations are yours. Family only ever sees what you choose to share, nothing
-                more.
-              </p>
+            <div data-drift className="absolute left-[14%] top-[46%]">
+              <OrbSparkle className="h-5 w-5 text-orb-terracotta" />
+            </div>
+            <div data-drift className="absolute right-[16%] top-[38%]">
+              <OrbSparkle className="h-4 w-4 text-orb-pink" />
             </div>
           </div>
-        </section>
 
-        {/* A gentle nudge, shown as itself */}
-        <section data-reveal className="space-y-4">
-          <h2 className="font-display text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            How we reach you
-          </h2>
-          <GentleNudge
-            title="Just checking in, how are you feeling today?"
-            body="Answer in a word. Or don't. Either is completely okay."
-          />
-          <GentleNudge
-            title="Your evening tablet is due in 20 minutes"
-            body="Reply TAKEN when you've had it. We'll stay quiet after that."
-          />
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            No red badges, no sirens. Just a warm pulse and a sentence you can ignore
-            without guilt.
-          </p>
-        </section>
+          <div className="mx-auto w-full max-w-4xl text-center">
+            <h1 className="mx-auto max-w-3xl text-[2.6rem] leading-[1.08] sm:text-6xl lg:text-[4.2rem]">
+              <RotatingHeadline />
+            </h1>
 
-        {/* Check-In */}
-        <section id="check-in" data-reveal className="scroll-mt-24 space-y-8 py-4">
-          <div className="space-y-2 text-center">
-            <h2 className="font-display text-3xl font-semibold">
-              Check-In, someone should know how they're doing
-            </h2>
-            <p className="mx-auto max-w-lg leading-relaxed text-muted-foreground">
-              A Check-In is a simple way to make sure someone you care about is doing okay, even
-              when you can't be there yourself.
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-border bg-surface p-8">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <CalendarHeartIcon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-4 font-display text-base font-medium">Scheduled Check-In</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                You pick a time. A SomeoneNear team member calls your loved one, asks how their day
-                went, whether they've eaten, had water, taken their medication, or simply how they're
-                feeling. Afterwards a short update appears on your family dashboard.
-              </p>
-            </div>
-            <div className="rounded-xl border border-border bg-surface p-8">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <PhoneCallIcon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-4 font-display text-base font-medium">On-Demand Check-In</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Some days you don't want to wait. Home early, feeling low, or just wanting someone
-                to talk to, they can ask for an earlier Check-In. If a trained listener is free, the
-                call happens then; otherwise we move it to the nearest time that works.
-              </p>
-            </div>
-          </div>
-          <p className="mx-auto max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
-            It isn't therapy or diagnosis. It's being present, listening, asking the right everyday
-            questions, and giving families a clearer picture of how their loved one is doing.
-          </p>
-          <div className="text-center">
-            <Button asChild variant="ghost" className="rounded-2xl">
-              <Link to="/docs/check-in">Read how Check-Ins work</Link>
-            </Button>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section data-reveal className="space-y-6">
-          <div className="space-y-2 text-center">
-            <h2 className="font-display text-3xl font-semibold">More than just a chat</h2>
-            <p className="text-muted-foreground">
-              It's a presence you can feel. Small things, built for the in-between hours.
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {features.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="rounded-xl border border-border bg-surface p-6 transition-colors hover:border-primary/40"
-              >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                  <Icon className="h-5 w-5" />
+            <p
+              data-hero-proof
+              className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-semibold text-muted-foreground"
+            >
+              {HERO_PROOF.map((item) => (
+                <span key={item} className="flex items-center gap-1.5">
+                  <CheckIcon
+                    className="h-3.5 w-3.5 text-orb-grass"
+                    weight="bold"
+                  />
+                  {item}
                 </span>
-                <h3 className="mt-4 font-display text-base font-medium">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              ))}
+            </p>
+          </div>
+
+          {/* Dual paths — the two people who arrive on this page */}
+          <div className="mx-auto mt-10 grid w-full max-w-5xl gap-4 md:grid-cols-2">
+            <article
+              data-hero-card
+              className="rounded-[28px] bg-surface px-6 py-9 text-center sm:px-9"
+            >
+              <h2 className="mx-auto max-w-xs text-2xl">
+                Check-in calls for a parent or loved one
+              </h2>
+              <div className="mt-5">
+                <InkButton to={nextStep}>Start a Care plan</InkButton>
               </div>
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <CheckIcon className="h-3 w-3" weight="bold" />
+                No card needed
+              </p>
+              <div className="mt-6">
+                <DashboardMockup />
+              </div>
+            </article>
+
+            <article
+              data-hero-card
+              className="rounded-[28px] bg-surface px-6 py-9 text-center sm:px-9"
+            >
+              <h2 className="mx-auto max-w-xs text-2xl">
+                A real listener to talk to, whenever you need one
+              </h2>
+              <div className="mt-5">
+                <InkButton to={nextStep}>Book a listener call</InkButton>
+              </div>
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <CheckIcon className="h-3 w-3" weight="bold" />
+                Private by default
+              </p>
+              <div className="mt-6">
+                <ListenerCallMockup />
+              </div>
+            </article>
+          </div>
+        </section>
+
+        {/* Worries ----------------------------------------------------- */}
+        <section id="worries" className="scroll-mt-20 px-6 py-16">
+          <h2 data-reveal className="text-center text-2xl sm:text-3xl">
+            What are you worried about?
+          </h2>
+
+          <ul className="mx-auto mt-8 grid w-full max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {WORRIES.map((w) => (
+              <li key={w.label} data-reveal-stagger>
+                <Link
+                  to={nextStep}
+                  className="group flex h-full items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 transition-colors hover:border-primary/40"
+                >
+                  <Orb tone={w.tone} face="calm" gaze className="h-8 w-8 shrink-0" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-bold leading-snug">
+                      {w.label}
+                    </span>
+                    <span className="mt-0.5 block text-sm leading-snug text-muted-foreground">
+                      {w.answer}
+                    </span>
+                  </span>
+                  <CaretRightIcon
+                    className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1"
+                    weight="bold"
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Features, as an auto-advancing carousel ------------------- */}
+        <FeatureCarousel />
+
+        {/* Marquee ---------------------------------------------------- */}
+        <div
+          aria-hidden="true"
+          className="mt-10 overflow-hidden border-y border-ink/10 bg-plate-saffron py-3.5"
+        >
+          <div
+            data-marquee-track
+            className="flex w-max items-center gap-8 whitespace-nowrap"
+          >
+            {Array.from({ length: 12 }).map((_, i) => (
+              <span
+                key={i}
+                className="flex items-center gap-8 text-sm font-extrabold uppercase tracking-wide text-ink"
+              >
+                Checking in when they can&apos;t
+                <Orb
+                  tone={i % 2 === 0 ? "terracotta" : "navy"}
+                  face="calm"
+                  className="h-5 w-5"
+                />
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* How it works ---------------------------------------------- */}
+        <section id="how-it-works" className="scroll-mt-20 px-6 py-16">
+          <div data-reveal className="text-center">
+            <h2 className="text-2xl sm:text-3xl">Three steps, then we handle it</h2>
+            <p className="mx-auto mt-2 max-w-md text-muted-foreground">
+              Setting it up takes a few minutes. After that it just happens.
+            </p>
+          </div>
+
+          {/* Genuinely a sequence, so the numbers are earning their place. */}
+          <ol className="mx-auto mt-10 grid w-full max-w-5xl gap-4 sm:grid-cols-3">
+            {STEPS.map((s, i) => (
+              <li
+                key={s.title}
+                data-reveal-stagger
+                className="rounded-2xl border border-border bg-card p-6"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-sm font-extrabold text-background">
+                  {i + 1}
+                </span>
+                <h3 className="mt-4 text-lg">{s.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  {s.body}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Voices ---------------------------------------------------- */}
+        <section className="relative overflow-hidden px-6 py-16">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-6 -z-10 mx-auto max-w-4xl"
+          >
+            <div data-drift className="absolute left-[10%] top-0">
+              <Orb tone="periwinkle" face="calm" className="h-12 w-12" />
+            </div>
+            <div data-drift className="absolute right-[12%] top-2">
+              <Orb tone="grass" face="wink" className="h-14 w-14" />
+            </div>
+            <div data-drift className="absolute left-[28%] top-16">
+              <Orb tone="saffron" face="smile" className="h-9 w-9" />
+            </div>
+          </div>
+
+          <h2 data-reveal className="mx-auto max-w-lg text-center text-2xl sm:text-3xl">
+            The part families didn&apos;t expect to need
+          </h2>
+
+          <div className="mx-auto mt-10 grid w-full max-w-5xl gap-4 sm:grid-cols-3">
+            {VOICES.map((v) => (
+              <figure
+                key={v.who}
+                data-reveal-stagger
+                className="flex h-full flex-col justify-between rounded-2xl bg-surface p-6"
+              >
+                <blockquote className="text-[0.95rem] leading-relaxed">
+                  &ldquo;{v.quote}&rdquo;
+                </blockquote>
+                <figcaption className="mt-5 flex items-center gap-2.5 text-xs font-semibold text-muted-foreground">
+                  <Orb tone={v.tone} face="calm" className="h-7 w-7 shrink-0" />
+                  {v.who}
+                </figcaption>
+              </figure>
             ))}
           </div>
         </section>
 
-        {/* Supportive empty state, in its own words */}
-        <section data-reveal className="space-y-4">
-          <h2 className="font-display text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            When there's nothing here yet
-          </h2>
-          <QuietEmptyState
-            quote="That moment when you want to tell someone about your day, and realise there's no one to tell."
-            title="This space is waiting for you"
-            body="Start with one sentence about today. There's no wrong way to begin, and nobody is keeping score."
-            variant="note"
-            action={
-              <Button asChild className="rounded-2xl px-6">
-                <Link to={nextStep}>Say the first thing</Link>
-              </Button>
-            }
-          />
-        </section>
+        {/* Trust ----------------------------------------------------- */}
+        <section className="px-6 py-10">
+          <div
+            data-reveal
+            className="mx-auto w-full max-w-6xl rounded-[32px] bg-plate-navy px-7 py-12 text-background sm:px-12"
+          >
+            <h2 className="mx-auto max-w-lg text-center text-2xl sm:text-3xl">
+              A trained human, not a robocall
+            </h2>
 
-        {/* Quiet live numbers */}
-        <section ref={statsSectionRef} data-reveal className="grid gap-4 sm:grid-cols-3">
-          {[
-            { label: "People here", value: stats.members },
-            { label: "Listener calls held", value: stats.sessions },
-            { label: "Check-ins shared", value: stats.checkins },
-          ].map((s, i) => (
-            <div
-              key={s.label}
-              className="rounded-xl border border-border bg-surface px-6 py-7 text-center"
-            >
-              <p
-                ref={(el) => {
-                  statValueRefs.current[i] = el;
-                }}
-                className="font-display text-2xl font-semibold"
-              >
-                {formatCount(s.value)}
-              </p>
-              <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                {s.label}
-              </p>
+            <div className="mt-9 grid gap-8 sm:grid-cols-3">
+              {TRUST.map(({ icon: Icon, title, body }) => (
+                <div key={title}>
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-background/15">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-4 text-lg">{title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed opacity-80">
+                    {body}
+                  </p>
+                </div>
+              ))}
             </div>
-          ))}
-        </section>
-
-        {/* Campaign line */}
-        <section data-reveal className="space-y-4 rounded-xl border border-primary/20 bg-primary/5 px-8 py-12 text-center">
-          <h2 className="font-display text-3xl font-medium text-foreground">
-            You can't always be there.
-            <br />
-            But what if someone could?
-          </h2>
-          <p className="mx-auto max-w-md leading-relaxed text-muted-foreground">
-            People still care. Life just got busy. SomeoneNear stands in the gap, quietly,
-            kindly, whenever it's needed.
-          </p>
-          <div className="pt-2">
-            <Button asChild size="lg" data-cta-lift className="px-8">
-              <Link to={nextStep}>Bring someone near</Link>
-            </Button>
           </div>
         </section>
 
-        {/* Pricing */}
-        <section id="pricing" data-reveal className="scroll-mt-24 space-y-6">
-          <div className="space-y-2 text-center">
-            <h2 className="font-display text-3xl font-semibold">Simple, flexible pricing</h2>
-            <p className="text-muted-foreground">
-              Choose the plan that fits your life. Change or leave any month.
+        {/* Stats ----------------------------------------------------- */}
+        <section className="px-6 py-10">
+          <div
+            data-reveal
+            className="relative mx-auto w-full max-w-6xl overflow-hidden rounded-[32px] bg-plate-periwinkle px-7 py-14 text-center text-background sm:px-12"
+          >
+            <OrbCloud className="pointer-events-none absolute -left-8 bottom-0 h-24 w-48 text-background/25" />
+            <OrbCloud className="pointer-events-none absolute -right-6 top-4 h-16 w-32 text-background/20" />
+
+            <h2 className="mx-auto max-w-lg text-2xl sm:text-3xl">
+              Families are sleeping a little easier
+            </h2>
+
+            <dl className="mt-10 grid gap-8 sm:grid-cols-3">
+              {[
+                { label: "People here", value: stats.members },
+                { label: "Listener calls held", value: stats.sessions },
+                { label: "Check-ins shared", value: stats.checkins },
+              ].map((s) => (
+                <div key={s.label}>
+                  <dt className="sr-only">{s.label}</dt>
+                  <dd>
+                    <span
+                      data-counter={s.value}
+                      className="block text-4xl font-extrabold tabular-nums tracking-tight"
+                    >
+                      {s.value.toLocaleString()}
+                    </span>
+                    <span className="mt-1 block text-sm font-semibold opacity-80">
+                      {s.label}
+                    </span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        {/* Pricing --------------------------------------------------- */}
+        <section id="pricing" className="scroll-mt-20 px-6 py-16">
+          <div data-reveal className="text-center">
+            <h2 className="text-2xl sm:text-3xl">Simple, flexible pricing</h2>
+            <p className="mx-auto mt-2 max-w-md text-muted-foreground">
+              Change or leave any month. No contracts, no exit fees.
             </p>
           </div>
-          <div className="space-y-4">
-            {plans.map((p) => (
-              <div
+
+          <div className="mx-auto mt-10 grid w-full max-w-4xl gap-4 md:grid-cols-2">
+            {PLANS.map((p) => (
+              <article
                 key={p.name}
-                className={`relative rounded-xl border p-6 ${
-                  p.highlight ? "border-primary/45 bg-surface" : "border-border bg-card"
+                data-reveal-stagger
+                className={`relative rounded-[28px] border p-7 ${
+                  p.highlight
+                    ? "border-primary/50 bg-surface"
+                    : "border-border bg-card"
                 }`}
               >
                 {p.highlight ? (
-                  <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-primary-foreground">
+                  <span className="absolute -top-3 left-7 rounded-full bg-primary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground">
                     Most chosen
                   </span>
                 ) : null}
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <div>
-                    <h3 className="font-display text-lg font-medium">{p.name}</h3>
-                    <p className="text-sm text-muted-foreground">{p.note}</p>
-                  </div>
-                  <p className="font-display text-2xl font-semibold">
-                    {p.price}
-                    <span className="text-sm font-normal text-muted-foreground"> / month</span>
-                  </p>
-                </div>
-                <ul className="mt-5 grid gap-2 sm:grid-cols-2">
+
+                <h3 className="text-xl">{p.name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{p.note}</p>
+                <p className="mt-5 text-4xl font-extrabold tracking-tight">
+                  {p.price}
+                  <span className="text-base font-semibold text-muted-foreground">
+                    {" "}
+                    / month
+                  </span>
+                </p>
+
+                <ul className="mt-6 space-y-2.5">
                   {p.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      <span>{f}</span>
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <CheckIcon
+                        className="mt-1 h-3.5 w-3.5 shrink-0 text-orb-grass"
+                        weight="bold"
+                      />
+                      <span className="text-muted-foreground">{f}</span>
                     </li>
                   ))}
                 </ul>
-              </div>
+
+                <div className="mt-7">
+                  <InkButton to={nextStep}>Choose {p.name}</InkButton>
+                </div>
+              </article>
             ))}
           </div>
         </section>
 
-        {/* FAQ */}
-        <section id="faq" data-reveal className="scroll-mt-24 space-y-6">
-          <h2 className="text-center font-display text-3xl font-semibold">
-            Questions people quietly ask
+        {/* FAQ ------------------------------------------------------- */}
+        <section id="faq" className="scroll-mt-20 px-6 py-16">
+          <h2 data-reveal className="text-center text-2xl sm:text-3xl">
+            Questions families quietly ask
           </h2>
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((f) => (
-              <AccordionItem key={f.q} value={f.q} className="border-border">
-                <AccordionTrigger className="text-left font-display text-base font-medium">
-                  {f.q}
-                </AccordionTrigger>
-                <AccordionContent className="leading-relaxed text-muted-foreground">
-                  {f.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+
+          <div data-reveal className="mx-auto mt-8 w-full max-w-2xl">
+            <Accordion type="single" collapsible className="w-full">
+              {FAQS.map((f) => (
+                <AccordionItem key={f.q} value={f.q} className="border-border">
+                  <AccordionTrigger className="text-left text-base font-bold">
+                    {f.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="leading-relaxed text-muted-foreground">
+                    {f.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
         </section>
 
-        {/* Safety + contact */}
-        <section data-reveal className="space-y-4">
-          <div className="flex items-start gap-4 rounded-xl border border-border bg-surface p-6">
-            <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Private by default. Your conversations are yours; family members see only what
-              you choose to share. If you're ever in danger, we'll show your local emergency
-              numbers first.
+        {/* Closing scene --------------------------------------------- */}
+        <section className="relative overflow-hidden bg-plate-saffron px-6 pb-0 pt-20 text-center">
+          <h2 className="relative z-10 mx-auto max-w-xl text-3xl text-ink sm:text-4xl">
+            You can&apos;t always be there.
+            <br />
+            But someone can.
+          </h2>
+
+          <div className="relative z-10 mt-7">
+            <Button
+              asChild
+              size="lg"
+              data-magnetic
+              className="rounded-full px-9 text-base font-bold"
+            >
+              <Link to={nextStep}>
+                {signedIn ? "Open SomeoneNear" : "Start with one call"}
+                <ArrowRightIcon className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <p className="mt-3 text-xs font-semibold text-ink/70">
+              No card needed · Cancel any time
             </p>
           </div>
-          <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-4">
-              <ChartLineIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Something felt off, or missing? Tell us. We read every message.
-              </p>
-            </div>
-            <FeedbackDialog
-              trigger={
-                <Button variant="secondary" className="rounded-2xl">
-                  <ChatCircleTextIcon className="mr-2 h-4 w-4" /> Send feedback
-                </Button>
-              }
-            />
+
+          {/* A rainbow arc, drawn as stacked semicircles from the orb family */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none relative mx-auto mt-12 h-40 w-[620px] max-w-full"
+          >
+            {[
+              { tone: "bg-orb-pink", inset: 0 },
+              { tone: "bg-orb-periwinkle", inset: 26 },
+              { tone: "bg-orb-grass", inset: 52 },
+            ].map((arc) => (
+              <div
+                key={arc.tone}
+                className={`absolute bottom-0 rounded-t-full ${arc.tone}`}
+                style={{
+                  left: arc.inset,
+                  right: arc.inset,
+                  top: arc.inset,
+                }}
+              />
+            ))}
+            <OrbCloud className="absolute -left-4 bottom-0 h-20 w-40 text-background" />
+            <OrbCloud className="absolute -right-2 bottom-0 h-14 w-28 text-background" />
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-5 px-6 py-10 text-sm text-muted-foreground">
-          <TrustBadge />
-          <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} SomeoneNear · Checking in when they can't.</p>
-            <a
-              href="mailto:care@someonenear.com"
-              className="inline-flex items-center gap-2 transition-colors hover:text-primary"
-            >
-              <EnvelopeSimpleIcon className="h-4 w-4" /> care@someonenear.com
-            </a>
+      {/* Footer ------------------------------------------------------ */}
+      <footer className="bg-plate-cream px-6 py-12">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <Wordmark />
+              <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+                Checking in when they can&apos;t.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-x-12 gap-y-6 text-sm">
+              <nav aria-label="Product">
+                <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                  Product
+                </h2>
+                <ul className="mt-3 space-y-2">
+                  <li>
+                    <a href="#how-it-works" className="hover:text-primary">
+                      How it works
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#pricing" className="hover:text-primary">
+                      Plans
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#faq" className="hover:text-primary">
+                      FAQ
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+
+              <nav aria-label="Company">
+                <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                  Company
+                </h2>
+                <ul className="mt-3 space-y-2">
+                  <li>
+                    <Link to="/docs" className="hover:text-primary">
+                      Docs
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/docs/check-in" className="hover:text-primary">
+                      Check-ins
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-4 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} SomeoneNear</p>
+            <div className="flex flex-wrap items-center gap-4">
+              <a
+                href="mailto:care@someonenear.com"
+                className="inline-flex items-center gap-2 hover:text-primary"
+              >
+                <EnvelopeSimpleIcon className="h-4 w-4" />
+                care@someonenear.com
+              </a>
+              <FeedbackDialog
+                trigger={
+                  <Button variant="ghost" size="sm" className="rounded-full">
+                    <ChatCircleTextIcon className="mr-2 h-4 w-4" />
+                    Send feedback
+                  </Button>
+                }
+              />
+            </div>
           </div>
         </div>
       </footer>

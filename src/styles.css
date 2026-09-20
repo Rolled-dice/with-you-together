@@ -14,8 +14,10 @@
  */
 
 @theme inline {
-  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", "Hanken Grotesk", ui-serif, serif;
+  /* One family carries the whole page — a friendly geometric grotesque in the
+   * Apercu register. No serif display face. */
+  --font-sans: "Figtree", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Figtree", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 8px);
   --radius-md: calc(var(--radius) - 4px);
@@ -62,100 +64,144 @@
 :root {
   --radius: 0.625rem;
 
-  /* Harbor — mist paper, deep muted teal, warm amber warmth */
-  --background: oklch(0.975 0.002 145.6);
-  --surface: oklch(0.949 0.004 157.2);
-  --foreground: oklch(0.254 0.009 173.5);
+  /* Playroom — warm white canvas, warm charcoal ink, one navy voltage.
+   * The brand pair is taken straight from the logo: a slate navy and a
+   * terracotta. Navy carries every CTA because it reads calm and trustworthy,
+   * which suits a product about someone's ageing parents far better than a
+   * bright accent would. Terracotta is the warm counterweight. Wider colour
+   * arrives only through the character-orb family. */
+  --background: #fffdfb;
+  --surface: #f3efe9;
+  --foreground: #2a2725;
 
-  --card: oklch(0.99 0.001 145.6);
-  --card-foreground: oklch(0.254 0.009 173.5);
-  --popover: oklch(0.99 0.001 145.6);
-  --popover-foreground: oklch(0.254 0.009 173.5);
+  --card: #ffffff;
+  --card-foreground: #2a2725;
+  --popover: #ffffff;
+  --popover-foreground: #2a2725;
 
-  /* Brand: Harbor teal primary, mist-deep secondary, ember warmth accent */
-  --brand-primary: oklch(0.439 0.054 188.4);
-  --brand-secondary: oklch(0.949 0.004 157.2);
-  --brand-accent: oklch(0.55 0.1 65);
+  /* Brand: navy voltage for CTAs, warm grey plate, terracotta accent.
+   * Both hexes are sampled directly from the logo artwork, not approximated. */
+  --brand-primary: #25435f;
+  --brand-secondary: #f3efe9;
+  --brand-accent: #c05c3a;
 
-  --primary: oklch(0.439 0.054 188.4);
-  --primary-foreground: oklch(0.975 0.002 145.6);
-  --secondary: oklch(0.949 0.004 157.2);
-  --secondary-foreground: oklch(0.254 0.009 173.5);
-  --muted: oklch(0.94 0.004 157.2);
-  --muted-foreground: oklch(0.5 0.012 173.5);
-  --accent: oklch(0.926 0.015 181.8);
-  --accent-foreground: oklch(0.254 0.009 173.5);
+  --primary: #25435f;
+  --primary-foreground: #ffffff;
+  --secondary: #f3efe9;
+  --secondary-foreground: #2a2725;
+  --muted: #f3efe9;
+  --muted-foreground: #6b6561;
+  --accent: #e3eaf1;
+  --accent-foreground: #2a2725;
   /* Muted signal red, never alarm-bright */
-  --destructive: oklch(0.543 0.141 27.5);
-  --destructive-foreground: oklch(0.98 0.004 27.5);
+  --destructive: #c4453b;
+  --destructive-foreground: #fff6f5;
 
-  --border: oklch(0.922 0.004 157.2);
-  --input: oklch(0.9 0.004 157.2);
-  --ring: oklch(0.439 0.054 188.4);
+  --border: #e7e2da;
+  --input: #ddd6cc;
+  --ring: #25435f;
 
-  --sidebar: oklch(0.955 0.004 157.2);
-  --sidebar-foreground: oklch(0.254 0.009 173.5);
-  --sidebar-primary: oklch(0.439 0.054 188.4);
-  --sidebar-primary-foreground: oklch(0.975 0.002 145.6);
-  --sidebar-accent: oklch(0.926 0.015 181.8);
-  --sidebar-accent-foreground: oklch(0.254 0.009 173.5);
-  --sidebar-border: oklch(0.922 0.004 157.2);
-  --sidebar-ring: oklch(0.439 0.054 188.4);
+  --sidebar: #f8f5f1;
+  --sidebar-foreground: #2a2725;
+  --sidebar-primary: #25435f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3eaf1;
+  --sidebar-accent-foreground: #2a2725;
+  --sidebar-border: #e7e2da;
+  --sidebar-ring: #25435f;
 }
 
 
 .dark {
-  /* Harbor at night — same teal/ember relationship, dimmed on a warm-cool charcoal */
-  --background: oklch(0.214 0.005 173.9);
-  --surface: oklch(0.252 0.006 179.2);
-  --foreground: oklch(0.95 0.003 165.1);
-  --card: oklch(0.264 0.006 179.2);
-  --card-foreground: oklch(0.95 0.003 165.1);
-  --popover: oklch(0.264 0.006 179.2);
-  --popover-foreground: oklch(0.95 0.003 165.1);
-  --brand-primary: oklch(0.675 0.06 187.4);
-  --brand-secondary: oklch(0.3 0.01 173.9);
-  --brand-accent: oklch(0.773 0.106 67.9);
-  --primary: oklch(0.675 0.06 187.4);
-  --primary-foreground: oklch(0.214 0.005 173.9);
-  --secondary: oklch(0.3 0.01 173.9);
-  --secondary-foreground: oklch(0.95 0.003 165.1);
-  --muted: oklch(0.29 0.008 173.9);
-  --muted-foreground: oklch(0.72 0.01 165.1);
-  --accent: oklch(0.322 0.028 188.6);
-  --accent-foreground: oklch(0.95 0.003 165.1);
-  --destructive: oklch(0.675 0.119 26.4);
-  --destructive-foreground: oklch(0.96 0.008 26.4);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.675 0.06 187.4);
-  --sidebar: oklch(0.24 0.007 173.9);
-  --sidebar-foreground: oklch(0.95 0.003 165.1);
-  --sidebar-primary: oklch(0.675 0.06 187.4);
-  --sidebar-primary-foreground: oklch(0.214 0.005 173.9);
-  --sidebar-accent: oklch(0.3 0.01 173.9);
-  --sidebar-accent-foreground: oklch(0.95 0.003 165.1);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.675 0.06 187.4);
+  /* Playroom after dark — same violet/orb relationship on a warm charcoal */
+  --background: #1c1a19;
+  --surface: #262322;
+  --foreground: #f5f1ec;
+  --card: #262322;
+  --card-foreground: #f5f1ec;
+  --popover: #262322;
+  --popover-foreground: #f5f1ec;
+  /* Navy can't carry a CTA on charcoal, so it lifts to a pale steel here
+   * while keeping the same hue relationship to the terracotta. */
+  --brand-primary: #8db3d4;
+  --brand-secondary: #2f2b29;
+  --brand-accent: #d9714a;
+  --primary: #8db3d4;
+  --primary-foreground: #1c1a19;
+  --secondary: #2f2b29;
+  --secondary-foreground: #f5f1ec;
+  --muted: #2b2826;
+  --muted-foreground: #a8a29b;
+  --accent: #223b52;
+  --accent-foreground: #f5f1ec;
+  --destructive: #e4756b;
+  --destructive-foreground: #2a1210;
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: #8db3d4;
+  --sidebar: #211f1e;
+  --sidebar-foreground: #f5f1ec;
+  --sidebar-primary: #8db3d4;
+  --sidebar-primary-foreground: #1c1a19;
+  --sidebar-accent: #2f2b29;
+  --sidebar-accent-foreground: #f5f1ec;
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: #8db3d4;
 }
 
 @theme inline {
-  /* Sand & clay scale */
-  --color-sand: #FBF6EF;
-  --color-sand-deep: #F3E7D8;
-  --color-clay: #C9714F;
-  --color-clay-soft: #E0A184;
-  --color-ink: #4A403A;
-  --color-sunrise-from: #F7E8D6;
-  --color-sunrise-via: #EFCFB4;
-  --color-sunrise-to: #D98C68;
-  --color-sage: #9DAE8C;
-  --color-coral: #C9714F;
-  --color-blush: #F0D6C6;
-  --color-sky: #C6D3DA;
-  --color-lilac: #DCD2CB;
-  --color-mint: #CBD9C9;
-  --color-amber-soft: #F6E6CE;
+  /* Character-orb family — the only place saturated colour is allowed to play.
+   * Each orb is a flat fill, never a gradient. */
+  --color-orb-saffron: #ffce2e;
+  --color-orb-pink: #ffa6cb;
+  --color-orb-aqua: #4aa8dc;
+  --color-orb-grass: #0e8a44;
+  /* Both sampled from the logo artwork */
+  --color-orb-navy: #25435f;
+  --color-orb-periwinkle: #7f9dc4;
+  --color-orb-terracotta: #c05c3a;
+
+  /* Full-bleed section plates. Each plate is paired in code with the type
+   * colour that clears AA on it: saffron, pink and periwinkle take ink; navy,
+   * grass and terracotta take light.
+   *
+   * plate-terracotta is deliberately deeper than the brand terracotta. White on
+   * the true #c05c3a is only 4.34:1, which fails AA for body text, and ink on it
+   * is worse at 3.3:1 — neither works. Deepening to #a94a28 gets white to
+   * ~5.4:1. The exact brand hex is preserved for the mark and small accents,
+   * where it sits on light surfaces and passes comfortably. */
+  --color-plate-saffron: #f5cf1a;
+  --color-plate-pink: #f0a3c6;
+  --color-plate-navy: #25435f;
+  --color-plate-grass: #14713c;
+  --color-plate-periwinkle: #7f9dc4;
+  --color-plate-terracotta: #a94a28;
+  --color-plate-cream: #f8f4ef;
+
+  /* Warm neutrals */
+  --color-sand: #f8f4ef;
+  --color-sand-deep: #f3efe9;
+  --color-ink: #2a2725;
+
+  /* Compatibility aliases. The docs, admin and feedback surfaces still paint
+   * with the previous Harbor vocabulary; these remap those names onto the new
+   * palette so nothing renders unstyled while the marketing page moves first. */
+  /* Deepened rather than the true brand hex: these paint small text in the docs
+   * eyebrows and links, where #c05c3a would only reach 4.34:1. */
+  --color-coral: #a94a28;
+  --color-clay: #a94a28;
+  --color-clay-soft: #ffcf8a;
+  --color-mint: #cdebd8;
+  --color-blush: #ffd9e7;
+  --color-peach: #ffe0c9;
+  --color-lilac: #e3d9fb;
+  --color-sage: #d3e0cd;
+  --color-sky: #d3e9fb;
+  --color-sunrise: #ffeab0;
+  --color-amber-soft: #ffeab0;
+  --color-sunrise-from: #ffeab0;
+  --color-sunrise-via: #ffd9e7;
+  --color-sunrise-to: #e3d9fb;
 }
 
 
@@ -305,14 +351,16 @@
 }
 .card-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px -18px rgb(200 120 80 / 0.35);
+  /* Neutral ink shadow. This was a warm clay tint from the old sand-and-clay
+   * theme, which read as an orange halo against the navy palette. */
+  box-shadow: 0 18px 36px -20px rgb(42 39 37 / 0.22);
 }
 .card-lift::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(255 200 154 / 0.28), transparent 65%);
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.10), transparent 65%);
   opacity: 0;
   transition: opacity 220ms ease;
   pointer-events: none;
@@ -349,13 +397,13 @@
 }
 /* Very soft flat shadows — presence, never elevation drama */
 @utility shadow-glow {
-  box-shadow: 0 18px 40px -24px rgb(201 113 79 / 0.35);
+  box-shadow: 0 18px 40px -24px rgb(37 67 95 / 0.3);
 }
 @utility shadow-soft {
-  box-shadow: 0 8px 24px -14px rgb(74 64 58 / 0.16);
+  box-shadow: 0 8px 24px -14px rgb(42 39 37 / 0.14);
 }
 @utility shadow-gentle {
-  box-shadow: 0 1px 2px rgb(74 64 58 / 0.04), 0 10px 30px -22px rgb(74 64 58 / 0.22);
+  box-shadow: 0 1px 2px rgb(42 39 37 / 0.04), 0 10px 30px -22px rgb(42 39 37 / 0.2);
 }
 
 /* Gentle nudges — a warm breath, never a red alarm */
@@ -393,14 +441,14 @@
 }
 .card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 36px -14px rgb(200 120 80 / 0.32);
+  box-shadow: 0 14px 36px -14px rgb(42 39 37 / 0.2);
 }
 .card-hover::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(255 210 138 / 0.32), transparent 65%);
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.10), transparent 65%);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
@@ -416,7 +464,7 @@
   will-change: transform;
 }
 .card-tilt:hover {
-  box-shadow: 0 24px 50px -22px rgb(200 120 80 / 0.4);
+  box-shadow: 0 24px 50px -22px rgb(42 39 37 / 0.26);
 }
 @utility card-glow {
   position: relative;
@@ -428,7 +476,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgb(255 200 154 / 0.35), transparent 60%);
+  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.12), transparent 60%);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
@@ -472,13 +520,16 @@
 
   h1 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
-    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
   }
 
   h2, h3, h4, h5, h6 {
-    font-family: var(--font-sans);
-    letter-spacing: -0.01em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
   }
 
 

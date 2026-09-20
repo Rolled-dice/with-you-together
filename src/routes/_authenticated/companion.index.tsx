@@ -1,33 +1,43 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  HandHeartIcon,
-  ChatCircleIcon,
-  MoonIcon,
-  SunIcon,
-  SparkleIcon,
-  RobotIcon,
-  FireIcon,
-  StarIcon,
   ArrowRightIcon,
+  ChatCircleIcon,
+  FireIcon,
+  HandHeartIcon,
+  MoonIcon,
+  SparkleIcon,
+  SunIcon,
 } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { AppCard, AppHero, SectionHeading } from "@/components/app-page";
+import { Orb, type OrbTone } from "@/components/landing/playroom-orb";
+import { Button } from "@/components/ui/button";
+import { useAppPageMotion } from "@/hooks/use-app-page-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { createConversation } from "@/lib/conversations.functions";
-import heroMug from "@/assets/checkin-hero.png";
-import bloomOrb from "@/assets/bloom-orb.png";
 
 export const Route = createFileRoute("/_authenticated/companion/")({
   component: CompanionEmpty,
 });
 
-const PROMPTS = [
-  { icon: MoonIcon, label: "Rough evening", tone: "from-indigo-100 to-rose-100" },
-  { icon: ChatCircleIcon, label: "Vent for 2 min", tone: "from-amber-100 to-orange-100" },
-  { icon: HandHeartIcon, label: "Help me sleep", tone: "from-violet-100 to-pink-100" },
-  { icon: SunIcon, label: "Something happy", tone: "from-yellow-100 to-amber-100" },
+/**
+ * Openers. Each carries an orb tone rather than a gradient — the previous
+ * version used hardcoded Tailwind palette gradients (from-indigo-100 etc) that
+ * belonged to no design system and clashed with the brand once it changed.
+ */
+const PROMPTS: {
+  icon: typeof MoonIcon;
+  label: string;
+  tone: OrbTone;
+}[] = [
+  { icon: MoonIcon, label: "Rough evening", tone: "navy" },
+  { icon: ChatCircleIcon, label: "Vent for 2 min", tone: "terracotta" },
+  { icon: HandHeartIcon, label: "Help me sleep", tone: "periwinkle" },
+  { icon: SunIcon, label: "Something happy", tone: "saffron" },
 ];
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -46,6 +56,10 @@ function CompanionEmpty() {
   const [firstName, setFirstName] = useState<string>("friend");
   const [streak, setStreak] = useState<number>(0);
   const [moods, setMoods] = useState<number[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useAppPageMotion(rootRef, loaded);
 
   useEffect(() => {
     (async () => {
@@ -71,7 +85,6 @@ function CompanionEmpty() {
             cur.setDate(cur.getDate() - 1);
           }
           setStreak(s);
-          // build last-7-days mood series (1..5)
           const map = new Map<string, number>();
           for (const e of entries) {
             const d = new Date(e.created_at as string).toDateString();
@@ -89,6 +102,8 @@ function CompanionEmpty() {
         }
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoaded(true);
       }
     })();
   }, []);
@@ -102,7 +117,10 @@ function CompanionEmpty() {
     onError: (e) => toast.error((e as Error).message),
   });
 
-  // Sparkline path
+  const start = () => startWith.mutate();
+
+  // Sparkline geometry. Stroke colour now comes from a token via currentColor
+  // instead of a baked orange gradient.
   const W = 320;
   const H = 80;
   const step = W / Math.max(1, moods.length - 1);
@@ -110,200 +128,146 @@ function CompanionEmpty() {
   const path = points.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(" ");
 
   return (
-    <div className="relative flex-1 overflow-y-auto p-4 md:p-6 animate-fade-up">
-      {/* Warm gradient wash */}
-      <div className="pointer-events-none absolute inset-0 -z-10 opacity-70"
-        style={{
-          background:
-            "radial-gradient(60% 60% at 20% 0%, #ffe1c9 0%, transparent 60%), radial-gradient(50% 60% at 100% 20%, #ffd8b6 0%, transparent 55%), linear-gradient(180deg, #fff6ec, #fff)",
-        }} />
-
-      {/* Greeting */}
-      <div className="mb-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-accent">
-          A quiet room, whenever you need one
-        </p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-          {greetingText()}, {firstName} <span className="inline-block animate-heartbeat">☀️</span>
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Take a deep breath, you're doing great. A fresh check-in is a step toward peace.
-        </p>
-      </div>
-
-      {/* Top row: Today's check-in + Wellness card */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="relative overflow-hidden rounded-3xl p-5 shadow-soft card-lift animate-slide-in-up"
-          style={{ background: "linear-gradient(135deg, #ffd9b9 0%, #ffb28a 100%)" }}>
-          <div className="max-w-[55%]">
-            <h2 className="text-xl font-bold text-neutral-900">Today's Check-in</h2>
-            <p className="mt-2 text-sm text-neutral-800/80">
-              A few minutes for you can make a big difference.
-            </p>
-            <button
-              type="button"
-              onClick={() => startWith.mutate()}
+    <div ref={rootRef} className="flex-1 overflow-y-auto p-4 md:p-6">
+      <AppHero
+        eyebrow="A quiet room, whenever you need one"
+        title={`${greetingText()}, ${firstName}`}
+        description="Take a breath. Nothing you write here is shared, and there's no wrong way to start."
+        orb="saffron"
+        actions={
+          <>
+            <Button
+              data-page-cta
+              onClick={start}
               disabled={startWith.isPending}
-              className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-soft transition-transform hover:-translate-y-0.5"
+              className="h-[52px] rounded-full px-7 text-base font-bold"
             >
-              <SparkleIcon className="h-4 w-4 text-brand-accent" />
-              Start check-in
-            </button>
-          </div>
-          <img
-            src={heroMug}
-            alt=""
-            className="pointer-events-none absolute -right-4 bottom-0 h-40 w-auto object-contain md:h-48"
-          />
-        </div>
+              <SparkleIcon className="mr-2 h-5 w-5" />
+              {startWith.isPending ? "Opening…" : "Start today's check-in"}
+            </Button>
+            <Button
+              data-page-cta
+              variant="outline"
+              onClick={start}
+              disabled={startWith.isPending}
+              className="h-[52px] rounded-full border-2 px-7 text-base font-bold"
+            >
+              <ChatCircleIcon className="mr-2 h-5 w-5" /> Just talk
+            </Button>
+          </>
+        }
+      />
 
-        <div className="relative overflow-hidden rounded-3xl p-5 shadow-soft card-lift animate-slide-in-up stagger-2"
-          style={{ background: "linear-gradient(135deg, #fff2e0 0%, #ffd8b6 100%)" }}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-accent">
-            Friendly wellness
-          </p>
-          <h3 className="mt-1 text-lg font-semibold text-neutral-900">Say hi to your Companion</h3>
-          <p className="mt-1 text-sm text-neutral-800/75">
-            Nothing you write is shared. Soft, patient, no judgement.
-          </p>
-          <button
-            type="button"
-            onClick={() => startWith.mutate()}
-            disabled={startWith.isPending}
-            className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-glow transition-transform hover:-translate-y-0.5"
-            style={{ background: "linear-gradient(135deg, #ff8a65, #e85d3a)" }}
-          >
-            <RobotIcon className="h-4 w-4" /> Start AI Check-in
-          </button>
-          <img
-            src={bloomOrb}
-            alt=""
-            className="pointer-events-none absolute -right-2 -bottom-2 h-32 w-32 object-contain opacity-90"
-          />
-        </div>
-      </div>
-
-      {/* Quick Access */}
-      <div className="mt-6">
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground/70">
-          Quick Access
-        </h3>
-        <div className="grid gap-3">
-          <button
-            type="button"
-            onClick={() => startWith.mutate()}
-            className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/70 p-4 text-left shadow-soft card-tilt card-lift animate-pop-in"
-          >
-            <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-full text-white shadow-glow"
-                style={{ background: "linear-gradient(135deg, #a8c3ff, #6d8bff)" }}>
-                <RobotIcon className="h-5 w-5" />
-              </span>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-foreground">AI Companion</p>
-                  <StarIcon className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                </div>
-                <p className="text-xs text-muted-foreground">Chat anytime, private & warm</p>
-              </div>
-              <ArrowRightIcon className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-            </div>
-          </button>
-        </div>
-
-      </div>
-
-      {/* Prompt chips */}
-      <div className="mt-6">
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground/70">
-          Start with a feeling
-        </h3>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {PROMPTS.map((p, i) => (
+      {/* OPENERS */}
+      <section data-page-reveal className="mt-10">
+        <SectionHeading
+          title="Start with a feeling"
+          hint="Tap one, or write your own"
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {PROMPTS.map((p) => (
             <button
               key={p.label}
               type="button"
-              onClick={() => startWith.mutate()}
+              data-page-stagger
+              onClick={start}
               disabled={startWith.isPending}
-              className={`group flex items-center gap-2 rounded-2xl border border-white/60 bg-gradient-to-br ${p.tone} px-3 py-3 text-left text-sm font-medium text-neutral-900 card-lift animate-slide-in-up stagger-${i + 1}`}
+              // Min-height clears the 44px target comfortably; no gradient fill.
+              className="group flex min-h-[72px] items-center gap-3.5 rounded-[20px] border border-border bg-card px-4 text-left transition-all hover:-translate-y-0.5 hover:border-ink/25 disabled:opacity-60"
             >
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-white/80 text-brand-accent transition-transform group-hover:animate-tilt-wiggle">
-                <p.icon className="h-4 w-4" />
-              </span>
-              {p.label}
+              <Orb
+                tone={p.tone}
+                face="calm"
+                gaze
+                className="h-10 w-10 shrink-0 transition-transform duration-300 group-hover:scale-105"
+              />
+              <span className="text-base font-bold leading-tight">{p.label}</span>
+              <ArrowRightIcon className="ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Progress and Trend */}
-      <div className="mt-6">
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground/70">
-          Progress and Trend
-        </h3>
+      {/* PROGRESS */}
+      <section data-page-reveal className="mt-10">
+        <SectionHeading title="How you've been" hint="Only you can see this" />
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-4 shadow-soft card-lift">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm font-semibold">Mood Trend</p>
-              <span className="rounded-full bg-brand-primary/10 px-2 py-0.5 text-[10px] font-medium text-brand-accent">
-                Weekly
+          <AppCard>
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-base font-bold">Mood trend</p>
+              <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold text-primary">
+                Last 7 days
               </span>
             </div>
-            <svg viewBox={`0 0 ${W} ${H}`} className="h-20 w-full">
-              <defs>
-                <linearGradient id="mood-grad" x1="0" x2="1">
-                  <stop offset="0%" stopColor="#ffd28a" />
-                  <stop offset="100%" stopColor="#e85d3a" />
-                </linearGradient>
-              </defs>
-              <path d={path} fill="none" stroke="url(#mood-grad)" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              viewBox={`0 0 ${W} ${H}`}
+              className="mt-3 h-20 w-full text-orb-terracotta"
+              role="img"
+              aria-label="Your mood over the last seven days"
+            >
+              <path
+                d={path}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
               {points.map(([x, y], i) => (
-                <circle key={i} cx={x} cy={y} r={3} fill="#e85d3a" />
+                <circle key={i} cx={x} cy={y} r={3.5} fill="currentColor" />
               ))}
             </svg>
-            <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
-              {DAYS.map((d) => (<span key={d}>{d}</span>))}
+            <div className="mt-2 flex justify-between text-xs font-semibold text-muted-foreground">
+              {DAYS.map((d) => (
+                <span key={d}>{d}</span>
+              ))}
             </div>
-          </div>
+          </AppCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-4 shadow-soft card-lift">
-            <p className="text-sm font-semibold">Check-in Streak</p>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="grid h-16 w-16 place-items-center rounded-full text-white shadow-glow"
-                style={{ background: "linear-gradient(135deg, #ffb28a, #e85d3a)" }}>
-                <div className="text-center leading-none">
-                  <div className="text-xl font-bold">{streak}</div>
-                  <div className="text-[9px] uppercase tracking-wider">days</div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center gap-1 text-amber-500">
-                  <FireIcon className="h-4 w-4" />
-                  <span className="text-sm font-semibold text-foreground">Keep it warm</span>
-                </div>
-                <p className="text-xs text-muted-foreground">A little every day adds up.</p>
+          <AppCard>
+            <p className="text-base font-bold">Check-in streak</p>
+            <div className="mt-3 flex items-center gap-4">
+              <span className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full bg-orb-terracotta/12 leading-none">
+                <span
+                  data-page-counter={streak}
+                  className="text-2xl font-extrabold tabular-nums text-orb-terracotta"
+                >
+                  {streak}
+                </span>
+                <span className="mt-0.5 text-[10px] font-bold text-muted-foreground">
+                  {streak === 1 ? "DAY" : "DAYS"}
+                </span>
+              </span>
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-base font-bold">
+                  <FireIcon className="h-4 w-4 text-orb-terracotta" weight="fill" />
+                  {streak > 0 ? "Keep it warm" : "Start today"}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A little every day adds up.
+                </p>
               </div>
             </div>
-          </div>
+          </AppCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/80 p-4 shadow-soft card-lift">
-            <p className="text-sm font-semibold">Check-in Score</p>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="grid h-16 w-16 place-items-center rounded-full text-amber-500"
-                style={{ background: "conic-gradient(#ffb28a 0 60%, #ffe6d1 60% 100%)" }}>
-                <StarIcon className="h-6 w-6 fill-amber-400 text-amber-400" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">Bright & steady</p>
-                <p className="text-xs text-muted-foreground">You're building a gentle habit.</p>
+          <AppCard>
+            <p className="text-base font-bold">Today</p>
+            <div className="mt-3 flex items-center gap-4">
+              <Orb tone="grass" face="smile" gaze className="h-16 w-16 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-base font-bold">Ready when you are</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  No streak to protect, no score to keep.
+                </p>
               </div>
             </div>
-          </div>
+          </AppCard>
         </div>
-      </div>
+      </section>
 
-      <p className="mt-6 text-center text-xs text-muted-foreground">
-        Not therapy or an emergency service. In a crisis, call 988 (US) or your local helpline.
+      <p className="mx-auto mt-10 max-w-md text-center text-sm text-muted-foreground">
+        Not therapy or an emergency service. In a crisis, call 988 (US) or your local
+        helpline.
       </p>
     </div>
   );

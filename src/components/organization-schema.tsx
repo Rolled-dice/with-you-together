@@ -7,9 +7,10 @@ const organizationSchema = {
   name: "SomeoneNear",
   alternateName: ["Someone Near", "Someone Near App"],
   url: "https://someonenear.com",
-  logo: "https://someonenear.com/favicon.png",
+  // Raster, which Google prefers for rich results over SVG.
+  logo: "https://someonenear.com/logo.png",
   description:
-    "SomeoneNear helps people find someone near when they need a caring check-in, a listener, or quiet companionship.",
+    "A trained listener phones your elderly parent on a schedule you set, on their ordinary phone. After every call the family gets a short update on how they're really doing.",
 };
 
 export function OrganizationSchema() {

@@ -56,7 +56,7 @@ function SafetyPage() {
         description="If you or someone you love is in danger, please reach out to a real person right now. SomeoneNear is a companion, not a replacement for a human in a crisis."
       />
 
-      <div className="rounded-brand border border-destructive/30 bg-destructive/5 p-5 mb-8 animate-fade-up">
+      <div data-page-reveal className="rounded-brand border border-destructive/30 bg-destructive/5 p-5 mb-8">
         <div className="flex gap-4">
           <LifebuoyIcon className="h-6 w-6 shrink-0 text-destructive mt-0.5 animate-heartbeat" />
           <div className="flex-1">
@@ -71,7 +71,7 @@ function SafetyPage() {
                   href={`tel:${e.number}`}
                   aria-label={`Call ${e.region} emergency ${e.number}`}
                   style={{ animationDelay: `${i * 70}ms` }}
-                  className="flex flex-col items-center justify-center rounded-brand bg-destructive px-3 py-3 text-destructive-foreground font-semibold shadow-sm hover:opacity-90 active:scale-[0.98] transition animate-pop-in card-lift"
+                  className="flex flex-col items-center justify-center rounded-brand bg-destructive px-3 py-3 text-destructive-foreground font-semibold shadow-sm hover:opacity-90 active:scale-[0.98] transition card-lift"
                 >
                   <span className="flex items-center gap-1.5 text-base"><PhoneIcon className="h-4 w-4" /> {e.number}</span>
                   <span className="text-[11px] opacity-90 font-normal mt-0.5">{e.region}</span>
@@ -82,14 +82,14 @@ function SafetyPage() {
         </div>
       </div>
 
-      <section className="mb-10 animate-fade-up" style={{ animationDelay: "120ms" }}>
+      <section data-page-reveal className="mb-10" style={{ animationDelay: "120ms" }}>
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><PhoneIcon className="h-4 w-4 text-brand-accent" /> Hotlines & text lines</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {HOTLINES.map((r, i) => (
             <div
               key={r.name}
               style={{ animationDelay: `${i * 70}ms` }}
-              className="rounded-brand border border-border bg-surface p-4 flex flex-col animate-fade-up card-lift"
+              className="rounded-brand border border-border bg-surface p-4 flex flex-col card-lift"
             >
               <p className="text-xs uppercase tracking-wide text-brand-accent font-medium">{r.region}</p>
               <p className="font-semibold text-foreground mt-1">{r.name}</p>
@@ -124,14 +124,14 @@ function SafetyPage() {
         </div>
       </section>
 
-      <section className="mb-10 animate-fade-up" style={{ animationDelay: "200ms" }}>
+      <section data-page-reveal className="mb-10" style={{ animationDelay: "200ms" }}>
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><HeartbeatIcon className="h-4 w-4 text-brand-accent" /> Grounding right now</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {GROUNDING.map((g, i) => (
             <div
               key={g.title}
               style={{ animationDelay: `${i * 70}ms` }}
-              className="rounded-brand border border-border bg-surface p-4 animate-pop-in card-lift"
+              className="rounded-brand border border-border bg-surface p-4 card-lift"
             >
               <p className="font-semibold text-foreground">{g.title}</p>
               <p className="text-sm text-muted-foreground mt-1">{g.body}</p>
@@ -140,7 +140,7 @@ function SafetyPage() {
         </div>
       </section>
 
-      <section className="rounded-brand border border-border bg-surface p-5 animate-fade-up" style={{ animationDelay: "280ms" }}>
+      <section data-page-reveal className="rounded-brand border border-border bg-surface p-5" style={{ animationDelay: "280ms" }}>
         <div className="flex items-start gap-3">
           <ShieldCheckIcon className="h-5 w-5 text-brand-accent mt-0.5" />
           <div>

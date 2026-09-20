@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { PLAN_DISPLAY } from "@/lib/currency";
 import { z } from "zod";
 
 // ---- Read: my family (family + members + pending invites) ----
@@ -74,14 +75,17 @@ export const createFamily = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 
-    // Enforce Family tier
+    // A circle needs a paid plan. Kept as "any paid tier" to match the previous
+    // behaviour — the retired `family` tier is simply dropped. Note that only
+    // Care Plus actually sells a shared circle, so gating this to care_plus is a
+    // product decision to make deliberately rather than a rename.
     const { data: prof } = await supabase
       .from("profiles")
       .select("care_tier")
       .eq("id", userId)
       .single();
-    if (prof?.care_tier !== "family" && prof?.care_tier !== "care") {
-      throw new Error("Family or Care tier required to create a family circle.");
+    if (prof?.care_tier !== "care" && prof?.care_tier !== "care_plus") {
+      throw new Error("A Care or Care Plus plan is required to create a family circle.");
     }
 
     // Ensure user isn't already in a family
@@ -149,12 +153,15 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
     if (!mem || (mem.role !== "owner" && mem.role !== "adult"))
       throw new Error("Only family admins can invite.");
 
-    // Max 4 members (Family tier)
+    // Circle size comes from the plan catalogue. This was hardcoded to 4 while
+    // Care Plus is sold as "up to 5 people", so the cap contradicted the offer.
+    const maxMembers = PLAN_DISPLAY.care_plus.members;
     const { count } = await supabase
       .from("family_members")
       .select("id", { count: "exact", head: true })
       .eq("family_id", mem.family_id);
-    if ((count ?? 0) >= 4) throw new Error("Family is full (max 4 members).");
+    if ((count ?? 0) >= maxMembers)
+      throw new Error(`Family is full (max ${maxMembers} members).`);
 
     const email = data.email.trim().toLowerCase();
     const { data: inv, error } = await supabase

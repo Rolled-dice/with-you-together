@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, type ReactNode } from "react";
-import { HeartIcon, SquaresFourIcon, ChatCircleIcon, UsersIcon, GearIcon, SignOutIcon, HandHeartIcon, LifebuoyIcon, ChartLineIcon, PhoneCallIcon, PillIcon, HeadphonesIcon, CalendarHeartIcon } from "@phosphor-icons/react";
+import { SquaresFourIcon, ChatCircleIcon, UsersIcon, GearIcon, SignOutIcon, HandHeartIcon, LifebuoyIcon, ChartLineIcon, PhoneCallIcon, PillIcon, HeadphonesIcon, CalendarHeartIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,8 +9,12 @@ import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import { isCurrentUserAgent } from "@/lib/agent-role.functions";
 import { SomeoneNearCursor } from "@/components/someonenear-cursor";
 import { NotificationBell } from "@/components/notification-bell";
+import { DevViewAsSwitcher } from "@/components/dev-view-as-switcher";
+import { BrandMark } from "@/components/landing/brand-mark";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
+import { useAppPageMotion } from "@/hooks/use-app-page-motion";
+import { getViewAsRole } from "@/lib/dev-view-as";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
@@ -39,8 +43,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const mobileNavRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
   usePointerParallax();
   useCardInteractions();
+
+  // Drives the shared page entrance for every authenticated screen. Pages that
+  // set no data-page-* attributes simply get nothing, so this is safe for
+  // screens like the dashboard that run their own timeline.
+  useAppPageMotion(mainRef);
 
   // Keep the active tab visible in the horizontally-scrollable mobile nav.
   useEffect(() => {
@@ -60,9 +70,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryFn: () => agentCheck({}),
     staleTime: 5 * 60 * 1000,
   });
-  const isAdmin = roleQ.data?.isAdmin === true;
-  const isAgent = agentQ.data?.isAgent === true;
-  const rolesLoading = roleQ.isLoading || agentQ.isLoading;
+  // Dev-only render override — see src/lib/dev-view-as.ts. It changes what
+  // this component chooses to display, never what the real RPCs return, so
+  // it cannot unlock a page or a row the signed-in account doesn't already
+  // have. Real role gating (_authenticated/route.tsx, every server fn) is
+  // completely unaffected and keeps checking has_role / is_call_agent as
+  // normal — the CRM and softphone routes still enforce those for real, this
+  // toggle just gets the SHELL to look the same way while you're on member
+  // data underneath.
+  const viewAs = getViewAsRole();
+  const isAdmin = viewAs ? viewAs === "admin" : roleQ.data?.isAdmin === true;
+  const isAgent = viewAs ? viewAs === "listener" : agentQ.data?.isAgent === true;
+  const rolesLoading = viewAs ? false : roleQ.isLoading || agentQ.isLoading;
   const isStaff = isAdmin || isAgent;
   const navItems = isAdmin ? ADMIN_NAV : isAgent ? AGENT_NAV : rolesLoading ? [] : NAV;
 
@@ -79,16 +98,21 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
       <SomeoneNearCursor />
+      <DevViewAsSwitcher />
       <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
 
-        {/* Sidebar (desktop) */}
-        <aside className="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6">
-          <div className="flex items-center justify-between">
+        {/* Sidebar (desktop).
+            Sized for older eyes and less precise pointing: 16px labels,
+            48px-tall rows, 20px icons. The active row is a solid navy pill
+            because a tinted background alone is easy to miss with reduced
+            contrast sensitivity. */}
+        <aside className="hidden flex-col border-r border-sidebar-border bg-sidebar md:flex md:w-72 lg:w-[19rem]">
+          <div className="flex items-center justify-between gap-2 border-b border-sidebar-border px-5 py-5">
             <Brand />
             {!rolesLoading && !isStaff ? <NotificationBell /> : null}
           </div>
 
-          <nav className="mt-8 flex flex-1 flex-col gap-1">
+          <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
             {navItems.map((item) => {
               const active = pathname === item.to || pathname.startsWith(item.to + "/");
               const Icon = item.icon;
@@ -96,31 +120,44 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-brand px-4 py-3 text-sm font-medium transition-colors",
+                    "flex min-h-12 items-center gap-3.5 rounded-2xl px-4 text-[15px] transition-colors",
                     active
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      ? "bg-sidebar-primary font-bold text-sidebar-primary-foreground"
+                      : "font-semibold text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                   )}
                 >
-                  <Icon className="h-4 w-4" strokeWidth={2} />
+                  <Icon className="h-5 w-5 shrink-0" strokeWidth={2} />
                   {item.label}
                 </Link>
               );
             })}
           </nav>
-          {!rolesLoading && !isStaff ? (
-            <div className="mt-6 rounded-brand bg-sidebar-accent/60 p-4 text-xs text-sidebar-accent-foreground/80">
-              <p className="font-medium text-sidebar-foreground">Care Membership</p>
-              <p className="mt-1">You're on the Together tier.</p>
-            </div>
-          ) : null}
-          <button
-            onClick={signOut}
-            className="mt-3 flex items-center gap-2 rounded-brand px-4 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          >
-            <SignOutIcon className="h-4 w-4" /> Sign out
-          </button>
+
+          <div className="px-3 pb-4">
+            {!rolesLoading && !isStaff ? (
+              <div className="rounded-2xl border border-sidebar-border bg-card px-4 py-3.5">
+                <p className="text-sm font-bold text-sidebar-foreground">
+                  Care Membership
+                </p>
+                {/* The shell doesn't load the profile, so it can't name the tier
+                 * without inventing one. Point at Settings instead. */}
+                <Link
+                  to="/settings"
+                  className="mt-0.5 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  View your plan
+                </Link>
+              </div>
+            ) : null}
+            <button
+              onClick={signOut}
+              className="mt-2 flex min-h-12 w-full items-center gap-3.5 rounded-2xl px-4 text-[15px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            >
+              <SignOutIcon className="h-5 w-5 shrink-0" /> Sign out
+            </button>
+          </div>
         </aside>
 
 
@@ -136,9 +173,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           </header>
 
 
+          {/* Keyed on pathname so the entrance replays on navigation. The ref
+              lets useAppPageMotion scope itself to the current page's content,
+              which is why any page using PageHeader animates with no extra
+              wiring. */}
           <main
             key={pathname}
-            className="flex-1 animate-fade-in px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
+            ref={mainRef}
+            className="flex-1 px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
           >
             {children}
           </main>
@@ -179,18 +221,36 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function Brand({ compact = false }: { compact?: boolean }) {
+  // Shares the real mark and two-tone wordmark with the marketing site, so the
+  // brand doesn't change the moment someone signs in. The old placeholder here
+  // was a heart glyph in a filled square, which matched nothing.
   return (
     <Link to="/" className="flex items-center gap-2">
-      <span className="inline-flex h-9 w-9 items-center justify-center rounded-brand bg-primary text-primary-foreground">
-        <HeartIcon className="h-5 w-5" weight="fill" />
-      </span>
-      <span className="font-sans text-lg font-semibold tracking-tight text-foreground">
-        SomeoneNear
+      <BrandMark className={compact ? "h-7 w-auto" : "h-9 w-auto"} />
+      <span
+        className={cn(
+          "font-extrabold tracking-tight",
+          compact ? "text-base" : "text-lg",
+        )}
+      >
+        <span className="text-orb-navy">Someone</span>
+        <span className="text-orb-terracotta">Near</span>
       </span>
     </Link>
   );
 }
 
+/**
+ * Standard page header for authenticated screens.
+ *
+ * Emits the `data-page-*` attributes that `useAppPageMotion` (called by AppShell
+ * below) animates, so every page that uses this gets the same entrance for free
+ * rather than each one wiring its own.
+ *
+ * Type sizes are set for members who are often elderly: 28-35px title, 17px
+ * description at full `muted-foreground` rather than 14px at reduced opacity,
+ * which is a common readability failure with age.
+ */
 export function PageHeader({
   eyebrow,
   slogan,
@@ -205,24 +265,29 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-wrap items-end justify-between gap-4 animate-slide-in-up">
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
         {eyebrow && (
-          <p className="text-sm font-medium text-brand-accent">{eyebrow}</p>
-        )}
-        <h1 className="mt-1 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-          {title}
-        </h1>
-        {slogan && (
-          <p className="mt-1 text-sm text-muted-foreground">{slogan}</p>
-        )}
-        {description && (
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            {description}
+          <p data-page-eyebrow className="text-sm font-bold text-orb-terracotta">
+            {eyebrow}
           </p>
         )}
+        <h1
+          data-page-headline
+          className="mt-1 text-[1.75rem] font-extrabold leading-[1.12] tracking-tight sm:text-[2.2rem]"
+        >
+          {title}
+        </h1>
+        <div data-page-sub>
+          {slogan && <p className="mt-1.5 text-base text-muted-foreground">{slogan}</p>}
+          {description && (
+            <p className="mt-2 max-w-2xl text-[1.0625rem] leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+          )}
+        </div>
       </div>
-      {children}
+      {children && <div data-page-cta>{children}</div>}
     </div>
   );
 }

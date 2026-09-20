@@ -80,7 +80,9 @@ function FamilyPage() {
     );
   }
 
-  const hasFamilyTier = profile?.care_tier === "family" || profile?.care_tier === "care";
+  // Mirrors the server gate in family.functions.ts: any paid plan.
+  const hasFamilyTier =
+    profile?.care_tier === "care" || profile?.care_tier === "care_plus";
 
   return (
     <AppShell>
@@ -120,7 +122,7 @@ function EmptyState({ hasFamilyTier }: { hasFamilyTier: boolean }) {
   });
 
   return (
-    <Card className="rounded-brand border-border bg-card">
+    <Card data-page-reveal className="rounded-brand border-border bg-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base font-medium">
           <UsersIcon className="h-4 w-4 text-brand-accent" />
@@ -209,7 +211,7 @@ function FamilyView({
 
   return (
     <div className="grid gap-6">
-      <Card className="rounded-brand border-border bg-card">
+      <Card data-page-reveal className="rounded-brand border-border bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base font-medium">
             <UsersIcon className="h-4 w-4 text-brand-accent" />
@@ -441,7 +443,7 @@ function FamilyView({
         </CardContent>
       </Card>
 
-      <Card className="rounded-brand border-border bg-card">
+      <Card data-page-reveal className="rounded-brand border-border bg-card">
         <CardHeader>
           <CardTitle className="text-base font-medium">Privacy in your circle</CardTitle>
         </CardHeader>
@@ -493,7 +495,7 @@ function SessionAllocationPanel() {
 
   if (isLoading) {
     return (
-      <Card className="rounded-brand border-border bg-card">
+      <Card data-page-reveal className="rounded-brand border-border bg-card">
         <CardContent className="flex h-24 items-center justify-center">
           <SpinnerGapIcon className="h-4 w-4 animate-spin text-brand-primary" />
         </CardContent>
@@ -511,7 +513,7 @@ function SessionAllocationPanel() {
   const overAllocated = draftSum > pool.totalSessions;
 
   return (
-    <Card className="rounded-brand border-border bg-card">
+    <Card data-page-reveal className="rounded-brand border-border bg-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base font-medium">
           <CalendarCheckIcon className="h-4 w-4 text-brand-accent" />

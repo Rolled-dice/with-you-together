@@ -204,7 +204,7 @@ function ListenersPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
         {/* Booking form */}
-        <Card className="rounded-brand border-border bg-card">
+        <Card data-page-reveal className="rounded-brand border-border bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
               <HandHeartIcon className="h-4 w-4 text-brand-accent" />
@@ -289,7 +289,7 @@ function ListenersPage() {
         </Card>
 
         {/* Emergency callback */}
-        <Card className="rounded-brand border-2 border-primary/30 bg-primary/5">
+        <Card data-page-reveal className="rounded-brand border-2 border-primary/30 bg-primary/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
               <PhoneCallIcon className="h-4 w-4 text-brand-accent" />

@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, human listener calls, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { name: "author", content: "SomeoneNear" },
-      { property: "og:title", content: "SomeoneNear — Checking in when they can't" },
+      { property: "og:title", content: "SomeoneNear Checking in when they can't" },
       {
         property: "og:description",
         content:
@@ -94,13 +94,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/favicon.png" },
+      // Square, padded, genuinely transparent icons built by
+      // scripts/clean-logo.ps1 from the original artwork.
+      { rel: "icon", href: "/favicon-64.png?v=6", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=6" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap",
       },
       { rel: "preconnect", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co" },
