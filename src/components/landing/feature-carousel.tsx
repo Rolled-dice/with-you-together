@@ -10,6 +10,13 @@ import {
   RemindersVisual,
   SendLaterVisual,
   UpdateVisual,
+  checkInAmbient,
+  companionAmbient,
+  insightsAmbient,
+  remindersAmbient,
+  sendLaterAmbient,
+  updateAmbient,
+  type AmbientBuilder,
 } from "./feature-visuals";
 
 if (typeof window !== "undefined") gsap.registerPlugin(useGSAP);
@@ -23,8 +30,20 @@ type Slide = {
   plate: string;
   ink: string;
   Visual: () => React.ReactElement;
+  /** Looping timeline, created only while this slide is the active one. */
+  ambient: AmbientBuilder;
 };
 
+/**
+ * Order is deliberate, not arbitrary:
+ *   1-2  the spine — we call them, then you find out how they are. These two
+ *        are one cause-and-effect beat and must stay adjacent and first.
+ *   3-4  the between-times — the most concrete daily worry (tablets) before
+ *        the softer one (late-night company).
+ *   5    what accumulates over time.
+ *   6    the emotional close. The carousel loops, so ending on feeling and
+ *        restarting on the practical spine is a good cycle.
+ */
 const SLIDES: Slide[] = [
   {
     id: "check-in",
@@ -34,6 +53,7 @@ const SLIDES: Slide[] = [
     plate: "bg-plate-saffron",
     ink: "text-ink",
     Visual: CheckInVisual,
+    ambient: checkInAmbient,
   },
   {
     id: "updates",
@@ -43,15 +63,7 @@ const SLIDES: Slide[] = [
     plate: "bg-plate-pink",
     ink: "text-ink",
     Visual: UpdateVisual,
-  },
-  {
-    id: "companion",
-    tab: "Companion",
-    title: "Someone to talk to at 2am",
-    body: "Between calls, an AI companion is there for a daily check-in. One small question, answered in a word or skipped entirely. Private to them, and nothing is ever scored.",
-    plate: "bg-plate-violet",
-    ink: "text-background",
-    Visual: CompanionVisual,
+    ambient: updateAmbient,
   },
   {
     id: "reminders",
@@ -61,6 +73,17 @@ const SLIDES: Slide[] = [
     plate: "bg-plate-grass",
     ink: "text-background",
     Visual: RemindersVisual,
+    ambient: remindersAmbient,
+  },
+  {
+    id: "companion",
+    tab: "Companion",
+    title: "Someone to talk to at 2am",
+    body: "Between calls, an AI companion is there for a daily check-in. One small question, answered in a word or skipped entirely. Private to them, and nothing is ever scored.",
+    plate: "bg-plate-violet",
+    ink: "text-background",
+    Visual: CompanionVisual,
+    ambient: companionAmbient,
   },
   {
     id: "insights",
@@ -70,6 +93,7 @@ const SLIDES: Slide[] = [
     plate: "bg-plate-periwinkle",
     ink: "text-ink",
     Visual: InsightsVisual,
+    ambient: insightsAmbient,
   },
   {
     id: "send-later",
@@ -79,6 +103,7 @@ const SLIDES: Slide[] = [
     plate: "bg-plate-tangerine",
     ink: "text-ink",
     Visual: SendLaterVisual,
+    ambient: sendLaterAmbient,
   },
 ];
 
@@ -150,45 +175,23 @@ export function FeatureCarousel() {
         });
       });
 
-      if (reduce) return;
-
-      // Content inside the newly active slide arrives just behind the slide.
-      const pops = slide.querySelectorAll("[data-slide-pop]");
-      if (pops.length) {
-        gsap.fromTo(
-          pops,
-          { autoAlpha: 0, y: 14 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.5,
-            ease: "power3.out",
-            stagger: 0.07,
-            delay: 0.15,
-            overwrite: true,
-          },
-        );
-      }
-
-      // The insights chart grows from its baseline when that slide lands.
-      const bars = slide.querySelectorAll("[data-bar]");
-      if (bars.length) {
-        gsap.fromTo(
-          bars,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            transformOrigin: "bottom center",
-            duration: 0.6,
-            ease: "power3.out",
-            stagger: 0.05,
-            delay: 0.2,
-            overwrite: true,
-          },
-        );
-      }
     },
     { dependencies: [active], scope: rootRef, revertOnUpdate: false },
+  );
+
+  /* -- Ambient loop for the active slide only ---------------------------- */
+  // Separate hook with revertOnUpdate so switching slides kills the previous
+  // loop and restores its inline styles. Exactly one loop runs at a time, and
+  // because each visual's initial hidden state is set *inside* its builder,
+  // skipping the builder under reduced motion leaves the visual fully visible.
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const slide = slideRefs.current[active];
+      if (!slide) return;
+      SLIDES[active].ambient(slide);
+    },
+    { dependencies: [active], scope: rootRef, revertOnUpdate: true },
   );
 
   /* -- Recentre on resize ------------------------------------------------ */
