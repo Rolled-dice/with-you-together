@@ -16,6 +16,7 @@ import { FeedbackDialog } from "@/components/feedback-dialog";
 import { JsonLd } from "@/components/json-ld";
 import { Wordmark } from "@/components/landing/brand-mark";
 import { FeatureCarousel } from "@/components/landing/feature-carousel";
+import { RotatingHeadline } from "@/components/landing/rotating-headline";
 import {
   DashboardMockup,
   ListenerCallMockup,
@@ -369,13 +370,8 @@ function Landing() {
           </div>
 
           <div className="mx-auto w-full max-w-4xl text-center">
-            <h1
-              data-hero-headline
-              className="mx-auto max-w-3xl text-[2.6rem] leading-[1.03] sm:text-6xl lg:text-[4.2rem]"
-            >
-              Worry less.
-              <br />
-              Someone&apos;s checking in.
+            <h1 className="mx-auto max-w-3xl text-[2.6rem] leading-[1.08] sm:text-6xl lg:text-[4.2rem]">
+              <RotatingHeadline />
             </h1>
 
             <p
