@@ -1,22 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { z } from "zod";
-import { useCallback, useMemo, useState } from "react";
-import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import {
-  getRazorpayEnvironment,
-  openRazorpaySubscriptionCheckout,
-} from "@/lib/razorpay";
-import {
-  createMembershipCheckout,
-  createRazorpaySubscription,
-} from "@/lib/billing.functions";
+import { useState } from "react";
+import { createDodoCheckout } from "@/lib/dodo.functions";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { ArrowLeftIcon, SpinnerGapIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import type { PlanId } from "@/lib/currency";
 
 const PriceParam = z.enum([
   "care_monthly_inr",
@@ -46,12 +36,6 @@ function CheckoutPage() {
   const { price } = Route.useSearch();
   const navigate = useNavigate();
 
-  // INR prices are billed through Razorpay; USD through Stripe. The price key
-  // encodes the currency suffix (e.g. care_plus_monthly_inr).
-  const isInr = price.endsWith("_inr");
-  // Extract plan id: everything before "_monthly_"
-  const plan = price.replace(/_monthly_(inr|usd)$/, "") as PlanId;
-
   return (
     <AppShell>
       <PaymentTestModeBanner />
@@ -70,64 +54,28 @@ function CheckoutPage() {
         title={PRICE_LABELS[price as z.infer<typeof PriceParam>]}
         description="Secure checkout, cancel anytime from Settings."
       />
-      {isInr ? (
-        <RazorpayCheckout plan={plan} />
-      ) : (
-        <StripeCheckout price={price} />
-      )}
+      <DodoCheckout price={price} />
     </AppShell>
   );
 }
 
-function StripeCheckout({ price }: { price: z.infer<typeof PriceParam> }) {
-  const fetchClientSecret = useCallback(async (): Promise<string> => {
-    const result = await createMembershipCheckout({
-      data: {
-        priceId: price,
-        environment: getStripeEnvironment(),
-        returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
-      },
-    });
-    if ("error" in result) throw new Error(result.error);
-    if (!result.clientSecret) throw new Error("Missing client secret");
-    return result.clientSecret;
-  }, [price]);
-
-  const options = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret]);
-
-  return (
-    <div id="checkout" className="rounded-brand border border-border bg-card p-2">
-      <EmbeddedCheckoutProvider stripe={getStripe()} options={options}>
-        <EmbeddedCheckout />
-      </EmbeddedCheckoutProvider>
-    </div>
-  );
-}
-
-function RazorpayCheckout({ plan }: { plan: PlanId }) {
-  const navigate = useNavigate();
+function DodoCheckout({ price }: { price: z.infer<typeof PriceParam> }) {
   const [loading, setLoading] = useState(false);
 
   async function startCheckout() {
     setLoading(true);
     try {
-      const result = await createRazorpaySubscription({
-        data: { plan, environment: getRazorpayEnvironment() },
+      const result = await createDodoCheckout({
+        data: {
+          priceId: price,
+          environment: "test",
+          returnUrl: `${window.location.origin}/checkout/return`,
+        },
       });
       if ("error" in result) throw new Error(result.error);
-
-      await openRazorpaySubscriptionCheckout({
-        subscriptionId: result.subscriptionId,
-        description: "Care Membership",
-        onSuccess: () => {
-          toast.success("Payment received. Activating your membership…");
-          // Activation is confirmed by webhook; settings polls the subscription.
-          navigate({ to: "/settings" });
-        },
-        onDismiss: () => setLoading(false),
-      });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't start checkout.");
+      window.location.assign(result.checkoutUrl);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't start checkout.");
       setLoading(false);
     }
   }
@@ -135,18 +83,16 @@ function RazorpayCheckout({ plan }: { plan: PlanId }) {
   return (
     <div className="rounded-brand border border-border bg-card p-6">
       <p className="mb-4 text-sm text-muted-foreground">
-        You'll be billed monthly in Indian Rupees through Razorpay. Your card or
-        UPI mandate is set up securely, and you can cancel anytime from Settings.
+        You’ll complete this membership checkout securely on Dodo Payments. Your membership
+        activates once the signed Dodo webhook is processed.
       </p>
       <Button
         onClick={startCheckout}
         disabled={loading}
         className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
       >
-        {loading ? (
-          <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
-        ) : null}
-        Continue to secure payment
+        {loading ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
+        Continue to secure checkout
       </Button>
     </div>
   );

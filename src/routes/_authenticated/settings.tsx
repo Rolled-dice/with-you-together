@@ -31,12 +31,9 @@ import {
   deleteMemory as deleteMemoryFn,
 } from "@/lib/memories.functions";
 import {
-  createBillingPortalSession,
-  getMySubscription,
-  cancelRazorpaySubscription,
-} from "@/lib/billing.functions";
-import { cancelDodoSubscription, getMyDodoSubscription } from "@/lib/dodo.functions";
-import { getStripeEnvironment } from "@/lib/stripe";
+  cancelDodoSubscription,
+  getMyDodoSubscription,
+} from "@/lib/dodo.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -78,11 +75,8 @@ type TierId = "free" | "care" | "care_plus";
 function SettingsPage() {
   const profileFn = useServerFn(getMyProfile);
   const updateFn = useServerFn(updateMyProfile);
-  const portalFn = useServerFn(createBillingPortalSession);
-  const cancelRzpFn = useServerFn(cancelRazorpaySubscription);
   const cancelDodoFn = useServerFn(cancelDodoSubscription);
   const dodoSubFn = useServerFn(getMyDodoSubscription);
-  const subFn = useServerFn(getMySubscription);
   const qc = useQueryClient();
   const navigate = useNavigate();
 
@@ -91,15 +85,10 @@ function SettingsPage() {
     queryFn: () => profileFn(),
   });
 
-  const { data: defaultSubscription, refetch: refetchSub } = useQuery({
-    queryKey: ["my-subscription"],
-    queryFn: () => subFn({ data: { environment: getStripeEnvironment() } }),
-  });
-  const { data: dodoSubscription, refetch: refetchDodoSub } = useQuery({
+  const { data: subscription, refetch: refetchSub } = useQuery({
     queryKey: ["my-dodo-subscription"],
     queryFn: () => dodoSubFn(),
   });
-  const subscription = dodoSubscription ?? defaultSubscription;
 
   const [displayName, setDisplayName] = useState("");
   const [fullName, setFullName] = useState("");
@@ -108,9 +97,6 @@ function SettingsPage() {
   const [intent, setIntent] = useState("");
   const [language, setLanguage] = useState<"en" | "hi">("en");
   const [currency, setCurrency] = useState<Currency>("usd");
-  const [checkoutProvider, setCheckoutProvider] = useState<"default" | "dodo">(() =>
-    getStripeEnvironment() === "sandbox" ? "dodo" : "default",
-  );
   const [phone, setPhone] = useState("");
 
   useEffect(() => {
@@ -141,14 +127,13 @@ function SettingsPage() {
         () => {
           qc.invalidateQueries({ queryKey: ["me"] });
           refetchSub();
-          refetchDodoSub();
         },
       )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [profile?.id, qc, refetchSub, refetchDodoSub]);
+  }, [profile?.id, qc, refetchSub]);
 
   const saveMut = useMutation({
     mutationFn: () =>
@@ -171,42 +156,6 @@ function SettingsPage() {
     onError: (e) => toast.error((e as Error).message),
   });
 
-  const portalMut = useMutation({
-    mutationFn: async () => {
-      const res = await portalFn({
-        data: {
-          environment: getStripeEnvironment(),
-          returnUrl: `${window.location.origin}/settings`,
-        },
-      });
-      if ("error" in res) throw new Error(res.error);
-      return res.url;
-    },
-    onSuccess: (url) => {
-      window.open(url, "_blank");
-    },
-    onError: (e) => toast.error((e as Error).message),
-  });
-
-  // Razorpay has no hosted billing portal, so cancellation is a direct action
-  // (keeps access until the paid period ends). The webhook records the change.
-  const cancelRzpMut = useMutation({
-    mutationFn: async () => {
-      const res = await cancelRzpFn({
-        data: { environment: getStripeEnvironment() },
-      });
-      if ("error" in res) throw new Error(res.error);
-      return res;
-    },
-    onSuccess: () => {
-      toast.success("Your membership will end at the close of this billing period.");
-      qc.invalidateQueries({ queryKey: ["my-subscription"] });
-      refetchSub();
-      refetchDodoSub();
-    },
-    onError: (e) => toast.error((e as Error).message),
-  });
-
   const cancelDodoMut = useMutation({
     mutationFn: async () => {
       const res = await cancelDodoFn({ data: { environment: "test" } });
@@ -215,19 +164,16 @@ function SettingsPage() {
     },
     onSuccess: () => {
       toast.success("Your membership will end at the close of this billing period.");
-      qc.invalidateQueries({ queryKey: ["my-subscription"] });
+      qc.invalidateQueries({ queryKey: ["my-dodo-subscription"] });
       refetchSub();
-      refetchDodoSub();
     },
     onError: (e) => toast.error((e as Error).message),
   });
 
-  // Route "manage/cancel" to the provider that owns the active subscription.
-  const activeProvider = (subscription as { provider?: string } | null | undefined)?.provider;
-  const isRazorpaySub = activeProvider === "razorpay";
-  const isDodoSub = activeProvider === "dodo";
-  const manageMut = isDodoSub ? cancelDodoMut : isRazorpaySub ? cancelRzpMut : portalMut;
-  const manageLabel = isDodoSub || isRazorpaySub ? "Cancel membership" : "Manage or cancel";
+  // Dodo is the sole provider. Cancellation keeps access until the paid period
+  // ends; the webhook records the resulting status change.
+  const manageMut = cancelDodoMut;
+  const manageLabel = "Cancel membership";
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -346,22 +292,6 @@ function SettingsPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-brand border border-border bg-muted/20 p-3 text-xs">
-              <span className="text-muted-foreground">Checkout provider</span>
-              <Select
-                value={checkoutProvider}
-                onValueChange={(value) => setCheckoutProvider(value as "default" | "dodo")}
-              >
-                <SelectTrigger className="h-8 w-48 rounded-brand text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">Default for currency</SelectItem>
-                  <SelectItem value="dodo">Dodo Payments (test)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Plans */}
             <div className="grid gap-3 md:grid-cols-2">
               {plans.map((plan) => {
@@ -421,34 +351,15 @@ function SettingsPage() {
                       <Button
                         size="sm"
                         onClick={() =>
-                          hasPaidSub
-                            ? isRazorpaySub || isDodoSub
-                              ? navigate({
-                                  to: "/checkout",
-                                  search:
-                                    checkoutProvider === "dodo"
-                                      ? { price: priceId as any, provider: "dodo" }
-                                      : { price: priceId as any, provider: undefined },
-                                })
-                              : portalMut.mutate()
-                            : navigate({
-                                to: "/checkout",
-                                search:
-                                  checkoutProvider === "dodo"
-                                    ? { price: priceId as any, provider: "dodo" }
-                                    : { price: priceId as any, provider: undefined },
-                              })
+                          navigate({
+                            to: "/checkout",
+                            search: { price: priceId as any },
+                          })
                         }
                         className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
                       >
                         <SparkleIcon className="mr-2 h-3 w-3" />
-                        {hasPaidSub
-                          ? isRazorpaySub || isDodoSub
-                            ? "Switch plan"
-                            : "Switch in billing portal"
-                          : checkoutProvider === "dodo"
-                            ? "Choose with Dodo"
-                            : "Choose plan"}
+                        {hasPaidSub ? "Switch plan" : "Choose plan"}
                       </Button>
                     )}
                   </div>
@@ -744,7 +655,7 @@ function formatMoney(cents: number | null, currency: string | null) {
 }
 
 function BillingHistoryCard() {
-  const env = getStripeEnvironment();
+  const env = "test";
   const { data, isLoading } = useQuery({
     queryKey: ["billing-events", env],
     queryFn: async () => {
