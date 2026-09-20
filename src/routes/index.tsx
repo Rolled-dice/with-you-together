@@ -15,6 +15,7 @@ import {
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { JsonLd } from "@/components/json-ld";
+import { FeatureCarousel } from "@/components/landing/feature-carousel";
 import {
   DashboardMockup,
   ListenerCallMockup,
@@ -126,49 +127,6 @@ const WORRIES: { label: string; answer: string; tone: OrbTone }[] = [
     label: "They won't use an app",
     answer: "They never have to. It's just a phone call.",
     tone: "tangerine",
-  },
-];
-
-/** Full-bleed coloured plates. Plate colour is the section's whole identity. */
-const PLATES: {
-  plate: string;
-  ink: string;
-  kicker: string;
-  title: string;
-  body: string;
-  orb: OrbTone;
-}[] = [
-  {
-    plate: "bg-plate-saffron",
-    ink: "text-ink",
-    kicker: "Check-in calls",
-    title: "A real person, on the phone",
-    body: "A trained listener rings them, asks how the day went, whether they've eaten, had water, taken their tablets. Never a robocall, never a script read at them.",
-    orb: "tangerine",
-  },
-  {
-    plate: "bg-plate-pink",
-    ink: "text-ink",
-    kicker: "Family dashboard",
-    title: "You finally know how they are",
-    body: "Minutes after the call, a short written update lands: how they sounded, what they managed, and anything worth a follow-up from you.",
-    orb: "violet",
-  },
-  {
-    plate: "bg-plate-violet",
-    ink: "text-background",
-    kicker: "Companion",
-    title: "Someone to talk to at 2am",
-    body: "Between calls, an AI companion is there for a daily check-in — one small question, answered in a word, or skipped entirely. Nothing is scored.",
-    orb: "saffron",
-  },
-  {
-    plate: "bg-plate-grass",
-    ink: "text-background",
-    kicker: "Reminders",
-    title: "Tablets, without the nagging",
-    body: "Dose nudges arrive over WhatsApp. They reply TAKEN or SKIP, we log it, and then we stay quiet. No red badges, no alarms.",
-    orb: "pink",
   },
 ];
 
@@ -513,37 +471,8 @@ function Landing() {
           </ul>
         </section>
 
-        {/* Coloured plates -------------------------------------------- */}
-        <section id="included" className="scroll-mt-20 px-6 py-10">
-          <h2 data-reveal className="text-center text-2xl sm:text-3xl">
-            Everything that comes with it
-          </h2>
-
-          <div className="mx-auto mt-8 grid w-full max-w-6xl gap-4 md:grid-cols-2">
-            {PLATES.map((p) => (
-              <article
-                key={p.title}
-                data-reveal-stagger
-                className={`relative overflow-hidden rounded-[28px] px-7 py-9 ${p.plate} ${p.ink}`}
-              >
-                <div
-                  data-drift
-                  className="pointer-events-none absolute -right-5 -top-5 opacity-90"
-                >
-                  <Orb tone={p.orb} face="smile" className="h-20 w-20" />
-                </div>
-
-                <p className="text-xs font-extrabold uppercase tracking-wider opacity-70">
-                  {p.kicker}
-                </p>
-                <h3 className="mt-2 max-w-sm text-2xl">{p.title}</h3>
-                <p className="mt-3 max-w-md text-[0.95rem] leading-relaxed opacity-85">
-                  {p.body}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
+        {/* Features, as an auto-advancing carousel ------------------- */}
+        <FeatureCarousel />
 
         {/* Marquee ---------------------------------------------------- */}
         <div

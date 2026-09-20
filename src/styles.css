@@ -154,12 +154,15 @@
   --color-orb-periwinkle: #7c8ff0;
   --color-orb-tangerine: #ff6e1f;
 
-  /* Full-bleed section plates, lifted straight from the orb family */
+  /* Full-bleed section plates, lifted straight from the orb family.
+   * Each plate declares whether it takes ink or light type — saffron, pink,
+   * periwinkle and tangerine are light enough to need ink at AA. */
   --color-plate-saffron: #f5cf1a;
   --color-plate-pink: #f0a3c6;
   --color-plate-violet: #4c1d95;
   --color-plate-grass: #14713c;
   --color-plate-periwinkle: #7c8ff0;
+  --color-plate-tangerine: #ff8c3f;
   --color-plate-cream: #f8f4ef;
 
   /* Warm neutrals */
