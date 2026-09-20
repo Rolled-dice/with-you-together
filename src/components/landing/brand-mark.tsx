@@ -56,8 +56,8 @@ export function BrandMark({
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
-      <BrandMark className="h-9 w-auto" />
-      <span className="text-xl font-extrabold tracking-tight">
+      <BrandMark className="h-10 w-auto" />
+      <span className="text-2xl font-extrabold tracking-tight sm:text-[1.7rem]">
         <span className="text-orb-navy">Someone</span>
         <span className="text-orb-terracotta">Near</span>
       </span>

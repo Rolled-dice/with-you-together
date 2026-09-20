@@ -291,7 +291,8 @@ function Landing() {
 
       {/* Nav ------------------------------------------------------------- */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
-        <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-6 px-6">
+        {/* 72px so the 40px mark has room to breathe rather than filling the bar */}
+        <nav className="mx-auto flex h-[4.5rem] w-full max-w-6xl items-center justify-between gap-6 px-6">
           <Link to="/" aria-label="SomeoneNear home">
             <Wordmark />
           </Link>
