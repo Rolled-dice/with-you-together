@@ -8,6 +8,9 @@ import { BellRingingIcon, CheckIcon, SpinnerGapIcon, PillIcon, PlusIcon, TrashIc
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { MedicationOnboarding } from "@/components/medication-onboarding";
 import { GoogleCalendarCard } from "@/components/google-calendar-card";
+import { MedicationCalendarPrompt } from "@/components/medication-calendar-prompt";
+import { getGoogleCalendarStatus } from "@/lib/google-calendar.functions";
+import { listMedications } from "@/lib/medications.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -72,20 +75,45 @@ function RemindersPage() {
     <AppShell>
       <div className="mx-auto max-w-5xl">
         <PageHeader eyebrow="Care, made lighter" title="Medication & reminders" description="A calm place to remember what matters, for you or someone you love." />
-        <div className="mb-8">
-          <GoogleCalendarCard />
-        </div>
         <Tabs defaultValue="medication" className="space-y-8">
           <TabsList className="grid h-auto w-full grid-cols-2 rounded-2xl bg-surface p-1.5 sm:max-w-xl">
             <TabsTrigger value="medication" className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><PillIcon className="mr-2 size-5" /> Medication</TabsTrigger>
             <TabsTrigger value="everyday" className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><BellRingingIcon className="mr-2 size-5" /> Everyday reminder</TabsTrigger>
           </TabsList>
-          <TabsContent value="medication" className="mt-0"><MedicationOnboarding /></TabsContent>
+          <TabsContent value="medication" className="mt-0 space-y-6">
+            <MedicationCalendarSlot />
+            <MedicationOnboarding />
+          </TabsContent>
           <TabsContent value="everyday" className="mt-0"><EverydayReminders /></TabsContent>
         </Tabs>
       </div>
     </AppShell>
   );
+}
+
+/**
+ * Picks the right Google Calendar surface for the moment:
+ *   - once connected -> the full card, so the sync toggle and disconnect stay
+ *     reachable
+ *   - medications exist but not connected -> the contextual "add these to your
+ *     calendar?" prompt (the point of need)
+ *   - no medications yet -> nothing, so a first-time member isn't nagged before
+ *     they've added anything
+ *
+ * The old design showed the full Connect card unconditionally at the top, which
+ * asked for calendar access before there was any reason to.
+ */
+function MedicationCalendarSlot() {
+  const statusFn = useServerFn(getGoogleCalendarStatus);
+  const listMedsFn = useServerFn(listMedications);
+
+  const status = useQuery({ queryKey: ["google-calendar-status"], queryFn: () => statusFn() });
+  const meds = useQuery({ queryKey: ["medications"], queryFn: () => listMedsFn() });
+
+  if (status.data?.connected) return <GoogleCalendarCard />;
+
+  const hasMedications = Array.isArray(meds.data) && meds.data.length > 0;
+  return <MedicationCalendarPrompt hasMedications={hasMedications} />;
 }
 
 function EverydayReminders() {
