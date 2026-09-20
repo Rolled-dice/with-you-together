@@ -19,13 +19,15 @@ import {
   UsersIcon,
   PhoneCallIcon,
 } from "@phosphor-icons/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyAiQuota } from "@/lib/quota.functions";
 import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import { PLAN_DISPLAY } from "@/lib/currency";
+import { Orb, OrbSparkle, type OrbTone } from "@/components/landing/playroom-orb";
+import { useDashboardMotion } from "@/hooks/use-dashboard-motion";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -116,11 +118,15 @@ function AdminDashboard() {
   );
 }
 
+/** Earned badges cycle through the orb family rather than all being identical. */
+const BADGE_TONES: OrbTone[] = ["saffron", "terracotta", "periwinkle", "grass"];
+
 function MemberDashboard() {
   const [profile, setProfile] = useState<ProfileSummary | null>(null);
   const [streak, setStreak] = useState<number>(0);
   const [checkInCount, setCheckInCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const rootRef = useRef<HTMLDivElement>(null);
   const quotaFn = useServerFn(getMyAiQuota);
   const { data: quota, isLoading: quotaLoading } = useQuery({
     queryKey: ["ai-quota"],
@@ -131,6 +137,10 @@ function MemberDashboard() {
     const idx = new Date().getDate() % QUOTES.length;
     return QUOTES[idx];
   }, []);
+
+  // Runs once `loading` flips, so the counters animate toward real values
+  // rather than counting to zero and then snapping.
+  useDashboardMotion(rootRef, !loading);
 
   useEffect(() => {
     (async () => {
@@ -207,30 +217,67 @@ function MemberDashboard() {
 
   return (
     <AppShell>
-      {/* HERO CHECK-IN */}
-      <section className="rounded-xl border border-border bg-primary/8 p-6 sm:p-8 md:p-10">
-        <div className="max-w-xl">
-          <div className="inline-flex items-center gap-2 rounded-brand border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+      <div ref={rootRef}>
+      {/* HERO CHECK-IN — saffron plate, borrowed from the marketing page so the
+          product doesn't change character the moment you sign in. */}
+      <section className="relative overflow-hidden rounded-[28px] bg-plate-saffron px-6 py-8 text-ink sm:px-9 sm:py-10">
+        {/* Scenery. Faceless on purpose — these are not characters. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div data-dash-orb className="absolute -right-6 -top-6 opacity-90">
+            <Orb tone="terracotta" face="smile" className="h-28 w-28" />
+          </div>
+          <div data-dash-orb className="absolute bottom-4 right-16 hidden sm:block">
+            <Orb tone="navy" face="calm" className="h-12 w-12" />
+          </div>
+          <div data-dash-orb className="absolute right-40 top-8 hidden lg:block">
+            <OrbSparkle className="h-5 w-5 text-ink/40" />
+          </div>
+        </div>
+
+        <div className="relative max-w-xl">
+          <div
+            data-dash-pill
+            className="inline-flex items-center gap-2 rounded-full bg-ink/10 px-3 py-1 text-xs font-bold text-ink"
+          >
             <GreetIcon className="h-3.5 w-3.5" />
             {greetText}
           </div>
-          <h1 className="mt-4 font-display text-3xl font-medium leading-tight text-foreground sm:text-4xl">
+
+          <h1
+            data-dash-headline
+            className="mt-4 text-[2rem] font-extrabold leading-[1.05] tracking-tight sm:text-[2.6rem]"
+          >
             {greetText}, {firstName}
           </h1>
-          <p className="mt-2 text-base text-muted-foreground">
-            A few minutes for you can make a big difference. Ready for today's check-in?
-          </p>
-          <blockquote className="mt-3 border-l-2 border-primary/30 pl-3 text-sm italic text-muted-foreground">
-            "{quote}"
-          </blockquote>
+
+          <div data-dash-sub>
+            <p className="mt-2.5 text-[0.95rem] font-medium leading-relaxed text-ink/75">
+              A few minutes for you can make a big difference. Ready for today&apos;s
+              check-in?
+            </p>
+            <blockquote className="mt-3 border-l-2 border-ink/25 pl-3 text-sm italic text-ink/70">
+              &ldquo;{quote}&rdquo;
+            </blockquote>
+          </div>
 
           <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <Button asChild size="lg">
+            <Button
+              asChild
+              size="lg"
+              data-dash-cta
+              className="rounded-full bg-ink px-6 font-bold text-background hover:bg-ink/90"
+            >
               <Link to="/companion">
-                <SparkleIcon className="mr-2 h-4 w-4" /> Start today's check-in
+                <SparkleIcon className="mr-2 h-4 w-4" /> Start today&apos;s check-in
               </Link>
             </Button>
-            <Button asChild size="lg" variant="secondary">
+            <Button
+              asChild
+              size="lg"
+              data-dash-cta
+              variant="ghost"
+              className="rounded-full font-bold text-ink hover:bg-ink/10"
+            >
               <Link to="/insights">
                 <ChartLineIcon className="mr-2 h-4 w-4" /> Quick mood check-in
               </Link>
@@ -240,28 +287,35 @@ function MemberDashboard() {
       </section>
 
 
-      {/* STATS ROW */}
-      <section className="mt-6 divide-y divide-border rounded-xl border border-border bg-card sm:grid sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
-        <StatRow
-          icon={<FireIcon className="h-5 w-5 text-primary" />}
+      {/* STATS ROW — separate cards rather than one divided slab, so each can
+          carry its own tone and animate in independently. */}
+      <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          tone="terracotta"
+          icon={<FireIcon className="h-4 w-4" />}
           label="Current streak"
-          value={`${streak} ${streak === 1 ? "day" : "days"}`}
+          // Numeric stats count up; the unit stays static beside them.
+          countTo={streak}
+          unit={streak === 1 ? "day" : "days"}
           hint={streak > 0 ? "Keep it going" : "Start today"}
         />
-        <StatRow
-          icon={<ChartLineIcon className="h-5 w-5 text-primary" />}
+        <StatCard
+          tone="periwinkle"
+          icon={<ChartLineIcon className="h-4 w-4" />}
           label="Mood check-ins"
-          value={`${checkInCount}`}
+          countTo={checkInCount}
           hint="Private and yours"
         />
-        <StatRow
-          icon={<HandHeartIcon className="h-5 w-5 text-primary" />}
+        <StatCard
+          tone="navy"
+          icon={<HandHeartIcon className="h-4 w-4" />}
           label="Membership"
           value={tierLabel}
           hint={profile?.care_status ?? "active"}
         />
-        <StatRow
-          icon={<SparkleIcon className="h-5 w-5 text-primary" />}
+        <StatCard
+          tone="grass"
+          icon={<SparkleIcon className="h-4 w-4" />}
           label="Companion quota"
           value={
             quotaLoading || !quota ? "…" : quotaUnlimited ? "Unlimited" : String(quota.remaining)
@@ -270,10 +324,11 @@ function MemberDashboard() {
         />
       </section>
 
-      {/* QUICK ACCESS TILES */}
-      <section className="mt-8">
+      {/* QUICK ACCESS — full-colour plates, so the four destinations are
+          distinguishable at a glance rather than four identical grey cards. */}
+      <section data-dash-section className="mt-8">
         <div className="mb-3 flex items-baseline justify-between gap-3">
-          <h2 className="text-lg font-semibold text-foreground">Quick access</h2>
+          <h2 className="text-lg font-extrabold tracking-tight">Quick access</h2>
           <span className="hidden text-xs text-muted-foreground sm:inline">
             Everything a tap away
           </span>
@@ -281,25 +336,37 @@ function MemberDashboard() {
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <QuickTile
             to="/companion"
-            icon={<ChatCircleIcon className="h-6 w-6" />}
+            plate="bg-plate-navy"
+            ink="text-background"
+            orb="saffron"
+            icon={<ChatCircleIcon className="h-5 w-5" />}
             title="AI Companion"
             desc="Talk it through, gently."
           />
           <QuickTile
             to="/listeners"
-            icon={<EarIcon className="h-6 w-6" />}
+            plate="bg-plate-saffron"
+            ink="text-ink"
+            orb="terracotta"
+            icon={<EarIcon className="h-5 w-5" />}
             title="Human Listener"
             desc="A real person, on your schedule."
           />
           <QuickTile
             to="/insights"
-            icon={<ChartLineIcon className="h-6 w-6" />}
+            plate="bg-plate-periwinkle"
+            ink="text-ink"
+            orb="navy"
+            icon={<ChartLineIcon className="h-5 w-5" />}
             title="Mood Insights"
             desc="See your patterns over time."
           />
           <QuickTile
             to="/family"
-            icon={<UsersIcon className="h-6 w-6" />}
+            plate="bg-plate-pink"
+            ink="text-ink"
+            orb="grass"
+            icon={<UsersIcon className="h-5 w-5" />}
             title="Family Circle"
             desc="Share only what you choose."
           />
@@ -307,116 +374,155 @@ function MemberDashboard() {
       </section>
 
       {/* ACHIEVEMENTS + SIDE */}
-      <section className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft sm:p-6">
+      <section data-dash-section className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+        <div className="rounded-[24px] border border-border bg-card p-5 sm:p-6">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="flex items-center gap-2 text-base font-semibold">
-              <TrophyIcon className="h-4 w-4 text-coral" /> Achievements
+            <h3 className="flex items-center gap-2 text-base font-extrabold tracking-tight">
+              <TrophyIcon className="h-4 w-4 text-orb-terracotta" weight="fill" /> Achievements
             </h3>
             <Link
               to="/insights"
-              className="inline-flex items-center gap-1 text-xs font-medium text-coral hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-orb-terracotta hover:underline"
             >
               View all <ArrowUpRightIcon className="h-3 w-3" />
             </Link>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-4 sm:gap-3">
-            {badges.map((b) => (
+            {badges.map((b, i) => (
               <div
                 key={b.label}
-                className={`flex flex-col items-center gap-1.5 rounded-brand border p-3 text-center sm:gap-2 sm:p-4 ${
-                  b.earned ? "border-primary/30 bg-primary/5" : "border-border bg-muted/40"
+                data-dash-badge
+                className={`flex flex-col items-center gap-2 rounded-2xl border p-3 text-center sm:p-4 ${
+                  b.earned
+                    ? "border-orb-terracotta/35 bg-orb-terracotta/8"
+                    : "border-border bg-muted/40"
                 }`}
               >
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12 ${
-                    b.earned ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  <StarIcon className="h-5 w-5 sm:h-6 sm:w-6" weight={b.earned ? "fill" : "regular"} />
-                </div>
-                <span className="text-xs font-medium leading-tight text-foreground">
-                  {b.label}
-                </span>
+                {/* Earned badges get a real character orb; unearned stay a
+                    muted outline, so progress reads instantly. */}
+                {b.earned ? (
+                  <Orb
+                    tone={BADGE_TONES[i % BADGE_TONES.length]}
+                    face="smile"
+                    className="h-10 w-10 sm:h-11 sm:w-11"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground sm:h-11 sm:w-11">
+                    <StarIcon className="h-5 w-5" />
+                  </div>
+                )}
+                <span className="text-xs font-bold leading-tight">{b.label}</span>
                 {b.earned && (
-                  <span className="text-[11px] text-primary">Earned</span>
+                  <span className="text-[11px] font-semibold text-orb-terracotta">
+                    Earned
+                  </span>
                 )}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-
-          <Link
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <SideCard
             to="/insights"
-            className="group flex items-center justify-between rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
-          >
-            <div>
-              <div className="text-xs font-medium text-muted-foreground">Insights</div>
-              <div className="mt-1 text-base font-medium text-foreground">Your mood trends</div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                See patterns over time. Gently.
-              </div>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-brand bg-primary/10 text-primary">
-              <ChartLineIcon className="h-5 w-5" />
-            </div>
-          </Link>
-
-          <Link
+            eyebrow="Insights"
+            title="Your mood trends"
+            desc="See patterns over time. Gently."
+            icon={<ChartLineIcon className="h-5 w-5" />}
+            tone="periwinkle"
+          />
+          <SideCard
             to="/safety"
-            className="group flex items-center justify-between rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
-          >
-            <div>
-              <div className="text-xs font-medium text-muted-foreground">Feeling overwhelmed?</div>
-              <div className="mt-1 text-base font-medium text-foreground">Safety toolkit</div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                Grounding, hotlines, one-tap help.
-              </div>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-brand bg-primary/10 text-primary">
-              <LifebuoyIcon className="h-5 w-5" />
-            </div>
-          </Link>
+            eyebrow="Feeling overwhelmed?"
+            title="Safety toolkit"
+            desc="Grounding, hotlines, one-tap help."
+            icon={<LifebuoyIcon className="h-5 w-5" />}
+            tone="terracotta"
+          />
         </div>
       </section>
+      </div>
     </AppShell>
   );
 }
 
-function StatRow({
+/** Maps an orb tone to its icon-chip classes, so tone lives in one place. */
+const TONE_CHIP: Record<OrbTone, string> = {
+  saffron: "bg-orb-saffron/20 text-ink",
+  pink: "bg-orb-pink/25 text-ink",
+  aqua: "bg-orb-aqua/20 text-orb-aqua",
+  grass: "bg-orb-grass/15 text-orb-grass",
+  navy: "bg-orb-navy/12 text-orb-navy",
+  periwinkle: "bg-orb-periwinkle/25 text-orb-navy",
+  terracotta: "bg-orb-terracotta/15 text-orb-terracotta",
+};
+
+function StatCard({
+  tone,
   icon,
   label,
   value,
+  countTo,
+  unit,
   hint,
 }: {
+  tone: OrbTone;
   icon: React.ReactNode;
   label: string;
-  value: string;
+  /** Static display value. Ignored when `countTo` is supplied. */
+  value?: string;
+  /** Numeric value to count up to. */
+  countTo?: number;
+  unit?: string;
   hint: string;
 }) {
   return (
-    <div className="flex items-center gap-3 p-4 sm:flex-col sm:items-start sm:gap-2">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-brand bg-primary/10">
+    <div
+      data-dash-stat
+      className="rounded-[20px] border border-border bg-card p-4 transition-colors hover:border-ink/20"
+    >
+      <span
+        className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${TONE_CHIP[tone]}`}
+      >
         {icon}
-      </div>
-      <div className="min-w-0">
-        <div className="text-xs font-medium text-muted-foreground">{label}</div>
-        <div className="truncate text-xl font-semibold text-foreground">{value}</div>
-        <div className="truncate text-xs text-muted-foreground">{hint}</div>
-      </div>
+      </span>
+      <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-0.5 flex items-baseline gap-1 text-2xl font-extrabold tracking-tight">
+        {countTo !== undefined ? (
+          <>
+            {/* The number itself carries the counter hook; the markup still
+                ships the real value so it is correct without JS. */}
+            <span data-dash-counter={countTo} className="tabular-nums">
+              {countTo.toLocaleString()}
+            </span>
+            {unit && (
+              <span className="text-sm font-bold text-muted-foreground">{unit}</span>
+            )}
+          </>
+        ) : (
+          <span className="truncate text-xl">{value}</span>
+        )}
+      </p>
+      <p className="mt-0.5 truncate text-xs text-muted-foreground">{hint}</p>
     </div>
   );
 }
 
 function QuickTile({
   to,
+  plate,
+  ink,
+  orb,
   icon,
   title,
   desc,
 }: {
   to: string;
+  plate: string;
+  ink: string;
+  orb: OrbTone;
   icon: React.ReactNode;
   title: string;
   desc: string;
@@ -424,14 +530,61 @@ function QuickTile({
   return (
     <Link
       to={to as "/companion"}
-      className="group relative rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+      data-dash-tile
+      className={`group relative overflow-hidden rounded-[22px] p-5 transition-transform hover:-translate-y-1 ${plate} ${ink}`}
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-brand bg-primary/10 text-primary">
-        {icon}
+      {/* Oversized orb bleeding off the corner, echoing the marketing plates */}
+      <Orb
+        tone={orb}
+        face="calm"
+        className="pointer-events-none absolute -bottom-6 -right-5 h-20 w-20 opacity-90 transition-transform duration-500 group-hover:scale-110"
+      />
+      <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-current/15">
+        <span className="opacity-90">{icon}</span>
+      </span>
+      <div className="relative mt-4 text-[0.95rem] font-extrabold leading-tight">
+        {title}
       </div>
-      <div className="mt-4 text-base font-medium text-foreground">{title}</div>
-      <div className="mt-1 text-sm text-muted-foreground">{desc}</div>
-      <ArrowUpRightIcon className="absolute right-4 top-4 h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      <div className="relative mt-1 max-w-[85%] text-xs leading-snug opacity-75">
+        {desc}
+      </div>
+      <ArrowUpRightIcon className="absolute right-4 top-4 h-4 w-4 opacity-40 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+    </Link>
+  );
+}
+
+function SideCard({
+  to,
+  eyebrow,
+  title,
+  desc,
+  icon,
+  tone,
+}: {
+  to: string;
+  eyebrow: string;
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+  tone: OrbTone;
+}) {
+  return (
+    <Link
+      to={to as "/insights"}
+      className="group flex items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-ink/20"
+    >
+      <div className="min-w-0">
+        <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+          {eyebrow}
+        </div>
+        <div className="mt-1 text-base font-extrabold tracking-tight">{title}</div>
+        <div className="mt-1 text-xs text-muted-foreground">{desc}</div>
+      </div>
+      <span
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110 ${TONE_CHIP[tone]}`}
+      >
+        {icon}
+      </span>
     </Link>
   );
 }

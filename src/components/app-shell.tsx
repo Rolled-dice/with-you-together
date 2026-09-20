@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, type ReactNode } from "react";
-import { HeartIcon, SquaresFourIcon, ChatCircleIcon, UsersIcon, GearIcon, SignOutIcon, HandHeartIcon, LifebuoyIcon, ChartLineIcon, PhoneCallIcon, PillIcon, HeadphonesIcon, CalendarHeartIcon } from "@phosphor-icons/react";
+import { SquaresFourIcon, ChatCircleIcon, UsersIcon, GearIcon, SignOutIcon, HandHeartIcon, LifebuoyIcon, ChartLineIcon, PhoneCallIcon, PillIcon, HeadphonesIcon, CalendarHeartIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,6 +10,7 @@ import { isCurrentUserAgent } from "@/lib/agent-role.functions";
 import { SomeoneNearCursor } from "@/components/someonenear-cursor";
 import { NotificationBell } from "@/components/notification-bell";
 import { DevViewAsSwitcher } from "@/components/dev-view-as-switcher";
+import { BrandMark } from "@/components/landing/brand-mark";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
 import { getViewAsRole } from "@/lib/dev-view-as";
@@ -195,13 +196,20 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function Brand({ compact = false }: { compact?: boolean }) {
+  // Shares the real mark and two-tone wordmark with the marketing site, so the
+  // brand doesn't change the moment someone signs in. The old placeholder here
+  // was a heart glyph in a filled square, which matched nothing.
   return (
     <Link to="/" className="flex items-center gap-2">
-      <span className="inline-flex h-9 w-9 items-center justify-center rounded-brand bg-primary text-primary-foreground">
-        <HeartIcon className="h-5 w-5" weight="fill" />
-      </span>
-      <span className="font-sans text-lg font-semibold tracking-tight text-foreground">
-        SomeoneNear
+      <BrandMark className={compact ? "h-7 w-auto" : "h-9 w-auto"} />
+      <span
+        className={cn(
+          "font-extrabold tracking-tight",
+          compact ? "text-base" : "text-lg",
+        )}
+      >
+        <span className="text-orb-navy">Someone</span>
+        <span className="text-orb-terracotta">Near</span>
       </span>
     </Link>
   );
