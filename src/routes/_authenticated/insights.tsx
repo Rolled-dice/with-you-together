@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { JournalSection } from "@/components/insights/journal-section";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createMoodCheckIn, listMoodCheckIns } from "@/lib/mood.functions";
@@ -231,6 +232,13 @@ function InsightsPage() {
         </div>
       </section>
 
+      {/* Journal sits directly under the check-in, above the charts, so writing
+          an entry is one of the first things a member sees rather than
+          something buried below every graph. Saving invalidates the
+          mood-checkins query so the streak and entry counts update. */}
+      <JournalSection
+        onEntrySaved={() => qc.invalidateQueries({ queryKey: ["mood-checkins"] })}
+      />
 
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-3">
