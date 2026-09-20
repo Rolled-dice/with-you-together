@@ -319,13 +319,18 @@ function Landing() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              asChild
-              variant="ghost"
-              className="hidden rounded-full font-semibold sm:inline-flex"
-            >
-              <Link to={nextStep}>{signedIn ? "Open app" : "Log in"}</Link>
-            </Button>
+            {/* Signed in, the ghost link and the button both pointed at the app,
+                so the nav showed "Open app" twice. Signed in needs only the one
+                button; the "Log in" link is only meaningful when signed out. */}
+            {!signedIn && (
+              <Button
+                asChild
+                variant="ghost"
+                className="hidden rounded-full font-semibold sm:inline-flex"
+              >
+                <Link to={nextStep}>Log in</Link>
+              </Button>
+            )}
             <Button
               asChild
               data-magnetic
