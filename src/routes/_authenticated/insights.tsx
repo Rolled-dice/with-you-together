@@ -186,7 +186,7 @@ function InsightsPage() {
         description="A gentle look at how you've been. Only visible to you."
       />
 
-      <section className="rounded-brand border border-border bg-surface p-4 sm:p-5 mb-6 animate-fade-up card-lift">
+      <section data-page-reveal className="rounded-brand border border-border bg-surface p-4 sm:p-5 mb-6 card-lift">
         <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
           <div>
             <h2 className="font-semibold text-foreground">Today's check-in</h2>
@@ -291,13 +291,13 @@ function InsightsPage() {
                 hint: `${stats.totalEntries} total`,
               },
             ].map((s, i) => (
-              <div key={s.label} style={{ animationDelay: `${i * 80}ms` }} className="animate-pop-in">
+              <div key={s.label} style={{ animationDelay: `${i * 80}ms` }} className="">
                 <StatCard icon={s.icon} label={s.label} value={s.value} hint={s.hint} />
               </div>
             ))}
           </div>
 
-          <section className="rounded-brand border border-border bg-surface p-4 sm:p-5 mb-6 animate-fade-up card-lift" style={{ animationDelay: "240ms" }}>
+          <section data-page-reveal className="rounded-brand border border-border bg-surface p-4 sm:p-5 mb-6 card-lift" style={{ animationDelay: "240ms" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold">Mood over the {rangeMeta.label.toLowerCase()}</h2>
               <span className="text-xs text-muted-foreground">Daily average</span>
@@ -343,7 +343,7 @@ function InsightsPage() {
             </div>
           </section>
 
-          <section className="rounded-brand border border-border bg-surface p-4 sm:p-5 animate-fade-up card-lift" style={{ animationDelay: "320ms" }}>
+          <section data-page-reveal className="rounded-brand border border-border bg-surface p-4 sm:p-5 card-lift" style={{ animationDelay: "320ms" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold">Mood distribution</h2>
               <span className="text-xs text-muted-foreground">{rangeMeta.label}</span>

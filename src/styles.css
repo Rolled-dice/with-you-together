@@ -351,14 +351,16 @@
 }
 .card-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px -18px rgb(200 120 80 / 0.35);
+  /* Neutral ink shadow. This was a warm clay tint from the old sand-and-clay
+   * theme, which read as an orange halo against the navy palette. */
+  box-shadow: 0 18px 36px -20px rgb(42 39 37 / 0.22);
 }
 .card-lift::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(255 200 154 / 0.28), transparent 65%);
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.10), transparent 65%);
   opacity: 0;
   transition: opacity 220ms ease;
   pointer-events: none;
@@ -439,14 +441,14 @@
 }
 .card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 36px -14px rgb(200 120 80 / 0.32);
+  box-shadow: 0 14px 36px -14px rgb(42 39 37 / 0.2);
 }
 .card-hover::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(255 210 138 / 0.32), transparent 65%);
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.10), transparent 65%);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
@@ -462,7 +464,7 @@
   will-change: transform;
 }
 .card-tilt:hover {
-  box-shadow: 0 24px 50px -22px rgb(200 120 80 / 0.4);
+  box-shadow: 0 24px 50px -22px rgb(42 39 37 / 0.26);
 }
 @utility card-glow {
   position: relative;
@@ -474,7 +476,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgb(255 200 154 / 0.35), transparent 60%);
+  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.12), transparent 60%);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;

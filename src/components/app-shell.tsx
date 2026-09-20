@@ -13,6 +13,7 @@ import { DevViewAsSwitcher } from "@/components/dev-view-as-switcher";
 import { BrandMark } from "@/components/landing/brand-mark";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
+import { useAppPageMotion } from "@/hooks/use-app-page-motion";
 import { getViewAsRole } from "@/lib/dev-view-as";
 
 const NAV = [
@@ -42,8 +43,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const mobileNavRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
   usePointerParallax();
   useCardInteractions();
+
+  // Drives the shared page entrance for every authenticated screen. Pages that
+  // set no data-page-* attributes simply get nothing, so this is safe for
+  // screens like the dashboard that run their own timeline.
+  useAppPageMotion(mainRef);
 
   // Keep the active tab visible in the horizontally-scrollable mobile nav.
   useEffect(() => {
@@ -166,9 +173,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           </header>
 
 
+          {/* Keyed on pathname so the entrance replays on navigation. The ref
+              lets useAppPageMotion scope itself to the current page's content,
+              which is why any page using PageHeader animates with no extra
+              wiring. */}
           <main
             key={pathname}
-            className="flex-1 animate-fade-in px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
+            ref={mainRef}
+            className="flex-1 px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
           >
             {children}
           </main>
@@ -228,6 +240,17 @@ function Brand({ compact = false }: { compact?: boolean }) {
   );
 }
 
+/**
+ * Standard page header for authenticated screens.
+ *
+ * Emits the `data-page-*` attributes that `useAppPageMotion` (called by AppShell
+ * below) animates, so every page that uses this gets the same entrance for free
+ * rather than each one wiring its own.
+ *
+ * Type sizes are set for members who are often elderly: 28-35px title, 17px
+ * description at full `muted-foreground` rather than 14px at reduced opacity,
+ * which is a common readability failure with age.
+ */
 export function PageHeader({
   eyebrow,
   slogan,
@@ -242,24 +265,29 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-wrap items-end justify-between gap-4 animate-slide-in-up">
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
         {eyebrow && (
-          <p className="text-sm font-medium text-brand-accent">{eyebrow}</p>
-        )}
-        <h1 className="mt-1 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-          {title}
-        </h1>
-        {slogan && (
-          <p className="mt-1 text-sm text-muted-foreground">{slogan}</p>
-        )}
-        {description && (
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            {description}
+          <p data-page-eyebrow className="text-sm font-bold text-orb-terracotta">
+            {eyebrow}
           </p>
         )}
+        <h1
+          data-page-headline
+          className="mt-1 text-[1.75rem] font-extrabold leading-[1.12] tracking-tight sm:text-[2.2rem]"
+        >
+          {title}
+        </h1>
+        <div data-page-sub>
+          {slogan && <p className="mt-1.5 text-base text-muted-foreground">{slogan}</p>}
+          {description && (
+            <p className="mt-2 max-w-2xl text-[1.0625rem] leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+          )}
+        </div>
       </div>
-      {children}
+      {children && <div data-page-cta>{children}</div>}
     </div>
   );
 }

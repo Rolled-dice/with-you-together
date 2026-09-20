@@ -121,7 +121,7 @@ function EverydayReminders() {
 
   return (
     <div className="space-y-8 animate-gentle-rise">
-      <section className="rounded-[2.5rem] border border-border bg-card p-5 shadow-gentle sm:p-8" aria-labelledby="everyday-title">
+      <section data-page-reveal className="rounded-[2.5rem] border border-border bg-card p-5 shadow-gentle sm:p-8" aria-labelledby="everyday-title">
         <div className="mb-6"><p className="text-sm font-medium text-primary">A gentle nudge</p><h2 id="everyday-title" className="font-display text-2xl font-medium">What would you like to remember?</h2><p className="mt-2 text-base leading-relaxed text-muted-foreground">Water, rest, an appointment, or a call home, set it once and let us hold it for you.</p></div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_auto] lg:items-end">
           <div className="space-y-2 sm:col-span-2 lg:col-span-1"><label className="text-base font-medium" htmlFor="reminder-title">What should we remind you about?</label><Input id="reminder-title" value={title} maxLength={200} onChange={(event) => setTitle(event.target.value)} placeholder="Drink a glass of water" className="min-h-12 rounded-xl bg-background px-4 text-base md:text-base" /></div>

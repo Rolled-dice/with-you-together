@@ -24,10 +24,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
-import {
-  startPhoneVerification,
-  confirmPhoneVerification,
-} from "@/lib/phone-verify.functions";
+import { startPhoneVerification, confirmPhoneVerification } from "@/lib/phone-verify.functions";
 import {
   listMemories as listMemoriesFn,
   createMemory as createMemoryFn,
@@ -38,11 +35,18 @@ import {
   getMySubscription,
   cancelRazorpaySubscription,
 } from "@/lib/billing.functions";
+import { cancelDodoSubscription, getMyDodoSubscription } from "@/lib/dodo.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CheckIcon, HandHeartIcon, SpinnerGapIcon, SignOutIcon, SparkleIcon } from "@phosphor-icons/react";
+import {
+  CheckIcon,
+  HandHeartIcon,
+  SpinnerGapIcon,
+  SignOutIcon,
+  SparkleIcon,
+} from "@phosphor-icons/react";
 import { WebhookEventsCard } from "@/components/webhook-events-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -76,6 +80,8 @@ function SettingsPage() {
   const updateFn = useServerFn(updateMyProfile);
   const portalFn = useServerFn(createBillingPortalSession);
   const cancelRzpFn = useServerFn(cancelRazorpaySubscription);
+  const cancelDodoFn = useServerFn(cancelDodoSubscription);
+  const dodoSubFn = useServerFn(getMyDodoSubscription);
   const subFn = useServerFn(getMySubscription);
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -85,10 +91,15 @@ function SettingsPage() {
     queryFn: () => profileFn(),
   });
 
-  const { data: subscription, refetch: refetchSub } = useQuery({
+  const { data: defaultSubscription, refetch: refetchSub } = useQuery({
     queryKey: ["my-subscription"],
     queryFn: () => subFn({ data: { environment: getStripeEnvironment() } }),
   });
+  const { data: dodoSubscription, refetch: refetchDodoSub } = useQuery({
+    queryKey: ["my-dodo-subscription"],
+    queryFn: () => dodoSubFn(),
+  });
+  const subscription = dodoSubscription ?? defaultSubscription;
 
   const [displayName, setDisplayName] = useState("");
   const [fullName, setFullName] = useState("");
@@ -97,6 +108,9 @@ function SettingsPage() {
   const [intent, setIntent] = useState("");
   const [language, setLanguage] = useState<"en" | "hi">("en");
   const [currency, setCurrency] = useState<Currency>("usd");
+  const [checkoutProvider, setCheckoutProvider] = useState<"default" | "dodo">(() =>
+    getStripeEnvironment() === "sandbox" ? "dodo" : "default",
+  );
   const [phone, setPhone] = useState("");
 
   useEffect(() => {
@@ -127,13 +141,14 @@ function SettingsPage() {
         () => {
           qc.invalidateQueries({ queryKey: ["me"] });
           refetchSub();
+          refetchDodoSub();
         },
       )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [profile?.id, qc, refetchSub]);
+  }, [profile?.id, qc, refetchSub, refetchDodoSub]);
 
   const saveMut = useMutation({
     mutationFn: () =>
@@ -187,15 +202,32 @@ function SettingsPage() {
       toast.success("Your membership will end at the close of this billing period.");
       qc.invalidateQueries({ queryKey: ["my-subscription"] });
       refetchSub();
+      refetchDodoSub();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const cancelDodoMut = useMutation({
+    mutationFn: async () => {
+      const res = await cancelDodoFn({ data: { environment: "test" } });
+      if ("error" in res) throw new Error(res.error);
+      return res;
+    },
+    onSuccess: () => {
+      toast.success("Your membership will end at the close of this billing period.");
+      qc.invalidateQueries({ queryKey: ["my-subscription"] });
+      refetchSub();
+      refetchDodoSub();
     },
     onError: (e) => toast.error((e as Error).message),
   });
 
   // Route "manage/cancel" to the provider that owns the active subscription.
-  const isRazorpaySub =
-    (subscription as { provider?: string } | null | undefined)?.provider === "razorpay";
-  const manageMut = isRazorpaySub ? cancelRzpMut : portalMut;
-  const manageLabel = isRazorpaySub ? "Cancel membership" : "Manage or cancel";
+  const activeProvider = (subscription as { provider?: string } | null | undefined)?.provider;
+  const isRazorpaySub = activeProvider === "razorpay";
+  const isDodoSub = activeProvider === "dodo";
+  const manageMut = isDodoSub ? cancelDodoMut : isRazorpaySub ? cancelRzpMut : portalMut;
+  const manageLabel = isDodoSub || isRazorpaySub ? "Cancel membership" : "Manage or cancel";
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -227,8 +259,7 @@ function SettingsPage() {
     if (p.startsWith("care")) return "care";
     return null;
   })();
-  const activeTier: TierId =
-    currentTier !== "free" ? currentTier : (subTier ?? "free");
+  const activeTier: TierId = currentTier !== "free" ? currentTier : (subTier ?? "free");
   const cancelsAt =
     subscription?.cancel_at_period_end && subscription.current_period_end
       ? new Date(subscription.current_period_end as string).toLocaleDateString()
@@ -247,7 +278,7 @@ function SettingsPage() {
       />
 
       <div className="grid gap-6">
-        <Card className="rounded-brand border-border bg-card">
+        <Card data-page-reveal className="rounded-brand border-border bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
               <HandHeartIcon className="h-4 w-4 text-brand-accent" />
@@ -257,7 +288,8 @@ function SettingsPage() {
           <CardContent className="grid gap-4">
             {cancelsAt ? (
               <div className="rounded-brand border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
-                Your membership will end on <strong>{cancelsAt}</strong>. You'll keep access until then.
+                Your membership will end on <strong>{cancelsAt}</strong>. You'll keep access until
+                then.
               </div>
             ) : null}
             {hasPaidSub ? (
@@ -314,6 +346,22 @@ function SettingsPage() {
               </div>
             </div>
 
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-brand border border-border bg-muted/20 p-3 text-xs">
+              <span className="text-muted-foreground">Checkout provider</span>
+              <Select
+                value={checkoutProvider}
+                onValueChange={(value) => setCheckoutProvider(value as "default" | "dodo")}
+              >
+                <SelectTrigger className="h-8 w-48 rounded-brand text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default for currency</SelectItem>
+                  <SelectItem value="dodo">Dodo Payments (test)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Plans */}
             <div className="grid gap-3 md:grid-cols-2">
               {plans.map((plan) => {
@@ -348,9 +396,7 @@ function SettingsPage() {
                       ) : null}
                     </div>
                     <div>
-                      <div className="text-lg font-semibold">
-                        {displayPrice(plan, currency)}
-                      </div>
+                      <div className="text-lg font-semibold">{displayPrice(plan, currency)}</div>
                       <div className="text-[11px] text-muted-foreground">per month</div>
                     </div>
                     <ul className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
@@ -376,36 +422,43 @@ function SettingsPage() {
                         size="sm"
                         onClick={() =>
                           hasPaidSub
-                            ? isRazorpaySub
+                            ? isRazorpaySub || isDodoSub
                               ? navigate({
                                   to: "/checkout",
-                                  search: { price: priceId as any },
+                                  search:
+                                    checkoutProvider === "dodo"
+                                      ? { price: priceId as any, provider: "dodo" }
+                                      : { price: priceId as any, provider: undefined },
                                 })
                               : portalMut.mutate()
                             : navigate({
                                 to: "/checkout",
-                                search: { price: priceId as any },
+                                search:
+                                  checkoutProvider === "dodo"
+                                    ? { price: priceId as any, provider: "dodo" }
+                                    : { price: priceId as any, provider: undefined },
                               })
                         }
                         className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
                       >
                         <SparkleIcon className="mr-2 h-3 w-3" />
                         {hasPaidSub
-                          ? isRazorpaySub
+                          ? isRazorpaySub || isDodoSub
                             ? "Switch plan"
                             : "Switch in billing portal"
-                          : "Choose plan"}
+                          : checkoutProvider === "dodo"
+                            ? "Choose with Dodo"
+                            : "Choose plan"}
                       </Button>
                     )}
                   </div>
                 );
               })}
-
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-brand border-border bg-card">
+        <Card data-page-reveal className="rounded-brand border-border bg-card">
           <CardHeader>
             <CardTitle className="text-base font-medium">Profile</CardTitle>
           </CardHeader>
@@ -483,7 +536,6 @@ function SettingsPage() {
                 Include your country code. Save it first, then verify, a listener can only call a
                 verified number.
               </p>
-
             </Field>
             <Field label="What brings you here?">
               <Textarea
@@ -511,7 +563,7 @@ function SettingsPage() {
 
         {profile?.id && <WebhookEventsCard userId={profile.id} />}
 
-        <Card className="rounded-brand border-border bg-card">
+        <Card data-page-reveal className="rounded-brand border-border bg-card">
           <CardHeader>
             <CardTitle className="text-base font-medium">Account</CardTitle>
           </CardHeader>
@@ -710,7 +762,7 @@ function BillingHistoryCard() {
   });
 
   return (
-    <Card className="rounded-brand border-border bg-card">
+    <Card data-page-reveal className="rounded-brand border-border bg-card">
       <CardHeader>
         <CardTitle className="text-base font-medium">Billing history</CardTitle>
       </CardHeader>
@@ -784,7 +836,7 @@ function CompanionMemoryCard() {
   });
 
   return (
-    <Card className="rounded-brand border-border bg-card">
+    <Card data-page-reveal className="rounded-brand border-border bg-card">
       <CardHeader>
         <CardTitle className="text-base font-medium">Companion memory</CardTitle>
       </CardHeader>
