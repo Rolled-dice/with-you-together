@@ -27,23 +27,48 @@ export function BrandMark({
 }) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 112 72"
       role={title ? "img" : "presentation"}
       aria-label={title}
       aria-hidden={title ? undefined : true}
       focusable="false"
       className={cn("shrink-0", className)}
     >
-      {/* Each figure leans 5 degrees inward about its own base. Enough to read
-       * as turning toward the other; more and the heads collide. */}
-      <g className="text-orb-terracotta" transform="rotate(5 20 58)">
-        <circle cx="20" cy="22" r="7" fill="currentColor" />
-        <path d="M13 58V38a7 7 0 0 1 14 0v20Z" fill="currentColor" />
+      {/* Each figure is one stroked path: up the back, over the shoulder, down
+       * the torso, then out along the knee. Stroked rather than filled because
+       * the original has an even ribbon weight throughout. The two knees stop
+       * just short of touching — that gap is the whole idea of the name. */}
+      <g
+        fill="none"
+        strokeWidth={13}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path
+          className="text-orb-terracotta"
+          stroke="currentColor"
+          d="M12 60V38q0-12 12-12t11 12v6q0 10 13 10"
+        />
+        <path
+          className="text-orb-navy"
+          stroke="currentColor"
+          d="M100 60V38q0-12-12-12t-11 12v6q0 10-13 10"
+        />
       </g>
-      <g className="text-orb-navy" transform="rotate(-5 44 58)">
-        <circle cx="44" cy="22" r="7" fill="currentColor" />
-        <path d="M37 58V38a7 7 0 0 1 14 0v20Z" fill="currentColor" />
-      </g>
+      <circle
+        className="text-orb-terracotta"
+        cx="26"
+        cy="12"
+        r="8.5"
+        fill="currentColor"
+      />
+      <circle
+        className="text-orb-navy"
+        cx="86"
+        cy="12"
+        r="8.5"
+        fill="currentColor"
+      />
     </svg>
   );
 }
@@ -58,7 +83,8 @@ export function BrandMark({
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
-      <BrandMark className="h-9 w-9" />
+      {/* 112x72 viewBox, so the box must be ~1.56:1 or the figures squash */}
+      <BrandMark className="h-9 w-14" />
       <span className="text-xl font-extrabold tracking-tight">
         <span className="text-orb-navy">Someone</span>
         <span className="text-orb-terracotta">Near</span>

@@ -100,8 +100,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/logo.svg?v=4", type: "image/svg+xml" },
-      { rel: "apple-touch-icon", href: "/logo.png?v=4" },
+      { rel: "icon", href: "/logo.svg?v=5", type: "image/svg+xml" },
+      // No apple-touch-icon yet: iOS ignores SVG here, and public/logo.png has
+      // its transparency checkerboard flattened into opaque pixels, so it would
+      // show a grey grid on the home screen. Add a clean square PNG export and
+      // point this back at it.
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

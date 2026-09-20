@@ -79,18 +79,19 @@
   --popover: #ffffff;
   --popover-foreground: #2a2725;
 
-  /* Brand: navy voltage for CTAs, warm grey plate, terracotta accent */
-  --brand-primary: #2b4b6c;
+  /* Brand: navy voltage for CTAs, warm grey plate, terracotta accent.
+   * Both hexes are sampled directly from the logo artwork, not approximated. */
+  --brand-primary: #25435f;
   --brand-secondary: #f3efe9;
-  --brand-accent: #c4552f;
+  --brand-accent: #c05c3a;
 
-  --primary: #2b4b6c;
+  --primary: #25435f;
   --primary-foreground: #ffffff;
   --secondary: #f3efe9;
   --secondary-foreground: #2a2725;
   --muted: #f3efe9;
   --muted-foreground: #6b6561;
-  --accent: #e4ecf4;
+  --accent: #e3eaf1;
   --accent-foreground: #2a2725;
   /* Muted signal red, never alarm-bright */
   --destructive: #c4453b;
@@ -98,16 +99,16 @@
 
   --border: #e7e2da;
   --input: #ddd6cc;
-  --ring: #2b4b6c;
+  --ring: #25435f;
 
   --sidebar: #f8f5f1;
   --sidebar-foreground: #2a2725;
-  --sidebar-primary: #2b4b6c;
+  --sidebar-primary: #25435f;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e4ecf4;
+  --sidebar-accent: #e3eaf1;
   --sidebar-accent-foreground: #2a2725;
   --sidebar-border: #e7e2da;
-  --sidebar-ring: #2b4b6c;
+  --sidebar-ring: #25435f;
 }
 
 
@@ -122,30 +123,30 @@
   --popover-foreground: #f5f1ec;
   /* Navy can't carry a CTA on charcoal, so it lifts to a pale steel here
    * while keeping the same hue relationship to the terracotta. */
-  --brand-primary: #8fb4d9;
+  --brand-primary: #8db3d4;
   --brand-secondary: #2f2b29;
-  --brand-accent: #e0744a;
-  --primary: #8fb4d9;
+  --brand-accent: #d9714a;
+  --primary: #8db3d4;
   --primary-foreground: #1c1a19;
   --secondary: #2f2b29;
   --secondary-foreground: #f5f1ec;
   --muted: #2b2826;
   --muted-foreground: #a8a29b;
-  --accent: #24384d;
+  --accent: #223b52;
   --accent-foreground: #f5f1ec;
   --destructive: #e4756b;
   --destructive-foreground: #2a1210;
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: #8fb4d9;
+  --ring: #8db3d4;
   --sidebar: #211f1e;
   --sidebar-foreground: #f5f1ec;
-  --sidebar-primary: #8fb4d9;
+  --sidebar-primary: #8db3d4;
   --sidebar-primary-foreground: #1c1a19;
   --sidebar-accent: #2f2b29;
   --sidebar-accent-foreground: #f5f1ec;
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: #8fb4d9;
+  --sidebar-ring: #8db3d4;
 }
 
 @theme inline {
@@ -155,20 +156,26 @@
   --color-orb-pink: #ffa6cb;
   --color-orb-aqua: #4aa8dc;
   --color-orb-grass: #0e8a44;
-  --color-orb-navy: #1f3a57;
+  /* Both sampled from the logo artwork */
+  --color-orb-navy: #25435f;
   --color-orb-periwinkle: #7f9dc4;
-  /* The brand terracotta, straight off the logo */
-  --color-orb-terracotta: #c4552f;
+  --color-orb-terracotta: #c05c3a;
 
-  /* Full-bleed section plates, lifted straight from the orb family.
-   * Each plate declares whether it takes ink or light type — saffron, pink,
-   * periwinkle and tangerine are light enough to need ink at AA. */
+  /* Full-bleed section plates. Each plate is paired in code with the type
+   * colour that clears AA on it: saffron, pink and periwinkle take ink; navy,
+   * grass and terracotta take light.
+   *
+   * plate-terracotta is deliberately deeper than the brand terracotta. White on
+   * the true #c05c3a is only 4.34:1, which fails AA for body text, and ink on it
+   * is worse at 3.3:1 — neither works. Deepening to #a94a28 gets white to
+   * ~5.4:1. The exact brand hex is preserved for the mark and small accents,
+   * where it sits on light surfaces and passes comfortably. */
   --color-plate-saffron: #f5cf1a;
   --color-plate-pink: #f0a3c6;
-  --color-plate-navy: #1f3a57;
+  --color-plate-navy: #25435f;
   --color-plate-grass: #14713c;
   --color-plate-periwinkle: #7f9dc4;
-  --color-plate-terracotta: #c4552f;
+  --color-plate-terracotta: #a94a28;
   --color-plate-cream: #f8f4ef;
 
   /* Warm neutrals */
@@ -179,8 +186,10 @@
   /* Compatibility aliases. The docs, admin and feedback surfaces still paint
    * with the previous Harbor vocabulary; these remap those names onto the new
    * palette so nothing renders unstyled while the marketing page moves first. */
-  --color-coral: #c4552f;
-  --color-clay: #c4552f;
+  /* Deepened rather than the true brand hex: these paint small text in the docs
+   * eyebrows and links, where #c05c3a would only reach 4.34:1. */
+  --color-coral: #a94a28;
+  --color-clay: #a94a28;
   --color-clay-soft: #ffcf8a;
   --color-mint: #cdebd8;
   --color-blush: #ffd9e7;
@@ -386,7 +395,7 @@
 }
 /* Very soft flat shadows — presence, never elevation drama */
 @utility shadow-glow {
-  box-shadow: 0 18px 40px -24px rgb(43 75 108 / 0.3);
+  box-shadow: 0 18px 40px -24px rgb(37 67 95 / 0.3);
 }
 @utility shadow-soft {
   box-shadow: 0 8px 24px -14px rgb(42 39 37 / 0.14);
