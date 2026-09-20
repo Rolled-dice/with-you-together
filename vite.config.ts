@@ -70,7 +70,6 @@ export default defineConfig({
       alias: {
         "entities/lib/decode.js": resolve(process.cwd(), "node_modules/entities/lib/decode.js"),
         "entities/lib/encode.js": resolve(process.cwd(), "node_modules/entities/lib/encode.js"),
-        entities: resolve(process.cwd(), "node_modules/entities"),
       },
     },
   },
