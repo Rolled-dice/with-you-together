@@ -80,7 +80,9 @@ function FamilyPage() {
     );
   }
 
-  const hasFamilyTier = profile?.care_tier === "family" || profile?.care_tier === "care";
+  // Mirrors the server gate in family.functions.ts: any paid plan.
+  const hasFamilyTier =
+    profile?.care_tier === "care" || profile?.care_tier === "care_plus";
 
   return (
     <AppShell>

@@ -112,7 +112,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           {!rolesLoading && !isStaff ? (
             <div className="mt-6 rounded-brand bg-sidebar-accent/60 p-4 text-xs text-sidebar-accent-foreground/80">
               <p className="font-medium text-sidebar-foreground">Care Membership</p>
-              <p className="mt-1">You're on the Together tier.</p>
+              {/* The shell doesn't load the profile, so it can't name the tier
+               * without inventing one. Point at Settings instead. */}
+              <Link to="/settings" className="mt-1 block underline underline-offset-2">
+                View your plan
+              </Link>
             </div>
           ) : null}
           <button

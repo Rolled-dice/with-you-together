@@ -54,8 +54,11 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Two live plans plus the unsubscribed state. The legacy `together` and
+// `family` tiers were retired with the two-plan migration and must not be
+// accepted here, or a stale client could write a tier billing can't map.
 const TierInput = z.object({
-  care_tier: z.enum(["free", "together", "family", "care"]),
+  care_tier: z.enum(["free", "care", "care_plus"]),
 });
 
 export const updateCareTier = createServerFn({ method: "POST" })

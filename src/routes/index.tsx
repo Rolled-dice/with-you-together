@@ -35,6 +35,7 @@ import {
 import { useLandingMotion } from "@/hooks/use-landing-motion";
 import { useLiveStats } from "@/hooks/use-live-stats";
 import { supabase } from "@/integrations/supabase/client";
+import { PLAN_DISPLAY } from "@/lib/currency";
 import { getPublicStats } from "@/lib/stats.functions";
 
 const TITLE = "SomeoneNear — we call your parents, so you know they're okay";
@@ -225,32 +226,20 @@ const TRUST = [
   },
 ];
 
-const PLANS = [
-  {
-    name: "Care",
-    price: "$49",
-    note: "For one loved one you want to keep an eye on",
-    features: [
-      "18 check-in calls a month",
-      "15 minutes per call",
-      "Dashboard update after every call",
-      "Companion chat with a daily allowance",
-    ],
-  },
-  {
-    name: "Care Plus",
-    price: "$79",
-    note: "For families sharing the care between them",
-    highlight: true,
-    features: [
-      "30 check-in calls a month",
-      "15 minutes per call",
-      "Unlimited companion chat, no daily cap",
-      "Shared circle, up to 5 people",
-      "On-demand check-ins when a day feels hard",
-    ],
-  },
-];
+/**
+ * Pricing is read from the plan catalogue rather than retyped here, so the
+ * marketing page can never drift from what billing actually charges.
+ */
+const PLANS = (["care", "care_plus"] as const).map((id) => {
+  const plan = PLAN_DISPLAY[id];
+  return {
+    name: plan.name,
+    price: plan.usdLabel,
+    note: plan.note,
+    highlight: plan.highlight ?? false,
+    features: plan.bullets,
+  };
+});
 
 const FAQS = [
   {

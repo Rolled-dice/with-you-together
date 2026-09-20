@@ -25,6 +25,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyAiQuota } from "@/lib/quota.functions";
 import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
+import { PLAN_DISPLAY } from "@/lib/currency";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -43,11 +44,11 @@ type ProfileSummary = {
   care_since: string;
 };
 
+// Names come from the plan catalogue so they can't drift from billing.
 const TIER_LABEL: Record<string, string> = {
   free: "No active plan",
-  together: "Together",
-  family: "Family",
-  care: "Care",
+  care: PLAN_DISPLAY.care.name,
+  care_plus: PLAN_DISPLAY.care_plus.name,
 };
 
 const QUOTES = [

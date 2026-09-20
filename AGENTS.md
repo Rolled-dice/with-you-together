@@ -60,5 +60,5 @@ State machine keyed by `whatsapp_sessions` (phone → step). Supports: account l
 
 - Semantic design tokens only — no hardcoded color utilities (`text-white`, `bg-[#...]`) in components.
 - Brand is **SomeoneNear** everywhere; heart icon favicon. Primary domain: someonenear.com.
-- Prices displayed in USD (Together $8.99, Family $15.99, Care $36.99).
+- Two plans only: **Care** ($49 / ₹3,999 per month) and **Care Plus** ($79 / ₹6,499 per month, "most chosen", unlimited Companion). `src/lib/currency.ts` (`PLAN_DISPLAY`) is the single source of truth for names, prices and bullets — read from it rather than hardcoding a price anywhere. Tier values are `free | care | care_plus`; the older `together` / `family` tiers no longer exist.
 - Full tech inventory: `techstack.txt`.
