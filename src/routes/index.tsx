@@ -294,7 +294,7 @@ function Landing() {
 
       {/* Announcement ---------------------------------------------------- */}
       <div className="bg-primary px-4 py-2.5 text-center text-sm text-primary-foreground">
-        Medication reminders now work over WhatsApp.{" "}
+        Medication reminders now land straight on their phone.{" "}
         <Link to="/docs" className="font-semibold underline underline-offset-2">
           See how
         </Link>

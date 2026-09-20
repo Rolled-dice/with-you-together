@@ -14,7 +14,7 @@ import { Orb } from "./playroom-orb";
  * that brings it to life while its slide is active.
  *
  * Each visual explains the feature by showing the artefact the user actually
- * receives — a call screen, an update, a WhatsApp nudge — and then *performs*
+ * receives — a call screen, an update, a calendar alert — and then *performs*
  * the thing happening: the timer runs, the ticks land one by one, the companion
  * types before it replies. That performance is the explanation.
  *
@@ -266,38 +266,79 @@ export const updateAmbient: AmbientBuilder = (root) => {
 export function RemindersVisual() {
   return (
     <div className="relative mx-auto w-full max-w-[300px]">
-      <div className="rounded-2xl bg-card p-3.5 shadow-soft">
-        <span className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orb-grass/15">
-            <PillIcon className="h-3.5 w-3.5 text-orb-grass" />
-          </span>
-          <span className="text-[10px] font-extrabold uppercase tracking-wide text-muted-foreground">
-            WhatsApp
-          </span>
-        </span>
+      <Screen className="w-[212px]">
+        {/* Lock screen, so the notification reads as arriving on their phone */}
+        <div className="relative h-[228px] overflow-hidden rounded-2xl bg-surface p-2.5">
+          <div className="flex items-center justify-between px-0.5 text-[8px] font-bold text-muted-foreground">
+            <span>Tue 12 Nov</span>
+            <span className="tabular-nums">7:58</span>
+          </div>
+          <p className="mt-2 text-center text-3xl font-extrabold tabular-nums tracking-tight">
+            7:58
+          </p>
 
-        <p className="mt-2.5 text-[11.5px] font-medium leading-snug">
-          Your evening tablet is due in 20 minutes. Reply{" "}
-          <strong>TAKEN</strong> when you&apos;ve had it.
-        </p>
-
-        <div className="mt-3 flex gap-2">
-          <span
-            data-anim="taken"
-            className="rounded-full bg-ink px-3 py-1 text-[10px] font-bold text-background"
+          {/* The notification itself — slides down from the top of the screen */}
+          <div
+            data-anim="notif"
+            className="relative mt-4 rounded-xl border border-ink/10 bg-card p-2.5 shadow-soft"
           >
-            TAKEN
-          </span>
-          <span className="rounded-full border border-ink/15 px-3 py-1 text-[10px] font-bold text-muted-foreground">
-            SKIP
-          </span>
-        </div>
-      </div>
+            <span className="flex items-center gap-1.5">
+              {/* Calendar glyph: a real date tile, not a generic bell */}
+              <span className="flex h-4 w-4 flex-col overflow-hidden rounded-[3px] border border-ink/15 bg-card">
+                <span className="h-1 w-full bg-orb-aqua" />
+                <span className="flex flex-1 items-center justify-center text-[5px] font-extrabold leading-none">
+                  12
+                </span>
+              </span>
+              <span className="text-[7.5px] font-extrabold uppercase tracking-wide text-muted-foreground">
+                Calendar · now
+              </span>
+            </span>
 
-      <FloatCard anim="logged" className="-right-1 -bottom-4">
+            <p className="mt-1.5 text-[10px] font-bold leading-tight">
+              Evening tablet
+            </p>
+            <p className="text-[8.5px] leading-tight text-muted-foreground">
+              8:00 pm · Metformin 500mg
+            </p>
+
+            <div className="mt-2 flex gap-1.5">
+              {/* Two stacked states: the highlight sits on top at opacity 0 and
+               * is revealed on acknowledgement, so no colour is animated. */}
+              <span className="relative overflow-hidden rounded-full">
+                <span className="block rounded-full border border-ink/15 px-2.5 py-1 text-[8px] font-extrabold text-muted-foreground">
+                  Taken
+                </span>
+                <span
+                  data-anim="hl"
+                  className="absolute inset-0 flex items-center justify-center rounded-full bg-orb-grass px-2.5 text-[8px] font-extrabold text-background"
+                >
+                  Taken
+                </span>
+              </span>
+              <span className="rounded-full border border-ink/15 px-2.5 py-1 text-[8px] font-extrabold text-muted-foreground">
+                Snooze
+              </span>
+            </div>
+          </div>
+
+          {/* Confirmation replaces the prompt once acknowledged */}
+          <div
+            data-anim="done"
+            className="mt-2 flex items-center gap-1.5 rounded-xl bg-orb-grass/12 px-2.5 py-2"
+          >
+            <CheckIcon className="h-2.5 w-2.5 text-orb-grass" weight="bold" />
+            <span className="text-[8.5px] font-bold text-orb-grass">
+              Logged · the family can see it
+            </span>
+          </div>
+        </div>
+      </Screen>
+
+      <FloatCard anim="pill" className="-right-2 top-10">
         <span className="flex items-center gap-1.5">
-          <CheckIcon className="h-2.5 w-2.5 text-orb-grass" weight="bold" />
-          Logged · 8:12pm
+          <PillIcon className="h-3 w-3 text-orb-grass" />
+          One tap, no typing
         </span>
       </FloatCard>
     </div>
@@ -305,18 +346,43 @@ export function RemindersVisual() {
 }
 
 export const remindersAmbient: AmbientBuilder = (root) => {
-  const taken = one(root, '[data-anim="taken"]');
-  const logged = one(root, '[data-anim="logged"]');
+  const notif = one(root, '[data-anim="notif"]');
+  const hl = one(root, '[data-anim="hl"]');
+  const done = one(root, '[data-anim="done"]');
+  const pill = one(root, '[data-anim="pill"]');
 
-  const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.6 });
-  gsap.set(logged, { autoAlpha: 0 });
+  const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.4 });
 
-  tl.to({}, { duration: 1.1 })
-    // A press, not a bounce — it should feel like a thumb, not a toy.
-    .to(taken, { scale: 0.92, duration: 0.14, ease: "power2.in" })
-    .to(taken, { scale: 1, duration: 0.3, ease: "power2.out" })
+  gsap.set([done, pill].filter(Boolean), { autoAlpha: 0 });
+  gsap.set(hl, { autoAlpha: 0 });
+
+  tl
+    // 1. The notification drops in from above the screen edge.
+    .fromTo(
+      notif,
+      { autoAlpha: 0, y: -46 },
+      { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" },
+    )
     .to(
-      logged,
+      pill,
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.4,
+        ease: "power2.out",
+        startAt: { y: 8 },
+      },
+      "-=0.2",
+    )
+    .to({}, { duration: 1.3 })
+    // 2. Acknowledged. A press, then the highlight sweeps over the label —
+    //    revealing a second layer rather than animating a colour value.
+    .to(notif, { scale: 0.985, duration: 0.14, ease: "power2.in" })
+    .to(notif, { scale: 1, duration: 0.3, ease: "power2.out" })
+    .to(hl, { autoAlpha: 1, duration: 0.32, ease: "power2.out" }, "-=0.24")
+    // 3. The log lands, which is the bit the family actually cares about.
+    .to(
+      done,
       {
         autoAlpha: 1,
         y: 0,
@@ -324,10 +390,15 @@ export const remindersAmbient: AmbientBuilder = (root) => {
         ease: "power3.out",
         startAt: { y: 10 },
       },
-      "-=0.1",
+      "+=0.25",
     )
-    .to({}, { duration: 2.4 })
-    .to(logged, { autoAlpha: 0, duration: 0.4, ease: "power2.in" });
+    .to({}, { duration: 2.3 })
+    .to([notif, done, pill].filter(Boolean), {
+      autoAlpha: 0,
+      duration: 0.42,
+      ease: "power2.in",
+    })
+    .set(hl, { autoAlpha: 0 });
 
   return tl;
 };
@@ -337,113 +408,152 @@ export const remindersAmbient: AmbientBuilder = (root) => {
  * It types before it answers, which is the whole point of the feature.
  * ========================================================================== */
 
+/** One exchange in the thread. AI turns carry a typing state. */
+const CHAT: { from: "you" | "ai"; text: string }[] = [
+  { from: "you", text: "can't sleep again" },
+  { from: "ai", text: "Me neither. Well — I don't, technically. Want company?" },
+  { from: "you", text: "yeah" },
+  { from: "ai", text: "Then I'll just sit here. No advice, promise." },
+];
+
 export function CompanionVisual() {
   return (
-    <div className="relative mx-auto w-full max-w-[300px] space-y-2">
-      <div
-        data-anim="ask"
-        className="ml-auto w-fit max-w-[80%] rounded-2xl rounded-br-md bg-card px-3.5 py-2.5 text-[11px] font-medium shadow-soft"
-      >
-        Everyone&apos;s asleep and my head won&apos;t stop.
-      </div>
-
-      <div
-        data-anim="bubble"
-        className="w-fit max-w-[86%] rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 shadow-soft"
-      >
-        <span className="mb-1 flex items-center gap-1.5">
-          <Orb tone="violet" face="calm" className="h-4 w-4" />
-          <span className="text-[9px] font-extrabold uppercase tracking-wide text-muted-foreground">
-            Companion
+    <div className="relative mx-auto w-full max-w-[300px]">
+      <Screen className="w-[228px]">
+        {/* Header makes it unmistakably a chat, and with whom */}
+        <div className="flex items-center gap-2 border-b border-border px-1 pb-2">
+          <Orb tone="violet" face="smile" className="h-6 w-6 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold leading-tight">Companion</p>
+            <p className="flex items-center gap-1 text-[7.5px] leading-tight text-orb-grass">
+              <span className="h-1 w-1 rounded-full bg-orb-grass" />
+              Always awake
+            </p>
+          </div>
+          {/* The 2am claim, shown rather than asserted in prose */}
+          <span className="rounded-full bg-surface px-1.5 py-0.5 text-[7.5px] font-extrabold tabular-nums text-muted-foreground">
+            2:14 AM
           </span>
-        </span>
+        </div>
 
-        {/* Typing indicator, swapped for the reply by the ambient timeline */}
-        <span data-anim="typing" className="flex items-center gap-1 py-1">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              data-anim="dot"
-              className="h-1.5 w-1.5 rounded-full bg-muted-foreground"
-            />
-          ))}
-        </span>
+        <div className="space-y-1.5 px-1 pt-2.5">
+          {CHAT.map((m, i) =>
+            m.from === "you" ? (
+              <div
+                key={i}
+                data-msg
+                className="ml-auto w-fit max-w-[82%] rounded-2xl rounded-br-sm bg-ink px-2.5 py-1.5 text-[9.5px] font-medium text-background"
+              >
+                {m.text}
+              </div>
+            ) : (
+              <div
+                key={i}
+                data-msg
+                data-from="ai"
+                className="w-fit max-w-[88%] rounded-2xl rounded-bl-sm bg-surface px-2.5 py-1.5"
+              >
+                {/* Typing dots, swapped for the text by the ambient timeline */}
+                <span data-typing className="flex items-center gap-1 py-1">
+                  {[0, 1, 2].map((d) => (
+                    <span
+                      key={d}
+                      data-dot
+                      className="h-1 w-1 rounded-full bg-muted-foreground"
+                    />
+                  ))}
+                </span>
+                <span
+                  data-text
+                  className="block text-[9.5px] font-medium leading-snug"
+                >
+                  {m.text}
+                </span>
+              </div>
+            ),
+          )}
+        </div>
+      </Screen>
 
-        <span
-          data-anim="reply"
-          className="block text-[11px] font-medium leading-snug"
-        >
-          That sounds exhausting. You don&apos;t have to explain it properly —
-          what&apos;s the loudest thought right now?
-        </span>
-      </div>
-
-      <div
-        data-anim="hint"
-        className="ml-auto w-fit rounded-full bg-card px-3 py-1.5 text-[10px] font-semibold text-muted-foreground shadow-soft"
-      >
+      <FloatCard anim="note" className="-right-2 top-14">
         Answer in a word · or skip
-      </div>
+      </FloatCard>
     </div>
   );
 }
 
 export const companionAmbient: AmbientBuilder = (root) => {
-  const ask = one(root, '[data-anim="ask"]');
-  const typing = one(root, '[data-anim="typing"]');
-  const dots = pick(root, '[data-anim="dot"]');
-  const reply = one(root, '[data-anim="reply"]');
-  const hint = one(root, '[data-anim="hint"]');
+  const msgs = pick(root, "[data-msg]");
+  const dots = pick(root, "[data-dot]");
+  const note = one(root, '[data-anim="note"]');
 
-  // Dots run on their own loop for as long as the typing state is shown.
+  // Dots bounce on their own loop, independent of the conversation's pacing.
   if (dots.length) {
     gsap.to(dots, {
-      y: -3,
-      duration: 0.34,
+      y: -2.5,
+      duration: 0.32,
       ease: "sine.inOut",
       repeat: -1,
       yoyo: true,
-      stagger: 0.12,
+      stagger: 0.11,
     });
   }
 
-  const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.4 });
+  const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.2 });
 
-  gsap.set([ask, hint].filter(Boolean), { autoAlpha: 0 });
-  gsap.set(typing, { autoAlpha: 0, display: "flex" });
-  gsap.set(reply, { autoAlpha: 0, display: "none" });
+  // Reset: nothing sent yet, and every AI bubble starts in its typing state.
+  gsap.set([msgs, note].flat().filter(Boolean), { autoAlpha: 0 });
+  msgs.forEach((m) => {
+    if (m.dataset.from !== "ai") return;
+    gsap.set(m.querySelector("[data-typing]"), { display: "flex" });
+    gsap.set(m.querySelector("[data-text]"), { display: "none", autoAlpha: 0 });
+  });
 
-  tl.to(ask, {
-    autoAlpha: 1,
-    y: 0,
-    duration: 0.45,
-    ease: "power3.out",
-    startAt: { y: 10 },
-  })
-    .to(typing, { autoAlpha: 1, duration: 0.3 }, "+=0.35")
-    .to({}, { duration: 1.5 }) // thinking
-    .set(typing, { autoAlpha: 0, display: "none" })
-    .set(reply, { display: "block" })
-    .to(reply, { autoAlpha: 1, duration: 0.45, ease: "power2.out" })
-    .to(
-      hint,
-      {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.4,
-        ease: "power2.out",
-        startAt: { y: 8 },
-      },
-      "+=0.3",
-    )
-    .to({}, { duration: 2.6 })
-    .to([ask, reply, hint].filter(Boolean), {
+  // Play the thread turn by turn. AI turns think first, then answer — the
+  // pause is the point, so it reads as a reply rather than a canned string.
+  msgs.forEach((m) => {
+    const isAi = m.dataset.from === "ai";
+
+    tl.to(m, {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.38,
+      ease: "power3.out",
+      startAt: { y: 8 },
+    });
+
+    if (!isAi) {
+      tl.to({}, { duration: 0.3 });
+      return;
+    }
+
+    const typing = m.querySelector("[data-typing]");
+    const text = m.querySelector("[data-text]");
+
+    tl.to({}, { duration: 0.85 }) // thinking
+      .set(typing, { display: "none" })
+      .set(text, { display: "block" })
+      .to(text, { autoAlpha: 1, duration: 0.34, ease: "power2.out" })
+      .to({}, { duration: 0.35 });
+  });
+
+  tl.to(
+    note,
+    {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.4,
+      ease: "power2.out",
+      startAt: { y: 8 },
+    },
+    "-=0.3",
+  )
+    .to({}, { duration: 1.2 })
+    .to([msgs, note].flat().filter(Boolean), {
       autoAlpha: 0,
       duration: 0.4,
       ease: "power2.in",
-    })
-    .set(reply, { display: "none" })
-    .set(typing, { display: "flex" });
+    });
 
   return tl;
 };
@@ -465,14 +575,19 @@ export function InsightsVisual() {
           Last 7 days
         </p>
 
-        <div className="mt-3 flex h-24 items-end gap-2">
+        <div className="mt-3 flex items-end gap-2">
           {bars.map((h, i) => (
             <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
-              <div
-                data-bar
-                className="w-full rounded-full bg-orb-periwinkle"
-                style={{ height: `${h}%` }}
-              />
+              {/* The track carries a definite height so the bar's percentage
+               * has something to resolve against. Without it the bar collapses
+               * to 0px and the whole chart is invisible. */}
+              <div className="flex h-24 w-full items-end">
+                <div
+                  data-bar
+                  className="w-full rounded-full bg-orb-periwinkle"
+                  style={{ height: `${h}%` }}
+                />
+              </div>
               <span className="text-[8px] font-bold text-muted-foreground">
                 {days[i]}
               </span>
@@ -505,10 +620,13 @@ export const insightsAmbient: AmbientBuilder = (root) => {
   gsap.set(bars, { transformOrigin: "bottom center" });
   gsap.set([read, note].filter(Boolean), { autoAlpha: 0 });
 
+  // autoAlpha is restored here, not just scaleY. The cycle ends by fading the
+  // bars out, so resetting only the scale would leave them invisible from the
+  // second loop onward.
   tl.fromTo(
     bars,
-    { scaleY: 0 },
-    { scaleY: 1, duration: 0.55, ease: "power3.out", stagger: 0.07 },
+    { scaleY: 0, autoAlpha: 1 },
+    { scaleY: 1, autoAlpha: 1, duration: 0.55, ease: "power3.out", stagger: 0.07 },
   )
     .to(read, { autoAlpha: 1, duration: 0.45, ease: "power2.out" }, "-=0.2")
     .to(note, { autoAlpha: 1, duration: 0.4, ease: "power2.out" }, "-=0.25")

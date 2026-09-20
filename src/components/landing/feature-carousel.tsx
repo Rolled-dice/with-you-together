@@ -69,7 +69,7 @@ const SLIDES: Slide[] = [
     id: "reminders",
     tab: "Reminders",
     title: "Tablets, without the nagging",
-    body: "Dose nudges arrive over WhatsApp, so there's no new app to learn. They reply TAKEN or SKIP, we log it, and then we stay quiet. Snap a photo of the prescription and we'll read the schedule off it.",
+    body: "Each dose lands on their phone as an ordinary calendar reminder — nothing new to learn, no app to open. One tap marks it taken, we log it for the family, and then we stay quiet. Snap a photo of the prescription and we'll read the schedule off it.",
     plate: "bg-plate-grass",
     ink: "text-background",
     Visual: RemindersVisual,
@@ -78,8 +78,8 @@ const SLIDES: Slide[] = [
   {
     id: "companion",
     tab: "Companion",
-    title: "Someone to talk to at 2am",
-    body: "Between calls, an AI companion is there for a daily check-in. One small question, answered in a word or skipped entirely. Private to them, and nothing is ever scored.",
+    title: "An AI that's awake at 2am",
+    body: "Some nights the call is hours away. Our AI companion picks up in seconds — warm, unhurried, and honest about what it is. Answer in a word or skip it entirely. Private to them, and nothing is ever scored.",
     plate: "bg-plate-violet",
     ink: "text-background",
     Visual: CompanionVisual,
@@ -107,7 +107,9 @@ const SLIDES: Slide[] = [
   },
 ];
 
-const AUTOPLAY_MS = 6500;
+// Long enough for the slowest ambient loop (the companion conversation, ~7s)
+// to finish its story before the slide changes under it.
+const AUTOPLAY_MS = 8000;
 
 export function FeatureCarousel() {
   const [active, setActive] = useState(0);
