@@ -8,13 +8,13 @@ import {
   CheckIcon,
   EnvelopeSimpleIcon,
   HeadphonesIcon,
-  HeartIcon,
   PhoneCallIcon,
   ShieldCheckIcon,
 } from "@phosphor-icons/react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { JsonLd } from "@/components/json-ld";
+import { Wordmark } from "@/components/landing/brand-mark";
 import { FeatureCarousel } from "@/components/landing/feature-carousel";
 import {
   DashboardMockup,
@@ -229,17 +229,6 @@ const FAQS = [
 /* -------------------------------------------------------------------------- *
  * Small building blocks
  * -------------------------------------------------------------------------- */
-
-function Wordmark() {
-  return (
-    <span className="flex items-center gap-2">
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orb-tangerine">
-        <HeartIcon className="h-4 w-4 text-background" weight="fill" />
-      </span>
-      <span className="text-lg font-extrabold tracking-tight">SomeoneNear</span>
-    </span>
-  );
-}
 
 /** The near-black pill used inside cards and plates. */
 function InkButton({
