@@ -80,14 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SomeoneNear — Checking in when they can't" },
+      { title: "SomeoneNear Checking in when they can't" },
       {
         name: "description",
         content:
           "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, human listener calls, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { name: "author", content: "SomeoneNear" },
-      { property: "og:title", content: "SomeoneNear — Checking in when they can't" },
+      { property: "og:title", content: "SomeoneNear Checking in when they can't" },
       {
         property: "og:description",
         content:
@@ -95,18 +95,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "SomeoneNear — Checking in when they can't" },
+      { name: "twitter:title", content: "SomeoneNear Checking in when they can't" },
       { name: "twitter:description", content: "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, human listener calls, mood insights, and a shared circle that keeps your loved ones close." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "icon", href: "/favicon.png?v=2", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/favicon.png?v=2" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap",
       },
       { rel: "preconnect", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co" },
