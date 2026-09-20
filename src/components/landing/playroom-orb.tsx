@@ -1,3 +1,7 @@
+import gsap from "gsap";
+import { useEffect, useRef, useState } from "react";
+
+import { gazeOffset, gazeSupported, subscribeGaze } from "@/lib/orb-gaze";
 import { cn } from "@/lib/utils";
 
 /**
@@ -19,6 +23,62 @@ export type OrbTone =
   | "terracotta";
 
 export type OrbFace = "calm" | "smile" | "wink" | "plain";
+
+/**
+ * Open eyes whose pupils follow the cursor.
+ *
+ * Kept separate from the closed-eye `Face` variants because tracking needs a
+ * visible pupil to move — a contented closed arc has nothing to aim. The whites
+ * are the page background rather than pure white so the eyes sit correctly on
+ * both light and dark orbs.
+ */
+function GazingEyes() {
+  const pupils = useRef<SVGGElement>(null);
+
+  useEffect(() => {
+    const group = pupils.current;
+    if (!group || !gazeSupported()) return;
+
+    // quickTo keeps a single interpolating tween per axis instead of spawning a
+    // new tween on every pointer frame.
+    const xTo = gsap.quickTo(group, "x", { duration: 0.45, ease: "power3.out" });
+    const yTo = gsap.quickTo(group, "y", { duration: 0.45, ease: "power3.out" });
+
+    // The orb's box only changes on layout, not on pointer move, so it's cached
+    // and refreshed on resize/scroll rather than measured every frame.
+    let rect = group.getBoundingClientRect();
+    const remeasure = () => {
+      rect = group.getBoundingClientRect();
+    };
+
+    window.addEventListener("resize", remeasure);
+    window.addEventListener("scroll", remeasure, { passive: true });
+
+    const unsubscribe = subscribeGaze((px, py) => {
+      const { x, y } = gazeOffset(rect, px, py);
+      xTo(x);
+      yTo(y);
+    });
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener("resize", remeasure);
+      window.removeEventListener("scroll", remeasure);
+      gsap.killTweensOf(group);
+    };
+  }, []);
+
+  return (
+    <g>
+      <ellipse cx="17.5" cy="21" rx="5.2" ry="5.6" fill="var(--color-background)" />
+      <ellipse cx="30.5" cy="21" rx="5.2" ry="5.6" fill="var(--color-background)" />
+      <g ref={pupils}>
+        <circle cx="17.5" cy="21.4" r="2.7" fill="var(--color-ink)" />
+        <circle cx="30.5" cy="21.4" r="2.7" fill="var(--color-ink)" />
+      </g>
+    </g>
+  );
+}
 
 const TONE_CLASS: Record<OrbTone, string> = {
   saffron: "text-orb-saffron",
@@ -65,13 +125,29 @@ export function Orb({
   face = "calm",
   className,
   size,
+  gaze = false,
 }: {
   tone?: OrbTone;
   face?: OrbFace;
   className?: string;
   /** Convenience: sets width/height inline when a Tailwind size isn't handy. */
   size?: number;
+  /**
+   * Open the eyes and follow the cursor. Falls back to the `face` variant on
+   * touch devices and when reduced motion is requested, so the orb is never
+   * left with blank staring eyes that cannot move.
+   */
+  gaze?: boolean;
 }) {
+  // Resolved after mount, never during render: `gazeSupported()` reads `window`
+  // and matchMedia, which don't exist during SSR, so deciding at render time
+  // would make the server and client markup disagree and trip hydration. The
+  // closed-eye face is the SSR output and the honest no-JS fallback.
+  const [tracking, setTracking] = useState(false);
+  useEffect(() => {
+    if (gaze && gazeSupported()) setTracking(true);
+  }, [gaze]);
+
   return (
     <svg
       viewBox="0 0 48 48"
@@ -83,7 +159,7 @@ export function Orb({
       className={cn(TONE_CLASS[tone], className)}
     >
       <circle cx="24" cy="24" r="24" fill="currentColor" />
-      <Face face={face} />
+      {tracking ? <GazingEyes /> : <Face face={face} />}
     </svg>
   );
 }

@@ -227,7 +227,9 @@ function MemberDashboard() {
           data-dash-orb
           className="pointer-events-none absolute -right-8 -top-8 hidden sm:block"
         >
-          <Orb tone="saffron" face="smile" className="h-32 w-32 opacity-80" />
+          {/* Watches the cursor — the one piece of liveliness on an otherwise
+              deliberately calm screen. */}
+          <Orb tone="saffron" face="smile" gaze className="h-32 w-32 opacity-80" />
         </div>
 
         <div className="relative max-w-xl">
@@ -519,6 +521,7 @@ function QuickTile({
       <Orb
         tone={orb}
         face="calm"
+        gaze
         className="h-11 w-11 shrink-0 transition-transform duration-300 group-hover:scale-105"
       />
       <div className="min-w-0 sm:mt-4">

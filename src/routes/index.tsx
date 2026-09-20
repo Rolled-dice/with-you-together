@@ -347,11 +347,13 @@ function Landing() {
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 -z-10"
           >
+            {/* These two watch the cursor. Scenery that notices you is on-theme
+                for a product about being checked in on. */}
             <div data-drift className="absolute left-[6%] top-[14%] opacity-70">
-              <Orb tone="saffron" face="plain" className="h-16 w-16" />
+              <Orb tone="saffron" face="plain" gaze className="h-16 w-16" />
             </div>
             <div data-drift className="absolute right-[8%] top-[9%] opacity-70">
-              <Orb tone="periwinkle" face="plain" className="h-11 w-11" />
+              <Orb tone="periwinkle" face="plain" gaze className="h-11 w-11" />
             </div>
             <div data-drift className="absolute left-[14%] top-[46%]">
               <OrbSparkle className="h-5 w-5 text-orb-terracotta" />
@@ -442,7 +444,7 @@ function Landing() {
                   to={nextStep}
                   className="group flex h-full items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 transition-colors hover:border-primary/40"
                 >
-                  <Orb tone={w.tone} face="calm" className="h-8 w-8 shrink-0" />
+                  <Orb tone={w.tone} face="calm" gaze className="h-8 w-8 shrink-0" />
                   <span className="min-w-0 flex-1">
                     <span className="block font-bold leading-snug">
                       {w.label}
