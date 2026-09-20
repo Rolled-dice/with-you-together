@@ -49,18 +49,18 @@ export function RotatingHeadline() {
 
       let index = 0;
       let split: SplitText | null = null;
-      let cycle: gsap.core.Timeline | null = null;
 
       const setPhrase = contextSafe?.((text: string, animateIn: boolean) => {
         split?.revert();
         slot.textContent = text;
         split = SplitText.create(slot, { type: "chars", aria: "none" });
         if (animateIn) {
+          // Straight rise from below, one character at a time. No overshoot,
+          // no fade tricks — just up.
           gsap.from(split.chars, {
-            yPercent: 120,
-            autoAlpha: 0,
-            duration: 0.55,
-            ease: "back.out(1.6)",
+            yPercent: 100,
+            duration: 0.5,
+            ease: "power3.out",
             stagger: 0.03,
           });
         }
@@ -70,21 +70,10 @@ export function RotatingHeadline() {
       setPhrase?.(PHRASES[0], true);
 
       const advance = contextSafe?.(() => {
-        const outgoing = split?.chars ?? [];
-        cycle = gsap.timeline();
-        cycle
-          // Outgoing characters drop and fade.
-          .to(outgoing, {
-            yPercent: -120,
-            autoAlpha: 0,
-            duration: 0.4,
-            ease: "power2.in",
-            stagger: 0.02,
-          })
-          .add(() => {
-            index = (index + 1) % PHRASES.length;
-            setPhrase?.(PHRASES[index], true);
-          });
+        // No exit animation — the outgoing phrase is simply replaced, and the
+        // incoming one rises up into its place.
+        index = (index + 1) % PHRASES.length;
+        setPhrase?.(PHRASES[index], true);
       });
 
       // A repeating driver: hold, advance, repeat.
@@ -93,7 +82,6 @@ export function RotatingHeadline() {
 
       return () => {
         loop.kill();
-        cycle?.kill();
         split?.revert();
       };
     },
@@ -114,11 +102,8 @@ export function RotatingHeadline() {
           {/* Longest phrase reserves the space. */}
           Improve relationships
         </span>
-        <span className="col-start-1 row-start-1 inline-flex items-baseline justify-center gap-1 whitespace-nowrap">
-          <span aria-hidden className="text-foreground/40">
-            [
-          </span>
-          {/* overflow-hidden clips characters as they rise/fall past the edge */}
+        <span className="col-start-1 row-start-1 flex justify-center whitespace-nowrap">
+          {/* overflow-hidden clips characters as they rise up past the edge */}
           <span className="overflow-hidden pb-[0.12em]">
             <span
               ref={slotRef}
@@ -128,9 +113,6 @@ export function RotatingHeadline() {
             >
               Sleep better
             </span>
-          </span>
-          <span aria-hidden className="text-foreground/40">
-            ]
           </span>
         </span>
       </span>
