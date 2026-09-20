@@ -9,8 +9,10 @@ import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import { isCurrentUserAgent } from "@/lib/agent-role.functions";
 import { SomeoneNearCursor } from "@/components/someonenear-cursor";
 import { NotificationBell } from "@/components/notification-bell";
+import { DevViewAsSwitcher } from "@/components/dev-view-as-switcher";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
+import { getViewAsRole } from "@/lib/dev-view-as";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
@@ -60,9 +62,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryFn: () => agentCheck({}),
     staleTime: 5 * 60 * 1000,
   });
-  const isAdmin = roleQ.data?.isAdmin === true;
-  const isAgent = agentQ.data?.isAgent === true;
-  const rolesLoading = roleQ.isLoading || agentQ.isLoading;
+  // Dev-only render override — see src/lib/dev-view-as.ts. It changes what
+  // this component chooses to display, never what the real RPCs return, so
+  // it cannot unlock a page or a row the signed-in account doesn't already
+  // have. Real role gating (_authenticated/route.tsx, every server fn) is
+  // completely unaffected and keeps checking has_role / is_call_agent as
+  // normal — the CRM and softphone routes still enforce those for real, this
+  // toggle just gets the SHELL to look the same way while you're on member
+  // data underneath.
+  const viewAs = getViewAsRole();
+  const isAdmin = viewAs ? viewAs === "admin" : roleQ.data?.isAdmin === true;
+  const isAgent = viewAs ? viewAs === "listener" : agentQ.data?.isAgent === true;
+  const rolesLoading = viewAs ? false : roleQ.isLoading || agentQ.isLoading;
   const isStaff = isAdmin || isAgent;
   const navItems = isAdmin ? ADMIN_NAV : isAgent ? AGENT_NAV : rolesLoading ? [] : NAV;
 
@@ -79,6 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
       <SomeoneNearCursor />
+      <DevViewAsSwitcher />
       <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
 
         {/* Sidebar (desktop) */}
