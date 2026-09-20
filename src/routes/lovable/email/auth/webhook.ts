@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "WithU Connection Hub"
+const SITE_NAME = "SomeoneNear"
 const SENDER_DOMAIN = "care.someonenear.com"
 const ROOT_DOMAIN = "someonenear.com"
 const FROM_DOMAIN = "someonenear.com"
