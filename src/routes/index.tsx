@@ -121,12 +121,12 @@ const WORRIES: { label: string; answer: string; tone: OrbTone }[] = [
   {
     label: "Nobody tells me how they are",
     answer: "A short update after every single call.",
-    tone: "violet",
+    tone: "navy",
   },
   {
     label: "They won't use an app",
     answer: "They never have to. It's just a phone call.",
-    tone: "tangerine",
+    tone: "terracotta",
   },
 ];
 
@@ -353,7 +353,7 @@ function Landing() {
               <Orb tone="periwinkle" face="plain" className="h-11 w-11" />
             </div>
             <div data-drift className="absolute left-[14%] top-[46%]">
-              <OrbSparkle className="h-5 w-5 text-orb-tangerine" />
+              <OrbSparkle className="h-5 w-5 text-orb-terracotta" />
             </div>
             <div data-drift className="absolute right-[16%] top-[38%]">
               <OrbSparkle className="h-4 w-4 text-orb-pink" />
@@ -479,7 +479,7 @@ function Landing() {
               >
                 Checking in when they can&apos;t
                 <Orb
-                  tone={i % 2 === 0 ? "tangerine" : "violet"}
+                  tone={i % 2 === 0 ? "terracotta" : "navy"}
                   face="calm"
                   className="h-5 w-5"
                 />
@@ -561,7 +561,7 @@ function Landing() {
         <section className="px-6 py-10">
           <div
             data-reveal
-            className="mx-auto w-full max-w-6xl rounded-[32px] bg-plate-violet px-7 py-12 text-background sm:px-12"
+            className="mx-auto w-full max-w-6xl rounded-[32px] bg-plate-navy px-7 py-12 text-background sm:px-12"
           >
             <h2 className="mx-auto max-w-lg text-center text-2xl sm:text-3xl">
               A trained human, not a robocall

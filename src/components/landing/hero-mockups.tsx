@@ -138,7 +138,7 @@ export function ListenerCallMockup() {
 
       <Chip className="bottom-9 right-0 max-w-[132px] rotate-[4deg] font-medium">
         <span className="flex items-start gap-1.5">
-          <Orb tone="violet" face="plain" className="mt-px h-2.5 w-2.5 shrink-0" />
+          <Orb tone="navy" face="plain" className="mt-px h-2.5 w-2.5 shrink-0" />
           <span className="leading-snug">How are you feeling today?</span>
         </span>
       </Chip>

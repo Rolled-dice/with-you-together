@@ -64,9 +64,12 @@
 :root {
   --radius: 0.625rem;
 
-  /* Playroom — warm white canvas, warm charcoal ink, one violet voltage.
-   * Colour arrives only through the character-orb family; the page itself
-   * stays quiet so the orbs and the type carry the personality. */
+  /* Playroom — warm white canvas, warm charcoal ink, one navy voltage.
+   * The brand pair is taken straight from the logo: a slate navy and a
+   * terracotta. Navy carries every CTA because it reads calm and trustworthy,
+   * which suits a product about someone's ageing parents far better than a
+   * bright accent would. Terracotta is the warm counterweight. Wider colour
+   * arrives only through the character-orb family. */
   --background: #fffdfb;
   --surface: #f3efe9;
   --foreground: #2a2725;
@@ -76,18 +79,18 @@
   --popover: #ffffff;
   --popover-foreground: #2a2725;
 
-  /* Brand: violet voltage for CTAs, warm grey plate, tangerine brand mark */
-  --brand-primary: #5a22e0;
+  /* Brand: navy voltage for CTAs, warm grey plate, terracotta accent */
+  --brand-primary: #2b4b6c;
   --brand-secondary: #f3efe9;
-  --brand-accent: #ff6e1f;
+  --brand-accent: #c4552f;
 
-  --primary: #5a22e0;
+  --primary: #2b4b6c;
   --primary-foreground: #ffffff;
   --secondary: #f3efe9;
   --secondary-foreground: #2a2725;
   --muted: #f3efe9;
   --muted-foreground: #6b6561;
-  --accent: #ede6fb;
+  --accent: #e4ecf4;
   --accent-foreground: #2a2725;
   /* Muted signal red, never alarm-bright */
   --destructive: #c4453b;
@@ -95,16 +98,16 @@
 
   --border: #e7e2da;
   --input: #ddd6cc;
-  --ring: #5a22e0;
+  --ring: #2b4b6c;
 
   --sidebar: #f8f5f1;
   --sidebar-foreground: #2a2725;
-  --sidebar-primary: #5a22e0;
+  --sidebar-primary: #2b4b6c;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ede6fb;
+  --sidebar-accent: #e4ecf4;
   --sidebar-accent-foreground: #2a2725;
   --sidebar-border: #e7e2da;
-  --sidebar-ring: #5a22e0;
+  --sidebar-ring: #2b4b6c;
 }
 
 
@@ -117,30 +120,32 @@
   --card-foreground: #f5f1ec;
   --popover: #262322;
   --popover-foreground: #f5f1ec;
-  --brand-primary: #a889ff;
+  /* Navy can't carry a CTA on charcoal, so it lifts to a pale steel here
+   * while keeping the same hue relationship to the terracotta. */
+  --brand-primary: #8fb4d9;
   --brand-secondary: #2f2b29;
-  --brand-accent: #ff8b4d;
-  --primary: #a889ff;
+  --brand-accent: #e0744a;
+  --primary: #8fb4d9;
   --primary-foreground: #1c1a19;
   --secondary: #2f2b29;
   --secondary-foreground: #f5f1ec;
   --muted: #2b2826;
   --muted-foreground: #a8a29b;
-  --accent: #352b52;
+  --accent: #24384d;
   --accent-foreground: #f5f1ec;
   --destructive: #e4756b;
   --destructive-foreground: #2a1210;
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: #a889ff;
+  --ring: #8fb4d9;
   --sidebar: #211f1e;
   --sidebar-foreground: #f5f1ec;
-  --sidebar-primary: #a889ff;
+  --sidebar-primary: #8fb4d9;
   --sidebar-primary-foreground: #1c1a19;
   --sidebar-accent: #2f2b29;
   --sidebar-accent-foreground: #f5f1ec;
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: #a889ff;
+  --sidebar-ring: #8fb4d9;
 }
 
 @theme inline {
@@ -148,21 +153,22 @@
    * Each orb is a flat fill, never a gradient. */
   --color-orb-saffron: #ffce2e;
   --color-orb-pink: #ffa6cb;
-  --color-orb-aqua: #3fb4f7;
+  --color-orb-aqua: #4aa8dc;
   --color-orb-grass: #0e8a44;
-  --color-orb-violet: #40197f;
-  --color-orb-periwinkle: #7c8ff0;
-  --color-orb-tangerine: #ff6e1f;
+  --color-orb-navy: #1f3a57;
+  --color-orb-periwinkle: #7f9dc4;
+  /* The brand terracotta, straight off the logo */
+  --color-orb-terracotta: #c4552f;
 
   /* Full-bleed section plates, lifted straight from the orb family.
    * Each plate declares whether it takes ink or light type — saffron, pink,
    * periwinkle and tangerine are light enough to need ink at AA. */
   --color-plate-saffron: #f5cf1a;
   --color-plate-pink: #f0a3c6;
-  --color-plate-violet: #4c1d95;
+  --color-plate-navy: #1f3a57;
   --color-plate-grass: #14713c;
-  --color-plate-periwinkle: #7c8ff0;
-  --color-plate-tangerine: #ff8c3f;
+  --color-plate-periwinkle: #7f9dc4;
+  --color-plate-terracotta: #c4552f;
   --color-plate-cream: #f8f4ef;
 
   /* Warm neutrals */
@@ -173,8 +179,8 @@
   /* Compatibility aliases. The docs, admin and feedback surfaces still paint
    * with the previous Harbor vocabulary; these remap those names onto the new
    * palette so nothing renders unstyled while the marketing page moves first. */
-  --color-coral: #ff6e1f;
-  --color-clay: #ff6e1f;
+  --color-coral: #c4552f;
+  --color-clay: #c4552f;
   --color-clay-soft: #ffcf8a;
   --color-mint: #cdebd8;
   --color-blush: #ffd9e7;
@@ -380,7 +386,7 @@
 }
 /* Very soft flat shadows — presence, never elevation drama */
 @utility shadow-glow {
-  box-shadow: 0 18px 40px -24px rgb(90 34 224 / 0.28);
+  box-shadow: 0 18px 40px -24px rgb(43 75 108 / 0.3);
 }
 @utility shadow-soft {
   box-shadow: 0 8px 24px -14px rgb(42 39 37 / 0.14);

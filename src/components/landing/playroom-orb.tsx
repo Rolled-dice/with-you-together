@@ -14,9 +14,9 @@ export type OrbTone =
   | "pink"
   | "aqua"
   | "grass"
-  | "violet"
+  | "navy"
   | "periwinkle"
-  | "tangerine";
+  | "terracotta";
 
 export type OrbFace = "calm" | "smile" | "wink" | "plain";
 
@@ -25,9 +25,9 @@ const TONE_CLASS: Record<OrbTone, string> = {
   pink: "text-orb-pink",
   aqua: "text-orb-aqua",
   grass: "text-orb-grass",
-  violet: "text-orb-violet",
+  navy: "text-orb-navy",
   periwinkle: "text-orb-periwinkle",
-  tangerine: "text-orb-tangerine",
+  terracotta: "text-orb-terracotta",
 };
 
 /** Faces sit on a 48x48 viewBox so every orb scales from one geometry. */

@@ -425,7 +425,7 @@ export function CompanionVisual() {
       <Screen className="w-[228px]">
         {/* Header makes it unmistakably a chat, and with whom */}
         <div className="flex items-center gap-2 border-b border-border px-1 pb-2">
-          <Orb tone="violet" face="smile" className="h-6 w-6 shrink-0" />
+          <Orb tone="navy" face="smile" className="h-6 w-6 shrink-0" />
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold leading-tight">Companion</p>
             <p className="flex items-center gap-1 text-[7.5px] leading-tight text-orb-grass">
@@ -667,9 +667,9 @@ export function SendLaterVisual() {
         <span className="flex items-center gap-2">
           <span
             data-anim="seal"
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-orb-tangerine/20"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-orb-terracotta/20"
           >
-            <EnvelopeSimpleIcon className="h-3.5 w-3.5 text-orb-tangerine" />
+            <EnvelopeSimpleIcon className="h-3.5 w-3.5 text-orb-terracotta" />
           </span>
           <span className="text-[10px] font-extrabold uppercase tracking-wide text-muted-foreground">
             Scheduled
