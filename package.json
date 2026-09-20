@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "seed:users": "node scripts/seed-dev-users.mjs",
-    "seed:users:destroy": "node scripts/seed-dev-users.mjs --destroy"
+    "seed:users:destroy": "node scripts/seed-dev-users.mjs --destroy",
+    "seed:users:verify": "node scripts/seed-dev-users.mjs --verify"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.11",

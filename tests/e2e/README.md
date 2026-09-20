@@ -71,6 +71,32 @@ Remove them again:
 npm run seed:users:destroy -- --yes-write-to-hosted
 ```
 
+### If sign-in says the password is wrong
+
+Check it from the command line first — this signs in exactly the way the browser
+does, and needs no service-role key:
+
+```powershell
+$env:SEED_PASSWORD='<what you think it is>'
+npm run seed:users:verify
+```
+
+Both the seed and the verify print a `sha256=` fingerprint of the password they
+received. **If the two fingerprints differ, your shell altered the value, not the
+script.**
+
+The usual culprit is PowerShell interpolating inside double quotes:
+
+```powershell
+$env:SEED_PASSWORD="Pa$$w0rd1234"   # node receives Pa}w0rd1234  — broken
+$env:SEED_PASSWORD='Pa$$w0rd1234'   # node receives Pa$$w0rd1234 — correct
+```
+
+Use **single quotes** for any password containing `$`, `` ` `` or `!`.
+
+Also note the password is only ever written during a seed run. Changing
+`SEED_PASSWORD` without re-seeding will always fail.
+
 ### Things worth knowing
 
 - **Admin and listener are different mechanisms.** The CRM is gated on the

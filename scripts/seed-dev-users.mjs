@@ -94,6 +94,7 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const PASSWORD = process.env.SEED_PASSWORD;
 
 const destroy = process.argv.includes("--destroy");
+const verify = process.argv.includes("--verify");
 
 function die(msg) {
   console.error(`\n  ✗ ${msg}\n`);
@@ -101,7 +102,8 @@ function die(msg) {
 }
 
 if (!SUPABASE_URL) die("SUPABASE_URL is not set (checked env, .env, .env.development).");
-if (!SERVICE_KEY) {
+// --verify signs in the way the browser does, so it needs no service-role key.
+if (!SERVICE_KEY && !verify) {
   die(
     "SUPABASE_SERVICE_ROLE_KEY is not set.\n" +
       "    Set it for this command only:\n" +
@@ -119,8 +121,42 @@ if (!destroy && !PASSWORD) {
       '      $env:SEED_PASSWORD="<something long>"; node scripts/seed-dev-users.mjs',
   );
 }
-if (!destroy && PASSWORD.length < 12) {
+if (!destroy && !verify && PASSWORD.length < 12) {
   die("SEED_PASSWORD must be at least 12 characters.");
+}
+
+/**
+ * A non-reversible fingerprint of the password the script actually received.
+ *
+ * This exists because the usual cause of "wrong password" is the shell eating
+ * the value before node ever sees it: in PowerShell a `$` inside double quotes
+ * interpolates, so "Pa$$w0rd1234" arrives as "Paw0rd1234". Printing length plus
+ * a hash prefix lets you confirm the seed and your login attempt agree, without
+ * putting the secret in your scrollback.
+ */
+async function fingerprint(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const hex = [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `len=${value.length} sha256=${hex.slice(0, 12)}`;
+}
+
+if (!destroy) {
+  if (PASSWORD !== PASSWORD.trim()) {
+    console.warn(
+      "\n  ! SEED_PASSWORD has leading or trailing whitespace. That is part of the\n" +
+        "    password and you will have to type it at sign-in. Probably not intended.",
+    );
+  }
+  if (/\$/.test(PASSWORD)) {
+    console.warn(
+      "\n  ! SEED_PASSWORD contains a '$'. If you set it in PowerShell with double\n" +
+        "    quotes, the shell may already have eaten part of it. Compare the\n" +
+        "    fingerprint below against `node scripts/seed-dev-users.mjs --verify`.",
+    );
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -131,7 +167,8 @@ if (!destroy && PASSWORD.length < 12) {
 // project, so these writes are real. Require an explicit acknowledgement rather
 // than letting a stray command create known-password logins in a live database.
 const isLocal = /localhost|127\.0\.0\.1|kong:8000/.test(SUPABASE_URL);
-if (!isLocal && !process.argv.includes("--yes-write-to-hosted")) {
+// --verify only reads, so the write gate does not apply to it.
+if (!verify && !isLocal && !process.argv.includes("--yes-write-to-hosted")) {
   die(
     `Refusing to run: ${SUPABASE_URL} is not a local Supabase.\n` +
       "    These accounts have a password you know, so they must never exist in\n" +
@@ -140,9 +177,11 @@ if (!isLocal && !process.argv.includes("--yes-write-to-hosted")) {
   );
 }
 
-const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+const supabase = SERVICE_KEY
+  ? createClient(SUPABASE_URL, SERVICE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+  : null;
 
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                     */
@@ -267,7 +306,9 @@ async function runDestroy() {
 /* -------------------------------------------------------------------------- */
 
 async function runSeed() {
-  console.log(`\n  Seeding test accounts on ${SUPABASE_URL}\n`);
+  console.log(`\n  Seeding test accounts on ${SUPABASE_URL}`);
+  // Print the fingerprint so it can be compared against --verify.
+  console.log(`  Password being set: ${await fingerprint(PASSWORD)}\n`);
   const results = [];
 
   for (const seed of SEEDS) {
@@ -310,8 +351,86 @@ async function runSeed() {
 `);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Verify                                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Attempts a real sign-in for each seed account using the publishable key —
+ * the exact path the browser takes. This distinguishes the three failures that
+ * all surface as "Invalid login credentials" in the UI:
+ *   - the account does not exist (seed never actually ran)
+ *   - the account exists but the password differs (shell mangled it)
+ *   - the account exists and the email is unconfirmed
+ */
+async function runVerify() {
+  const publishable =
+    process.env.SUPABASE_PUBLISHABLE_KEY ??
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!publishable) die("SUPABASE_PUBLISHABLE_KEY is not set; cannot test sign-in.");
+
+  console.log(`\n  Verifying sign-in against ${SUPABASE_URL}`);
+  console.log(`  Password the script received: ${await fingerprint(PASSWORD)}\n`);
+
+  const anon = createClient(SUPABASE_URL, publishable, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  let anyFailed = false;
+
+  for (const seed of SEEDS) {
+    const { data, error } = await anon.auth.signInWithPassword({
+      email: seed.email,
+      password: PASSWORD,
+    });
+
+    if (error) {
+      anyFailed = true;
+      console.log(`  ✗ ${seed.email.padEnd(30)} ${error.message}`);
+      continue;
+    }
+
+    const u = data.user;
+    const confirmed = Boolean(u?.email_confirmed_at ?? u?.confirmed_at);
+    console.log(
+      `  ✓ ${seed.email.padEnd(30)} signed in  id=${u.id.slice(0, 8)}…  confirmed=${confirmed}`,
+    );
+    await anon.auth.signOut();
+  }
+
+  if (anyFailed) {
+    console.log(`
+  ─────────────────────────────────────────────────────────────
+  "Invalid login credentials" means one of three things:
+
+  1. The account does not exist. The seed may have exited on a guard.
+     Re-run it and read the output:
+       npm run seed:users -- --yes-write-to-hosted
+
+  2. The password differs from the one you are typing. Almost always the
+     shell, not the script. In PowerShell, a '$' inside DOUBLE quotes
+     interpolates, so "Pa\$\$w0rd1234" reaches node as "Paw0rd1234".
+     Use SINGLE quotes for anything containing $ ! or \`:
+       $env:SEED_PASSWORD='Pa$$w0rd1234'
+     Then re-seed, and check the fingerprint above matches between the
+     seed run and this verify run.
+
+  3. Email unconfirmed. The seed passes email_confirm: true, so this
+     should not happen — if confirmed=false above, tell me.
+
+  Note: the password is only ever set by the seed. Changing SEED_PASSWORD
+  and NOT re-seeding will always fail.
+`);
+    process.exit(1);
+  }
+
+  console.log("\n  All three accounts sign in. Use these exact values at /auth.\n");
+}
+
 try {
-  await (destroy ? runDestroy() : runSeed());
+  if (verify) await runVerify();
+  else if (destroy) await runDestroy();
+  else await runSeed();
 } catch (err) {
   die(err instanceof Error ? err.message : String(err));
 }
