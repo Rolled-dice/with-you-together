@@ -1,3 +1,6 @@
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -5,11 +8,10 @@ import {
   TrashIcon,
   LockSimpleIcon,
 } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AppCard, SectionHeading } from "@/components/app-page";
-import { Orb } from "@/components/landing/playroom-orb";
 import { Button } from "@/components/ui/button";
 import {
   createJournalEntry,
@@ -17,6 +19,94 @@ import {
   listJournalEntries,
   type JournalEntry,
 } from "@/lib/mood.functions";
+
+if (typeof window !== "undefined") gsap.registerPlugin(useGSAP, DrawSVGPlugin);
+
+/**
+ * A handwritten squiggle that draws itself on a loop, sitting where the orb
+ * used to be. It reads as "writing" — the right cue for a journal — and the
+ * pen nib rides the end of the line as it draws.
+ *
+ * Idle-only motion, so it obeys reduced motion: the ambient timeline is created
+ * inside gsap.matchMedia's no-preference branch and simply isn't built
+ * otherwise, leaving a static drawn line.
+ */
+function WritingMark() {
+  const root = useRef<SVGSVGElement>(null);
+
+  useGSAP(
+    () => {
+      const el = root.current;
+      if (!el) return;
+      const line = el.querySelector<SVGPathElement>("[data-ink]");
+      const nib = el.querySelector<SVGGElement>("[data-nib]");
+      if (!line) return;
+
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const tl = gsap.timeline({ repeat: -1, repeatDelay: 1.1 });
+        tl.set(line, { drawSVG: "0%" })
+          .set(nib, { autoAlpha: 1, x: NIB_PATH[0].x, y: NIB_PATH[0].y })
+          .to(line, { drawSVG: "100%", duration: 1.6, ease: "power1.inOut" })
+          // The nib rides the visible end of the stroke as it grows, stepping
+          // through sampled points along the same path.
+          .to(
+            nib,
+            {
+              keyframes: { x: NIB_PATH.map((p) => p.x), y: NIB_PATH.map((p) => p.y) },
+              duration: 1.6,
+              ease: "power1.inOut",
+            },
+            "<",
+          )
+          .to(nib, { autoAlpha: 0, duration: 0.3 }, "-=0.1")
+          // Erase by pushing the visible window off the end, then it loops.
+          .to(line, { drawSVG: "100% 100%", duration: 0.5, ease: "power1.in" }, "+=0.6");
+        return () => tl.kill();
+      });
+
+      return () => mm.revert();
+    },
+    { scope: root },
+  );
+
+  return (
+    <svg
+      ref={root}
+      viewBox="0 0 48 48"
+      className="h-11 w-11 text-primary"
+      role="presentation"
+      aria-hidden="true"
+    >
+      {/* A gently looping cursive stroke */}
+      <path
+        data-ink
+        d="M8 30c4-10 7-10 9-4s3 10 6 4 4-14 7-9 3 12 5 9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Pen nib that rides the drawing end */}
+      <g data-nib className="text-orb-terracotta">
+        <circle cx="0" cy="0" r="2.4" fill="currentColor" />
+      </g>
+    </svg>
+  );
+}
+
+/** Sample points along the ink path so the nib can trace it without MotionPath. */
+const NIB_PATH = [
+  { x: 8, y: 30 },
+  { x: 13, y: 22 },
+  { x: 17, y: 26 },
+  { x: 21, y: 28 },
+  { x: 26, y: 20 },
+  { x: 30, y: 23 },
+  { x: 35, y: 30 },
+  { x: 40, y: 30 },
+];
 
 const MOOD_EMOJI: Record<number, string> = {
   1: "😔",
@@ -61,11 +151,37 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
     queryFn: () => listFn(),
   });
 
+  const listRef = useRef<HTMLUListElement>(null);
+  // The id of the entry just saved, so only that one gets the write-in animation
+  // rather than the whole list re-animating on every refetch.
+  const [justSaved, setJustSaved] = useState<string | null>(null);
+
+  useGSAP(
+    () => {
+      if (!justSaved) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const el = listRef.current?.querySelector(`[data-entry="${justSaved}"]`);
+      if (el) {
+        gsap.from(el, {
+          autoAlpha: 0,
+          y: -10,
+          height: 0,
+          marginBottom: 0,
+          duration: 0.5,
+          ease: "power3.out",
+          clearProps: "height,marginBottom",
+        });
+      }
+    },
+    { dependencies: [justSaved], scope: listRef },
+  );
+
   const createMut = useMutation({
     mutationFn: (text: string) => createFn({ data: { body: text } }),
-    onSuccess: () => {
+    onSuccess: (row) => {
       setBody("");
       setOpen(false);
+      setJustSaved(row.id);
       qc.invalidateQueries({ queryKey: ["journal-entries"] });
       onEntrySaved?.();
       toast.success("Saved to your journal");
@@ -97,7 +213,7 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
   const canSave = body.trim().length > 0 && !createMut.isPending;
 
   return (
-    <section data-page-reveal className="mt-6">
+    <section data-page-reveal>
       <SectionHeading title="Journal" hint="Private to you" />
 
       <AppCard>
@@ -109,7 +225,9 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
             onClick={() => setOpen(true)}
             className="flex w-full items-center gap-4 text-left"
           >
-            <Orb tone="periwinkle" face="smile" gaze className="h-11 w-11 shrink-0" />
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+              <WritingMark />
+            </span>
             <span className="min-w-0">
               <span className="block text-base font-bold">Write something down</span>
               <span className="mt-0.5 block text-sm text-muted-foreground">
@@ -171,9 +289,9 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
           first.
         </p>
       ) : (
-        <ul className="mt-4 space-y-3">
+        <ul ref={listRef} className="mt-4 space-y-3">
           {entries.map((e) => (
-            <li key={e.id} data-page-stagger>
+            <li key={e.id} data-entry={e.id}>
               <AppCard className="group">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
