@@ -36,3 +36,8 @@ dist-ssr
 # Git worktrees + subagent-driven-development scratch
 .worktrees/
 .superpowers/
+
+# Original brand artwork. Kept on disk as the source for scripts/clean-logo.ps1,
+# but not committed: the supplied export is a 7 MB base64 raster in an SVG wrapper.
+brand/
+
