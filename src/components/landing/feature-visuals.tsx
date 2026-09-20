@@ -43,7 +43,10 @@ function Screen({
 }) {
   return (
     <div
-      className={`rounded-3xl border-[5px] border-ink bg-card p-3 shadow-soft ${className ?? ""}`}
+      // `text-foreground` is load-bearing: the dark plates (violet, grass) set
+      // a near-white ink on the whole slide, which would otherwise cascade into
+      // this light card and render every unstyled label invisible.
+      className={`rounded-3xl border-[5px] border-ink bg-card p-3 text-foreground shadow-soft ${className ?? ""}`}
     >
       <div className="mx-auto mb-2.5 h-1 w-9 rounded-full bg-ink/15" />
       {children}
@@ -474,10 +477,8 @@ export function CompanionVisual() {
           )}
         </div>
       </Screen>
-
-      <FloatCard anim="note" className="-right-2 top-14">
-        Answer in a word · or skip
-      </FloatCard>
+      {/* No float card here on purpose: the thread is the whole story, and the
+       * "answer in a word" hint already lives in the slide's body copy. */}
     </div>
   );
 }
@@ -537,23 +538,26 @@ export const companionAmbient: AmbientBuilder = (root) => {
       .to({}, { duration: 0.35 });
   });
 
-  tl.to(
-    note,
-    {
-      autoAlpha: 1,
-      y: 0,
-      duration: 0.4,
-      ease: "power2.out",
-      startAt: { y: 8 },
-    },
-    "-=0.3",
-  )
-    .to({}, { duration: 1.2 })
-    .to([msgs, note].flat().filter(Boolean), {
-      autoAlpha: 0,
-      duration: 0.4,
-      ease: "power2.in",
-    });
+  // `note` is optional — guard rather than handing GSAP a null target.
+  if (note) {
+    tl.to(
+      note,
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.4,
+        ease: "power2.out",
+        startAt: { y: 8 },
+      },
+      "-=0.3",
+    );
+  }
+
+  tl.to({}, { duration: 1.2 }).to([msgs, note].flat().filter(Boolean), {
+    autoAlpha: 0,
+    duration: 0.4,
+    ease: "power2.in",
+  });
 
   return tl;
 };
@@ -570,7 +574,8 @@ export function InsightsVisual() {
 
   return (
     <div className="relative mx-auto w-full max-w-[300px]">
-      <div className="rounded-2xl bg-card p-4 shadow-soft">
+      {/* text-foreground so a dark plate's ink can't cascade in — see Screen */}
+      <div className="rounded-2xl bg-card p-4 text-foreground shadow-soft">
         <p className="text-[10px] font-extrabold uppercase tracking-wide text-muted-foreground">
           Last 7 days
         </p>
@@ -655,7 +660,10 @@ export const insightsAmbient: AmbientBuilder = (root) => {
 export function SendLaterVisual() {
   return (
     <div className="relative mx-auto w-full max-w-[300px]">
-      <div data-anim="letter" className="rounded-2xl bg-card p-4 shadow-soft">
+      <div
+        data-anim="letter"
+        className="rounded-2xl bg-card p-4 text-foreground shadow-soft"
+      >
         <span className="flex items-center gap-2">
           <span
             data-anim="seal"
