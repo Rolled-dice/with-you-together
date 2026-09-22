@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as DocsSendLaterRouteImport } from './routes/docs.send-later'
 import { Route as DocsSafetyRouteImport } from './routes/docs.safety'
 import { Route as DocsMedicationRouteImport } from './routes/docs.medication'
 import { Route as DocsListenersRouteImport } from './routes/docs.listeners'
@@ -85,6 +86,11 @@ const IndexRoute = IndexRouteImport.update({
 const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsSendLaterRoute = DocsSendLaterRouteImport.update({
+  id: '/send-later',
+  path: '/send-later',
   getParentRoute: () => DocsRoute,
 } as any)
 const DocsSafetyRoute = DocsSafetyRouteImport.update({
@@ -341,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/docs/listeners': typeof DocsListenersRoute
   '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
+  '/docs/send-later': typeof DocsSendLaterRoute
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
@@ -388,6 +395,7 @@ export interface FileRoutesByTo {
   '/docs/listeners': typeof DocsListenersRoute
   '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
+  '/docs/send-later': typeof DocsSendLaterRoute
   '/docs': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/docs/listeners': typeof DocsListenersRoute
   '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
+  '/docs/send-later': typeof DocsSendLaterRoute
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/calls': typeof AuthenticatedAdminCallsRoute
@@ -490,6 +499,7 @@ export interface FileRouteTypes {
     | '/docs/listeners'
     | '/docs/medication'
     | '/docs/safety'
+    | '/docs/send-later'
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/calls'
@@ -537,6 +547,7 @@ export interface FileRouteTypes {
     | '/docs/listeners'
     | '/docs/medication'
     | '/docs/safety'
+    | '/docs/send-later'
     | '/docs'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/calls'
@@ -587,6 +598,7 @@ export interface FileRouteTypes {
     | '/docs/listeners'
     | '/docs/medication'
     | '/docs/safety'
+    | '/docs/send-later'
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/calls'
@@ -669,6 +681,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/docs/'
       preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/send-later': {
+      id: '/docs/send-later'
+      path: '/send-later'
+      fullPath: '/docs/send-later'
+      preLoaderRoute: typeof DocsSendLaterRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/safety': {
@@ -1035,6 +1054,7 @@ interface DocsRouteChildren {
   DocsListenersRoute: typeof DocsListenersRoute
   DocsMedicationRoute: typeof DocsMedicationRoute
   DocsSafetyRoute: typeof DocsSafetyRoute
+  DocsSendLaterRoute: typeof DocsSendLaterRoute
   DocsIndexRoute: typeof DocsIndexRoute
 }
 
@@ -1050,6 +1070,7 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsListenersRoute: DocsListenersRoute,
   DocsMedicationRoute: DocsMedicationRoute,
   DocsSafetyRoute: DocsSafetyRoute,
+  DocsSendLaterRoute: DocsSendLaterRoute,
   DocsIndexRoute: DocsIndexRoute,
 }
 
