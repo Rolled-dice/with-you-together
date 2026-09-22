@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChatCircleIcon, PhoneCallIcon, UsersIcon, ChartLineIcon, LifebuoyIcon, PillIcon, ArrowRightIcon } from "@phosphor-icons/react";
+import { ChatCircleIcon, PhoneCallIcon, UsersIcon, ChartLineIcon, LifebuoyIcon, PillIcon, CalendarHeartIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { DocHeader, DocSection, Steps, TryItNow } from "@/components/docs/docs-shell";
 
 export const Route = createFileRoute("/docs/")({
@@ -21,6 +21,7 @@ const cards = [
   { to: "/docs/family", icon: UsersIcon, title: "Family Circle", body: "Invite loved ones. Share care." },
   { to: "/docs/insights", icon: ChartLineIcon, title: "Insights", body: "See gentle patterns in how you feel." },
   { to: "/docs/medication", icon: PillIcon, title: "Medication", body: "Dose reminders, with or without a prescription photo." },
+  { to: "/docs/send-later", icon: CalendarHeartIcon, title: "Send It Later", body: "Schedule a message for a future day." },
   { to: "/docs/safety", icon: LifebuoyIcon, title: "Safety", body: "Crisis help when it matters most." },
 ];
 
@@ -51,13 +52,13 @@ function Page() {
             <Link
               key={c.to}
               to={c.to}
-              className="group flex items-start gap-3 rounded-2xl border p-4 transition hover:border-coral hover:bg-coral/5"
+              className="group flex items-start gap-3 rounded-2xl border border-border p-4 transition hover:border-primary/40 hover:bg-primary/5"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-coral/10 text-coral">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <c.icon className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <div className="flex items-center gap-1 font-semibold group-hover:text-coral">
+                <div className="flex items-center gap-1 font-bold group-hover:text-primary">
                   {c.title} <ArrowRightIcon className="h-3.5 w-3.5 opacity-0 transition group-hover:opacity-100" />
                 </div>
                 <div className="text-sm text-muted-foreground">{c.body}</div>

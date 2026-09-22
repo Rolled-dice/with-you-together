@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { HeartIcon, ListIcon, ArrowLeftIcon, ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { ListIcon, ArrowLeftIcon, ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { BrandMark } from "@/components/landing/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export const DOC_GROUPS: DocGroup[] = [
       { to: "/docs/family", label: "Family Circle" },
       { to: "/docs/insights", label: "Insights" },
       { to: "/docs/medication", label: "Medication" },
+      { to: "/docs/send-later", label: "Send Later" },
       { to: "/docs/safety", label: "Safety" },
     ],
   },
@@ -61,10 +63,10 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                     to={l.to}
                     onClick={onNavigate}
                     className={cn(
-                      "block rounded-lg px-3 py-2 text-sm transition",
+                      "block rounded-xl px-3 py-2 text-sm transition",
                       active
-                        ? "bg-coral/10 text-coral font-semibold"
-                        : "text-foreground/80 hover:bg-muted hover:text-foreground",
+                        ? "bg-primary/10 font-bold text-primary"
+                        : "font-medium text-foreground/75 hover:bg-muted hover:text-foreground",
                     )}
                   >
                     {l.label}
@@ -105,17 +107,19 @@ export function DocsShell() {
               </SheetContent>
             </Sheet>
             <Link to="/" className="flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl gradient-sunrise text-neutral-900">
-                <HeartIcon className="h-4 w-4" fill="currentColor" strokeWidth={2.6} />
+              <BrandMark className="h-7 w-auto" />
+              <span className="text-base font-extrabold tracking-tight">
+                <span className="text-orb-navy">Someone</span>
+                <span className="text-orb-terracotta">Near</span>
+                <span className="ml-1.5 font-semibold text-muted-foreground">Docs</span>
               </span>
-              <span className="font-semibold tracking-tight">SomeoneNear Docs</span>
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <Button asChild variant="ghost" size="sm" className="hidden rounded-full font-semibold sm:inline-flex">
               <Link to="/">Back to site</Link>
             </Button>
-            <Button asChild size="sm" className="rounded-brand bg-neutral-900 text-white hover:bg-neutral-800">
+            <Button asChild size="sm" className="rounded-full font-bold">
               <Link to="/auth">Sign in</Link>
             </Button>
           </div>
@@ -151,23 +155,23 @@ export function DocsShell() {
               {prev ? (
                 <Link
                   to={prev.to}
-                  className="group rounded-2xl border p-4 transition hover:border-coral hover:bg-coral/5"
+                  className="group rounded-2xl border border-border p-4 transition hover:border-primary/40 hover:bg-primary/5"
                 >
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <ArrowLeftIcon className="h-3 w-3" /> Previous
                   </div>
-                  <div className="mt-1 font-semibold group-hover:text-coral">{prev.label}</div>
+                  <div className="mt-1 font-bold group-hover:text-primary">{prev.label}</div>
                 </Link>
               ) : <div />}
               {next ? (
                 <Link
                   to={next.to}
-                  className="group rounded-2xl border p-4 text-right transition hover:border-coral hover:bg-coral/5 sm:text-right"
+                  className="group rounded-2xl border border-border p-4 text-right transition hover:border-primary/40 hover:bg-primary/5 sm:text-right"
                 >
                   <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
                     Next <ArrowRightIcon className="h-3 w-3" />
                   </div>
-                  <div className="mt-1 font-semibold group-hover:text-coral">{next.label}</div>
+                  <div className="mt-1 font-bold group-hover:text-primary">{next.label}</div>
                 </Link>
               ) : <div />}
             </nav>
@@ -192,12 +196,14 @@ export function DocHeader({
   return (
     <header className="mb-8">
       {eyebrow && (
-        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-coral">
-          {eyebrow}
-        </div>
+        <div className="mb-2 text-sm font-bold text-orb-terracotta">{eyebrow}</div>
       )}
-      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
-      {intro && <p className="mt-3 text-base text-muted-foreground sm:text-lg">{intro}</p>}
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
+      {intro && (
+        <p className="mt-3 text-[1.0625rem] leading-relaxed text-muted-foreground sm:text-lg">
+          {intro}
+        </p>
+      )}
     </header>
   );
 }
@@ -205,8 +211,8 @@ export function DocHeader({
 export function DocSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mt-10">
-      <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h2>
-      <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-foreground/90">
+      <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">{title}</h2>
+      <div className="mt-3 space-y-3 text-[1.0625rem] leading-relaxed text-foreground/90">
         {children}
       </div>
     </section>
@@ -217,13 +223,13 @@ export function Steps({ items }: { items: { title: string; body?: ReactNode }[] 
   return (
     <ol className="mt-4 space-y-4">
       {items.map((s, i) => (
-        <li key={i} className="flex gap-4 rounded-2xl border p-4">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/10 text-sm font-semibold text-coral">
+        <li key={i} className="flex gap-4 rounded-2xl border border-border p-4">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
             {i + 1}
           </span>
           <div>
-            <div className="font-semibold">{s.title}</div>
-            {s.body && <div className="mt-1 text-sm text-muted-foreground">{s.body}</div>}
+            <div className="font-bold">{s.title}</div>
+            {s.body && <div className="mt-1 text-[15px] text-muted-foreground">{s.body}</div>}
           </div>
         </li>
       ))}
@@ -240,15 +246,17 @@ export function Callout({
   title?: string;
   children: ReactNode;
 }) {
+  // Tones drawn from the orb family so callouts belong to the Playroom palette
+  // rather than stock Tailwind sky/emerald/amber.
   const toneStyles: Record<string, string> = {
-    info: "border-sky-200 bg-sky-50 text-sky-900",
-    tip: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    warn: "border-amber-200 bg-amber-50 text-amber-900",
+    info: "border-orb-periwinkle/40 bg-orb-periwinkle/10",
+    tip: "border-orb-grass/35 bg-orb-grass/10",
+    warn: "border-orb-terracotta/35 bg-orb-terracotta/10",
   };
   return (
-    <div className={cn("mt-4 rounded-2xl border p-4 text-sm", toneStyles[tone])}>
-      {title && <div className="mb-1 font-semibold">{title}</div>}
-      <div>{children}</div>
+    <div className={cn("mt-4 rounded-2xl border p-4 text-[15px]", toneStyles[tone])}>
+      {title && <div className="mb-1 font-bold">{title}</div>}
+      <div className="text-foreground/85">{children}</div>
     </div>
   );
 }
@@ -273,9 +281,9 @@ export function MiniFaq({ items }: { items: { q: string; a: ReactNode }[] }) {
 
 export function TryItNow({ to, label }: { to: string; label: string }) {
   return (
-    <div className="mt-8 flex flex-wrap items-center gap-3 rounded-2xl bg-gradient-to-r from-coral/10 to-amber-200/30 p-4">
-      <div className="text-sm font-medium">Ready to try it?</div>
-      <Button asChild size="sm" className="rounded-brand bg-neutral-900 text-white hover:bg-neutral-800">
+    <div className="mt-8 flex flex-wrap items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+      <div className="text-[15px] font-bold">Ready to try it?</div>
+      <Button asChild size="sm" className="rounded-full font-bold">
         <Link to={to}>{label}</Link>
       </Button>
     </div>
