@@ -51,8 +51,7 @@ import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authentic
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicPaymentsRazorpayWebhookRouteImport } from './routes/api/public/payments/razorpay-webhook'
+import { Route as ApiPublicPaymentsDodoWebhookRouteImport } from './routes/api/public/payments/dodo-webhook'
 import { Route as ApiPublicHooksTelnyxRouteImport } from './routes/api/public/hooks/telnyx'
 import { Route as ApiPublicHooksSendLaterRouteImport } from './routes/api/public/hooks/send-later'
 import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
@@ -275,16 +274,10 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicPaymentsWebhookRoute =
-  ApiPublicPaymentsWebhookRouteImport.update({
-    id: '/api/public/payments/webhook',
-    path: '/api/public/payments/webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicPaymentsRazorpayWebhookRoute =
-  ApiPublicPaymentsRazorpayWebhookRouteImport.update({
-    id: '/api/public/payments/razorpay-webhook',
-    path: '/api/public/payments/razorpay-webhook',
+const ApiPublicPaymentsDodoWebhookRoute =
+  ApiPublicPaymentsDodoWebhookRouteImport.update({
+    id: '/api/public/payments/dodo-webhook',
+    path: '/api/public/payments/dodo-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksTelnyxRoute = ApiPublicHooksTelnyxRouteImport.update({
@@ -360,8 +353,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
-  '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -408,8 +400,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
-  '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -460,8 +451,7 @@ export interface FileRoutesById {
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
-  '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -512,8 +502,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
-    | '/api/public/payments/razorpay-webhook'
-    | '/api/public/payments/webhook'
+    | '/api/public/payments/dodo-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -560,8 +549,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
-    | '/api/public/payments/razorpay-webhook'
-    | '/api/public/payments/webhook'
+    | '/api/public/payments/dodo-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   id:
@@ -611,8 +599,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/call-sla'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
-    | '/api/public/payments/razorpay-webhook'
-    | '/api/public/payments/webhook'
+    | '/api/public/payments/dodo-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
@@ -633,8 +620,7 @@ export interface RootRouteChildren {
   ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
   ApiPublicHooksSendLaterRoute: typeof ApiPublicHooksSendLaterRoute
   ApiPublicHooksTelnyxRoute: typeof ApiPublicHooksTelnyxRoute
-  ApiPublicPaymentsRazorpayWebhookRoute: typeof ApiPublicPaymentsRazorpayWebhookRoute
-  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicPaymentsDodoWebhookRoute: typeof ApiPublicPaymentsDodoWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -935,18 +921,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/payments/webhook': {
-      id: '/api/public/payments/webhook'
-      path: '/api/public/payments/webhook'
-      fullPath: '/api/public/payments/webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/payments/razorpay-webhook': {
-      id: '/api/public/payments/razorpay-webhook'
-      path: '/api/public/payments/razorpay-webhook'
-      fullPath: '/api/public/payments/razorpay-webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsRazorpayWebhookRouteImport
+    '/api/public/payments/dodo-webhook': {
+      id: '/api/public/payments/dodo-webhook'
+      path: '/api/public/payments/dodo-webhook'
+      fullPath: '/api/public/payments/dodo-webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsDodoWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/telnyx': {
@@ -1093,8 +1072,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
   ApiPublicHooksSendLaterRoute: ApiPublicHooksSendLaterRoute,
   ApiPublicHooksTelnyxRoute: ApiPublicHooksTelnyxRoute,
-  ApiPublicPaymentsRazorpayWebhookRoute: ApiPublicPaymentsRazorpayWebhookRoute,
-  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicPaymentsDodoWebhookRoute: ApiPublicPaymentsDodoWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
