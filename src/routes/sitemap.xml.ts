@@ -1,8 +1,10 @@
-import { createAPIFileRoute } from '@tanstack/start/api'
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createAPIFileRoute('/sitemap.xml')({
-  GET: () => {
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+export const Route = createFileRoute("/sitemap.xml")({
+  server: {
+    handlers: {
+      GET: () => {
+        const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://someonenear.com/</loc>
@@ -16,11 +18,13 @@ export const Route = createAPIFileRoute('/sitemap.xml')({
   </url>
 </urlset>`
 
-    return new Response(sitemap, {
-      headers: {
-        'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=3600',
+        return new Response(sitemap, {
+          headers: {
+            "Content-Type": "application/xml; charset=utf-8",
+            "Cache-Control": "public, max-age=3600",
+          },
+        });
       },
-    })
+    },
   },
-})
+});
