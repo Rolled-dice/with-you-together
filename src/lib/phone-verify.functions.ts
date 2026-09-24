@@ -20,7 +20,7 @@ export const startPhoneVerification = createServerFn({ method: "POST" })
         data.country ?? null,
         data.channel,
       );
-      return { ok: true as const, ...result };
+      return result;
     } catch (error) {
       return {
         ok: false as const,
@@ -41,7 +41,7 @@ export const confirmPhoneVerification = createServerFn({ method: "POST" })
     try {
       const { confirmVerification } = await import("@/lib/phone-verify.server");
       const result = await confirmVerification(context.userId, data.code, data.country ?? null);
-      return { ok: true as const, ...result };
+      return result;
     } catch (error) {
       return {
         ok: false as const,
