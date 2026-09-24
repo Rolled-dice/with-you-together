@@ -109,7 +109,7 @@ function ListenersPage() {
   const [tz, setTz] = useState(TIMEZONES.includes(DEFAULT_TZ) ? DEFAULT_TZ : "Asia/Kolkata");
   const [duration, setDuration] = useState(45);
   const [note, setNote] = useState("");
-  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [bookingError, setBookingError] = useState<{ message: string; settingsLink: boolean } | null>(null);
 
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [emergencyNote, setEmergencyNote] = useState("");
@@ -125,7 +125,10 @@ function ListenersPage() {
     }) => requestFn({ data: input }),
     onSuccess: (res, vars) => {
       if (!res.ok) {
-        setBookingError(res.message);
+        setBookingError({
+          message: res.message,
+          settingsLink: res.code === "phone_required" || res.code === "phone_verification_required",
+        });
         toast.error(res.message);
         return;
       }
@@ -142,7 +145,7 @@ function ListenersPage() {
     },
     onError: (e) => {
       const message = e instanceof Error ? e.message : "We couldn't complete your booking. Please try again.";
-      setBookingError(message);
+      setBookingError({ message, settingsLink: false });
       toast.error(message);
     },
   });
@@ -279,11 +282,13 @@ function ListenersPage() {
             {bookingError && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-brand border border-destructive/30 bg-destructive/5 p-3">
                 <p role="alert" className="text-sm text-destructive-foreground">
-                  {bookingError}
+                  {bookingError.message}
                 </p>
-                <Button asChild size="sm" variant="outline">
-                  <Link to="/settings">Open Settings</Link>
-                </Button>
+                {bookingError.settingsLink && (
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/settings">Open Settings</Link>
+                  </Button>
+                )}
               </div>
             )}
             <Button
