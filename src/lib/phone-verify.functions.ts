@@ -12,13 +12,21 @@ export const startPhoneVerification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => StartInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { startVerification } = await import("@/lib/phone-verify.server");
-    return startVerification(
-      context.userId,
-      data.phone,
-      data.country ?? null,
-      data.channel,
-    );
+    try {
+      const { startVerification } = await import("@/lib/phone-verify.server");
+      const result = await startVerification(
+        context.userId,
+        data.phone,
+        data.country ?? null,
+        data.channel,
+      );
+      return { ok: true as const, ...result };
+    } catch (error) {
+      return {
+        ok: false as const,
+        message: error instanceof Error ? error.message : "Couldn't send the code.",
+      };
+    }
   });
 
 const ConfirmInput = z.object({
@@ -30,6 +38,14 @@ export const confirmPhoneVerification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ConfirmInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { confirmVerification } = await import("@/lib/phone-verify.server");
-    return confirmVerification(context.userId, data.code, data.country ?? null);
+    try {
+      const { confirmVerification } = await import("@/lib/phone-verify.server");
+      const result = await confirmVerification(context.userId, data.code, data.country ?? null);
+      return { ok: true as const, ...result };
+    } catch (error) {
+      return {
+        ok: false as const,
+        message: error instanceof Error ? error.message : "Verification failed.",
+      };
+    }
   });

@@ -514,14 +514,21 @@ function PhoneVerifyDialog({
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [sentTo, setSentTo] = useState<{ phone: string; channel: string } | null>(null);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
   const startFn = useServerFn(startPhoneVerification);
   const confirmFn = useServerFn(confirmPhoneVerification);
 
   async function sendOtp(channel?: "sms" | "call") {
     if (!phone) return toast.error("Please enter your mobile number first.");
     setLoading(true);
+    setVerificationError(null);
     try {
       const res = await startFn({ data: { phone, country, channel } });
+      if (!res.ok) {
+        setVerificationError(res.message);
+        toast.error(res.message);
+        return;
+      }
       setSentTo({ phone: res.phone, channel: res.channel });
       toast.success(
         res.channel === "call"
@@ -529,7 +536,9 @@ function PhoneVerifyDialog({
           : `Code texted to ${res.phone}`,
       );
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't send the code.");
+      const message = e instanceof Error ? e.message : "Couldn't send the code.";
+      setVerificationError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -538,15 +547,23 @@ function PhoneVerifyDialog({
   async function verify(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setVerificationError(null);
     try {
-      await confirmFn({ data: { code: otp, country } });
+      const res = await confirmFn({ data: { code: otp, country } });
+      if (!res.ok) {
+        setVerificationError(res.message);
+        toast.error(res.message);
+        return;
+      }
       toast.success("Mobile number verified.");
       setOpen(false);
       setOtp("");
       setSentTo(null);
       onVerified();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Verification failed.");
+      const message = err instanceof Error ? err.message : "Verification failed.";
+      setVerificationError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -574,6 +591,14 @@ function PhoneVerifyDialog({
               {sentTo.channel === "call" ? "phone call" : "text message"}. It expires in 10 minutes.
             </div>
           ) : null}
+          {verificationError ? (
+            <div
+              role="alert"
+              className="rounded-brand border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive-foreground"
+            >
+              {verificationError}
+            </div>
+          ) : null}
           <div className="space-y-2">
             <Label htmlFor="settings-otp">Verification code</Label>
             <Input
@@ -582,7 +607,10 @@ function PhoneVerifyDialog({
               autoComplete="one-time-code"
               maxLength={6}
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => {
+                setOtp(e.target.value.replace(/\D/g, ""));
+                setVerificationError(null);
+              }}
               className="rounded-brand tracking-widest text-center"
               placeholder="123456"
             />
