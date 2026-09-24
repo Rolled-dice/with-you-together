@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   ArrowLeftIcon,
@@ -124,6 +125,14 @@ function CallsConsole() {
     refetchOnWindowFocus: true,
     staleTime: 0,
   });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["call-queue"] });
+    qc.invalidateQueries({ queryKey: ["call-flags"] });
+    qc.invalidateQueries({ queryKey: ["call-agents"] });
+    qc.invalidateQueries({ queryKey: ["supervisor-snapshot"] });
+  };
+
   useEffect(() => {
     const channel = supabase
       .channel(`admin-call-crm-${crypto.randomUUID()}`)
@@ -160,13 +169,6 @@ function CallsConsole() {
       void supabase.removeChannel(channel);
     };
   }, [qc]);
-
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["call-queue"] });
-    qc.invalidateQueries({ queryKey: ["call-flags"] });
-    qc.invalidateQueries({ queryKey: ["call-agents"] });
-    qc.invalidateQueries({ queryKey: ["supervisor-snapshot"] });
-  };
 
   const autoAssign = useMutation({
     mutationFn: (id: string) => autoAssignFn({ data: { id } }),
