@@ -158,8 +158,10 @@ function AgentConsolePage() {
   const dial = useMutation({
     mutationFn: async (bookingId: string) => {
       await phone.ensureRegistered();
-      await presenceFn({ data: { state: "on_call", booking_id: bookingId } });
-      return startFn({ data: { booking_id: bookingId } });
+      await normalizeFailure(() =>
+        presenceFn({ data: { state: "on_call", booking_id: bookingId } }),
+      );
+      return normalizeFailure(() => startFn({ data: { booking_id: bookingId } }));
     },
     onSuccess: () => {
       toast.success("Dialling, your headset will ring first, then the member");
@@ -170,9 +172,13 @@ function AgentConsolePage() {
 
   const end = useMutation({
     mutationFn: async () => {
-      if (selected) await endFn({ data: { booking_id: selected } });
+      if (selected) {
+        await normalizeFailure(() => endFn({ data: { booking_id: selected } }));
+      }
       await phone.hangup();
-      await presenceFn({ data: { state: "wrap_up", booking_id: selected } });
+      await normalizeFailure(() =>
+        presenceFn({ data: { state: "wrap_up", booking_id: selected } }),
+      );
     },
     onSuccess: () => {
       toast.success("Call ended, add your notes");
@@ -184,7 +190,9 @@ function AgentConsolePage() {
   const doTransfer = useMutation({
     mutationFn: () => {
       if (!selected) throw new Error("Choose a call first.");
-      return transferFn({ data: { booking_id: selected, to: transferTo.trim() } });
+      return normalizeFailure(() =>
+        transferFn({ data: { booking_id: selected, to: transferTo.trim() } }),
+      );
     },
     onSuccess: () => {
       setTransferTo("");
@@ -197,15 +205,17 @@ function AgentConsolePage() {
   const saveNotes = useMutation({
     mutationFn: () => {
       if (!selected) throw new Error("Choose a call first.");
-      return dispositionFn({
-        data: {
-          booking_id: selected,
-          outcome: outcome as never,
-          follow_up_needed: followUp,
-          safety_concern: safety,
-          notes,
-        },
-      });
+      return normalizeFailure(() =>
+        dispositionFn({
+          data: {
+            booking_id: selected,
+            outcome: outcome as never,
+            follow_up_needed: followUp,
+            safety_concern: safety,
+            notes,
+          },
+        }),
+      );
     },
     onSuccess: async () => {
       toast.success("Saved");
