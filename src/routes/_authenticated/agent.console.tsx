@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -25,13 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState } from "@/components/empty-state";
 import { useSoftphone } from "@/hooks/useSoftphone";
 import {
@@ -130,6 +126,37 @@ function AgentConsolePage() {
     refetchOnWindowFocus: true,
     staleTime: 0,
   });
+  useEffect(() => {
+    const channel = supabase
+      .channel(`agent-queue-${crypto.randomUUID()}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "listener_bookings",
+        },
+        () => {
+          void qc.invalidateQueries({ queryKey: ["agent-queue"] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "agent_presence",
+        },
+        () => {
+          void qc.invalidateQueries({ queryKey: ["agent-queue"] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   const pop = useQuery({
     queryKey: ["agent-screen-pop", selected],
@@ -160,9 +187,7 @@ function AgentConsolePage() {
       await phone.ensureRegistered();
       const result = await normalizeFailure(() => startFn({ data: { booking_id: bookingId } }));
       if (result.ok) {
-        await normalizeFailure(() =>
-          presenceFn({ data: { state: "on_call", booking_id: bookingId } }),
-        );
+        await normalizeFailure(() => presenceFn({ data: { state: "on_call", booking_id: bookingId } }));
       }
       return result;
     },
@@ -185,9 +210,7 @@ function AgentConsolePage() {
         await normalizeFailure(() => endFn({ data: { booking_id: selected } }));
       }
       await phone.hangup();
-      await normalizeFailure(() =>
-        presenceFn({ data: { state: "wrap_up", booking_id: selected } }),
-      );
+      await normalizeFailure(() => presenceFn({ data: { state: "wrap_up", booking_id: selected } }));
     },
     onSuccess: () => {
       toast.success("Call ended, add your notes");
@@ -199,9 +222,7 @@ function AgentConsolePage() {
   const doTransfer = useMutation({
     mutationFn: () => {
       if (!selected) throw new Error("Choose a call first.");
-      return normalizeFailure(() =>
-        transferFn({ data: { booking_id: selected, to: transferTo.trim() } }),
-      );
+      return normalizeFailure(() => transferFn({ data: { booking_id: selected, to: transferTo.trim() } }));
     },
     onSuccess: () => {
       setTransferTo("");
@@ -288,9 +309,7 @@ function AgentConsolePage() {
                     key={r.id}
                     onClick={() => setSelected(r.id)}
                     className={`w-full rounded-2xl border p-4 text-left transition-colors duration-300 ${
-                      selected === r.id
-                        ? "border-primary/45 bg-primary/8"
-                        : "border-border hover:bg-muted/60"
+                      selected === r.id ? "border-primary/45 bg-primary/8" : "border-border hover:bg-muted/60"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -333,26 +352,16 @@ function AgentConsolePage() {
                         <span className="font-medium">
                           {pop.data?.member?.display_name ?? pop.data?.member?.full_name ?? "Member"}
                         </span>
-                        {pop.data?.member?.pronouns && (
-                          <Badge variant="outline">{pop.data.member.pronouns}</Badge>
-                        )}
-                        {pop.data?.member?.care_tier && (
-                          <Badge variant="secondary">{pop.data.member.care_tier}</Badge>
-                        )}
-                        {pop.data?.member?.timezone && (
-                          <Badge variant="outline">{pop.data.member.timezone}</Badge>
-                        )}
+                        {pop.data?.member?.pronouns && <Badge variant="outline">{pop.data.member.pronouns}</Badge>}
+                        {pop.data?.member?.care_tier && <Badge variant="secondary">{pop.data.member.care_tier}</Badge>}
+                        {pop.data?.member?.timezone && <Badge variant="outline">{pop.data.member.timezone}</Badge>}
                       </div>
-                      <p className="text-muted-foreground">
-                        Phone on file: {pop.data?.member?.phone ?? "none"}
-                      </p>
+                      <p className="text-muted-foreground">Phone on file: {pop.data?.member?.phone ?? "none"}</p>
                       {pop.data?.booking?.note && (
                         <p className="rounded-2xl bg-muted p-3 text-sm">{pop.data.booking.note}</p>
                       )}
                       <div>
-                        <p className="mb-1 text-xs font-medium text-muted-foreground">
-                          Recent calls
-                        </p>
+                        <p className="mb-1 text-xs font-medium text-muted-foreground">Recent calls</p>
                         {(pop.data?.history ?? []).length === 0 ? (
                           <p className="text-xs text-muted-foreground">First call with us.</p>
                         ) : (
@@ -368,8 +377,8 @@ function AgentConsolePage() {
                       </div>
                       {(pop.data?.flags ?? []).some((f: any) => !f.resolved) && (
                         <p className="flex items-center gap-2 rounded-2xl bg-primary/10 p-3 text-xs text-primary">
-                          <ShieldWarningIcon className="h-4 w-4" /> This booking has an open flag, read the
-                          notes before you dial.
+                          <ShieldWarningIcon className="h-4 w-4" /> This booking has an open flag, read the notes before
+                          you dial.
                         </p>
                       )}
                     </>
@@ -433,10 +442,7 @@ function AgentConsolePage() {
                     rows={4}
                   />
                   <label className="flex items-center gap-2 text-sm">
-                    <Checkbox
-                      checked={followUp}
-                      onCheckedChange={(v) => setFollowUp(Boolean(v))}
-                    />
+                    <Checkbox checked={followUp} onCheckedChange={(v) => setFollowUp(Boolean(v))} />
                     Follow-up needed
                   </label>
                   <label className="flex items-center gap-2 text-sm">
@@ -507,9 +513,7 @@ function SoftphoneDock({
   return (
     <Card className="rounded-3xl border-border bg-surface shadow-gentle">
       <CardContent className="flex flex-wrap items-center gap-3 p-4">
-        <Badge variant={phone.status === "on_call" ? "default" : "secondary"}>
-          {label[phone.status]}
-        </Badge>
+        <Badge variant={phone.status === "on_call" ? "default" : "secondary"}>{label[phone.status]}</Badge>
         {phone.status === "on_call" && (
           <span className="text-sm tabular-nums text-muted-foreground">
             {Math.floor(phone.seconds / 60)}:{String(phone.seconds % 60).padStart(2, "0")}
