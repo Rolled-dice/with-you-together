@@ -140,7 +140,7 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
     [connect],
   );
 
-  const disconnect = useCallback(async () => {
+  const disconnect = useCallback(async (updateStatus = true) => {
     try {
       await callRef.current?.hangup();
     } catch {
@@ -153,10 +153,10 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
     }
     clientRef.current = null;
     callRef.current = null;
-    setStatus("idle");
+    if (updateStatus) setStatus("idle");
   }, []);
 
-  useEffect(() => () => void disconnect(), [disconnect]);
+  useEffect(() => () => void disconnect(false), [disconnect]);
 
   const toggleMute = useCallback(() => {
     const call = callRef.current;

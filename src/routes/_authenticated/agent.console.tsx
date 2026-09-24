@@ -50,21 +50,40 @@ import { SLA_META, slaLevel, type CrmState } from "@/lib/call-crm";
 export const Route = createFileRoute("/_authenticated/agent/console")({
   head: () => ({
     meta: [
-      { title: "Agent console · SomeoneNear" },
+      { title: "Agent console | SomeoneNear" },
       {
         name: "description",
         content: "Softphone, member context and call notes for SomeoneNear listener agents.",
       },
+      { property: "og:title", content: "Agent console | SomeoneNear" },
+      {
+        property: "og:description",
+        content: "Secure call workspace for SomeoneNear listener agents.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: AgentConsolePage,
   errorComponent: ({ error }) => (
     <AppShell>
-      <p className="text-sm text-primary">Something went wrong: {error.message}</p>
+      <p className="text-sm text-primary">Something went wrong: {errorMessage(error)}</p>
     </AppShell>
   ),
 });
+
+function errorMessage(error: unknown) {
+  return error instanceof Error && error.message ? error.message : "Please refresh and try again.";
+}
+
+async function normalizeFailure<T>(request: () => Promise<T>): Promise<T> {
+  try {
+    return await request();
+  } catch (error) {
+    throw error instanceof Error ? error : new Error(errorMessage(error));
+  }
+}
 
 const OUTCOMES = [
   { value: "connected", label: "Spoke with the member" },
@@ -94,7 +113,7 @@ function AgentConsolePage() {
   const [notes, setNotes] = useState("");
   const [transferTo, setTransferTo] = useState("");
 
-  const getToken = useCallback(async () => tokenFn(), [tokenFn]);
+  const getToken = useCallback(() => normalizeFailure(() => tokenFn()), [tokenFn]);
   const phone = useSoftphone(getToken);
 
   const refreshAll = () => {
@@ -105,7 +124,8 @@ function AgentConsolePage() {
 
   const queue = useQuery({
     queryKey: ["agent-queue"],
-    queryFn: () => queueFn(),
+    queryFn: () => normalizeFailure(() => queueFn()),
+    retry: 1,
     refetchInterval: 10_000,
     refetchOnWindowFocus: true,
     staleTime: 0,
@@ -113,7 +133,10 @@ function AgentConsolePage() {
 
   const pop = useQuery({
     queryKey: ["agent-screen-pop", selected],
-    queryFn: () => popFn({ data: { booking_id: selected! } }),
+    queryFn: () => {
+      if (!selected) throw new Error("Choose a call first.");
+      return normalizeFailure(() => popFn({ data: { booking_id: selected } }));
+    },
     enabled: Boolean(selected),
     refetchInterval: 15_000,
     refetchOnWindowFocus: true,
@@ -122,7 +145,10 @@ function AgentConsolePage() {
 
   const timeline = useQuery({
     queryKey: ["agent-timeline", selected],
-    queryFn: () => timelineFn({ data: { booking_id: selected! } }),
+    queryFn: () => {
+      if (!selected) throw new Error("Choose a call first.");
+      return normalizeFailure(() => timelineFn({ data: { booking_id: selected } }));
+    },
     enabled: Boolean(selected),
     refetchInterval: 5_000,
     refetchOnWindowFocus: true,
@@ -139,7 +165,7 @@ function AgentConsolePage() {
       toast.success("Dialling, your headset will ring first, then the member");
       refreshAll();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (error: unknown) => toast.error(errorMessage(error)),
   });
 
   const end = useMutation({
@@ -152,30 +178,35 @@ function AgentConsolePage() {
       toast.success("Call ended, add your notes");
       refreshAll();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (error: unknown) => toast.error(errorMessage(error)),
   });
 
   const doTransfer = useMutation({
-    mutationFn: () => transferFn({ data: { booking_id: selected!, to: transferTo.trim() } }),
+    mutationFn: () => {
+      if (!selected) throw new Error("Choose a call first.");
+      return transferFn({ data: { booking_id: selected, to: transferTo.trim() } });
+    },
     onSuccess: () => {
       setTransferTo("");
       toast.success("Transfer started");
       refreshAll();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (error: unknown) => toast.error(errorMessage(error)),
   });
 
   const saveNotes = useMutation({
-    mutationFn: () =>
-      dispositionFn({
+    mutationFn: () => {
+      if (!selected) throw new Error("Choose a call first.");
+      return dispositionFn({
         data: {
-          booking_id: selected!,
+          booking_id: selected,
           outcome: outcome as never,
           follow_up_needed: followUp,
           safety_concern: safety,
           notes,
         },
-      }),
+      });
+    },
     onSuccess: async () => {
       toast.success("Saved");
       setNotes("");
@@ -184,7 +215,7 @@ function AgentConsolePage() {
       await presenceFn({ data: { state: "available", booking_id: null } });
       refreshAll();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (error: unknown) => toast.error(errorMessage(error)),
   });
 
   const rows = queue.data?.rows ?? [];
@@ -211,6 +242,12 @@ function AgentConsolePage() {
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-16 w-full" />
               </>
+            ) : queue.isError ? (
+              <EmptyState
+                icon={<ShieldWarningIcon className="h-5 w-5" />}
+                title="We couldn't load your queue"
+                description={errorMessage(queue.error)}
+              />
             ) : !queue.data?.agent ? (
               <EmptyState
                 icon={<HeadphonesIcon className="h-5 w-5" />}
