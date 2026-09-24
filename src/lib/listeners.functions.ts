@@ -103,14 +103,18 @@ export const requestBooking = createServerFn({ method: "POST" })
       .eq("id", context.userId)
       .single();
     if (!me?.phone) {
-      throw new Error(
-        "Please add your mobile number in Settings so a listener can call you.",
-      );
+      return {
+        ok: false as const,
+        code: "phone_required" as const,
+        message: "Please add your mobile number in Settings so a listener can call you.",
+      };
     }
     if (!me.phone_verified) {
-      throw new Error(
-        "Please verify your mobile number in Settings before booking a call.",
-      );
+      return {
+        ok: false as const,
+        code: "phone_verification_required" as const,
+        message: "Please verify your mobile number in Settings before booking a call.",
+      };
     }
 
     // Auto-assign: least-loaded active listener.
@@ -157,7 +161,7 @@ export const requestBooking = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    return { ok: true, id: inserted?.id };
+    return { ok: true as const, id: inserted?.id };
   });
 
 const RescheduleInput = z.object({
