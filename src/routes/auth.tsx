@@ -153,7 +153,10 @@ function AuthPage() {
             transition={{ type: "spring", stiffness: 400, damping: 15 }}
           />
 
-          <span className="text-lg font-semibold tracking-tight">SomeoneNear</span>
+          <span className="text-lg font-extrabold tracking-tight">
+            <span className="text-orb-navy">Someone</span>
+            <span className="text-orb-terracotta">Near</span>
+          </span>
         </Link>
 
         <motion.div
