@@ -41,7 +41,11 @@ const NAV = [
 //   { to: "/admin/calls", label: "Call CRM", icon: PhoneCallIcon },
 // ] as const;
 
-const ADMIN_NAV = [{ to: "/admin/calls", label: "Call CRM", icon: PhoneCallIcon }] as const;
+// const ADMIN_NAV = [{ to: "/admin/calls", label: "Call CRM", icon: PhoneCallIcon }] as const;
+const ADMIN_NAV = [
+  { to: "/admin/calls", label: "Call CRM", icon: PhoneCallIcon },
+  { to: "/admin/agents", label: "Agents", icon: UsersIcon },
+] as const;
 
 const AGENT_NAV = [{ to: "/agent/console", label: "Agent console", icon: HeadphonesIcon }] as const;
 
