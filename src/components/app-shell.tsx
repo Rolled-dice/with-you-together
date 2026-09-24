@@ -1,6 +1,19 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, type ReactNode } from "react";
-import { SquaresFourIcon, ChatCircleIcon, UsersIcon, GearIcon, SignOutIcon, HandHeartIcon, LifebuoyIcon, ChartLineIcon, PhoneCallIcon, PillIcon, HeadphonesIcon, CalendarHeartIcon } from "@phosphor-icons/react";
+import {
+  SquaresFourIcon,
+  ChatCircleIcon,
+  UsersIcon,
+  GearIcon,
+  SignOutIcon,
+  HandHeartIcon,
+  LifebuoyIcon,
+  ChartLineIcon,
+  PhoneCallIcon,
+  PillIcon,
+  HeadphonesIcon,
+  CalendarHeartIcon,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,12 +22,12 @@ import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import { isCurrentUserAgent } from "@/lib/agent-role.functions";
 import { SomeoneNearCursor } from "@/components/someonenear-cursor";
 import { NotificationBell } from "@/components/notification-bell";
-import { DevViewAsSwitcher } from "@/components/dev-view-as-switcher";
+// import { DevViewAsSwitcher } from "@/components/dev-view-as-switcher";
 import { BrandMark } from "@/components/landing/brand-mark";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
 import { useAppPageMotion } from "@/hooks/use-app-page-motion";
-import { getViewAsRole } from "@/lib/dev-view-as";
+// import { getViewAsRole } from "@/lib/dev-view-as";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
@@ -33,10 +46,7 @@ const ADMIN_NAV = [
   { to: "/admin/calls", label: "Call CRM", icon: PhoneCallIcon },
 ] as const;
 
-const AGENT_NAV = [
-  { to: "/agent/console", label: "Agent console", icon: HeadphonesIcon },
-] as const;
-
+const AGENT_NAV = [{ to: "/agent/console", label: "Agent console", icon: HeadphonesIcon }] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -78,13 +88,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   // normal — the CRM and softphone routes still enforce those for real, this
   // toggle just gets the SHELL to look the same way while you're on member
   // data underneath.
-  const viewAs = getViewAsRole();
-  const isAdmin = viewAs ? viewAs === "admin" : roleQ.data?.isAdmin === true;
-  const isAgent = viewAs ? viewAs === "listener" : agentQ.data?.isAgent === true;
-  const rolesLoading = viewAs ? false : roleQ.isLoading || agentQ.isLoading;
+  // const viewAs = getViewAsRole();
+  // const isAdmin = viewAs ? viewAs === "admin" : roleQ.data?.isAdmin === true;
+  // const isAgent = viewAs ? viewAs === "listener" : agentQ.data?.isAgent === true;
+  // const rolesLoading = viewAs ? false : roleQ.isLoading || agentQ.isLoading;
+
+  const isAdmin = roleQ.data?.isAdmin === true;
+  const isAgent = agentQ.data?.isAgent === true;
+  const rolesLoading = roleQ.isLoading || agentQ.isLoading;
+
   const isStaff = isAdmin || isAgent;
   const navItems = isAdmin ? ADMIN_NAV : isAgent ? AGENT_NAV : rolesLoading ? [] : NAV;
-
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -93,14 +107,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     navigate({ to: "/auth", replace: true });
   }
 
-
-
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
       <SomeoneNearCursor />
-      <DevViewAsSwitcher />
+      {/* <DevViewAsSwitcher /> */}
       <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
-
         {/* Sidebar (desktop).
             Sized for older eyes and less precise pointing: 16px labels,
             48px-tall rows, 20px icons. The active row is a solid navy pill
@@ -138,9 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="px-3 pb-4">
             {!rolesLoading && !isStaff ? (
               <div className="rounded-2xl border border-sidebar-border bg-card px-4 py-3.5">
-                <p className="text-sm font-bold text-sidebar-foreground">
-                  Care Membership
-                </p>
+                <p className="text-sm font-bold text-sidebar-foreground">Care Membership</p>
                 {/* The shell doesn't load the profile, so it can't name the tier
                  * without inventing one. Point at Settings instead. */}
                 <Link
@@ -160,7 +169,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-
         {/* Main */}
         <div className="flex flex-1 flex-col">
           {/* Mobile top bar */}
@@ -171,7 +179,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Brand compact />
             {!rolesLoading && !isStaff ? <NotificationBell /> : null}
           </header>
-
 
           {/* Keyed on pathname so the entrance replays on navigation. The ref
               lets useAppPageMotion scope itself to the current page's content,
@@ -194,7 +201,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             }}
             aria-label="Main navigation"
           >
-
             {navItems.map((item) => {
               const active = pathname === item.to || pathname.startsWith(item.to + "/");
               const Icon = item.icon;
@@ -227,12 +233,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2">
       <BrandMark className={compact ? "h-7 w-auto" : "h-9 w-auto"} />
-      <span
-        className={cn(
-          "font-extrabold tracking-tight",
-          compact ? "text-base" : "text-lg",
-        )}
-      >
+      <span className={cn("font-extrabold tracking-tight", compact ? "text-base" : "text-lg")}>
         <span className="text-orb-navy">Someone</span>
         <span className="text-orb-terracotta">Near</span>
       </span>
@@ -281,9 +282,7 @@ export function PageHeader({
         <div data-page-sub>
           {slogan && <p className="mt-1.5 text-base text-muted-foreground">{slogan}</p>}
           {description && (
-            <p className="mt-2 max-w-2xl text-[1.0625rem] leading-relaxed text-muted-foreground">
-              {description}
-            </p>
+            <p className="mt-2 max-w-2xl text-[1.0625rem] leading-relaxed text-muted-foreground">{description}</p>
           )}
         </div>
       </div>
@@ -291,4 +290,3 @@ export function PageHeader({
     </div>
   );
 }
-
