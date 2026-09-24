@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, type ReactNode } from "react";
 import {
   SquaresFourIcon,
@@ -16,18 +16,13 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
-import { isCurrentUserAgent } from "@/lib/agent-role.functions";
+import { useQueryClient } from "@tanstack/react-query";
 import { SomeoneNearCursor } from "@/components/someonenear-cursor";
 import { NotificationBell } from "@/components/notification-bell";
-// import { DevViewAsSwitcher } from "@/components/dev-view-as-switcher";
 import { BrandMark } from "@/components/landing/brand-mark";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
 import { useAppPageMotion } from "@/hooks/use-app-page-motion";
-// import { getViewAsRole } from "@/lib/dev-view-as";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
@@ -70,34 +65,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     active?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
   }, [pathname]);
 
-  const adminCheck = useServerFn(isCurrentUserAdmin);
-  const roleQ = useQuery({
-    queryKey: ["admin", "role-check"],
-    queryFn: () => adminCheck({}),
-    staleTime: 5 * 60 * 1000,
-  });
-  const agentCheck = useServerFn(isCurrentUserAgent);
-  const agentQ = useQuery({
-    queryKey: ["agent", "role-check"],
-    queryFn: () => agentCheck({}),
-    staleTime: 5 * 60 * 1000,
-  });
-  // Dev-only render override — see src/lib/dev-view-as.ts. It changes what
-  // this component chooses to display, never what the real RPCs return, so
-  // it cannot unlock a page or a row the signed-in account doesn't already
-  // have. Real role gating (_authenticated/route.tsx, every server fn) is
-  // completely unaffected and keeps checking has_role / is_call_agent as
-  // normal — the CRM and softphone routes still enforce those for real, this
-  // toggle just gets the SHELL to look the same way while you're on member
-  // data underneath.
-  // const viewAs = getViewAsRole();
-  // const isAdmin = viewAs ? viewAs === "admin" : roleQ.data?.isAdmin === true;
-  // const isAgent = viewAs ? viewAs === "listener" : agentQ.data?.isAgent === true;
-  // const rolesLoading = viewAs ? false : roleQ.isLoading || agentQ.isLoading;
-
-  const isAdmin = roleQ.data?.isAdmin === true;
-  const isAgent = agentQ.data?.isAgent === true;
-  const rolesLoading = roleQ.isLoading || agentQ.isLoading;
+  const { isAdmin, isAgent } = useRouteContext({ from: "/_authenticated" });
+  const rolesLoading = false;
 
   const isStaff = isAdmin || isAgent;
   const navItems = isAdmin ? ADMIN_NAV : isAgent ? AGENT_NAV : rolesLoading ? [] : NAV;
@@ -112,7 +81,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
       <SomeoneNearCursor />
-      {/* <DevViewAsSwitcher /> */}
       <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
         {/* Sidebar (desktop).
             Sized for older eyes and less precise pointing: 16px labels,

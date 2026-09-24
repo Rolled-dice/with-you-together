@@ -3,11 +3,12 @@
 type Ctx = { supabase: any; userId: string };
 
 async function myAgent(context: Ctx) {
-  const { data } = await context.supabase
+  const { data, error } = await context.supabase
     .from("call_agents")
     .select("id, name, timezone, skills, max_concurrent, is_active")
     .eq("user_id", context.userId)
     .maybeSingle();
+  if (error) throw new Error(error.message);
   return data ?? null;
 }
 
@@ -24,13 +25,14 @@ export async function listMyQueue(context: Ctx) {
   if (!agent) return { agent: null, rows: [] as any[] };
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("listener_bookings")
     .select("id, user_id, requested_at, duration_minutes, note, status, crm_state, sla_deadline")
     .eq("agent_id", agent.id)
     .in("crm_state", ["assigned", "confirmed", "in_call"])
     .order("requested_at", { ascending: true })
     .limit(100);
+  if (error) throw new Error(error.message);
 
   const ids = [...new Set((data ?? []).map((r: any) => r.user_id))];
   const names = new Map<string, string>();
