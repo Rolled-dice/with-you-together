@@ -61,8 +61,20 @@ export async function startBookingCall(context: Ctx, bookingId: string) {
     .eq("id", bookingId)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!booking) throw new Error("Booking not found");
-  if (!isAdmin && booking.agent_id !== agent?.id) throw new Error("This call is not assigned to you");
+  if (!booking) {
+    return {
+      ok: false as const,
+      code: "booking_unavailable" as const,
+      message: "This call is no longer available. Your queue has been refreshed.",
+    };
+  }
+  if (!isAdmin && booking.agent_id !== agent?.id) {
+    return {
+      ok: false as const,
+      code: "booking_unavailable" as const,
+      message: "This call is no longer assigned to you. Your queue has been refreshed.",
+    };
+  }
 
   const { data: profile } = await supabaseAdmin
     .from("profiles")
@@ -121,7 +133,7 @@ export async function startBookingCall(context: Ctx, bookingId: string) {
     .update({ crm_state: "in_call", call_started_at: new Date().toISOString() })
     .eq("id", bookingId);
 
-  return { ok: true, memberPhone: mask(memberPhone) };
+  return { ok: true as const, memberPhone: mask(memberPhone) };
 }
 
 export async function hangupBookingCall(context: Ctx, bookingId: string) {

@@ -158,12 +158,21 @@ function AgentConsolePage() {
   const dial = useMutation({
     mutationFn: async (bookingId: string) => {
       await phone.ensureRegistered();
-      await normalizeFailure(() =>
-        presenceFn({ data: { state: "on_call", booking_id: bookingId } }),
-      );
-      return normalizeFailure(() => startFn({ data: { booking_id: bookingId } }));
+      const result = await normalizeFailure(() => startFn({ data: { booking_id: bookingId } }));
+      if (result.ok) {
+        await normalizeFailure(() =>
+          presenceFn({ data: { state: "on_call", booking_id: bookingId } }),
+        );
+      }
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message);
+        setSelected(null);
+        refreshAll();
+        return;
+      }
       toast.success("Dialling, your headset will ring first, then the member");
       refreshAll();
     },
