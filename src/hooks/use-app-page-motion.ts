@@ -14,7 +14,7 @@ import type { RefObject } from "react";
  *
  * Opt in from markup with these attributes:
  *   data-page-eyebrow   small label above the title
- *   data-page-headline  the h1 — masked line reveal via SplitText
+ *   data-page-headline  the h1 with a simple browser-safe reveal
  *   data-page-sub       supporting copy
  *   data-page-cta       action buttons
  *   data-page-reveal    a block that fades up once when scrolled to
