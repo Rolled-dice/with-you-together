@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { BellIcon, XIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  dismissNotification,
-  listMyNotifications,
-  markNotificationsRead,
-} from "@/lib/notifications.functions";
+import type { AppNotification } from "@/lib/notifications.functions";
 import { cn } from "@/lib/utils";
 import { NotificationList } from "@/components/notifications/notification-list";
 
@@ -23,13 +18,18 @@ import { NotificationList } from "@/components/notifications/notification-list";
 export function NotificationBell({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
-  const list = useServerFn(listMyNotifications);
-  const markRead = useServerFn(markNotificationsRead);
-  const dismiss = useServerFn(dismissNotification);
 
   const q = useQuery({
     queryKey: ["notifications"],
-    queryFn: () => list({}),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("id, booking_id, kind, severity, title, body, read_at, created_at")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (error) return [];
+      return (data ?? []) as AppNotification[];
+    },
     refetchInterval: 60_000,
   });
 
@@ -58,9 +58,11 @@ export function NotificationBell({ className }: { className?: string }) {
         onClick={() => {
           setOpen((v) => !v);
           if (!open && unread) {
-            markRead({ data: {} }).then(() =>
-              qc.invalidateQueries({ queryKey: ["notifications"] }),
-            ).catch(() => undefined);
+            void supabase
+              .from("notifications")
+              .update({ read_at: new Date().toISOString() })
+              .in("id", items.filter((item) => !item.read_at).map((item) => item.id))
+              .then(() => qc.invalidateQueries({ queryKey: ["notifications"] }));
           }
         }}
         className="relative inline-flex h-9 w-9 items-center justify-center rounded-brand text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -88,11 +90,13 @@ export function NotificationBell({ className }: { className?: string }) {
           <NotificationList
             className="max-h-80 overflow-y-auto p-2"
             items={items}
-            onDismiss={(id) =>
-              dismiss({ data: { id } }).then(() =>
-                qc.invalidateQueries({ queryKey: ["notifications"] }),
-              ).catch(() => undefined)
-            }
+            onDismiss={(id) => {
+              void supabase
+                .from("notifications")
+                .delete()
+                .eq("id", id)
+                .then(() => qc.invalidateQueries({ queryKey: ["notifications"] }));
+            }}
           />
         </div>
       )}
