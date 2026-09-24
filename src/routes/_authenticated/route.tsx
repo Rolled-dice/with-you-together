@@ -51,12 +51,17 @@ export const Route = createFileRoute("/_authenticated")({
     ]);
 
     const path = location.pathname;
-    const isAdminPage = path === "/dashboard" || path === "/admin/calls";
+    // const isAdminPage = path === "/dashboard" || path === "/admin/calls";
+    const isAdminPage = path === "/admin/calls";
+
     const isAgentPage = path === "/agent/console";
     const isStaffPage = path.startsWith("/admin/") || path.startsWith("/agent/");
 
+    // if (isAdmin && !isAdminPage) {
+    //   throw redirect({ to: "/dashboard" });
+    // }
     if (isAdmin && !isAdminPage) {
-      throw redirect({ to: "/dashboard" });
+      throw redirect({ to: "/admin/calls" });
     }
 
     if (!isAdmin && isAgent && !isAgentPage) {
