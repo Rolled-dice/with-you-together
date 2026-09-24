@@ -131,8 +131,8 @@ function AuthPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2">
-          <motion.span
+        {/* <Link to="/" className="mb-8 flex items-center justify-center gap-2"> */}
+        {/* <motion.span
             className="inline-flex h-9 w-9 items-center justify-center rounded-brand bg-brand-primary text-primary-foreground shadow-sm"
             whileHover={{ scale: 1.08, rotate: -6 }}
             whileTap={{ scale: 0.95 }}
@@ -140,6 +140,19 @@ function AuthPage() {
           >
             <HeartIcon className="h-5 w-5" strokeWidth={2.4} />
           </motion.span>
+          <span className="text-lg font-semibold tracking-tight">SomeoneNear</span>
+        </Link> */}
+
+        <Link to="/" className="mb-8 flex items-center justify-center gap-2.5" aria-label="SomeoneNear home">
+          <motion.img
+            src="/logo-mark.png"
+            alt=""
+            className="h-10 w-10 object-contain"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+          />
+
           <span className="text-lg font-semibold tracking-tight">SomeoneNear</span>
         </Link>
 
