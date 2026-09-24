@@ -119,7 +119,10 @@ export async function startVerification(
   rawPhone: string,
   country: string | null,
   channelOverride?: Channel,
-): Promise<{ phone: string; channel: Channel; expiresAt: string }> {
+): Promise<
+  | { ok: true; phone: string; channel: Channel; expiresAt: string }
+  | { ok: false; message: string }
+> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const cfg = telnyxConfig();
   if (!cfg) throw new Error("Verification is temporarily unavailable. Please try again later.");
@@ -137,11 +140,14 @@ export async function startVerification(
 
   const sendsThisHour = (recent ?? []).reduce((n, r) => n + (r.send_count ?? 1), 0);
   if (sendsThisHour >= MAX_SENDS_PER_HOUR) {
-    throw new Error("Too many code requests. Please wait an hour and try again.");
+    return { ok: false, message: "Too many code requests. Please wait an hour and try again." };
   }
   const last = recent?.[0];
   if (last && nowMs - new Date(last.last_sent_at as string).getTime() < RESEND_COOLDOWN_MS) {
-    throw new Error("A code was just sent. Please wait a minute before asking for another.");
+    return {
+      ok: false,
+      message: "A code was just sent. Please wait a minute before asking for another.",
+    };
   }
 
   const code = randomCode();
@@ -185,14 +191,14 @@ export async function startVerification(
   });
   if (error) throw new Error(error.message);
 
-  return { phone, channel: used, expiresAt };
+  return { ok: true, phone, channel: used, expiresAt };
 }
 
 export async function confirmVerification(
   userId: string,
   code: string,
   country: string | null,
-): Promise<{ phone: string }> {
+): Promise<{ ok: true; phone: string } | { ok: false; message: string }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: rows, error } = await supabaseAdmin
     .from("phone_verifications")
@@ -203,20 +209,20 @@ export async function confirmVerification(
     .limit(1);
   if (error) throw new Error(error.message);
   const row = rows?.[0];
-  if (!row) throw new Error("No active code. Please request a new one.");
+  if (!row) return { ok: false, message: "No active code. Please request a new one." };
   if (new Date(row.expires_at as string).getTime() < Date.now()) {
     await supabaseAdmin
       .from("phone_verifications")
       .update({ consumed_at: new Date().toISOString() })
       .eq("id", row.id);
-    throw new Error("That code has expired. Please request a new one.");
+    return { ok: false, message: "That code has expired. Please request a new one." };
   }
   if ((row.attempts ?? 0) >= MAX_ATTEMPTS) {
     await supabaseAdmin
       .from("phone_verifications")
       .update({ consumed_at: new Date().toISOString() })
       .eq("id", row.id);
-    throw new Error("Too many wrong attempts. Please request a new code.");
+    return { ok: false, message: "Too many wrong attempts. Please request a new code." };
   }
 
   const candidate = await hashCode(code.trim(), row.salt as string);
@@ -225,7 +231,7 @@ export async function confirmVerification(
       .from("phone_verifications")
       .update({ attempts: (row.attempts ?? 0) + 1 })
       .eq("id", row.id);
-    throw new Error("That code isn't right. Please try again.");
+    return { ok: false, message: "That code isn't right. Please try again." };
   }
 
   await supabaseAdmin
@@ -243,7 +249,7 @@ export async function confirmVerification(
     .eq("id", userId);
   if (perr) throw new Error(perr.message);
 
-  return { phone: row.phone as string };
+  return { ok: true, phone: row.phone as string };
 }
 
 /** Speaks the code on an answered verification call, then hangs up. */
