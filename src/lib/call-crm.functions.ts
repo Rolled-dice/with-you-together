@@ -10,29 +10,23 @@ import {
   type CrmState,
   type QueueRow,
 } from "@/lib/call-crm";
-import {
-  assertAdmin,
-  extractSkills,
-  logCallEvent,
-  scoreAgents,
-} from "@/lib/call-crm.server";
+import { assertAdmin, extractSkills, logCallEvent, scoreAgents } from "@/lib/call-crm.server";
 
 export const listCallQueue = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const [{ data: bookings, error }, { data: agents }, { data: flags }] =
-      await Promise.all([
-        context.supabase
-          .from("listener_bookings")
-          .select(
-            "id, user_id, requested_at, duration_minutes, note, status, crm_state, sla_deadline, agent_id, contact_phone, listeners(name)",
-          )
-          .order("requested_at", { ascending: true })
-          .limit(500),
-        context.supabase.from("call_agents").select("id, name"),
-        context.supabase.from("call_flags").select("booking_id").eq("resolved", false),
-      ]);
+    const [{ data: bookings, error }, { data: agents }, { data: flags }] = await Promise.all([
+      context.supabase
+        .from("listener_bookings")
+        .select(
+          "id, user_id, requested_at, duration_minutes, note, status, crm_state, sla_deadline, agent_id, contact_phone, listeners(name)",
+        )
+        .order("requested_at", { ascending: true })
+        .limit(500),
+      context.supabase.from("call_agents").select("id, name"),
+      context.supabase.from("call_flags").select("booking_id").eq("resolved", false),
+    ]);
     if (error) throw new Error(error.message);
 
     const agentName = new Map<string, string>(
@@ -48,10 +42,7 @@ export const listCallQueue = createServerFn({ method: "GET" })
     const profilePhone = new Map<string, string | null>();
     if (userIds.length > 0) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: profiles } = await supabaseAdmin
-        .from("profiles")
-        .select("id, phone")
-        .in("id", userIds);
+      const { data: profiles } = await supabaseAdmin.from("profiles").select("id, phone").in("id", userIds);
       for (const p of (profiles ?? []) as { id: string; phone: string | null }[]) {
         profilePhone.set(p.id, p.phone);
       }
@@ -67,7 +58,7 @@ export const listCallQueue = createServerFn({ method: "GET" })
       crm_state: (b.crm_state ?? "requested") as CrmState,
       sla_deadline: b.sla_deadline,
       agent_id: b.agent_id,
-      agent_name: b.agent_id ? agentName.get(b.agent_id) ?? null : null,
+      agent_name: b.agent_id ? (agentName.get(b.agent_id) ?? null) : null,
       listener_name: b.listeners?.name ?? null,
       open_flags: flagCount.get(b.id) ?? 0,
       contact_phone: b.contact_phone ?? null,
@@ -103,16 +94,13 @@ export const setBookingContactPhone = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
 export const listCallAgents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { data, error } = await context.supabase
       .from("call_agents")
-      .select(
-        "id, name, email, phone, timezone, skills, work_start, work_end, max_concurrent, is_active",
-      )
+      .select("id, name, email, phone, timezone, skills, work_start, work_end, max_concurrent, is_active")
       .order("name");
     if (error) throw new Error(error.message);
     return { agents: (data ?? []) as CallAgent[] };
@@ -145,18 +133,11 @@ export const upsertCallAgent = createServerFn({ method: "POST" })
       phone: fields.phone ?? null,
     };
     if (id) {
-      const { error } = await context.supabase
-        .from("call_agents")
-        .update(payload)
-        .eq("id", id);
+      const { error } = await context.supabase.from("call_agents").update(payload).eq("id", id);
       if (error) throw new Error(error.message);
       return { ok: true, id };
     }
-    const { data: inserted, error } = await context.supabase
-      .from("call_agents")
-      .insert(payload)
-      .select("id")
-      .single();
+    const { data: inserted, error } = await context.supabase.from("call_agents").insert(payload).select("id").single();
     if (error) throw new Error(error.message);
     return { ok: true, id: inserted?.id as string };
   });
@@ -177,11 +158,35 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
     const startsAt = new Date(booking.requested_at);
     const tooLate = startsAt.getTime() - Date.now() < 2 * 60 * 60 * 1000;
 
+    // const { data: agentRows, error: aerr } = await context.supabase
+    //   .from("call_agents")
+    //   .select(
+    //     "id, name, email, phone, timezone, skills, work_start, work_end, max_concurrent, is_active",
+    //   );
+    // if (aerr) throw new Error(aerr.message);
+
+    const { data: presenceRows, error: presenceError } = await context.supabase
+      .from("agent_presence")
+      .select("agent_id, state")
+      .eq("state", "available");
+
+    if (presenceError) throw new Error(presenceError.message);
+
+    const availableAgentIds = (presenceRows ?? []).map((presence) => presence.agent_id);
+
+    if (availableAgentIds.length === 0) {
+      return {
+        ok: false,
+        reason: "No listener is currently available.",
+      };
+    }
+
     const { data: agentRows, error: aerr } = await context.supabase
       .from("call_agents")
-      .select(
-        "id, name, email, phone, timezone, skills, work_start, work_end, max_concurrent, is_active",
-      );
+      .select("id, name, email, phone, timezone, skills, work_start, work_end, max_concurrent, is_active")
+      .eq("is_active", true)
+      .in("id", availableAgentIds);
+
     if (aerr) throw new Error(aerr.message);
 
     const { data: openBookings } = await context.supabase
@@ -207,10 +212,7 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
     });
 
     if (ranked.length === 0) {
-      await context.supabase
-        .from("listener_bookings")
-        .update({ crm_state: "escalated" })
-        .eq("id", data.id);
+      await context.supabase.from("listener_bookings").update({ crm_state: "escalated" }).eq("id", data.id);
       await context.supabase.from("call_flags").insert({
         booking_id: data.id,
         kind: "other",
@@ -258,9 +260,7 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
 
 export const assignBookingAgent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid(), agent_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid(), agent_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { error } = await context.supabase
@@ -274,9 +274,7 @@ export const assignBookingAgent = createServerFn({ method: "POST" })
 
 export const setBookingCrmState = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid(), crm_state: z.enum(CRM_STATES) }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid(), crm_state: z.enum(CRM_STATES) }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { error } = await context.supabase
@@ -332,10 +330,7 @@ export const resolveCallFlag = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
-      .from("call_flags")
-      .update({ resolved: true })
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("call_flags").update({ resolved: true }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
