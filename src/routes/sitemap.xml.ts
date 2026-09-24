@@ -16,7 +16,7 @@ export const Route = createAPIFileRoute('/sitemap.xml')({
   </url>
 </urlset>`
 
-    return new Response(sitemap, {
+    return new Response(sitemap, { 
       headers: {
         'Content-Type': 'application/xml',
         'Cache-Control': 'public, max-age=3600',
