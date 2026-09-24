@@ -176,9 +176,10 @@ function SettingsPage() {
   const manageLabel = "Cancel membership";
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
+    await qc.cancelQueries();
     qc.clear();
-    navigate({ to: "/auth" });
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
   }
 
   if (isLoading || !profile) {
