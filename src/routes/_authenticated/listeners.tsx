@@ -109,6 +109,7 @@ function ListenersPage() {
   const [tz, setTz] = useState(TIMEZONES.includes(DEFAULT_TZ) ? DEFAULT_TZ : "Asia/Kolkata");
   const [duration, setDuration] = useState(45);
   const [note, setNote] = useState("");
+  const [bookingError, setBookingError] = useState<{ message: string; settingsLink: boolean } | null>(null);
 
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [emergencyNote, setEmergencyNote] = useState("");
@@ -122,7 +123,16 @@ function ListenersPage() {
       note: string;
       booking_type: "scheduled" | "emergency_callback";
     }) => requestFn({ data: input }),
-    onSuccess: (_res, vars) => {
+    onSuccess: (res, vars) => {
+      if (!res.ok) {
+        setBookingError({
+          message: res.message,
+          settingsLink: res.code === "phone_required" || res.code === "phone_verification_required",
+        });
+        toast.error(res.message);
+        return;
+      }
+      setBookingError(null);
       qc.invalidateQueries({ queryKey: ["listener-bookings"] });
       if (vars.booking_type === "emergency_callback") {
         toast.success("Callback requested. A Listener will reach you within the SLA.");
@@ -133,7 +143,11 @@ function ListenersPage() {
         setNote("");
       }
     },
-    onError: (e) => toast.error((e as Error).message),
+    onError: (e) => {
+      const message = e instanceof Error ? e.message : "We couldn't complete your booking. Please try again.";
+      setBookingError({ message, settingsLink: false });
+      toast.error(message);
+    },
   });
 
   const cancel = useMutation({
@@ -265,6 +279,18 @@ function ListenersPage() {
                 placeholder="A word or two about how you're feeling, helps your Listener meet you where you are."
               />
             </div>
+            {bookingError && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-brand border border-destructive/30 bg-destructive/5 p-3">
+                <p role="alert" className="text-sm text-destructive-foreground">
+                  {bookingError.message}
+                </p>
+                {bookingError.settingsLink && (
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/settings">Open Settings</Link>
+                  </Button>
+                )}
+              </div>
+            )}
             <Button
               onClick={() =>
                 book.mutate({

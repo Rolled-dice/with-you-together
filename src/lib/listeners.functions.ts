@@ -89,9 +89,11 @@ export const requestBooking = createServerFn({ method: "POST" })
     if (data.booking_type === "scheduled") {
       const leadMs = new Date(requestedAt).getTime() - Date.now();
       if (leadMs < 2 * 60 * 60 * 1000) {
-        throw new Error(
-          "Calls must be booked at least 2 hours ahead so we can assign a listener. Please pick a later time.",
-        );
+        return {
+          ok: false as const,
+          code: "lead_time_required" as const,
+          message: "Calls must be booked at least 2 hours ahead so we can assign a listener. Please pick a later time.",
+        };
       }
     }
 
@@ -103,14 +105,18 @@ export const requestBooking = createServerFn({ method: "POST" })
       .eq("id", context.userId)
       .single();
     if (!me?.phone) {
-      throw new Error(
-        "Please add your mobile number in Settings so a listener can call you.",
-      );
+      return {
+        ok: false as const,
+        code: "phone_required" as const,
+        message: "Please add your mobile number in Settings so a listener can call you.",
+      };
     }
     if (!me.phone_verified) {
-      throw new Error(
-        "Please verify your mobile number in Settings before booking a call.",
-      );
+      return {
+        ok: false as const,
+        code: "phone_verification_required" as const,
+        message: "Please verify your mobile number in Settings before booking a call.",
+      };
     }
 
     // Auto-assign: least-loaded active listener.
@@ -118,9 +124,19 @@ export const requestBooking = createServerFn({ method: "POST" })
       .from("listeners")
       .select("id")
       .eq("is_active", true);
-    if (lerr) throw new Error(lerr.message);
+    if (lerr) {
+      return {
+        ok: false as const,
+        code: "booking_failed" as const,
+        message: "We couldn't check listener availability. Please try again.",
+      };
+    }
     if (!listeners || listeners.length === 0) {
-      throw new Error("Our team is at capacity right now. Please try another day.");
+      return {
+        ok: false as const,
+        code: "team_at_capacity" as const,
+        message: "Our team is at capacity right now. Please try another day.",
+      };
     }
 
     // Fetch current queue counts and pick the smallest.
@@ -156,8 +172,14 @@ export const requestBooking = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
-    return { ok: true, id: inserted?.id };
+    if (error) {
+      return {
+        ok: false as const,
+        code: "booking_failed" as const,
+        message: "We couldn't complete your booking. Please try again.",
+      };
+    }
+    return { ok: true as const, id: inserted?.id };
   });
 
 const RescheduleInput = z.object({
