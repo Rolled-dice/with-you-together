@@ -7,7 +7,7 @@ Allow: /
 Sitemap: https://someonenear.com/sitemap.xml`
 
     return new Response(robots, {
-      headers: {
+      headers: { 
         'Content-Type': 'text/plain',
         'Cache-Control': 'public, max-age=3600',
       },
