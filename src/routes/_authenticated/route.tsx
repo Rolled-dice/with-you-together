@@ -51,7 +51,8 @@ export const Route = createFileRoute("/_authenticated")({
     ]);
 
     const path = location.pathname;
-    const isAdminPage = path === "/admin/calls";
+    // const isAdminPage = path === "/admin/calls";
+    const isAdminPage = path.startsWith("/admin/");
 
     const isAgentPage = path === "/agent/console";
     const isStaffPage = path.startsWith("/admin/") || path.startsWith("/agent/");
