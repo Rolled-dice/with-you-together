@@ -49,15 +49,32 @@ export async function softphoneToken() {
  */
 export async function startBookingCall(context: Ctx, bookingId: string) {
   const cfg = requireConfig();
+  const { agent, isAdmin } = await requireAgent(context);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const { data: booking, error } = await context.supabase
+  // Listener bookings are private to members under RLS, so an assigned agent
+  // cannot read the row with their user-scoped client. Read it with the
+  // privileged client, then explicitly enforce agent ownership here.
+  const { data: booking, error } = await supabaseAdmin
     .from("listener_bookings")
     .select("id, user_id, agent_id, crm_state, contact_phone")
     .eq("id", bookingId)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!booking) throw new Error("Booking not found");
+  if (!booking) {
+    return {
+      ok: false as const,
+      code: "booking_unavailable" as const,
+      message: "This call is no longer available. Your queue has been refreshed.",
+    };
+  }
+  if (!isAdmin && booking.agent_id !== agent?.id) {
+    return {
+      ok: false as const,
+      code: "booking_unavailable" as const,
+      message: "This call is no longer assigned to you. Your queue has been refreshed.",
+    };
+  }
 
   const { data: profile } = await supabaseAdmin
     .from("profiles")
@@ -116,12 +133,21 @@ export async function startBookingCall(context: Ctx, bookingId: string) {
     .update({ crm_state: "in_call", call_started_at: new Date().toISOString() })
     .eq("id", bookingId);
 
-  return { ok: true, memberPhone: mask(memberPhone) };
+  return { ok: true as const, memberPhone: mask(memberPhone) };
 }
 
 export async function hangupBookingCall(context: Ctx, bookingId: string) {
   const cfg = requireConfig();
+  const { agent, isAdmin } = await requireAgent(context);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: booking, error: bookingError } = await supabaseAdmin
+    .from("listener_bookings")
+    .select("id, agent_id")
+    .eq("id", bookingId)
+    .maybeSingle();
+  if (bookingError) throw new Error(bookingError.message);
+  if (!booking) throw new Error("Booking not found");
+  if (!isAdmin && booking.agent_id !== agent?.id) throw new Error("This call is not assigned to you");
   const { data: legs } = await supabaseAdmin
     .from("call_legs")
     .select("id, call_control_id")
@@ -146,7 +172,16 @@ export async function hangupBookingCall(context: Ctx, bookingId: string) {
 
 export async function transferBookingCall(context: Ctx, bookingId: string, to: string) {
   const cfg = requireConfig();
+  const { agent, isAdmin } = await requireAgent(context);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: booking, error: bookingError } = await supabaseAdmin
+    .from("listener_bookings")
+    .select("id, agent_id")
+    .eq("id", bookingId)
+    .maybeSingle();
+  if (bookingError) throw new Error(bookingError.message);
+  if (!booking) throw new Error("Booking not found");
+  if (!isAdmin && booking.agent_id !== agent?.id) throw new Error("This call is not assigned to you");
   const { data: leg } = await supabaseAdmin
     .from("call_legs")
     .select("call_control_id")

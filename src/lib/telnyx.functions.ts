@@ -32,7 +32,6 @@ export const startCall = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => BookingId.parse(i))
   .handler(async ({ context, data }) => {
-    await requireAgent(context as never);
     return startBookingCall(context as never, data.booking_id);
   });
 
@@ -40,7 +39,6 @@ export const endTelnyxCall = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => BookingId.parse(i))
   .handler(async ({ context, data }) => {
-    await requireAgent(context as never);
     return hangupBookingCall(context as never, data.booking_id);
   });
 
@@ -50,7 +48,6 @@ export const transferCall = createServerFn({ method: "POST" })
     BookingId.extend({ to: z.string().min(5).max(32) }).parse(i),
   )
   .handler(async ({ context, data }) => {
-    await requireAgent(context as never);
     return transferBookingCall(context as never, data.booking_id, data.to);
   });
 
