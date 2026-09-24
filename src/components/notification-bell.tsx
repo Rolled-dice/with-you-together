@@ -60,7 +60,7 @@ export function NotificationBell({ className }: { className?: string }) {
           if (!open && unread) {
             markRead({ data: {} }).then(() =>
               qc.invalidateQueries({ queryKey: ["notifications"] }),
-            );
+            ).catch(() => undefined);
           }
         }}
         className="relative inline-flex h-9 w-9 items-center justify-center rounded-brand text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -91,7 +91,7 @@ export function NotificationBell({ className }: { className?: string }) {
             onDismiss={(id) =>
               dismiss({ data: { id } }).then(() =>
                 qc.invalidateQueries({ queryKey: ["notifications"] }),
-              )
+              ).catch(() => undefined)
             }
           />
         </div>
