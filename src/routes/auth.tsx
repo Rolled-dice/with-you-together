@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { HeartIcon, SpinnerGapIcon, WarningCircleIcon, WifiSlashIcon } from "@phosphor-icons/react";
+// import { HeartIcon, SpinnerGapIcon, WarningCircleIcon, WifiSlashIcon } from "@phosphor-icons/react";
+import { SpinnerGapIcon, WarningCircleIcon, WifiSlashIcon } from "@phosphor-icons/react";
+
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,18 +15,13 @@ import { FieldRow } from "@/components/auth/field-row";
 import { classifyAuthError } from "@/lib/auth-errors";
 import { safeAuthRedirect } from "@/lib/auth-routing";
 
-const SignUpForm = lazy(() =>
-  import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })),
-);
+const SignUpForm = lazy(() => import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })));
 
 type AuthSearch = { reason?: "session_expired" | "signed_out"; redirect?: string };
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): AuthSearch => ({
-    reason:
-      search.reason === "session_expired" || search.reason === "signed_out"
-        ? search.reason
-        : undefined,
+    reason: search.reason === "session_expired" || search.reason === "signed_out" ? search.reason : undefined,
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
   }),
   head: () => ({
@@ -42,9 +39,7 @@ function AuthPage() {
   const redirectTo = safeAuthRedirect(search.redirect);
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [checkingSession, setCheckingSession] = useState(true);
-  const [online, setOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine !== false,
-  );
+  const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine !== false);
 
   useEffect(() => {
     const on = () => setOnline(true);
@@ -71,20 +66,23 @@ function AuthPage() {
       if (!cancelled) setCheckingSession(false);
     }, 900);
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (cancelled) return;
-      window.clearTimeout(fallback);
-      if (data.session) {
-        window.location.replace(redirectTo);
-      } else {
-        setCheckingSession(false);
-      }
-    }).catch(() => {
-      if (!cancelled) {
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (cancelled) return;
         window.clearTimeout(fallback);
-        setCheckingSession(false);
-      }
-    });
+        if (data.session) {
+          window.location.replace(redirectTo);
+        } else {
+          setCheckingSession(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          window.clearTimeout(fallback);
+          setCheckingSession(false);
+        }
+      });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
@@ -152,9 +150,7 @@ function AuthPage() {
           transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
         >
           <h1 className="text-2xl font-semibold tracking-tight">Welcome</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sign in or create your Care Membership.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in or create your Care Membership.</p>
 
           {!online && (
             <div
@@ -186,12 +182,7 @@ function AuthPage() {
             </div>
           )}
 
-
-          <Tabs
-            value={tab}
-            onValueChange={(v) => setTab(v as "signin" | "signup")}
-            className="mt-6"
-          >
+          <Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")} className="mt-6">
             <TabsList className="grid w-full grid-cols-2 rounded-brand">
               <TabsTrigger value="signin" className="rounded-brand transition-all">
                 Sign in
@@ -223,8 +214,18 @@ function AuthPage() {
                           <SignInForm redirectTo={redirectTo} lock={lock} />
                           <Divider />
                           <div className="space-y-2">
-                            <OAuthButton provider="google" label="Continue with Google" redirectTo={redirectTo} lock={lock} />
-                            <OAuthButton provider="apple" label="Continue with Apple" redirectTo={redirectTo} lock={lock} />
+                            <OAuthButton
+                              provider="google"
+                              label="Continue with Google"
+                              redirectTo={redirectTo}
+                              lock={lock}
+                            />
+                            <OAuthButton
+                              provider="apple"
+                              label="Continue with Apple"
+                              redirectTo={redirectTo}
+                              lock={lock}
+                            />
                           </div>
                         </>
                       )}
@@ -241,8 +242,20 @@ function AuthPage() {
                             <SignUpForm redirectTo={redirectTo} />
                             <Divider />
                             <div className="space-y-2">
-                              <OAuthButton provider="google" label="Sign up with Google" requireAge redirectTo={redirectTo} lock={lock} />
-                              <OAuthButton provider="apple" label="Sign up with Apple" requireAge redirectTo={redirectTo} lock={lock} />
+                              <OAuthButton
+                                provider="google"
+                                label="Sign up with Google"
+                                requireAge
+                                redirectTo={redirectTo}
+                                lock={lock}
+                              />
+                              <OAuthButton
+                                provider="apple"
+                                label="Sign up with Apple"
+                                requireAge
+                                redirectTo={redirectTo}
+                                lock={lock}
+                              />
                             </div>
                           </>
                         )}
@@ -250,7 +263,6 @@ function AuthPage() {
                     </Suspense>
                   )}
                 </TabsContent>
-
               </motion.div>
             </AnimatePresence>
           </Tabs>
@@ -313,7 +325,6 @@ function OAuthLockGroup({ children }: { children: (lock: AuthLock) => React.Reac
   return <>{children(lock)}</>;
 }
 
-
 function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -330,9 +341,7 @@ function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }
       const info = classifyAuthError(err);
       toast.error(info.title, {
         description: info.description,
-        action: info.retryable
-          ? { label: "Try again", onClick: () => void attemptSignIn() }
-          : undefined,
+        action: info.retryable ? { label: "Try again", onClick: () => void attemptSignIn() } : undefined,
       });
       lock.release();
     }
@@ -342,7 +351,6 @@ function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }
     e.preventDefault();
     await attemptSignIn();
   }
-
 
   return (
     <motion.form
@@ -392,7 +400,6 @@ function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }
             ) : (
               "Sign in"
             )}
-
           </Button>
         </motion.div>
       </FieldRow>
@@ -400,14 +407,22 @@ function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }
   );
 }
 
-
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path fill="#4285F4" d="M21.6 12.23c0-.66-.06-1.3-.17-1.9H12v3.6h5.4a4.62 4.62 0 0 1-2 3.03v2.52h3.24c1.9-1.75 2.96-4.32 2.96-7.25Z" />
-      <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.42l-3.24-2.52c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.58-4.12H3.06v2.6A10 10 0 0 0 12 22Z" />
+      <path
+        fill="#4285F4"
+        d="M21.6 12.23c0-.66-.06-1.3-.17-1.9H12v3.6h5.4a4.62 4.62 0 0 1-2 3.03v2.52h3.24c1.9-1.75 2.96-4.32 2.96-7.25Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 22c2.7 0 4.96-.9 6.62-2.42l-3.24-2.52c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.58-4.12H3.06v2.6A10 10 0 0 0 12 22Z"
+      />
       <path fill="#FBBC05" d="M6.42 13.9a5.98 5.98 0 0 1 0-3.82V7.48H3.06a10 10 0 0 0 0 9.04l3.36-2.62Z" />
-      <path fill="#EA4335" d="M12 5.86c1.47 0 2.78.5 3.82 1.5l2.86-2.86C16.95 2.9 14.7 2 12 2A10 10 0 0 0 3.06 7.48l3.36 2.6C7.2 7.62 9.4 5.86 12 5.86Z" />
+      <path
+        fill="#EA4335"
+        d="M12 5.86c1.47 0 2.78.5 3.82 1.5l2.86-2.86C16.95 2.9 14.7 2 12 2A10 10 0 0 0 3.06 7.48l3.36 2.6C7.2 7.62 9.4 5.86 12 5.86Z"
+      />
     </svg>
   );
 }
@@ -450,9 +465,7 @@ function OAuthButton({
       const info = classifyAuthError(err);
       toast.error(info.title, {
         description: info.description,
-        action: info.retryable
-          ? { label: "Try again", onClick: () => void attempt() }
-          : undefined,
+        action: info.retryable ? { label: "Try again", onClick: () => void attempt() } : undefined,
       });
       lock.release();
     }
@@ -474,7 +487,6 @@ function OAuthButton({
     }
     await attempt();
   }
-
 
   const providerLabel = provider === "google" ? "Google" : "Apple";
 
@@ -498,7 +510,6 @@ function OAuthButton({
             <AppleIcon className="h-4 w-4" />
           )}
           {busy ? `Opening ${providerLabel}…` : label}
-
         </span>
       </Button>
     </motion.div>
