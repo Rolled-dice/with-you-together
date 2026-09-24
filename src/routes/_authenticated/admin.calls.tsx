@@ -124,6 +124,42 @@ function CallsConsole() {
     refetchOnWindowFocus: true,
     staleTime: 0,
   });
+  useEffect(() => {
+    const channel = supabase
+      .channel(`admin-call-crm-${crypto.randomUUID()}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "listener_bookings",
+        },
+        invalidate,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "agent_presence",
+        },
+        invalidate,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "call_flags",
+        },
+        invalidate,
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["call-queue"] });
