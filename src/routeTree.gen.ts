@@ -15,6 +15,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
+import { Route as RobotsTxtRouteImport } from './routes/robots.txt'
 import { Route as DocsSendLaterRouteImport } from './routes/docs.send-later'
 import { Route as DocsSafetyRouteImport } from './routes/docs.safety'
 import { Route as DocsMedicationRouteImport } from './routes/docs.medication'
@@ -87,6 +89,16 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DocsRoute,
+} as any)
+const SitemapXmlRoute = SitemapXmlRouteImport.update({
+  id: '/sitemap/xml',
+  path: '/sitemap/xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsTxtRoute = RobotsTxtRouteImport.update({
+  id: '/robots/txt',
+  path: '/robots/txt',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DocsSendLaterRoute = DocsSendLaterRouteImport.update({
   id: '/send-later',
@@ -348,6 +360,8 @@ export interface FileRoutesByFullPath {
   '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/send-later': typeof DocsSendLaterRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
@@ -396,6 +410,8 @@ export interface FileRoutesByTo {
   '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/send-later': typeof DocsSendLaterRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/docs': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
@@ -448,6 +464,8 @@ export interface FileRoutesById {
   '/docs/medication': typeof DocsMedicationRoute
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/send-later': typeof DocsSendLaterRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/agents': typeof AuthenticatedAdminAgentsRoute
@@ -500,6 +518,8 @@ export interface FileRouteTypes {
     | '/docs/medication'
     | '/docs/safety'
     | '/docs/send-later'
+    | '/robots/txt'
+    | '/sitemap/xml'
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/agents'
@@ -548,6 +568,8 @@ export interface FileRouteTypes {
     | '/docs/medication'
     | '/docs/safety'
     | '/docs/send-later'
+    | '/robots/txt'
+    | '/sitemap/xml'
     | '/docs'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/agents'
@@ -599,6 +621,8 @@ export interface FileRouteTypes {
     | '/docs/medication'
     | '/docs/safety'
     | '/docs/send-later'
+    | '/robots/txt'
+    | '/sitemap/xml'
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/agents'
@@ -627,6 +651,8 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
+  RobotsTxtRoute: typeof RobotsTxtRoute
+  SitemapXmlRoute: typeof SitemapXmlRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicGoogleCalendarCallbackRoute: typeof ApiPublicGoogleCalendarCallbackRoute
   ApiPublicHooksCalendarSyncRoute: typeof ApiPublicHooksCalendarSyncRoute
@@ -681,6 +707,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/docs/'
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof DocsRoute
+    }
+    '/sitemap/xml': {
+      id: '/sitemap/xml'
+      path: '/sitemap/xml'
+      fullPath: '/sitemap/xml'
+      preLoaderRoute: typeof SitemapXmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots/txt': {
+      id: '/robots/txt'
+      path: '/robots/txt'
+      fullPath: '/robots/txt'
+      preLoaderRoute: typeof RobotsTxtRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/docs/send-later': {
       id: '/docs/send-later'
@@ -1088,6 +1128,8 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
+  RobotsTxtRoute: RobotsTxtRoute,
+  SitemapXmlRoute: SitemapXmlRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicGoogleCalendarCallbackRoute: ApiPublicGoogleCalendarCallbackRoute,
   ApiPublicHooksCalendarSyncRoute: ApiPublicHooksCalendarSyncRoute,
