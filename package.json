@@ -19,7 +19,7 @@
     "seed:users:verify": "node scripts/seed-dev-users.mjs --verify"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.76",
+    "@ai-sdk/google": "4.0.17",
     "@ai-sdk/openai-compatible": "^3.0.11",
     "@ai-sdk/react": "^4.0.32",
     "@gsap/react": "^2.1.2",
