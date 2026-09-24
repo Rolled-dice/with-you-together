@@ -50,7 +50,7 @@ import { SLA_META, slaLevel, type CrmState } from "@/lib/call-crm";
 export const Route = createFileRoute("/_authenticated/agent/console")({
   head: () => ({
     meta: [
-      { title: "Agent console · SomeoneNear" },
+      { title: "Agent console | SomeoneNear" },
       {
         name: "description",
         content: "Softphone, member context and call notes for SomeoneNear listener agents.",

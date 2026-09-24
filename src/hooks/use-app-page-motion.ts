@@ -72,27 +72,23 @@ export function useAppPageMotion(
 
       /* -- Full motion ---------------------------------------------------- */
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set([q(SEL.eyebrow), q(SEL.sub), q(SEL.cta)].flat(), {
-          autoAlpha: 0,
-          y: 12,
-        });
-
+        const eyebrow = q(SEL.eyebrow);
         const headline = q(SEL.headline);
-        gsap.set(headline, { autoAlpha: 0, y: 18 });
+        const sub = q(SEL.sub);
+        const cta = q(SEL.cta);
+        const intro = [eyebrow, sub, cta].flat();
+        if (intro.length) gsap.set(intro, { autoAlpha: 0, y: 12 });
+        if (headline.length) gsap.set(headline, { autoAlpha: 0, y: 18 });
 
         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-          tl.to(q(SEL.eyebrow), { autoAlpha: 1, y: 0, duration: 0.35 })
-            .to(
-              headline,
-              { autoAlpha: 1, y: 0, duration: 0.65, ease: "expo.out" },
-              "-=0.18",
-            )
-            .to(q(SEL.sub), { autoAlpha: 1, y: 0, duration: 0.4 }, "-=0.42")
-            .to(
-              q(SEL.cta),
-              { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.06 },
-              "-=0.28",
-            );
+        if (eyebrow.length) tl.to(eyebrow, { autoAlpha: 1, y: 0, duration: 0.35 });
+        if (headline.length) {
+          tl.to(headline, { autoAlpha: 1, y: 0, duration: 0.65, ease: "expo.out" }, "-=0.18");
+        }
+        if (sub.length) tl.to(sub, { autoAlpha: 1, y: 0, duration: 0.4 }, "-=0.42");
+        if (cta.length) {
+          tl.to(cta, { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.06 }, "-=0.28");
+        }
 
         /* -- Count-ups --------------------------------------------------- */
         q(SEL.counter).forEach((el) => {
