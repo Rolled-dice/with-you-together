@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createClient } from "@supabase/supabase-js";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { getTierLimit, UNLIMITED } from "@/lib/quota.functions";
 
 const SYSTEM_PROMPT = `You are the SomeoneNear Companion, a warm, gentle, human-feeling presence.
@@ -25,8 +25,8 @@ export const Route = createFileRoute("/api/chat")({
 
         const supabaseUrl = process.env.SUPABASE_URL;
         const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const lovableKey = process.env.LOVABLE_API_KEY;
-        if (!supabaseUrl || !publishableKey || !lovableKey) {
+        const geminiKey = process.env.GEMINI_API_KEY;
+        if (!supabaseUrl || !publishableKey || !geminiKey) {
           return new Response("Server not configured", { status: 500 });
         }
 
@@ -126,11 +126,12 @@ export const Route = createFileRoute("/api/chat")({
         const displayName = profile && (profile as { display_name?: string }).display_name;
         const nameLine = displayName ? `\n\nYou're speaking with ${displayName}.` : "";
 
-        const gateway = createLovableAiGatewayProvider(lovableKey);
+        const google = createGoogleGenerativeAI({ apiKey: geminiKey });
         const result = streamText({
-          model: gateway("google/gemini-3-flash-preview"),
+          model: google("gemini-3-flash-preview"),
           system: SYSTEM_PROMPT + nameLine + memoryBlock,
           messages: await convertToModelMessages(body.messages),
+          maxRetries: 0,
           onError: ({ error }) => {
             console.error("[chat] stream error", error);
           },
@@ -138,6 +139,10 @@ export const Route = createFileRoute("/api/chat")({
 
         return result.toUIMessageStreamResponse({
           originalMessages: body.messages,
+          onError: (error) =>
+            error instanceof Error
+              ? error.message
+              : "Gemini could not respond. Please try again shortly.",
           onFinish: async ({ responseMessage }) => {
             const text = responseMessage.parts
               .map((p) => (p.type === "text" ? p.text : ""))

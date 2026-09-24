@@ -105,6 +105,8 @@ function ChatSurface({
       const msg = (err as Error).message || "";
       if (msg.includes("quota_exceeded") || msg.includes("429")) {
         toast.error("You've used today's Companion messages. They refill tomorrow, or upgrade to Care Plus.");
+      } else {
+        toast.error(msg || "Companion could not respond. Please try again shortly.");
       }
       console.error("[chat]", err);
     },
