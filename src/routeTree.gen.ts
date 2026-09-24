@@ -48,6 +48,7 @@ import { Route as AuthenticatedCompanionThreadIdRouteImport } from './routes/_au
 import { Route as AuthenticatedAgentConsoleRouteImport } from './routes/_authenticated/agent.console'
 import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authenticated/admin.feedback'
 import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authenticated/admin.calls'
+import { Route as AuthenticatedAdminAgentsRouteImport } from './routes/_authenticated/admin.agents'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -258,6 +259,12 @@ const AuthenticatedAdminCallsRoute = AuthenticatedAdminCallsRouteImport.update({
   path: '/admin/calls',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminAgentsRoute =
+  AuthenticatedAdminAgentsRouteImport.update({
+    id: '/admin/agents',
+    path: '/admin/agents',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -343,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/docs/send-later': typeof DocsSendLaterRoute
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/agent/console': typeof AuthenticatedAgentConsoleRoute
@@ -390,6 +398,7 @@ export interface FileRoutesByTo {
   '/docs/send-later': typeof DocsSendLaterRoute
   '/docs': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/agent/console': typeof AuthenticatedAgentConsoleRoute
@@ -441,6 +450,7 @@ export interface FileRoutesById {
   '/docs/send-later': typeof DocsSendLaterRoute
   '/docs/': typeof DocsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/_authenticated/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/_authenticated/agent/console': typeof AuthenticatedAgentConsoleRoute
@@ -492,6 +502,7 @@ export interface FileRouteTypes {
     | '/docs/send-later'
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/agents'
     | '/admin/calls'
     | '/admin/feedback'
     | '/agent/console'
@@ -539,6 +550,7 @@ export interface FileRouteTypes {
     | '/docs/send-later'
     | '/docs'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/agents'
     | '/admin/calls'
     | '/admin/feedback'
     | '/agent/console'
@@ -589,6 +601,7 @@ export interface FileRouteTypes {
     | '/docs/send-later'
     | '/docs/'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin/agents'
     | '/_authenticated/admin/calls'
     | '/_authenticated/admin/feedback'
     | '/_authenticated/agent/console'
@@ -900,6 +913,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCallsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/agents': {
+      id: '/_authenticated/admin/agents'
+      path: '/admin/agents'
+      fullPath: '/admin/agents'
+      preLoaderRoute: typeof AuthenticatedAdminAgentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -995,6 +1015,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSafetyRoute: typeof AuthenticatedSafetyRoute
   AuthenticatedSendLaterRoute: typeof AuthenticatedSendLaterRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedAdminAgentsRoute: typeof AuthenticatedAdminAgentsRoute
   AuthenticatedAdminCallsRoute: typeof AuthenticatedAdminCallsRoute
   AuthenticatedAdminFeedbackRoute: typeof AuthenticatedAdminFeedbackRoute
   AuthenticatedAgentConsoleRoute: typeof AuthenticatedAgentConsoleRoute
@@ -1013,6 +1034,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSafetyRoute: AuthenticatedSafetyRoute,
   AuthenticatedSendLaterRoute: AuthenticatedSendLaterRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedAdminAgentsRoute: AuthenticatedAdminAgentsRoute,
   AuthenticatedAdminCallsRoute: AuthenticatedAdminCallsRoute,
   AuthenticatedAdminFeedbackRoute: AuthenticatedAdminFeedbackRoute,
   AuthenticatedAgentConsoleRoute: AuthenticatedAgentConsoleRoute,

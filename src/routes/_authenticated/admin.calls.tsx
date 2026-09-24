@@ -9,7 +9,7 @@ import {
   PhoneCallIcon,
   ArrowClockwiseIcon,
   ShieldWarningIcon,
-  UsersIcon,
+  // UsersIcon,
   MagicWandIcon,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
@@ -27,33 +27,16 @@ import {
   resolveCallFlag,
   setBookingCrmState,
   setBookingContactPhone,
-  upsertCallAgent,
+  // upsertCallAgent,
 } from "@/lib/call-crm.functions";
 
-import {
-  getRoutingConfig,
-  getSupervisorSnapshot,
-  saveRoutingConfig,
-} from "@/lib/telnyx.functions";
-import {
-  CRM_STATES,
-  SLA_META,
-  STATE_META,
-  slaLevel,
-  type CrmState,
-  type QueueRow,
-} from "@/lib/call-crm";
+import { getRoutingConfig, getSupervisorSnapshot, saveRoutingConfig } from "@/lib/telnyx.functions";
+import { CRM_STATES, SLA_META, STATE_META, slaLevel, type CrmState, type QueueRow } from "@/lib/call-crm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/calls")({
   head: () => ({
@@ -67,9 +50,7 @@ export const Route = createFileRoute("/_authenticated/admin/calls")({
     ],
   }),
   component: AdminCallsPage,
-  errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-primary">Something went wrong: {error.message}</div>
-  ),
+  errorComponent: ({ error }) => <div className="p-8 text-sm text-primary">Something went wrong: {error.message}</div>,
 });
 
 const ACTIVE_STATES: CrmState[] = ["requested", "assigned", "confirmed", "in_call"];
@@ -95,11 +76,7 @@ function AdminCallsPage() {
   if (!adminCheck?.isAdmin) {
     return (
       <AppShell>
-        <PageHeader
-          eyebrow="Admin"
-          title="Call operations"
-          description="You don't have access to this panel."
-        />
+        <PageHeader eyebrow="Admin" title="Call operations" description="You don't have access to this panel." />
         <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm underline">
           <ArrowLeftIcon className="h-4 w-4" /> Back to dashboard
         </Link>
@@ -120,9 +97,8 @@ function CallsConsole() {
   const stateFn = useServerFn(setBookingCrmState);
   const flagFn = useServerFn(raiseCallFlag);
   const resolveFn = useServerFn(resolveCallFlag);
-  const upsertAgentFn = useServerFn(upsertCallAgent);
+  // const upsertAgentFn = useServerFn(upsertCallAgent);
   const phoneFn = useServerFn(setBookingContactPhone);
-
 
   const [showAll, setShowAll] = useState(false);
 
@@ -212,7 +188,6 @@ function CallsConsole() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-
   const rows = queue.data?.rows ?? [];
   const visible = useMemo(
     () => (showAll ? rows : rows.filter((r) => ACTIVE_STATES.includes(r.crm_state))),
@@ -232,9 +207,23 @@ function CallsConsole() {
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <StatTile icon={<PhoneCallIcon className="h-4 w-4" />} label="Active calls in queue" value={rows.filter((r) => ACTIVE_STATES.includes(r.crm_state)).length} />
-        <StatTile icon={<ShieldWarningIcon className="h-4 w-4" />} label="SLA breached" value={breached} tone={breached ? "text-primary" : undefined} />
-        <StatTile icon={<FlagIcon className="h-4 w-4" />} label="Open flags" value={openFlags.length} tone={openFlags.length ? "text-primary" : undefined} />
+        <StatTile
+          icon={<PhoneCallIcon className="h-4 w-4" />}
+          label="Active calls in queue"
+          value={rows.filter((r) => ACTIVE_STATES.includes(r.crm_state)).length}
+        />
+        <StatTile
+          icon={<ShieldWarningIcon className="h-4 w-4" />}
+          label="SLA breached"
+          value={breached}
+          tone={breached ? "text-primary" : undefined}
+        />
+        <StatTile
+          icon={<FlagIcon className="h-4 w-4" />}
+          label="Open flags"
+          value={openFlags.length}
+          tone={openFlags.length ? "text-primary" : undefined}
+        />
       </div>
 
       <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
@@ -255,29 +244,143 @@ function CallsConsole() {
         ) : visible.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nothing in the queue right now.</p>
         ) : (
-          <div className="space-y-3">
-            {visible.map((row) => (
-              <QueueCard
-                key={row.id}
-                row={row}
-                agents={agents.data?.agents ?? []}
-                busy={autoAssign.isPending || setState.isPending}
-                onAutoAssign={() => autoAssign.mutate(row.id)}
-                onAssign={(agentId) => manualAssign.mutate({ id: row.id, agent_id: agentId })}
-                onState={(s) => setState.mutate({ id: row.id, crm_state: s })}
-                onFlag={() => raise.mutate(row.id)}
-                onSavePhone={(v) => savePhone.mutate({ id: row.id, contact_phone: v })}
-                savingPhone={savePhone.isPending}
+          <div className="max-h-[620px] overflow-auto rounded-2xl border border-border">
+            <table className="min-w-[1450px] w-full text-left text-xs">
+              <thead className="sticky top-0 z-20 bg-surface shadow-sm">
+                <tr className="border-b border-border">
+                  <th className="p-3">Scheduled</th>
+                  <th className="p-3">Duration</th>
+                  <th className="p-3">Member</th>
+                  <th className="p-3">Phone</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">SLA</th>
+                  <th className="p-3">Listener</th>
+                  <th className="p-3">Assignment</th>
+                  <th className="p-3">Notes</th>
+                  <th className="sticky right-0 bg-surface p-3">Actions</th>
+                </tr>
+              </thead>
 
-              />
-            ))}
+              <tbody>
+                {visible.map((row) => {
+                  const level = slaLevel(row.requested_at, row.crm_state);
+                  const state = STATE_META[row.crm_state];
+                  const sla = SLA_META[level];
+                  const phone = row.contact_phone ?? row.profile_phone;
+
+                  return (
+                    <tr key={row.id} className="border-b border-border/70 align-top last:border-0">
+                      <td className="whitespace-nowrap p-3">
+                        <p className="font-medium">{new Date(row.requested_at).toLocaleDateString()}</p>
+                        <p className="text-muted-foreground">
+                          {new Date(row.requested_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </td>
+
+                      <td className="whitespace-nowrap p-3">{row.duration_minutes} min</td>
+
+                      <td className="p-3">{row.listener_name ?? "Member"}</td>
+
+                      <td className="whitespace-nowrap p-3">{phone ?? "Not available"}</td>
+
+                      <td className="p-3">
+                        <Badge variant="outline" className={state.className}>
+                          {state.label}
+                        </Badge>
+                      </td>
+
+                      <td className="p-3">
+                        <Badge variant="outline" className={sla.className}>
+                          {sla.label}
+                        </Badge>
+                      </td>
+
+                      <td className="p-3">
+                        <p className="font-medium">{row.agent_name ?? "Unassigned"}</p>
+                      </td>
+
+                      <td className="min-w-[190px] p-3">
+                        {row.agent_id ? (
+                          <Badge variant="secondary">Assigned</Badge>
+                        ) : (
+                          <Button size="sm" disabled={autoAssign.isPending} onClick={() => autoAssign.mutate(row.id)}>
+                            {autoAssign.isPending ? (
+                              <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />
+                            ) : (
+                              <MagicWandIcon className="mr-1.5 h-4 w-4" />
+                            )}
+                            Auto assign
+                          </Button>
+                        )}
+
+                        <Select
+                          value={row.agent_id ?? undefined}
+                          onValueChange={(agentId) =>
+                            manualAssign.mutate({
+                              id: row.id,
+                              agent_id: agentId,
+                            })
+                          }
+                        >
+                          <SelectTrigger className="mt-2 h-8 w-[175px]">
+                            <SelectValue placeholder="Manual assignment" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(agents.data?.agents ?? [])
+                              .filter((agent) => agent.is_active)
+                              .map((agent) => (
+                                <SelectItem key={agent.id} value={agent.id}>
+                                  {agent.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+
+                      <td className="max-w-[260px] p-3">
+                        <p className="line-clamp-3 text-muted-foreground">{row.note ?? "No notes"}</p>
+                      </td>
+
+                      <td className="sticky right-0 min-w-[170px] bg-surface p-3">
+                        <Select
+                          value={row.crm_state}
+                          onValueChange={(value) =>
+                            setState.mutate({
+                              id: row.id,
+                              crm_state: value as CrmState,
+                            })
+                          }
+                        >
+                          <SelectTrigger className="h-8 w-[150px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CRM_STATES.map((crmState) => (
+                              <SelectItem key={crmState} value={crmState}>
+                                {STATE_META[crmState].label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Button className="mt-2" size="sm" variant="outline" onClick={() => raise.mutate(row.id)}>
+                          <FlagIcon className="mr-1.5 h-4 w-4" />
+                          Flag
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
 
       <SupervisorBoard />
-
-
 
       <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
         <h2 className="mb-4 flex items-center gap-2 font-display text-base font-medium">
@@ -319,7 +422,7 @@ function CallsConsole() {
         )}
       </section>
 
-      <AgentRoster
+      {/* <AgentRoster
         agents={agents.data?.agents ?? []}
         loading={agents.isLoading}
         onSave={async (payload) => {
@@ -327,7 +430,7 @@ function CallsConsole() {
           qc.invalidateQueries({ queryKey: ["call-agents"] });
           toast.success("Agent saved");
         }}
-      />
+      /> */}
     </AppShell>
   );
 }
@@ -382,7 +485,6 @@ function QueueCard({
   const [phoneDraft, setPhoneDraft] = useState(row.contact_phone ?? row.profile_phone ?? "");
   const dialTarget = row.contact_phone ?? row.profile_phone;
 
-
   return (
     <article
       className={`rounded-3xl border p-4 shadow-gentle ${
@@ -411,9 +513,7 @@ function QueueCard({
         <span className="text-sm font-medium">
           {startsAt.toLocaleString()} · {row.duration_minutes}m
         </span>
-        <span className="text-xs text-muted-foreground">
-          {formatDistanceToNow(startsAt, { addSuffix: true })}
-        </span>
+        <span className="text-xs text-muted-foreground">{formatDistanceToNow(startsAt, { addSuffix: true })}</span>
       </div>
 
       <p className="mt-1 text-xs text-muted-foreground">
@@ -445,10 +545,13 @@ function QueueCard({
         </span>
       </div>
 
-
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button size="sm" onClick={onAutoAssign} disabled={busy}>
-          {busy ? <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" /> : <MagicWandIcon className="mr-1.5 h-4 w-4" />}
+          {busy ? (
+            <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />
+          ) : (
+            <MagicWandIcon className="mr-1.5 h-4 w-4" />
+          )}
           Auto-assign
         </Button>
 
@@ -493,14 +596,14 @@ function QueueCard({
 }
 
 type AgentDraft = {
-  name: string;
-  email: string;
-  phone: string;
-  timezone: string;
-  skills: string;
-  work_start: string;
-  work_end: string;
-  max_concurrent: string;
+  // name: string;
+  // email: string;
+  // phone: string;
+  // timezone: string;
+  // skills: string;
+  // work_start: string;
+  // work_end: string;
+  // max_concurrent: string;
 };
 
 const EMPTY_DRAFT: AgentDraft = {
@@ -575,25 +678,17 @@ function AgentRoster({
       {loading ? (
         <Skeleton className="h-20 w-full" />
       ) : agents.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No agents yet, add one below so the router has someone to pick.
-        </p>
+        <p className="text-sm text-muted-foreground">No agents yet, add one below so the router has someone to pick.</p>
       ) : (
         <ul className="mb-4 space-y-2">
           {agents.map((a) => (
-            <li
-              key={a.id}
-              className="rounded-2xl border border-border/70 bg-background/60 px-3 py-2 text-sm"
-            >
+            <li key={a.id} className="rounded-2xl border border-border/70 bg-background/60 px-3 py-2 text-sm">
               <span className="font-medium">{a.name}</span>{" "}
               <span className="text-xs text-muted-foreground">
-                · {a.timezone} · {a.work_start.slice(0, 5)}-{a.work_end.slice(0, 5)} · max{" "}
-                {a.max_concurrent}
+                · {a.timezone} · {a.work_start.slice(0, 5)}-{a.work_end.slice(0, 5)} · max {a.max_concurrent}
               </span>
               {a.skills.length > 0 && (
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  skills: {a.skills.join(", ")}
-                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">skills: {a.skills.join(", ")}</p>
               )}
             </li>
           ))}
@@ -601,11 +696,7 @@ function AgentRoster({
       )}
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <Input
-          placeholder="Name"
-          value={draft.name}
-          onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-        />
+        <Input placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
         <Input
           placeholder="Email"
           value={draft.email}
@@ -631,11 +722,7 @@ function AgentRoster({
           value={draft.work_start}
           onChange={(e) => setDraft({ ...draft, work_start: e.target.value })}
         />
-        <Input
-          type="time"
-          value={draft.work_end}
-          onChange={(e) => setDraft({ ...draft, work_end: e.target.value })}
-        />
+        <Input type="time" value={draft.work_end} onChange={(e) => setDraft({ ...draft, work_end: e.target.value })} />
         <Input
           type="number"
           min={1}
@@ -676,9 +763,7 @@ function SupervisorBoard() {
           require_skill_match: Boolean(current.require_skill_match),
           timezone_tolerance_hours: Number(current.timezone_tolerance_hours),
           enforce_working_hours: Boolean(current.enforce_working_hours),
-          max_concurrent_override: current.max_concurrent_override
-            ? Number(current.max_concurrent_override)
-            : null,
+          max_concurrent_override: current.max_concurrent_override ? Number(current.max_concurrent_override) : null,
           skill_weight: Number(current.skill_weight),
           load_weight: Number(current.load_weight),
           timezone_weight: Number(current.timezone_weight),
@@ -711,10 +796,27 @@ function SupervisorBoard() {
       ) : (
         <>
           <div className="grid gap-2 sm:grid-cols-4">
-            <StatTile icon={<PhoneCallIcon className="h-4 w-4" />} label="Queue depth" value={snapshot.data?.queueDepth ?? 0} />
-            <StatTile icon={<PhoneCallIcon className="h-4 w-4" />} label="Answer rate (7d)" value={`${m?.answerRate ?? 0}%`} />
-            <StatTile icon={<PhoneCallIcon className="h-4 w-4" />} label="Avg talk time" value={`${Math.round((m?.avgTalkSeconds ?? 0) / 60)}m`} />
-            <StatTile icon={<ShieldWarningIcon className="h-4 w-4" />} label="SLA breach rate" value={`${m?.breachRate ?? 0}%`} tone={(m?.breachRate ?? 0) > 0 ? "text-primary" : undefined} />
+            <StatTile
+              icon={<PhoneCallIcon className="h-4 w-4" />}
+              label="Queue depth"
+              value={snapshot.data?.queueDepth ?? 0}
+            />
+            <StatTile
+              icon={<PhoneCallIcon className="h-4 w-4" />}
+              label="Answer rate (7d)"
+              value={`${m?.answerRate ?? 0}%`}
+            />
+            <StatTile
+              icon={<PhoneCallIcon className="h-4 w-4" />}
+              label="Avg talk time"
+              value={`${Math.round((m?.avgTalkSeconds ?? 0) / 60)}m`}
+            />
+            <StatTile
+              icon={<ShieldWarningIcon className="h-4 w-4" />}
+              label="SLA breach rate"
+              value={`${m?.breachRate ?? 0}%`}
+              tone={(m?.breachRate ?? 0) > 0 ? "text-primary" : undefined}
+            />
           </div>
 
           <div className="space-y-2">
