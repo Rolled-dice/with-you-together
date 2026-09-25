@@ -532,17 +532,6 @@ function OAuthButton({
         aria-busy={busy}
         className="group relative w-full overflow-hidden rounded-brand transition-all hover:border-brand-primary/40 hover:shadow-md"
       >
-        <p className="text-center text-xs leading-relaxed text-muted-foreground">
-          By signing up with Google or Apple, you agree to the{" "}
-          <Link to="/terms" target="_blank" className="font-semibold text-primary underline underline-offset-4">
-            Terms
-          </Link>{" "}
-          and acknowledge the{" "}
-          <Link to="/privacy" target="_blank" className="font-semibold text-primary underline underline-offset-4">
-            Privacy Policy
-          </Link>
-          .
-        </p>
         <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-brand-primary/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         <span className="relative flex items-center justify-center gap-2">
           {busy ? (
