@@ -218,22 +218,9 @@ export async function createDodoCheckoutForUser(
       returnUrl: input.returnUrl,
     });
 
-    const { error } = await supabase.from("subscriptions").upsert(
-      {
-        user_id: userId,
-        provider: "dodo",
-        dodo_subscription_id: session.subscriptionId,
-        product_id: productId,
-        // Never store the Dodo product id here: the tier trigger matches this
-        // internal key (care_monthly_* / care_plus_monthly_*).
-        price_id: input.priceId,
-        status: "incomplete",
-        environment,
-        updated_at: new Date().toISOString(),
-      } as never,
-      { onConflict: "dodo_subscription_id" },
-    );
-    if (error) return { error: error.message };
+    // Subscription state is written only by the verified Dodo webhook using the
+    // Supabase service role. The browser-authenticated client has read-only RLS
+    // access to billing records and must never create or alter subscription rows.
     return { checkoutUrl: session.checkoutUrl };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Dodo checkout failed" };
