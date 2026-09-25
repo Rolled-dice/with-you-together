@@ -28,9 +28,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { PLAN_DISPLAY } from "@/lib/currency";
 import { getPublicStats } from "@/lib/stats.functions";
 
-const TITLE = "SomeoneNear — we call your parents, so you know they're okay";
+const TITLE = "Someone to Talk To | On-Demand Check-Ins | SomeoneNear";
 const DESCRIPTION =
-  "A trained listener phones your elderly parent on a schedule you set, on their ordinary phone. After every call you get a short update on how they're really doing.";
+  "Talk when you want. Get a friendly check-in when you need one. SomeoneNear connects you with real, compassionate listeners when you just need someone around.";
 
 const SCHEMA = {
   "@context": "https://schema.org",
