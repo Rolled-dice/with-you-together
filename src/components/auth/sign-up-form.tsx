@@ -219,6 +219,22 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
           </Label>
         </div>
       </FieldRow>
+      {ageFromDob(dob) !== null && ageFromDob(dob)! < 18 && (
+        <FieldRow>
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="guardian-consent"
+              checked={guardianConfirmed}
+              onCheckedChange={(checked) => setGuardianConfirmed(checked === true)}
+              aria-required="true"
+            />
+
+            <Label htmlFor="guardian-consent" className="text-sm font-normal leading-relaxed">
+              I confirm that my parent or legal guardian has given permission for me to use SomeoneNear.
+            </Label>
+          </div>
+        </FieldRow>
+      )}
 
       <FieldRow>
         <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
