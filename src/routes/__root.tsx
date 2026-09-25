@@ -118,8 +118,16 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <script
+          id="Cookiebot"
+          src="https://consent.cookiebot.com/uc.js"
+          data-cbid="3a9d7ca9-0293-48e0-8195-dda50a5cb1d6"
+          data-blockingmode="auto"
+          type="text/javascript"
+        />
         <HeadContent />
       </head>
+
       <body>
         {children}
         <Scripts />
