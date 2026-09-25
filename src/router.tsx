@@ -19,6 +19,30 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
   });
+  const sensitiveQueryKeys = [
+    ["me"],
+    ["conversations"],
+    ["messages"],
+    ["memories"],
+    ["family"],
+    ["family-pool"],
+    ["medications"],
+    ["mood-checkins"],
+    ["listener-bookings"],
+    ["notifications"],
+    ["reminders"],
+    ["send-later"],
+    ["send-later-contacts"],
+    ["send-later-received"],
+    ["session-feedback-prompt"],
+  ];
+
+  for (const queryKey of sensitiveQueryKeys) {
+    queryClient.setQueryDefaults(queryKey, {
+      staleTime: 0,
+      gcTime: 0,
+    });
+  }
 
   return router;
 };
