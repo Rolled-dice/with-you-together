@@ -111,7 +111,6 @@
   --sidebar-ring: #25435f;
 }
 
-
 .dark {
   /* Playroom after dark — same violet/orb relationship on a warm charcoal */
   --background: #1c1a19;
@@ -204,46 +203,96 @@
   --color-sunrise-to: #e3d9fb;
 }
 
-
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(2deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg);
+  }
 }
 @keyframes bloom {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.06); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
 }
 @keyframes pop-in {
-  0% { transform: scale(0.9); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 @keyframes ring-fill {
-  from { stroke-dashoffset: var(--ring-total); }
-  to { stroke-dashoffset: var(--ring-offset); }
+  from {
+    stroke-dashoffset: var(--ring-total);
+  }
+  to {
+    stroke-dashoffset: var(--ring-offset);
+  }
 }
 @keyframes orbit {
-  from { transform: rotate(0deg) translateX(var(--orbit-r)) rotate(0deg); }
-  to { transform: rotate(360deg) translateX(var(--orbit-r)) rotate(-360deg); }
+  from {
+    transform: rotate(0deg) translateX(var(--orbit-r)) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(var(--orbit-r)) rotate(-360deg);
+  }
 }
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes spin-reverse {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 @keyframes avatar-bob {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-6px) scale(1.06); }
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.06);
+  }
 }
 @keyframes avatar-glow {
-  0%, 100% { opacity: 0.45; transform: scale(1); }
-  50% { opacity: 0.9; transform: scale(1.15); }
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.15);
+  }
 }
 
 /* Orbit — GPU-friendly compositor layers, transform/opacity only */
@@ -282,60 +331,143 @@
   }
 }
 @keyframes marquee-x {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 @keyframes pulse-ring {
-  0% { transform: scale(0.9); opacity: 0.7; }
-  70% { transform: scale(1.4); opacity: 0; }
-  100% { transform: scale(1.4); opacity: 0; }
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
 @keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  15% { transform: scale(1.15); }
-  30% { transform: scale(1); }
-  45% { transform: scale(1.1); }
-  60% { transform: scale(1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.15);
+  }
+  30% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(1);
+  }
 }
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes slide-in-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes shimmer-text {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 @keyframes tilt-wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-3deg); }
-  75% { transform: rotate(3deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
 }
 
-@utility animate-float { animation: float 6s ease-in-out infinite; }
-@utility animate-bloom { animation: bloom 2.4s ease-in-out infinite; }
-@utility animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-@utility animate-heartbeat { animation: heartbeat 2.2s ease-in-out infinite; }
-@utility animate-pulse-ring { animation: pulse-ring 2.4s cubic-bezier(0.24,0,0.38,1) infinite; }
-@utility animate-fade-up { animation: fade-up 0.7s ease-out both; }
-@utility animate-fade-in { animation: fade-in 0.5s ease-out both; }
-@utility animate-slide-in-up { animation: slide-in-up 0.5s ease-out both; }
-@utility animate-marquee { animation: marquee-x 30s linear infinite; }
-@utility animate-tilt-wiggle { animation: tilt-wiggle 0.6s ease-in-out; }
+@utility animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+@utility animate-bloom {
+  animation: bloom 2.4s ease-in-out infinite;
+}
+@utility animate-pop-in {
+  animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@utility animate-heartbeat {
+  animation: heartbeat 2.2s ease-in-out infinite;
+}
+@utility animate-pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+@utility animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+@utility animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+@utility animate-slide-in-up {
+  animation: slide-in-up 0.5s ease-out both;
+}
+@utility animate-marquee {
+  animation: marquee-x 30s linear infinite;
+}
+@utility animate-tilt-wiggle {
+  animation: tilt-wiggle 0.6s ease-in-out;
+}
 
-@utility stagger-1 { animation-delay: 80ms; }
-@utility stagger-2 { animation-delay: 160ms; }
-@utility stagger-3 { animation-delay: 240ms; }
-@utility stagger-4 { animation-delay: 320ms; }
-@utility stagger-5 { animation-delay: 400ms; }
-@utility stagger-6 { animation-delay: 480ms; }
+@utility stagger-1 {
+  animation-delay: 80ms;
+}
+@utility stagger-2 {
+  animation-delay: 160ms;
+}
+@utility stagger-3 {
+  animation-delay: 240ms;
+}
+@utility stagger-4 {
+  animation-delay: 320ms;
+}
+@utility stagger-5 {
+  animation-delay: 400ms;
+}
+@utility stagger-6 {
+  animation-delay: 480ms;
+}
 @utility shimmer-text {
   background: linear-gradient(90deg, currentColor 0%, oklch(0.72 0.16 30) 50%, currentColor 100%);
   background-size: 200% 100%;
@@ -345,7 +477,10 @@
   animation: shimmer-text 3s linear infinite;
 }
 @utility card-lift {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
   position: relative;
   isolation: isolate;
 }
@@ -360,38 +495,39 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.10), transparent 65%);
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.1), transparent 65%);
   opacity: 0;
   transition: opacity 220ms ease;
   pointer-events: none;
   z-index: -1;
 }
-.card-lift:hover::after { opacity: 1; }
-
+.card-lift:hover::after {
+  opacity: 1;
+}
 
 @utility gradient-sunrise {
-  background-image: linear-gradient(135deg, #F7E8D6 0%, #EFCFB4 48%, #E0A184 100%);
+  background-image: linear-gradient(135deg, #f7e8d6 0%, #efcfb4 48%, #e0a184 100%);
 }
 @utility gradient-peach {
-  background-image: linear-gradient(135deg, #FBF6EF 0%, #F0D6C6 100%);
+  background-image: linear-gradient(135deg, #fbf6ef 0%, #f0d6c6 100%);
 }
 @utility gradient-sage {
-  background-image: linear-gradient(135deg, #F1F1E8 0%, #C7D3BC 100%);
+  background-image: linear-gradient(135deg, #f1f1e8 0%, #c7d3bc 100%);
 }
 @utility gradient-blush {
-  background-image: linear-gradient(135deg, #F9EDE5 0%, #EFC9B6 100%);
+  background-image: linear-gradient(135deg, #f9ede5 0%, #efc9b6 100%);
 }
 @utility gradient-sky {
-  background-image: linear-gradient(135deg, #F2F4F3 0%, #C6D3DA 100%);
+  background-image: linear-gradient(135deg, #f2f4f3 0%, #c6d3da 100%);
 }
 @utility gradient-lilac {
-  background-image: linear-gradient(135deg, #F6F1EC 0%, #DCD2CB 100%);
+  background-image: linear-gradient(135deg, #f6f1ec 0%, #dcd2cb 100%);
 }
 @utility gradient-mint {
-  background-image: linear-gradient(135deg, #F0F4EE 0%, #CBD9C9 100%);
+  background-image: linear-gradient(135deg, #f0f4ee 0%, #cbd9c9 100%);
 }
 @utility gradient-animated {
-  background: linear-gradient(120deg, #F7E8D6, #EFCFB4, #E0A184, #F7E8D6);
+  background: linear-gradient(120deg, #f7e8d6, #efcfb4, #e0a184, #f7e8d6);
   background-size: 300% 300%;
   animation: gradient-shift 14s ease infinite;
 }
@@ -403,20 +539,39 @@
   box-shadow: 0 8px 24px -14px rgb(42 39 37 / 0.14);
 }
 @utility shadow-gentle {
-  box-shadow: 0 1px 2px rgb(42 39 37 / 0.04), 0 10px 30px -22px rgb(42 39 37 / 0.2);
+  box-shadow:
+    0 1px 2px rgb(42 39 37 / 0.04),
+    0 10px 30px -22px rgb(42 39 37 / 0.2);
 }
 
 /* Gentle nudges — a warm breath, never a red alarm */
 @keyframes gentle-breathe {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.35); }
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.35);
+  }
 }
 @keyframes gentle-rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-@utility animate-gentle-breathe { animation: gentle-breathe 3.6s ease-in-out infinite; }
-@utility animate-gentle-rise { animation: gentle-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-gentle-breathe {
+  animation: gentle-breathe 3.6s ease-in-out infinite;
+}
+@utility animate-gentle-rise {
+  animation: gentle-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 @utility nudge-dot {
   position: relative;
   display: inline-flex;
@@ -435,7 +590,9 @@
 }
 
 @utility card-hover {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
   position: relative;
   isolation: isolate;
 }
@@ -448,19 +605,23 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.10), transparent 65%);
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.1), transparent 65%);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
   z-index: -1;
 }
-.card-hover:hover::after { opacity: 1; }
+.card-hover:hover::after {
+  opacity: 1;
+}
 
 /* Cursor-aware effects (mobile/reduced-motion neutralized below) */
 @utility card-tilt {
   transform-style: preserve-3d;
   transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
-  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease;
   will-change: transform;
 }
 .card-tilt:hover {
@@ -481,8 +642,13 @@
   transition: opacity 200ms ease;
   pointer-events: none;
 }
-.card-glow:hover::before { opacity: 1; }
-.card-glow > * { position: relative; z-index: 1; }
+.card-glow:hover::before {
+  opacity: 1;
+}
+.card-glow > * {
+  position: relative;
+  z-index: 1;
+}
 
 @utility magnetic {
   transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
@@ -499,10 +665,17 @@
 }
 
 @media (pointer: coarse), (prefers-reduced-motion: reduce) {
-  .card-tilt, .magnetic, .parallax-slow, .parallax-fast { transform: none !important; }
+  .card-tilt,
+  .magnetic,
+  .parallax-slow,
+  .parallax-fast {
+    transform: none !important;
+  }
   .card-glow::before,
   .card-lift::after,
-  .card-hover::after { display: none; }
+  .card-hover::after {
+    display: none;
+  }
 }
 
 @layer base {
@@ -525,13 +698,16 @@
     line-height: 1.04;
   }
 
-  h2, h3, h4, h5, h6 {
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.025em;
     line-height: 1.12;
   }
-
 
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -545,17 +721,26 @@
 
   /* SomeoneNear signature cursor — desktop with fine pointer only */
   @media (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .someonenear-cursor { display: block; }
+    .someonenear-cursor {
+      display: block;
+    }
   }
-  .someonenear-cursor { display: none; }
+  .someonenear-cursor {
+    display: none;
+  }
 }
 
 /* Hero ambient motion uses dedicated classes so parallax transforms cannot
  * replace animation transforms. When the OS requests reduced motion, these
  * specific decorative effects stay active at a slower, gentler pace. */
 @keyframes hero-status-float {
-  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
-  50% { transform: translate3d(0, -14px, 0) rotate(1deg); }
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-1deg);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(1deg);
+  }
 }
 
 .hero-orbit-ring {
@@ -586,6 +771,45 @@
     .hero-orbit-counter {
       animation: spin-reverse 24s linear infinite !important;
     }
+
+    @layer components {
+      .legal-copy {
+        @apply space-y-10 text-[1.0625rem] leading-8 text-foreground;
+      }
+
+      .legal-copy section {
+        @apply space-y-4;
+      }
+
+      .legal-copy h2 {
+        @apply text-2xl font-extrabold tracking-tight text-foreground;
+      }
+
+      .legal-copy h3 {
+        @apply pt-2 text-lg font-bold text-foreground;
+      }
+
+      .legal-copy p {
+        @apply text-muted-foreground;
+      }
+
+      .legal-copy ul {
+        @apply list-disc space-y-2 pl-6 text-muted-foreground;
+      }
+
+      .legal-copy a {
+        @apply font-semibold text-primary underline underline-offset-4;
+      }
+
+      .legal-copy .legal-notice {
+        @apply rounded-2xl border border-brand-accent/30 bg-brand-accent/5 p-6;
+      }
+
+      .legal-copy .legal-notice p {
+        @apply text-foreground;
+      }
+    }
+
     .hero-avatar-bob {
       animation: avatar-bob 5s ease-in-out infinite !important;
     }
