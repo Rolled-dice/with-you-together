@@ -284,8 +284,16 @@ function AuthPage() {
           </Tabs>
         </motion.div>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          By continuing you confirm you are 13 or older. Not therapy or an emergency service.
+        <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
+          By creating an account, you agree to the{" "}
+          <Link to="/terms" className="font-medium text-primary underline underline-offset-4">
+            Terms of Service
+          </Link>{" "}
+          and acknowledge the{" "}
+          <Link to="/privacy" className="font-medium text-primary underline underline-offset-4">
+            Privacy Policy
+          </Link>
+          . SomeoneNear is not therapy or an emergency service.
         </p>
       </motion.div>
     </div>
@@ -489,12 +497,20 @@ function OAuthButton({
 
   async function onClick() {
     if (disabled) return;
+    // if (requireAge) {
+    //   const ok = window.confirm(
+    //     "By continuing you confirm you are 13 or older. SomeoneNear is not available to under-13 users.",
+    //   );
+    //   if (!ok) return;
+    // }
     if (requireAge) {
       const ok = window.confirm(
-        "By continuing you confirm you are 13 or older. SomeoneNear is not available to under-13 users.",
+        "By continuing, you agree to the SomeoneNear Terms of Service and acknowledge the Privacy Policy. You confirm that you are at least 13 years old. If you are under 18, you confirm that your parent or legal guardian has given permission.",
       );
+
       if (!ok) return;
     }
+
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       toast.error("You're offline", {
         description: "Reconnect to the internet, then try again.",
