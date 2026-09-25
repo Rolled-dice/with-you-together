@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { PrivacyChoicesButton } from "@/components/privacy-choices-button";
 
 import {
   ArrowRightIcon,
@@ -17,23 +18,10 @@ import { JsonLd } from "@/components/json-ld";
 import { Wordmark } from "@/components/landing/brand-mark";
 import { FeatureCarousel } from "@/components/landing/feature-carousel";
 import { RotatingHeadline } from "@/components/landing/rotating-headline";
-import {
-  DashboardMockup,
-  ListenerCallMockup,
-} from "@/components/landing/hero-mockups";
-import {
-  Orb,
-  OrbCloud,
-  OrbSparkle,
-  type OrbTone,
-} from "@/components/landing/playroom-orb";
+import { DashboardMockup, ListenerCallMockup } from "@/components/landing/hero-mockups";
+import { Orb, OrbCloud, OrbSparkle, type OrbTone } from "@/components/landing/playroom-orb";
 import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useLandingMotion } from "@/hooks/use-landing-motion";
 import { useLiveStats } from "@/hooks/use-live-stats";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,11 +79,7 @@ export const Route = createFileRoute("/")({
  * Content
  * -------------------------------------------------------------------------- */
 
-const HERO_PROOF = [
-  "Trained, vetted listeners",
-  "Nothing for them to install",
-  "An update after every call",
-];
+const HERO_PROOF = ["Trained, vetted listeners", "Nothing for them to install", "An update after every call"];
 
 /** The worry, in the visitor's own words — not our feature names. */
 const WORRIES: { label: string; answer: string; tone: OrbTone }[] = [
@@ -154,8 +138,7 @@ const VOICES = [
     tone: "saffron" as OrbTone,
   },
   {
-    quote:
-      "Dad won't touch a smartphone. This was the only thing that didn't ask him to learn anything.",
+    quote: "Dad won't touch a smartphone. This was the only thing that didn't ask him to learn anything.",
     who: "Son, primary carer",
     tone: "aqua" as OrbTone,
   },
@@ -232,13 +215,7 @@ const FAQS = [
  * -------------------------------------------------------------------------- */
 
 /** The near-black pill used inside cards and plates. */
-function InkButton({
-  to,
-  children,
-}: {
-  to: "/dashboard" | "/auth";
-  children: React.ReactNode;
-}) {
+function InkButton({ to, children }: { to: "/dashboard" | "/auth"; children: React.ReactNode }) {
   return (
     <Button
       asChild
@@ -305,10 +282,7 @@ function Landing() {
             <a href="#included" className="transition-colors hover:text-foreground">
               What's included
             </a>
-            <a
-              href="#how-it-works"
-              className="transition-colors hover:text-foreground"
-            >
+            <a href="#how-it-works" className="transition-colors hover:text-foreground">
               How it works
             </a>
             <a href="#pricing" className="transition-colors hover:text-foreground">
@@ -324,22 +298,12 @@ function Landing() {
                 so the nav showed "Open app" twice. Signed in needs only the one
                 button; the "Log in" link is only meaningful when signed out. */}
             {!signedIn && (
-              <Button
-                asChild
-                variant="ghost"
-                className="hidden rounded-full font-semibold sm:inline-flex"
-              >
+              <Button asChild variant="ghost" className="hidden rounded-full font-semibold sm:inline-flex">
                 <Link to={nextStep}>Log in</Link>
               </Button>
             )}
-            <Button
-              asChild
-              data-magnetic
-              className="rounded-full px-5 font-bold"
-            >
-              <Link to={nextStep}>
-                {signedIn ? "Open app" : "Try for free"}
-              </Link>
+            <Button asChild data-magnetic className="rounded-full px-5 font-bold">
+              <Link to={nextStep}>{signedIn ? "Open app" : "Try for free"}</Link>
             </Button>
           </div>
         </nav>
@@ -349,10 +313,7 @@ function Landing() {
         {/* Hero -------------------------------------------------------- */}
         <section className="relative overflow-hidden px-6 pb-16 pt-14 sm:pt-20">
           {/* Background orbs. Scenery, so they stay faceless and far back. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10"
-          >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
             {/* These two watch the cursor. Scenery that notices you is on-theme
                 for a product about being checked in on. */}
             <div data-drift className="absolute left-[6%] top-[14%] opacity-70">
@@ -380,10 +341,7 @@ function Landing() {
             >
               {HERO_PROOF.map((item) => (
                 <span key={item} className="flex items-center gap-1.5">
-                  <CheckIcon
-                    className="h-3.5 w-3.5 text-orb-grass"
-                    weight="bold"
-                  />
+                  <CheckIcon className="h-3.5 w-3.5 text-orb-grass" weight="bold" />
                   {item}
                 </span>
               ))}
@@ -392,13 +350,8 @@ function Landing() {
 
           {/* Dual paths — the two people who arrive on this page */}
           <div className="mx-auto mt-10 grid w-full max-w-5xl gap-4 md:grid-cols-2">
-            <article
-              data-hero-card
-              className="rounded-[28px] bg-surface px-6 py-9 text-center sm:px-9"
-            >
-              <h2 className="mx-auto max-w-xs text-2xl">
-                Check-in calls for a parent or loved one
-              </h2>
+            <article data-hero-card className="rounded-[28px] bg-surface px-6 py-9 text-center sm:px-9">
+              <h2 className="mx-auto max-w-xs text-2xl">Check-in calls for a parent or loved one</h2>
               <div className="mt-5">
                 <InkButton to={nextStep}>Start a Care plan</InkButton>
               </div>
@@ -411,13 +364,8 @@ function Landing() {
               </div>
             </article>
 
-            <article
-              data-hero-card
-              className="rounded-[28px] bg-surface px-6 py-9 text-center sm:px-9"
-            >
-              <h2 className="mx-auto max-w-xs text-2xl">
-                A real listener to talk to, whenever you need one
-              </h2>
+            <article data-hero-card className="rounded-[28px] bg-surface px-6 py-9 text-center sm:px-9">
+              <h2 className="mx-auto max-w-xs text-2xl">A real listener to talk to, whenever you need one</h2>
               <div className="mt-5">
                 <InkButton to={nextStep}>Book a listener call</InkButton>
               </div>
@@ -447,12 +395,8 @@ function Landing() {
                 >
                   <Orb tone={w.tone} face="calm" gaze className="h-8 w-8 shrink-0" />
                   <span className="min-w-0 flex-1">
-                    <span className="block font-bold leading-snug">
-                      {w.label}
-                    </span>
-                    <span className="mt-0.5 block text-sm leading-snug text-muted-foreground">
-                      {w.answer}
-                    </span>
+                    <span className="block font-bold leading-snug">{w.label}</span>
+                    <span className="mt-0.5 block text-sm leading-snug text-muted-foreground">{w.answer}</span>
                   </span>
                   <CaretRightIcon
                     className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1"
@@ -468,25 +412,12 @@ function Landing() {
         <FeatureCarousel />
 
         {/* Marquee ---------------------------------------------------- */}
-        <div
-          aria-hidden="true"
-          className="mt-10 overflow-hidden border-y border-ink/10 bg-plate-saffron py-3.5"
-        >
-          <div
-            data-marquee-track
-            className="flex w-max items-center gap-8 whitespace-nowrap"
-          >
+        <div aria-hidden="true" className="mt-10 overflow-hidden border-y border-ink/10 bg-plate-saffron py-3.5">
+          <div data-marquee-track className="flex w-max items-center gap-8 whitespace-nowrap">
             {Array.from({ length: 12 }).map((_, i) => (
-              <span
-                key={i}
-                className="flex items-center gap-8 text-sm font-extrabold uppercase tracking-wide text-ink"
-              >
+              <span key={i} className="flex items-center gap-8 text-sm font-extrabold uppercase tracking-wide text-ink">
                 Checking in when they can&apos;t
-                <Orb
-                  tone={i % 2 === 0 ? "terracotta" : "navy"}
-                  face="calm"
-                  className="h-5 w-5"
-                />
+                <Orb tone={i % 2 === 0 ? "terracotta" : "navy"} face="calm" className="h-5 w-5" />
               </span>
             ))}
           </div>
@@ -504,18 +435,12 @@ function Landing() {
           {/* Genuinely a sequence, so the numbers are earning their place. */}
           <ol className="mx-auto mt-10 grid w-full max-w-5xl gap-4 sm:grid-cols-3">
             {STEPS.map((s, i) => (
-              <li
-                key={s.title}
-                data-reveal-stagger
-                className="rounded-2xl border border-border bg-card p-6"
-              >
+              <li key={s.title} data-reveal-stagger className="rounded-2xl border border-border bg-card p-6">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-sm font-extrabold text-background">
                   {i + 1}
                 </span>
                 <h3 className="mt-4 text-lg">{s.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  {s.body}
-                </p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
               </li>
             ))}
           </ol>
@@ -523,10 +448,7 @@ function Landing() {
 
         {/* Voices ---------------------------------------------------- */}
         <section className="relative overflow-hidden px-6 py-16">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-6 -z-10 mx-auto max-w-4xl"
-          >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-6 -z-10 mx-auto max-w-4xl">
             <div data-drift className="absolute left-[10%] top-0">
               <Orb tone="periwinkle" face="calm" className="h-12 w-12" />
             </div>
@@ -549,9 +471,7 @@ function Landing() {
                 data-reveal-stagger
                 className="flex h-full flex-col justify-between rounded-2xl bg-surface p-6"
               >
-                <blockquote className="text-[0.95rem] leading-relaxed">
-                  &ldquo;{v.quote}&rdquo;
-                </blockquote>
+                <blockquote className="text-[0.95rem] leading-relaxed">&ldquo;{v.quote}&rdquo;</blockquote>
                 <figcaption className="mt-5 flex items-center gap-2.5 text-xs font-semibold text-muted-foreground">
                   <Orb tone={v.tone} face="calm" className="h-7 w-7 shrink-0" />
                   {v.who}
@@ -567,9 +487,7 @@ function Landing() {
             data-reveal
             className="mx-auto w-full max-w-6xl rounded-[32px] bg-plate-navy px-7 py-12 text-background sm:px-12"
           >
-            <h2 className="mx-auto max-w-lg text-center text-2xl sm:text-3xl">
-              A trained human, not a robocall
-            </h2>
+            <h2 className="mx-auto max-w-lg text-center text-2xl sm:text-3xl">A trained human, not a robocall</h2>
 
             <div className="mt-9 grid gap-8 sm:grid-cols-3">
               {TRUST.map(({ icon: Icon, title, body }) => (
@@ -578,9 +496,7 @@ function Landing() {
                     <Icon className="h-5 w-5" />
                   </span>
                   <h3 className="mt-4 text-lg">{title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed opacity-80">
-                    {body}
-                  </p>
+                  <p className="mt-1.5 text-sm leading-relaxed opacity-80">{body}</p>
                 </div>
               ))}
             </div>
@@ -596,9 +512,7 @@ function Landing() {
             <OrbCloud className="pointer-events-none absolute -left-8 bottom-0 h-24 w-48 text-background/25" />
             <OrbCloud className="pointer-events-none absolute -right-6 top-4 h-16 w-32 text-background/20" />
 
-            <h2 className="mx-auto max-w-lg text-2xl sm:text-3xl">
-              Families are sleeping a little easier
-            </h2>
+            <h2 className="mx-auto max-w-lg text-2xl sm:text-3xl">Families are sleeping a little easier</h2>
 
             <dl className="mt-10 grid gap-8 sm:grid-cols-3">
               {[
@@ -609,15 +523,10 @@ function Landing() {
                 <div key={s.label}>
                   <dt className="sr-only">{s.label}</dt>
                   <dd>
-                    <span
-                      data-counter={s.value}
-                      className="block text-4xl font-extrabold tabular-nums tracking-tight"
-                    >
+                    <span data-counter={s.value} className="block text-4xl font-extrabold tabular-nums tracking-tight">
                       {s.value.toLocaleString()}
                     </span>
-                    <span className="mt-1 block text-sm font-semibold opacity-80">
-                      {s.label}
-                    </span>
+                    <span className="mt-1 block text-sm font-semibold opacity-80">{s.label}</span>
                   </dd>
                 </div>
               ))}
@@ -640,9 +549,7 @@ function Landing() {
                 key={p.name}
                 data-reveal-stagger
                 className={`relative rounded-[28px] border p-7 ${
-                  p.highlight
-                    ? "border-primary/50 bg-surface"
-                    : "border-border bg-card"
+                  p.highlight ? "border-primary/50 bg-surface" : "border-border bg-card"
                 }`}
               >
                 {p.highlight ? (
@@ -655,19 +562,13 @@ function Landing() {
                 <p className="mt-1 text-sm text-muted-foreground">{p.note}</p>
                 <p className="mt-5 text-4xl font-extrabold tracking-tight">
                   {p.price}
-                  <span className="text-base font-semibold text-muted-foreground">
-                    {" "}
-                    / month
-                  </span>
+                  <span className="text-base font-semibold text-muted-foreground"> / month</span>
                 </p>
 
                 <ul className="mt-6 space-y-2.5">
                   {p.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm">
-                      <CheckIcon
-                        className="mt-1 h-3.5 w-3.5 shrink-0 text-orb-grass"
-                        weight="bold"
-                      />
+                      <CheckIcon className="mt-1 h-3.5 w-3.5 shrink-0 text-orb-grass" weight="bold" />
                       <span className="text-muted-foreground">{f}</span>
                     </li>
                   ))}
@@ -691,12 +592,8 @@ function Landing() {
             <Accordion type="single" collapsible className="w-full">
               {FAQS.map((f) => (
                 <AccordionItem key={f.q} value={f.q} className="border-border">
-                  <AccordionTrigger className="text-left text-base font-bold">
-                    {f.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="leading-relaxed text-muted-foreground">
-                    {f.a}
-                  </AccordionContent>
+                  <AccordionTrigger className="text-left text-base font-bold">{f.q}</AccordionTrigger>
+                  <AccordionContent className="leading-relaxed text-muted-foreground">{f.a}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
@@ -712,27 +609,17 @@ function Landing() {
           </h2>
 
           <div className="relative z-10 mt-7">
-            <Button
-              asChild
-              size="lg"
-              data-magnetic
-              className="rounded-full px-9 text-base font-bold"
-            >
+            <Button asChild size="lg" data-magnetic className="rounded-full px-9 text-base font-bold">
               <Link to={nextStep}>
                 {signedIn ? "Open SomeoneNear" : "Start with one call"}
                 <ArrowRightIcon className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <p className="mt-3 text-xs font-semibold text-ink/70">
-              No card needed · Cancel any time
-            </p>
+            <p className="mt-3 text-xs font-semibold text-ink/70">No card needed · Cancel any time</p>
           </div>
 
           {/* A rainbow arc, drawn as stacked semicircles from the orb family */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none relative mx-auto mt-12 h-40 w-[620px] max-w-full"
-          >
+          <div aria-hidden="true" className="pointer-events-none relative mx-auto mt-12 h-40 w-[620px] max-w-full">
             {[
               { tone: "bg-orb-pink", inset: 0 },
               { tone: "bg-orb-periwinkle", inset: 26 },
@@ -760,16 +647,12 @@ function Landing() {
           <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <Wordmark />
-              <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-                Checking in when they can&apos;t.
-              </p>
+              <p className="mt-3 max-w-xs text-sm text-muted-foreground">Checking in when they can&apos;t.</p>
             </div>
 
             <div className="flex flex-wrap gap-x-12 gap-y-6 text-sm">
               <nav aria-label="Product">
-                <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                  Product
-                </h2>
+                <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">Product</h2>
                 <ul className="mt-3 space-y-2">
                   <li>
                     <a href="#how-it-works" className="hover:text-primary">
@@ -790,9 +673,7 @@ function Landing() {
               </nav>
 
               <nav aria-label="Company">
-                <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                  Company
-                </h2>
+                <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">Company</h2>
                 <ul className="mt-3 space-y-2">
                   <li>
                     <Link to="/docs" className="hover:text-primary">
@@ -812,10 +693,7 @@ function Landing() {
           <div className="mt-10 flex flex-col gap-4 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>© {new Date().getFullYear()} SomeoneNear</p>
             <div className="flex flex-wrap items-center gap-4">
-              <a
-                href="mailto:care@someonenear.com"
-                className="inline-flex items-center gap-2 hover:text-primary"
-              >
+              <a href="mailto:care@someonenear.com" className="inline-flex items-center gap-2 hover:text-primary">
                 <EnvelopeSimpleIcon className="h-4 w-4" />
                 care@someonenear.com
               </a>
