@@ -63,11 +63,12 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
       return toast.error("Please accept the Terms of Service and Privacy Policy.");
     }
 
+    if (age === null) return toast.error("Please enter your date of birth.");
+
     if (age < 18 && !guardianConfirmed) {
       return toast.error("A parent or legal guardian must approve your use of SomeoneNear.");
     }
 
-    if (age === null) return toast.error("Please enter your date of birth.");
     if (age < 13) return toast.error("Sorry, SomeoneNear is not available to users under 13.");
     if (age > 120) return toast.error("Please enter a valid date of birth.");
     if (!fullName.trim()) return toast.error("Please enter your name.");
@@ -109,6 +110,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
   }
 
   const maxDob = new Date().toISOString().slice(0, 10);
+  const currentAge = ageFromDob(dob);
 
   return (
     <motion.form
@@ -219,7 +221,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
           </Label>
         </div>
       </FieldRow>
-      {ageFromDob(dob) !== null && ageFromDob(dob)! < 18 && (
+      {currentAge !== null && currentAge < 18 && (
         <FieldRow>
           <div className="flex items-start gap-3">
             <Checkbox
@@ -241,7 +243,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
           <Button
             type="submit"
             disabled={
-              loading || !legalAccepted || (ageFromDob(dob) !== null && ageFromDob(dob)! < 18 && !guardianConfirmed)
+              loading || !legalAccepted || (currentAge !== null && currentAge < 18 && !guardianConfirmed)
             }
 
             className="w-full rounded-brand bg-brand-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-primary/90 hover:shadow-md"
