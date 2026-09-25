@@ -524,6 +524,18 @@ function OAuthButton({
 
   return (
     <motion.div whileHover={{ scale: 1.01, y: -1 }} whileTap={{ scale: 0.98 }}>
+      <p className="text-center text-xs leading-relaxed text-muted-foreground">
+        By signing up with Google or Apple, you agree to the{" "}
+        <Link to="/terms" target="_blank" className="font-semibold text-primary underline underline-offset-4">
+          Terms
+        </Link>{" "}
+        and acknowledge the{" "}
+        <Link to="/privacy" target="_blank" className="font-semibold text-primary underline underline-offset-4">
+          Privacy Policy
+        </Link>
+        .
+      </p>
+
       <Button
         type="button"
         variant="outline"
