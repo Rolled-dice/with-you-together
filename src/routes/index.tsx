@@ -689,6 +689,33 @@ function Landing() {
               </nav>
             </div>
           </div>
+          <nav aria-label="Legal">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">Legal</h2>
+
+            <ul className="mt-3 space-y-2">
+              <li>
+                <Link to="/privacy" className="hover:text-primary">
+                  Privacy Policy
+                </Link>
+              </li>
+
+              <li>
+                <Link to="/terms" className="hover:text-primary">
+                  Terms of Service
+                </Link>
+              </li>
+
+              <li>
+                <Link to="/cookies" className="hover:text-primary">
+                  Cookie Policy
+                </Link>
+              </li>
+
+              <li>
+                <PrivacyChoicesButton className="h-auto p-0 text-sm font-normal" />
+              </li>
+            </ul>
+          </nav>
 
           <div className="mt-10 flex flex-col gap-4 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>© {new Date().getFullYear()} SomeoneNear</p>
