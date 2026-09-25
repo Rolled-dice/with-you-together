@@ -110,6 +110,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
   }
 
   const maxDob = new Date().toISOString().slice(0, 10);
+  const currentAge = ageFromDob(dob);
 
   return (
     <motion.form
@@ -220,7 +221,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
           </Label>
         </div>
       </FieldRow>
-      {ageFromDob(dob) !== null && ageFromDob(dob)! < 18 && (
+      {currentAge !== null && currentAge < 18 && (
         <FieldRow>
           <div className="flex items-start gap-3">
             <Checkbox
@@ -242,7 +243,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
           <Button
             type="submit"
             disabled={
-              loading || !legalAccepted || (ageFromDob(dob) !== null && ageFromDob(dob)! < 18 && !guardianConfirmed)
+              loading || !legalAccepted || (currentAge !== null && currentAge < 18 && !guardianConfirmed)
             }
 
             className="w-full rounded-brand bg-brand-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-primary/90 hover:shadow-md"
