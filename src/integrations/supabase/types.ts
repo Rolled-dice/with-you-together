@@ -61,6 +61,7 @@ export type Database = {
           amount_cents: number | null
           created_at: string
           currency: string | null
+          dodo_subscription_id: string | null
           environment: string
           event_type: string
           id: string
@@ -81,6 +82,7 @@ export type Database = {
           amount_cents?: number | null
           created_at?: string
           currency?: string | null
+          dodo_subscription_id?: string | null
           environment?: string
           event_type: string
           id?: string
@@ -101,6 +103,7 @@ export type Database = {
           amount_cents?: number | null
           created_at?: string
           currency?: string | null
+          dodo_subscription_id?: string | null
           environment?: string
           event_type?: string
           id?: string
@@ -1343,6 +1346,7 @@ export type Database = {
       }
       stripe_webhook_events: {
         Row: {
+          dodo_subscription_id: string | null
           environment: string
           error: string | null
           event_type: string
@@ -1359,6 +1363,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          dodo_subscription_id?: string | null
           environment: string
           error?: string | null
           event_type: string
@@ -1375,6 +1380,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          dodo_subscription_id?: string | null
           environment?: string
           error?: string | null
           event_type?: string
@@ -1398,6 +1404,8 @@ export type Database = {
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
+          dodo_customer_id: string | null
+          dodo_subscription_id: string | null
           environment: string
           id: string
           price_id: string
@@ -1416,6 +1424,8 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          dodo_customer_id?: string | null
+          dodo_subscription_id?: string | null
           environment?: string
           id?: string
           price_id: string
@@ -1434,6 +1444,8 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          dodo_customer_id?: string | null
+          dodo_subscription_id?: string | null
           environment?: string
           id?: string
           price_id?: string
