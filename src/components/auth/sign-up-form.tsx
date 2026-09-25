@@ -82,11 +82,17 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
       options: {
         emailRedirectTo: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
         data: {
-          full_name: fullName,
-          display_name: fullName,
-          date_of_birth: dob,
-          phone: e164,
-          phone_country: country,
+          data: {
+            full_name: fullName,
+            display_name: fullName,
+            date_of_birth: dob,
+            phone: e164,
+            phone_country: country,
+            legal_terms_accepted_at: new Date().toISOString(),
+            terms_version: "2026-09-25",
+            privacy_version: "2026-09-25",
+            guardian_consent_confirmed: age < 18,
+          },
         },
       },
     });
