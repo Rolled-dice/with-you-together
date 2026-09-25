@@ -186,7 +186,7 @@ const PLANS = (["care", "care_plus"] as const).map((id) => {
 const FAQS = [
   {
     q: "Does my parent need a smartphone or an app?",
-    a: "No. We ring whatever phone they already use — a landline is completely fine. There is nothing to download, nothing to log into, and nothing for them to learn.",
+    a: "No. We ring whatever phone they already use - a landline is completely fine. There is nothing to download, nothing to log into, and nothing for them to learn.",
   },
   {
     q: "Who actually makes the call?",
