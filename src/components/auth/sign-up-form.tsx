@@ -197,6 +197,28 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
           className="rounded-brand transition-all focus-visible:ring-2 focus-visible:ring-brand-primary/40"
         />
       </FieldRow>
+      <FieldRow>
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="legal-acceptance"
+            checked={legalAccepted}
+            onCheckedChange={(checked) => setLegalAccepted(checked === true)}
+            aria-required="true"
+          />
+
+          <Label htmlFor="legal-acceptance" className="text-sm font-normal leading-relaxed">
+            I agree to the{" "}
+            <Link to="/terms" target="_blank" className="font-semibold text-primary underline underline-offset-4">
+              Terms of Service
+            </Link>{" "}
+            and acknowledge the{" "}
+            <Link to="/privacy" target="_blank" className="font-semibold text-primary underline underline-offset-4">
+              Privacy Policy
+            </Link>
+            .
+          </Label>
+        </div>
+      </FieldRow>
 
       <FieldRow>
         <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
