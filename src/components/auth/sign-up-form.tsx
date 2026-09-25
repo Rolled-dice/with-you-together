@@ -63,11 +63,12 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
       return toast.error("Please accept the Terms of Service and Privacy Policy.");
     }
 
+    if (age === null) return toast.error("Please enter your date of birth.");
+
     if (age < 18 && !guardianConfirmed) {
       return toast.error("A parent or legal guardian must approve your use of SomeoneNear.");
     }
 
-    if (age === null) return toast.error("Please enter your date of birth.");
     if (age < 13) return toast.error("Sorry, SomeoneNear is not available to users under 13.");
     if (age > 120) return toast.error("Please enter a valid date of birth.");
     if (!fullName.trim()) return toast.error("Please enter your name.");
