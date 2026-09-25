@@ -240,7 +240,10 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
         <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
           <Button
             type="submit"
-            disabled={loading}
+            disabled={
+              loading || !legalAccepted || (ageFromDob(dob) !== null && ageFromDob(dob)! < 18 && !guardianConfirmed)
+            }
+
             className="w-full rounded-brand bg-brand-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-primary/90 hover:shadow-md"
           >
             {loading ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
