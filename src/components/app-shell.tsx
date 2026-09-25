@@ -183,6 +183,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="flex-1 px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
           >
             {children}
+            <div className="mt-12 flex flex-wrap justify-center gap-x-4 gap-y-2 border-t border-border pt-6 text-xs text-muted-foreground md:hidden">
+              <Link to="/privacy">Privacy</Link>
+              <Link to="/terms">Terms</Link>
+              <Link to="/cookies">Cookies</Link>
+              <PrivacyChoicesButton className="h-auto p-0 text-xs font-normal" />
+            </div>
           </main>
 
           {/* Mobile bottom nav */}
