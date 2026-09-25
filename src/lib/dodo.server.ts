@@ -1,4 +1,13 @@
-export type DodoEnv = "test" | "live";
+import {
+  dodoBaseUrl,
+  dodoProductIdForPrice,
+  getDodoApiKey,
+  getDodoEnvironment,
+  type DodoEnvironment,
+  type DodoPriceId,
+} from "@/lib/dodo.config.server";
+
+export type DodoEnv = DodoEnvironment;
 
 export type DodoCheckoutSession = {
   checkoutUrl: string;
@@ -12,16 +21,6 @@ type DodoCheckoutResponse = {
   id?: string;
 };
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`${name} is not configured`);
-  return value;
-}
-
-export function dodoBaseUrl(env: DodoEnv): string {
-  return env === "test" ? "https://test.dodopayments.com" : "https://live.dodopayments.com";
-}
-
 async function dodoFetch<T>(
   env: DodoEnv,
   path: string,
@@ -30,7 +29,7 @@ async function dodoFetch<T>(
   const response = await fetch(`${dodoBaseUrl(env)}${path}`, {
     method: init?.method ?? "GET",
     headers: {
-      Authorization: `Bearer ${requireEnv("DODO_PAYMENTS_API_KEY")}`,
+      Authorization: `Bearer ${getDodoApiKey(env)}`,
       "Content-Type": "application/json",
     },
     ...(init?.body === undefined ? {} : { body: JSON.stringify(init.body) }),
@@ -199,30 +198,19 @@ export function mapDodoStatus(status: string): string {
   }
 }
 
-export function dodoProductIdForPrice(priceId: string): string {
-  const productVariables: Record<string, string> = {
-    care_monthly_usd: "DODO_TEST_PRODUCT_CARE_USD",
-    care_plus_monthly_usd: "DODO_TEST_PRODUCT_CARE_PLUS_USD",
-    care_monthly_inr: "DODO_TEST_PRODUCT_CARE_INR",
-    care_plus_monthly_inr: "DODO_TEST_PRODUCT_CARE_PLUS_INR",
-  };
-  const variable = productVariables[priceId];
-  if (!variable) throw new Error("Unsupported Dodo price");
-  return requireEnv(variable);
-}
-
 export async function createDodoCheckoutForUser(
   supabase: any,
   userId: string,
-  input: { priceId: string; environment: DodoEnv; returnUrl: string },
+  input: { priceId: DodoPriceId; returnUrl: string },
 ): Promise<{ checkoutUrl: string } | { error: string }> {
   try {
-    const productId = dodoProductIdForPrice(input.priceId);
+    const environment = getDodoEnvironment();
+    const productId = dodoProductIdForPrice(input.priceId, environment);
     const {
       data: { user },
     } = await supabase.auth.getUser();
     const session = await createDodoCheckoutSession({
-      env: input.environment,
+      env: environment,
       productId,
       priceId: input.priceId,
       userId,
@@ -240,7 +228,7 @@ export async function createDodoCheckoutForUser(
         // internal key (care_monthly_* / care_plus_monthly_*).
         price_id: input.priceId,
         status: "incomplete",
-        environment: input.environment,
+        environment,
         updated_at: new Date().toISOString(),
       } as never,
       { onConflict: "dodo_subscription_id" },
@@ -255,9 +243,9 @@ export async function createDodoCheckoutForUser(
 export async function cancelDodoSubscriptionForUser(
   supabase: any,
   userId: string,
-  environment: DodoEnv,
 ): Promise<{ ok: true } | { error: string }> {
   try {
+    const environment = getDodoEnvironment();
     const { data: subscription, error } = await supabase
       .from("subscriptions")
       .select("dodo_subscription_id")
@@ -281,12 +269,13 @@ export async function cancelDodoSubscriptionForUser(
 }
 
 export async function getDodoSubscriptionForUser(supabase: any, userId: string) {
+  const environment = getDodoEnvironment();
   const { data, error } = await supabase
     .from("subscriptions")
     .select("status, price_id, current_period_end, cancel_at_period_end, provider")
     .eq("user_id", userId)
     .eq("provider", "dodo")
-    .eq("environment", "test")
+    .eq("environment", environment)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();

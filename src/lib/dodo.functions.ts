@@ -16,21 +16,19 @@ const PriceIdSchema = z.enum([
 
 const DodoCheckoutInput = z.object({
   priceId: PriceIdSchema,
-  environment: z.literal("test"),
   returnUrl: z.string().url(),
 });
 
 export const createDodoCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => DodoCheckoutInput.parse(input))
-  .handler(({ data, context }) => createDodoCheckoutForUser(context.supabase, context.userId, data));
+  .handler(({ data, context }) =>
+    createDodoCheckoutForUser(context.supabase, context.userId, data),
+  );
 
 export const cancelDodoSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ environment: z.literal("test") }).parse(input))
-  .handler(({ data, context }) =>
-    cancelDodoSubscriptionForUser(context.supabase, context.userId, data.environment),
-  );
+  .handler(({ context }) => cancelDodoSubscriptionForUser(context.supabase, context.userId));
 
 export const getMyDodoSubscription = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

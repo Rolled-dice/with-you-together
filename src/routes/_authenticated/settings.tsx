@@ -30,10 +30,7 @@ import {
   createMemory as createMemoryFn,
   deleteMemory as deleteMemoryFn,
 } from "@/lib/memories.functions";
-import {
-  cancelDodoSubscription,
-  getMyDodoSubscription,
-} from "@/lib/dodo.functions";
+import { cancelDodoSubscription, getMyDodoSubscription } from "@/lib/dodo.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -158,7 +155,7 @@ function SettingsPage() {
 
   const cancelDodoMut = useMutation({
     mutationFn: async () => {
-      const res = await cancelDodoFn({ data: { environment: "test" } });
+      const res = await cancelDodoFn();
       if ("error" in res) throw new Error(res.error);
       return res;
     },
@@ -684,7 +681,7 @@ function formatMoney(cents: number | null, currency: string | null) {
 }
 
 function BillingHistoryCard() {
-  const env = "test";
+  const env = import.meta.env.VITE_DODO_MODE === "live" ? "live" : "test";
   const { data, isLoading } = useQuery({
     queryKey: ["billing-events", env],
     queryFn: async () => {

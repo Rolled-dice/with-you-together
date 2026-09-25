@@ -68,7 +68,6 @@ function DodoCheckout({ price }: { price: z.infer<typeof PriceParam> }) {
       const result = await createDodoCheckout({
         data: {
           priceId: price,
-          environment: "test",
           returnUrl: `${window.location.origin}/checkout/return`,
         },
       });

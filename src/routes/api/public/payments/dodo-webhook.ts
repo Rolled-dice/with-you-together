@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import {
+  getDodoEnvironment,
+  getDodoWebhookSecret,
+  type DodoEnvironment,
+} from "@/lib/dodo.config.server";
 import { mapDodoStatus, verifyDodoWebhook } from "@/lib/dodo.server";
 
-type DodoEnvironment = "test" | "live";
 type DodoResource = Record<string, unknown>;
 
 function getSupabase() {
@@ -29,7 +33,9 @@ function metadataFor(resource: DodoResource): DodoResource {
 
   const checkout = asObject(resource.checkout);
   const checkoutMetadata = checkout.metadata;
-  return checkoutMetadata && typeof checkoutMetadata === "object" && !Array.isArray(checkoutMetadata)
+  return checkoutMetadata &&
+    typeof checkoutMetadata === "object" &&
+    !Array.isArray(checkoutMetadata)
     ? (checkoutMetadata as DodoResource)
     : {};
 }
@@ -169,8 +175,7 @@ async function upsertSubscription(
       status,
       current_period_start: periodDate(resource, "current_period_start"),
       current_period_end:
-        periodDate(resource, "current_period_end") ??
-        periodDate(resource, "next_billing_date"),
+        periodDate(resource, "current_period_end") ?? periodDate(resource, "next_billing_date"),
       cancel_at_period_end: Boolean(resource.cancel_at_next_billing_date),
       environment,
       updated_at: new Date().toISOString(),
@@ -229,6 +234,7 @@ async function processWebhook(
     case "subscription.updated":
     case "subscription.on_hold":
     case "subscription.failed":
+    case "subscription.cancelled":
       await upsertSubscription(supabase, resource, environment, eventId, "subscription.updated");
       return;
     case "payment.succeeded":
@@ -253,14 +259,31 @@ export const Route = createFileRoute("/api/public/payments/dodo-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const environment = new URL(request.url).searchParams.get("env");
-        if (environment !== "test" && environment !== "live") {
-          console.error("Dodo webhook missing/invalid env:", environment);
+        const requestedEnvironment = new URL(request.url).searchParams.get("env");
+        if (requestedEnvironment !== "test" && requestedEnvironment !== "live") {
+          console.error("Dodo webhook missing/invalid env:", requestedEnvironment);
           return Response.json({ received: true, ignored: "invalid env" });
         }
 
+        let environment: DodoEnvironment;
+        let webhookSecret: string;
+        try {
+          environment = getDodoEnvironment();
+          if (requestedEnvironment !== environment) {
+            console.error("Dodo webhook environment does not match active payment mode:", {
+              requestedEnvironment,
+              environment,
+            });
+            return Response.json({ received: true, ignored: "environment mismatch" });
+          }
+          webhookSecret = getDodoWebhookSecret(environment);
+        } catch (error) {
+          console.error("Dodo webhook configuration failure:", error);
+          return Response.json({ error: "Webhook is not configured" }, { status: 500 });
+        }
+
         const rawBody = await request.text();
-        const valid = await verifyDodoWebhook(rawBody, request.headers, process.env.DODO_PAYMENTS_WEBHOOK_KEY ?? "");
+        const valid = await verifyDodoWebhook(rawBody, request.headers, webhookSecret);
         if (!valid) return Response.json({ error: "Invalid signature" }, { status: 400 });
 
         let payload: DodoResource;
