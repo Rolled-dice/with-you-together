@@ -2,6 +2,9 @@ import { useMemo, useState } from "react";
 import { SpinnerGapIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
+import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   parsePhoneNumberFromString,
   getCountries,
@@ -13,17 +16,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FieldRow } from "@/components/auth/field-row";
 
 const PHONE_PLACEHOLDER = "+91 98765 43210";
-
 
 function ageFromDob(iso: string): number | null {
   if (!iso) return null;
@@ -36,7 +32,6 @@ function ageFromDob(iso: string): number | null {
   return age;
 }
 
-
 export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -45,6 +40,8 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
   const [country, setCountry] = useState<CountryCode>("IN");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [guardianConfirmed, setGuardianConfirmed] = useState(false);
 
   const countryOptions = useMemo(() => {
     return getCountries().map((c) => ({
@@ -98,9 +95,6 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
   }
 
   const maxDob = new Date().toISOString().slice(0, 10);
-
-
-
 
   return (
     <motion.form
