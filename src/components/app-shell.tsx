@@ -1,5 +1,7 @@
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, type ReactNode } from "react";
+import { PrivacyChoicesButton } from "@/components/privacy-choices-button";
+
 import {
   SquaresFourIcon,
   ChatCircleIcon,
@@ -134,6 +136,23 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               </div>
             ) : null}
+
+            <div className="mt-4 flex flex-wrap gap-x-3 gap-y-2 px-4 text-xs text-sidebar-foreground/70">
+              <Link to="/privacy" className="hover:text-primary">
+                Privacy
+              </Link>
+
+              <Link to="/terms" className="hover:text-primary">
+                Terms
+              </Link>
+
+              <Link to="/cookies" className="hover:text-primary">
+                Cookies
+              </Link>
+
+              <PrivacyChoicesButton className="h-auto p-0 text-xs font-normal" />
+            </div>
+
             <button
               onClick={signOut}
               className="mt-2 flex min-h-12 w-full items-center gap-3.5 rounded-2xl px-4 text-[15px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
