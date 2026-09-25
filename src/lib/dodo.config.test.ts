@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   dodoBaseUrl,
   dodoProductIdForPrice,
@@ -7,19 +7,32 @@ import {
   getDodoWebhookSecret,
 } from "./dodo.config.server";
 
-const originalEnvironment = { ...(globalThis as any).process?.env };
+const DODO_ENVIRONMENT_NAMES = [
+  "DODO_PAYMENTS_ENV",
+  "DODO_TEST_API_KEY",
+  "DODO_TEST_WEBHOOK_SECRET",
+  "DODO_TEST_PRODUCT_CARE_USD",
+  "DODO_TEST_PRODUCT_CARE_PLUS_USD",
+  "DODO_TEST_PRODUCT_CARE_INR",
+  "DODO_TEST_PRODUCT_CARE_PLUS_INR",
+  "DODO_LIVE_API_KEY",
+  "DODO_LIVE_WEBHOOK_SECRET",
+  "DODO_LIVE_PRODUCT_CARE_USD",
+  "DODO_LIVE_PRODUCT_CARE_PLUS_USD",
+  "DODO_LIVE_PRODUCT_CARE_INR",
+  "DODO_LIVE_PRODUCT_CARE_PLUS_INR",
+] as const;
 
 function setEnvironment(values: Record<string, string | undefined>) {
-  const runtime = globalThis as typeof globalThis & { process?: { env?: Record<string, string> } };
-  const environment: Record<string, string> = {};
+  vi.unstubAllEnvs();
+  for (const name of DODO_ENVIRONMENT_NAMES) vi.stubEnv(name, "");
   for (const [name, value] of Object.entries(values)) {
-    if (value !== undefined) environment[name] = value;
+    if (value !== undefined) vi.stubEnv(name, value);
   }
-  runtime.process = { env: environment };
 }
 
 afterEach(() => {
-  setEnvironment(originalEnvironment);
+  vi.unstubAllEnvs();
 });
 
 describe("Dodo payment configuration", () => {
