@@ -24,8 +24,12 @@ export function GoogleCalendarCard() {
 
   const onConnect = async () => {
     try {
-      const { url } = await start();
-      window.location.href = url;
+      const result = await start();
+      if (!result.ok) {
+        gentleProblem("Google Calendar is not available", result.message);
+        return;
+      }
+      window.location.href = result.url;
     } catch (error) {
       gentleProblem(
         "We could not start the Google Calendar connection",
