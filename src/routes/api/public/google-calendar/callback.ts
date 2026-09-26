@@ -16,8 +16,10 @@ export const Route = createFileRoute("/api/public/google-calendar/callback")({
 
         try {
           const encKey = process.env["CALENDAR_TOKEN_ENC_KEY"];
-          const clientId = process.env["GOOGLE_CALENDAR_CLIENT_ID"];
-          const clientSecret = process.env["GOOGLE_CALENDAR_CLIENT_SECRET"];
+          const clientId =
+            process.env["GOOGLE_CALENDAR_CLIENT_ID"] ?? process.env["GOOGLE_OAUTH_CLIENT_ID"];
+          const clientSecret =
+            process.env["GOOGLE_CALENDAR_CLIENT_SECRET"] ?? process.env["GOOGLE_OAUTH_CLIENT_SECRET"];
           const redirectUri = process.env["GOOGLE_CALENDAR_REDIRECT_URI"];
           if (!encKey || !clientId || !clientSecret || !redirectUri) return redirect("error");
 
