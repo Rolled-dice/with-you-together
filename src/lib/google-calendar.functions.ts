@@ -26,7 +26,8 @@ export const startGoogleCalendarConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const encKey = process.env["CALENDAR_TOKEN_ENC_KEY"];
-    const clientId = process.env["GOOGLE_CALENDAR_CLIENT_ID"];
+    const clientId =
+      process.env["GOOGLE_CALENDAR_CLIENT_ID"] ?? process.env["GOOGLE_OAUTH_CLIENT_ID"];
     const redirectUri = process.env["GOOGLE_CALENDAR_REDIRECT_URI"];
     if (!encKey || !clientId || !redirectUri) {
       return {

@@ -38,8 +38,10 @@ export async function getFreshAccessToken(
   const refreshToken = await decryptSecret(cred.encrypted_refresh_token, env("CALENDAR_TOKEN_ENC_KEY"));
   const tokens = await refreshAccessToken({
     refreshToken,
-    clientId: env("GOOGLE_CALENDAR_CLIENT_ID"),
-    clientSecret: env("GOOGLE_CALENDAR_CLIENT_SECRET"),
+    clientId:
+      process.env["GOOGLE_CALENDAR_CLIENT_ID"] ?? env("GOOGLE_OAUTH_CLIENT_ID"),
+    clientSecret:
+      process.env["GOOGLE_CALENDAR_CLIENT_SECRET"] ?? env("GOOGLE_OAUTH_CLIENT_SECRET"),
   });
   const expiresAt = new Date(Date.now() + tokens.expires_in * 1000).toISOString();
   await supabaseAdmin
