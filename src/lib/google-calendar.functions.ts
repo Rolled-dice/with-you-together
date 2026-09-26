@@ -25,16 +25,20 @@ export const getGoogleCalendarStatus = createServerFn({ method: "GET" })
 export const startGoogleCalendarConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { signState } = await import("@/lib/calendar/crypto.server");
-    const { buildConsentUrl } = await import("@/lib/calendar/google-api.server");
     const encKey = process.env["CALENDAR_TOKEN_ENC_KEY"];
     const clientId = process.env["GOOGLE_CALENDAR_CLIENT_ID"];
     const redirectUri = process.env["GOOGLE_CALENDAR_REDIRECT_URI"];
     if (!encKey || !clientId || !redirectUri) {
-      throw new Error("Google Calendar is not configured on the server yet.");
+      return {
+        ok: false as const,
+        code: "calendar_not_configured" as const,
+        message: "Google Calendar is not available yet. Please try again later.",
+      };
     }
+    const { signState } = await import("@/lib/calendar/crypto.server");
+    const { buildConsentUrl } = await import("@/lib/calendar/google-api.server");
     const state = await signState({ userId: context.userId }, encKey, 600_000);
-    return { url: buildConsentUrl({ clientId, redirectUri, state }) };
+    return { ok: true as const, url: buildConsentUrl({ clientId, redirectUri, state }) };
   });
 
 export const setCalendarSyncEnabled = createServerFn({ method: "POST" })

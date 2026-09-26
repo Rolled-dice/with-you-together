@@ -52,8 +52,12 @@ export function MedicationCalendarPrompt({
 
   const connect = useMutation({
     mutationFn: () => startFn(),
-    onSuccess: ({ url }) => {
-      window.location.href = url;
+    onSuccess: (result) => {
+      if (!result.ok) {
+        gentleProblem("Google Calendar is not available", result.message);
+        return;
+      }
+      window.location.href = result.url;
     },
     onError: (e) =>
       gentleProblem(
