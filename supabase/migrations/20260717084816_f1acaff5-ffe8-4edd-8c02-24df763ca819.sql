@@ -32,7 +32,7 @@ CREATE TABLE public.family_invitations (
   family_id uuid NOT NULL REFERENCES public.families(id) ON DELETE CASCADE,
   email text NOT NULL,
   role public.family_role NOT NULL DEFAULT 'adult',
-  token text NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(24), 'hex'),
+  token text NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(24), 'hex'),
   status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','revoked')),
   invited_by uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   expires_at timestamptz NOT NULL DEFAULT (now() + interval '14 days'),

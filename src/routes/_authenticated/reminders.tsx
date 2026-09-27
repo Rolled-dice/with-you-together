@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/reminders")({
   }),
   component: RemindersPage,
   errorComponent: ({ error }) => (
-    <AppShell><div className="rounded-3xl border border-border bg-surface p-6 text-base text-foreground">We could not open your reminders. {error.message}</div></AppShell>
+    <AppShell><div className="rounded-3xl border border-border bg-surface p-6 text-base text-foreground">We could not open your reminders. {error instanceof Error ? error.message : String(error)}</div></AppShell>
   ),
 });
 
@@ -75,12 +75,12 @@ function RemindersPage() {
     <AppShell>
       <div className="mx-auto max-w-5xl">
         <PageHeader eyebrow="Care, made lighter" title="Medication & reminders" description="A calm place to remember what matters, for you or someone you love." />
-        <Tabs defaultValue="medication" className="space-y-8">
+        <Tabs defaultValue="medication" className="space-y-5 sm:space-y-8">
           <TabsList className="grid h-auto w-full grid-cols-2 rounded-2xl bg-surface p-1.5 sm:max-w-xl">
-            <TabsTrigger value="medication" className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><PillIcon className="mr-2 size-5" /> Medication</TabsTrigger>
-            <TabsTrigger value="everyday" className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><BellRingingIcon className="mr-2 size-5" /> Everyday reminder</TabsTrigger>
+            <TabsTrigger value="medication" className="min-h-11 rounded-xl px-2 text-sm sm:min-h-12 sm:px-3 sm:text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><PillIcon className="mr-1.5 size-4 sm:mr-2 sm:size-5" /> Medication</TabsTrigger>
+            <TabsTrigger value="everyday" className="min-h-11 rounded-xl px-2 text-sm sm:min-h-12 sm:px-3 sm:text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><BellRingingIcon className="mr-1.5 size-4 sm:mr-2 sm:size-5" /> Everyday</TabsTrigger>
           </TabsList>
-          <TabsContent value="medication" className="mt-0 space-y-6">
+          <TabsContent value="medication" className="mt-0 space-y-4 sm:space-y-6">
             <MedicationCalendarSlot />
             <MedicationOnboarding />
           </TabsContent>
@@ -148,10 +148,10 @@ function EverydayReminders() {
   const rows = (reminders.data ?? []) as ReminderRow[];
 
   return (
-    <div className="space-y-8 animate-gentle-rise">
-      <section data-page-reveal className="rounded-[2.5rem] border border-border bg-card p-5 shadow-gentle sm:p-8" aria-labelledby="everyday-title">
-        <div className="mb-6"><p className="text-sm font-medium text-primary">A gentle nudge</p><h2 id="everyday-title" className="font-display text-2xl font-medium">What would you like to remember?</h2><p className="mt-2 text-base leading-relaxed text-muted-foreground">Water, rest, an appointment, or a call home, set it once and let us hold it for you.</p></div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_auto] lg:items-end">
+    <div className="space-y-6 animate-gentle-rise sm:space-y-8">
+      <section data-page-reveal className="rounded-[2rem] border border-border bg-card p-4 shadow-gentle sm:rounded-[2.5rem] sm:p-8" aria-labelledby="everyday-title">
+        <div className="mb-4 sm:mb-6"><p className="text-sm font-medium text-primary">A gentle nudge</p><h2 id="everyday-title" className="font-display text-xl font-medium sm:text-2xl">What would you like to remember?</h2><p className="mt-1.5 text-sm leading-relaxed text-muted-foreground sm:mt-2 sm:text-base">Water, rest, an appointment, or a call home, set it once and let us hold it for you.</p></div>
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-[1.5fr_1fr_1fr_1fr_auto] lg:items-end">
           <div className="space-y-2 sm:col-span-2 lg:col-span-1"><label className="text-base font-medium" htmlFor="reminder-title">What should we remind you about?</label><Input id="reminder-title" value={title} maxLength={200} onChange={(event) => setTitle(event.target.value)} placeholder="Drink a glass of water" className="min-h-12 rounded-xl bg-background px-4 text-base md:text-base" /></div>
           <div className="space-y-2"><span className="text-base font-medium">Kind</span><Select value={category} onValueChange={setCategory}><SelectTrigger className="min-h-12 rounded-xl bg-background px-4 text-base"><SelectValue /></SelectTrigger><SelectContent>{CATEGORIES.map((item) => <SelectItem key={item.value} value={item.value} className="py-3 text-base">{item.label}</SelectItem>)}</SelectContent></Select></div>
           <div className="space-y-2"><label className="text-base font-medium" htmlFor="reminder-time">Time</label><Input id="reminder-time" type="time" value={time} onChange={(event) => setTime(event.target.value)} className="min-h-12 rounded-xl bg-background px-4 text-base md:text-base" /></div>

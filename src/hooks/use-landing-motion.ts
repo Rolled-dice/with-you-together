@@ -1,4 +1,4 @@
-import { useGSAP } from "@gsap/react";
+﻿import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -30,6 +30,9 @@ const SEL = {
   reveal: "[data-reveal]",
   stagger: "[data-reveal-stagger]",
   marquee: "[data-marquee-track]",
+  marqueePause: "[data-marquee-pause]",
+  marqueeIcon: "[data-marquee-icon]",
+  marqueeShine: "[data-marquee-shine]",
   magnetic: "[data-magnetic]",
   drift: "[data-drift]",
   counter: "[data-counter]",
@@ -212,12 +215,57 @@ export function useLandingMotion(root: RefObject<HTMLElement | null>) {
 
         // -- 5. Marquee -------------------------------------------------
         // The track renders its content twice, so -50% is a seamless loop.
+        // Three layered motions make the ribbon read as "alive" rather than
+        // a flat slide: the scroll itself, an independent bob on each orb
+        // icon, and a soft diagonal shine sweeping over the whole strip.
         q(SEL.marquee).forEach((track) => {
-          gsap.to(track, {
+          const scrollTween = gsap.to(track, {
             xPercent: -50,
-            duration: 26,
+            duration: 18,
             ease: "none",
             repeat: -1,
+          });
+
+          // Hover/focus pauses the scroll -- turns decoration into something
+          // that visibly responds to the visitor, without stopping the page.
+          const pauseRoot = track.closest(SEL.marqueePause) ?? track;
+          const pause = () => scrollTween.pause();
+          const resume = () => scrollTween.play();
+          pauseRoot.addEventListener("pointerenter", pause);
+          pauseRoot.addEventListener("pointerleave", resume);
+          pauseRoot.addEventListener("focusin", pause);
+          pauseRoot.addEventListener("focusout", resume);
+          cleanups.push(() => {
+            pauseRoot.removeEventListener("pointerenter", pause);
+            pauseRoot.removeEventListener("pointerleave", resume);
+            pauseRoot.removeEventListener("focusin", pause);
+            pauseRoot.removeEventListener("focusout", resume);
+          });
+        });
+
+        // Each orb icon bobs and gently scales on its own desynced timeline,
+        // independent of the scroll -- a second, slower layer of motion.
+        q(SEL.marqueeIcon).forEach((icon, i) => {
+          gsap.to(icon, {
+            y: -3,
+            scale: 1.15,
+            duration: 1.1,
+            delay: (i % 6) * 0.15,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+        });
+
+        // A soft light sweep drifts across the ribbon -- the eye-magnet pass,
+        // reusing the shimmer technique (background-position sweep) as a
+        // highlight rather than a loading cue. One loop for the whole strip.
+        q(SEL.marqueeShine).forEach((shine) => {
+          gsap.to(shine, {
+            backgroundPosition: "200% 0",
+            duration: 3.2,
+            repeat: -1,
+            ease: "sine.inOut",
           });
         });
 

@@ -204,6 +204,15 @@ export async function createDodoCheckoutForUser(
   input: { priceId: DodoPriceId; returnUrl: string },
 ): Promise<{ checkoutUrl: string } | { error: string }> {
   try {
+    // Owner-pays model: a non-owner family member is covered by the owner's
+    // plan and must not buy their own subscription. Enforced server-side.
+    const { getEffectiveTier } = await import("@/lib/tier.server");
+    const effective = await getEffectiveTier(supabase, userId);
+    if (effective.isMember) {
+      const who = effective.ownerName ? `${effective.ownerName}'s` : "your family owner's";
+      return { error: `Your plan is covered by ${who} Care Membership.` };
+    }
+
     const environment = getDodoEnvironment();
     const productId = dodoProductIdForPrice(input.priceId, environment);
     const {
@@ -252,6 +261,150 @@ export async function cancelDodoSubscriptionForUser(
     return { ok: true };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Dodo cancellation failed" };
+  }
+}
+
+/**
+ * Fetch subscriptions from the Dodo API. The list endpoint returns recent
+ * subscriptions for the merchant account; we filter to the ones whose checkout
+ * metadata.userId matches, newest first. Response shapes vary slightly across
+ * Dodo versions, so we read defensively.
+ */
+type DodoApiSubscription = Record<string, unknown>;
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function asStr(value: unknown): string | null {
+  return typeof value === "string" && value ? value : null;
+}
+
+function subMetadataUserId(sub: DodoApiSubscription): string | null {
+  const meta = asRecord(sub.metadata);
+  return asStr(meta.userId);
+}
+
+function subMetadataPriceId(sub: DodoApiSubscription): string | null {
+  const meta = asRecord(sub.metadata);
+  return asStr(meta.priceId);
+}
+
+async function listDodoSubscriptions(env: DodoEnv): Promise<DodoApiSubscription[]> {
+  // Dodo returns { items: [...] } (or a bare array on some versions).
+  const res = await dodoFetch<unknown>(env, "/subscriptions?page_size=100");
+  if (Array.isArray(res)) return res as DodoApiSubscription[];
+  const obj = asRecord(res);
+  const items = obj.items ?? obj.data;
+  return Array.isArray(items) ? (items as DodoApiSubscription[]) : [];
+}
+
+async function getDodoSubscriptionById(
+  env: DodoEnv,
+  subscriptionId: string,
+): Promise<DodoApiSubscription | null> {
+  try {
+    const res = await dodoFetch<unknown>(
+      env,
+      `/subscriptions/${encodeURIComponent(subscriptionId)}`,
+    );
+    const obj = asRecord(res);
+    return Object.keys(obj).length ? obj : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reconcile a user's Dodo subscription into Supabase WITHOUT relying on the
+ * webhook. Called on checkout return so the plan activates immediately even
+ * when the webhook can't reach the app (e.g. local dev behind a tunnel).
+ * Writes with the service-role client, mirroring the webhook's upsert.
+ */
+export async function reconcileDodoSubscriptionForUser(
+  serviceClient: any,
+  userId: string,
+  opts?: { subscriptionId?: string | null },
+): Promise<{ ok: true; status: string } | { ok: false; error: string }> {
+  try {
+    const env = getDodoEnvironment();
+
+    let sub: DodoApiSubscription | null = null;
+
+    // Prefer a direct lookup if we were handed a subscription id.
+    if (opts?.subscriptionId) {
+      sub = await getDodoSubscriptionById(env, opts.subscriptionId);
+      // Only accept it if it belongs to this user (defense in depth).
+      if (sub && subMetadataUserId(sub) && subMetadataUserId(sub) !== userId) sub = null;
+    }
+
+    // Otherwise, find the newest subscription whose metadata.userId matches.
+    if (!sub) {
+      const all = await listDodoSubscriptions(env);
+      const mine = all.filter((s) => subMetadataUserId(s) === userId);
+      // Newest first by created_at when present.
+      mine.sort((a, b) => {
+        const ta = new Date(asStr(a.created_at) ?? 0).valueOf();
+        const tb = new Date(asStr(b.created_at) ?? 0).valueOf();
+        return tb - ta;
+      });
+      sub = mine[0] ?? null;
+    }
+
+    if (!sub) return { ok: false, error: "No matching Dodo subscription found yet" };
+
+    const subscriptionId =
+      asStr(sub.subscription_id) ?? asStr(sub.id) ?? opts?.subscriptionId ?? null;
+    const priceId = subMetadataPriceId(sub);
+    if (!subscriptionId || !priceId) {
+      return { ok: false, error: "Dodo subscription is missing subscription id or price metadata" };
+    }
+
+    const status = mapDodoStatus(asStr(sub.status) ?? "");
+    const productId =
+      asStr(sub.product_id) ??
+      asStr(asRecord(sub.product).product_id) ??
+      asStr(asRecord(sub.product).id) ??
+      "";
+    const customerId =
+      asStr(sub.customer_id) ??
+      asStr(asRecord(sub.customer).customer_id) ??
+      asStr(asRecord(sub.customer).id);
+
+    const periodDate = (key: string): string | null => {
+      const v = sub![key];
+      if (typeof v === "number") return new Date(v * 1000).toISOString();
+      if (typeof v === "string" && v) {
+        const d = new Date(v);
+        return Number.isNaN(d.valueOf()) ? null : d.toISOString();
+      }
+      return null;
+    };
+
+    const { error } = await serviceClient.from("subscriptions").upsert(
+      {
+        user_id: userId,
+        provider: "dodo",
+        dodo_subscription_id: subscriptionId,
+        dodo_customer_id: customerId,
+        product_id: productId,
+        price_id: priceId,
+        status,
+        current_period_start: periodDate("current_period_start"),
+        current_period_end: periodDate("current_period_end") ?? periodDate("next_billing_date"),
+        cancel_at_period_end: Boolean(sub.cancel_at_next_billing_date),
+        environment: env,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "dodo_subscription_id" },
+    );
+    if (error) return { ok: false, error: `Subscription upsert failed: ${error.message}` };
+
+    return { ok: true, status };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Reconcile failed" };
   }
 }
 

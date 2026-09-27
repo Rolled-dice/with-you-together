@@ -3,7 +3,6 @@ import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scrip
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "sonner";
 
@@ -29,12 +28,9 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -104,8 +100,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap",
       },
-      { rel: "preconnect", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co", crossOrigin: "anonymous" },
-      { rel: "dns-prefetch", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co" },
+      { rel: "preconnect", href: "https://jflufaxdwzrohslviqeb.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://jflufaxdwzrohslviqeb.supabase.co" },
     ],
   }),
   shellComponent: RootShell,
@@ -118,6 +114,52 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/*
+          Cookiebot hydration guard. Cookiebot's auto-blocking inserts a
+          synchronous consent-config <script> right before the FIRST <script>
+          in the document. React 19 only skips unexpected head <script>s during
+          hydration when they are async, so that injected node collided with our
+          inline scripts and the whole tree was thrown away and re-rendered
+          ("Hydration failed").
+          1. The empty async script is a React "resource": it's emitted in the
+             head preamble and never hydrated in-tree, so it becomes the first
+             <script> and the injected node lands next to it, harmlessly.
+          2. The <noscript> is the first in-tree head child; hydrating it steps
+             the cursor past the injected node before our real scripts.
+        */}
+        <script async src="/cb-anchor.js" />
+        <noscript id="head-hydration-anchor" />
+        <HeadContent />
+        {/*
+          Password-recovery links land on the Site URL root with the session
+          in the URL (hash fragment or ?code=). Redirect to /auth/reset BEFORE
+          any other script runs — including the Supabase client's own
+          detectSessionInUrl — so there's no race between "consume the token"
+          and "know this was a recovery link". Inert on every other page load.
+        */}
+        <script
+          id="recovery-redirect"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+              try {
+                var p = window.location.pathname;
+                var h = window.location.hash || "";
+                var s = window.location.search || "";
+                var isRecoveryUrl = /type=recovery/.test(h) || /type=recovery/.test(s) || (/access_token=/.test(h) && /recovery/i.test(h));
+                if (isRecoveryUrl) {
+                  // Leave a flag any page (including the authenticated gate)
+                  // can check, in case the session already resolves before a
+                  // hard redirect takes effect.
+                  try { window.sessionStorage.setItem("sn_recovery_pending", "1"); } catch (e) {}
+                }
+                if (p.indexOf("/auth/reset") === 0) return;
+                if (isRecoveryUrl) {
+                  window.location.replace("/auth/reset" + s + h);
+                }
+              } catch (e) {}
+            })();`,
+          }}
+        />
         <script
           id="Cookiebot"
           src="https://consent.cookiebot.com/uc.js"
@@ -125,7 +167,6 @@ function RootShell({ children }: { children: ReactNode }) {
           data-blockingmode="auto"
           type="text/javascript"
         />
-        <HeadContent />
       </head>
 
       <body>
@@ -141,7 +182,27 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    // A password-recovery link can land on any page (Supabase redirects to the
+    // Site URL root). It may arrive as a PASSWORD_RECOVERY event OR as a hash
+    // fragment (#access_token=...&type=recovery / #type=recovery / #error=...).
+    // Detect any of these on load and route to the set-new-password page.
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash || "";
+      const onReset = window.location.pathname.startsWith("/auth/reset");
+      const looksLikeRecovery = /type=recovery/.test(hash) || (/access_token=/.test(hash) && /recovery/.test(hash));
+      if (looksLikeRecovery && !onReset) {
+        // Preserve the hash so the reset page's client can establish the session.
+        window.location.replace(`/auth/reset${window.location.hash}`);
+      }
+    }
+
     const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth/reset")) {
+          window.location.replace(`/auth/reset${window.location.hash}`);
+        }
+        return;
+      }
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
         void queryClient.cancelQueries().then(() => queryClient.clear());

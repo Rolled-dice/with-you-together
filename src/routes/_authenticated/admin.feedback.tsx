@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/admin/feedback")({
   }),
   component: AdminFeedbackPage,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-red-600">Something went wrong: {error.message}</div>
+    <div className="p-8 text-sm text-red-600">Something went wrong: {error instanceof Error ? error.message : String(error)}</div>
   ),
   notFoundComponent: () => <div className="p-8 text-sm">Not found.</div>,
 });

@@ -9,82 +9,63 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as DocsRouteImport } from './routes/docs'
-import { Route as CookiesRouteImport } from './routes/cookies'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DocsIndexRouteImport } from './routes/docs.index'
-import { Route as DocsSendLaterRouteImport } from './routes/docs.send-later'
-import { Route as DocsSafetyRouteImport } from './routes/docs.safety'
-import { Route as DocsMedicationRouteImport } from './routes/docs.medication'
-import { Route as DocsListenersRouteImport } from './routes/docs.listeners'
-import { Route as DocsInsightsRouteImport } from './routes/docs.insights'
-import { Route as DocsGettingStartedRouteImport } from './routes/docs.getting-started'
-import { Route as DocsFaqRouteImport } from './routes/docs.faq'
-import { Route as DocsFamilyRouteImport } from './routes/docs.family'
-import { Route as DocsCompanionRouteImport } from './routes/docs.companion'
-import { Route as DocsCheckInRouteImport } from './routes/docs.check-in'
-import { Route as DocsBillingRouteImport } from './routes/docs.billing'
-import { Route as DocsAccountRouteImport } from './routes/docs.account'
-import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedSendLaterRouteImport } from './routes/_authenticated/send-later'
-import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated/safety'
-import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
-import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
-import { Route as AuthenticatedListenersRouteImport } from './routes/_authenticated/listeners'
-import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
-import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
-import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated/family'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedCompanionRouteImport } from './routes/_authenticated/companion'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CalmRouteImport } from './routes/calm'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedCalmSpaceRouteImport } from './routes/_authenticated/calm-space'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
-import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as AuthenticatedCompanionRouteImport } from './routes/_authenticated/companion'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated/family'
+import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
+import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
+import { Route as AuthenticatedListenersRouteImport } from './routes/_authenticated/listeners'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
+import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated/safety'
+import { Route as AuthenticatedSendLaterRouteImport } from './routes/_authenticated/send-later'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthResetRouteImport } from './routes/auth_.reset'
+import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as DocsAccountRouteImport } from './routes/docs.account'
+import { Route as DocsBillingRouteImport } from './routes/docs.billing'
+import { Route as DocsCheckInRouteImport } from './routes/docs.check-in'
+import { Route as DocsCompanionRouteImport } from './routes/docs.companion'
+import { Route as DocsFamilyRouteImport } from './routes/docs.family'
+import { Route as DocsFaqRouteImport } from './routes/docs.faq'
+import { Route as DocsGettingStartedRouteImport } from './routes/docs.getting-started'
+import { Route as DocsInsightsRouteImport } from './routes/docs.insights'
+import { Route as DocsListenersRouteImport } from './routes/docs.listeners'
+import { Route as DocsMedicationRouteImport } from './routes/docs.medication'
+import { Route as DocsSafetyRouteImport } from './routes/docs.safety'
+import { Route as DocsSendLaterRouteImport } from './routes/docs.send-later'
+import { Route as AuthenticatedAdminAgentsRouteImport } from './routes/_authenticated/admin.agents'
+import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authenticated/admin.calls'
+import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authenticated/admin.feedback'
+import { Route as AuthenticatedAgentConsoleRouteImport } from './routes/_authenticated/agent.console'
 import { Route as AuthenticatedCompanionIndexRouteImport } from './routes/_authenticated/companion.index'
 import { Route as AuthenticatedCompanionThreadIdRouteImport } from './routes/_authenticated/companion.$threadId'
-import { Route as AuthenticatedAgentConsoleRouteImport } from './routes/_authenticated/agent.console'
-import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authenticated/admin.feedback'
-import { Route as AuthenticatedAdminCallsRouteImport } from './routes/_authenticated/admin.calls'
-import { Route as AuthenticatedAdminAgentsRouteImport } from './routes/_authenticated/admin.agents'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiPublicPaymentsDodoWebhookRouteImport } from './routes/api/public/payments/dodo-webhook'
-import { Route as ApiPublicHooksTelnyxRouteImport } from './routes/api/public/hooks/telnyx'
-import { Route as ApiPublicHooksSendLaterRouteImport } from './routes/api/public/hooks/send-later'
-import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
-import { Route as ApiPublicHooksCalendarSyncRouteImport } from './routes/api/public/hooks/calendar-sync'
 import { Route as ApiPublicGoogleCalendarCallbackRouteImport } from './routes/api/public/google-calendar/callback'
+import { Route as ApiPublicHooksCalendarSyncRouteImport } from './routes/api/public/hooks/calendar-sync'
+import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
+import { Route as ApiPublicHooksSendLaterRouteImport } from './routes/api/public/hooks/send-later'
+import { Route as ApiPublicHooksTelnyxRouteImport } from './routes/api/public/hooks/telnyx'
+import { Route as ApiPublicPaymentsDodoWebhookRouteImport } from './routes/api/public/payments/dodo-webhook'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocsRoute = DocsRouteImport.update({
-  id: '/docs',
-  path: '/docs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CookiesRoute = CookiesRouteImport.update({
-  id: '/cookies',
-  path: '/cookies',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -92,143 +73,34 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const CalmRoute = CalmRouteImport.update({
+  id: '/calm',
+  path: '/calm',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DocsIndexRoute = DocsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsSendLaterRoute = DocsSendLaterRouteImport.update({
-  id: '/send-later',
-  path: '/send-later',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsSafetyRoute = DocsSafetyRouteImport.update({
-  id: '/safety',
-  path: '/safety',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsMedicationRoute = DocsMedicationRouteImport.update({
-  id: '/medication',
-  path: '/medication',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsListenersRoute = DocsListenersRouteImport.update({
-  id: '/listeners',
-  path: '/listeners',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsInsightsRoute = DocsInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsGettingStartedRoute = DocsGettingStartedRouteImport.update({
-  id: '/getting-started',
-  path: '/getting-started',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsFaqRoute = DocsFaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsFamilyRoute = DocsFamilyRouteImport.update({
-  id: '/family',
-  path: '/family',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsCompanionRoute = DocsCompanionRouteImport.update({
-  id: '/companion',
-  path: '/companion',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsCheckInRoute = DocsCheckInRouteImport.update({
-  id: '/check-in',
-  path: '/check-in',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsBillingRoute = DocsBillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsAccountRoute = DocsAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => DocsRoute,
-} as any)
-const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
-  id: '/checkout/return',
-  path: '/checkout/return',
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedSendLaterRoute = AuthenticatedSendLaterRouteImport.update({
-  id: '/send-later',
-  path: '/send-later',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedSafetyRoute = AuthenticatedSafetyRouteImport.update({
-  id: '/safety',
-  path: '/safety',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedRemindersRoute = AuthenticatedRemindersRouteImport.update({
-  id: '/reminders',
-  path: '/reminders',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedListenersRoute = AuthenticatedListenersRouteImport.update({
-  id: '/listeners',
-  path: '/listeners',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedInviteRoute = AuthenticatedInviteRouteImport.update({
-  id: '/invite',
-  path: '/invite',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedFamilyRoute = AuthenticatedFamilyRouteImport.update({
-  id: '/family',
-  path: '/family',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedCompanionRoute = AuthenticatedCompanionRouteImport.update({
-  id: '/companion',
-  path: '/companion',
+const AuthenticatedCalmSpaceRoute = AuthenticatedCalmSpaceRouteImport.update({
+  id: '/calm-space',
+  path: '/calm-space',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
@@ -236,17 +108,163 @@ const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
+const AuthenticatedCompanionRoute = AuthenticatedCompanionRouteImport.update({
+  id: '/companion',
+  path: '/companion',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFamilyRoute = AuthenticatedFamilyRouteImport.update({
+  id: '/family',
+  path: '/family',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInviteRoute = AuthenticatedInviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedListenersRoute = AuthenticatedListenersRouteImport.update({
+  id: '/listeners',
+  path: '/listeners',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRemindersRoute = AuthenticatedRemindersRouteImport.update({
+  id: '/reminders',
+  path: '/reminders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSafetyRoute = AuthenticatedSafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSendLaterRoute = AuthenticatedSendLaterRouteImport.update({
+  id: '/send-later',
+  path: '/send-later',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/auth_/reset',
+  path: '/auth/reset',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
+  id: '/checkout/return',
+  path: '/checkout/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsAccountRoute = DocsAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsBillingRoute = DocsBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCheckInRoute = DocsCheckInRouteImport.update({
+  id: '/check-in',
+  path: '/check-in',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCompanionRoute = DocsCompanionRouteImport.update({
+  id: '/companion',
+  path: '/companion',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsFamilyRoute = DocsFamilyRouteImport.update({
+  id: '/family',
+  path: '/family',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsFaqRoute = DocsFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsGettingStartedRoute = DocsGettingStartedRouteImport.update({
+  id: '/getting-started',
+  path: '/getting-started',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsInsightsRoute = DocsInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsListenersRoute = DocsListenersRouteImport.update({
+  id: '/listeners',
+  path: '/listeners',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsMedicationRoute = DocsMedicationRouteImport.update({
+  id: '/medication',
+  path: '/medication',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsSafetyRoute = DocsSafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsSendLaterRoute = DocsSendLaterRouteImport.update({
+  id: '/send-later',
+  path: '/send-later',
+  getParentRoute: () => DocsRoute,
+} as any)
+const AuthenticatedAdminAgentsRoute =
+  AuthenticatedAdminAgentsRouteImport.update({
+    id: '/admin/agents',
+    path: '/admin/agents',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
+const AuthenticatedAdminCallsRoute = AuthenticatedAdminCallsRouteImport.update({
+  id: '/admin/calls',
+  path: '/admin/calls',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminFeedbackRoute =
+  AuthenticatedAdminFeedbackRouteImport.update({
+    id: '/admin/feedback',
+    path: '/admin/feedback',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAgentConsoleRoute =
+  AuthenticatedAgentConsoleRouteImport.update({
+    id: '/agent/console',
+    path: '/agent/console',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedCompanionIndexRoute =
   AuthenticatedCompanionIndexRouteImport.update({
@@ -260,43 +278,31 @@ const AuthenticatedCompanionThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedCompanionRoute,
   } as any)
-const AuthenticatedAgentConsoleRoute =
-  AuthenticatedAgentConsoleRouteImport.update({
-    id: '/agent/console',
-    path: '/agent/console',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminFeedbackRoute =
-  AuthenticatedAdminFeedbackRouteImport.update({
-    id: '/admin/feedback',
-    path: '/admin/feedback',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminCallsRoute = AuthenticatedAdminCallsRouteImport.update({
-  id: '/admin/calls',
-  path: '/admin/calls',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAdminAgentsRoute =
-  AuthenticatedAdminAgentsRouteImport.update({
-    id: '/admin/agents',
-    path: '/admin/agents',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const Char91DotmcpChar93InvokeToolToolRoute =
-  Char91DotmcpChar93InvokeToolToolRouteImport.update({
-    id: '/.mcp/invoke-tool/$tool',
-    path: '/.mcp/invoke-tool/$tool',
+const ApiPublicGoogleCalendarCallbackRoute =
+  ApiPublicGoogleCalendarCallbackRouteImport.update({
+    id: '/api/public/google-calendar/callback',
+    path: '/api/public/google-calendar/callback',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
+const ApiPublicHooksCalendarSyncRoute =
+  ApiPublicHooksCalendarSyncRouteImport.update({
+    id: '/api/public/hooks/calendar-sync',
+    path: '/api/public/hooks/calendar-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksCallSlaRoute = ApiPublicHooksCallSlaRouteImport.update({
+  id: '/api/public/hooks/call-sla',
+  path: '/api/public/hooks/call-sla',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
+const ApiPublicHooksSendLaterRoute = ApiPublicHooksSendLaterRouteImport.update({
+  id: '/api/public/hooks/send-later',
+  path: '/api/public/hooks/send-later',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksTelnyxRoute = ApiPublicHooksTelnyxRouteImport.update({
+  id: '/api/public/hooks/telnyx',
+  path: '/api/public/hooks/telnyx',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPaymentsDodoWebhookRoute =
@@ -305,44 +311,16 @@ const ApiPublicPaymentsDodoWebhookRoute =
     path: '/api/public/payments/dodo-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksTelnyxRoute = ApiPublicHooksTelnyxRouteImport.update({
-  id: '/api/public/hooks/telnyx',
-  path: '/api/public/hooks/telnyx',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksSendLaterRoute = ApiPublicHooksSendLaterRouteImport.update({
-  id: '/api/public/hooks/send-later',
-  path: '/api/public/hooks/send-later',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksCallSlaRoute = ApiPublicHooksCallSlaRouteImport.update({
-  id: '/api/public/hooks/call-sla',
-  path: '/api/public/hooks/call-sla',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksCalendarSyncRoute =
-  ApiPublicHooksCalendarSyncRouteImport.update({
-    id: '/api/public/hooks/calendar-sync',
-    path: '/api/public/hooks/calendar-sync',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicGoogleCalendarCallbackRoute =
-  ApiPublicGoogleCalendarCallbackRouteImport.update({
-    id: '/api/public/google-calendar/callback',
-    path: '/api/public/google-calendar/callback',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/calm': typeof CalmRoute
   '/cookies': typeof CookiesRoute
   '/docs': typeof DocsRouteWithChildren
-  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/calm-space': typeof AuthenticatedCalmSpaceRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/companion': typeof AuthenticatedCompanionRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -356,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/send-later': typeof AuthenticatedSendLaterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/reset': typeof AuthResetRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
   '/docs/billing': typeof DocsBillingRoute
@@ -370,7 +349,6 @@ export interface FileRoutesByFullPath {
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/send-later': typeof DocsSendLaterRoute
   '/docs/': typeof DocsIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
@@ -383,18 +361,15 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/calm': typeof CalmRoute
   '/cookies': typeof CookiesRoute
-  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/calm-space': typeof AuthenticatedCalmSpaceRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/family': typeof AuthenticatedFamilyRoute
@@ -407,6 +382,7 @@ export interface FileRoutesByTo {
   '/send-later': typeof AuthenticatedSendLaterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/reset': typeof AuthResetRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
   '/docs/billing': typeof DocsBillingRoute
@@ -421,7 +397,6 @@ export interface FileRoutesByTo {
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/send-later': typeof DocsSendLaterRoute
   '/docs': typeof DocsIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
@@ -434,21 +409,18 @@ export interface FileRoutesByTo {
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/calm': typeof CalmRoute
   '/cookies': typeof CookiesRoute
   '/docs': typeof DocsRouteWithChildren
-  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/_authenticated/calm-space': typeof AuthenticatedCalmSpaceRoute
   '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/companion': typeof AuthenticatedCompanionRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -462,6 +434,7 @@ export interface FileRoutesById {
   '/_authenticated/send-later': typeof AuthenticatedSendLaterRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth_/reset': typeof AuthResetRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
   '/docs/billing': typeof DocsBillingRoute
@@ -476,7 +449,6 @@ export interface FileRoutesById {
   '/docs/safety': typeof DocsSafetyRoute
   '/docs/send-later': typeof DocsSendLaterRoute
   '/docs/': typeof DocsIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/_authenticated/admin/calls': typeof AuthenticatedAdminCallsRoute
   '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
@@ -489,21 +461,18 @@ export interface FileRoutesById {
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/calm'
     | '/cookies'
     | '/docs'
-    | '/mcp'
     | '/privacy'
     | '/terms'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
+    | '/calm-space'
     | '/checkout'
     | '/companion'
     | '/dashboard'
@@ -517,6 +486,7 @@ export interface FileRouteTypes {
     | '/send-later'
     | '/settings'
     | '/api/chat'
+    | '/auth/reset'
     | '/checkout/return'
     | '/docs/account'
     | '/docs/billing'
@@ -531,7 +501,6 @@ export interface FileRouteTypes {
     | '/docs/safety'
     | '/docs/send-later'
     | '/docs/'
-    | '/.mcp/invoke-tool/$tool'
     | '/admin/agents'
     | '/admin/calls'
     | '/admin/feedback'
@@ -544,18 +513,15 @@ export interface FileRouteTypes {
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
     | '/api/public/payments/dodo-webhook'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/calm'
     | '/cookies'
-    | '/mcp'
     | '/privacy'
     | '/terms'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
+    | '/calm-space'
     | '/checkout'
     | '/dashboard'
     | '/family'
@@ -568,6 +534,7 @@ export interface FileRouteTypes {
     | '/send-later'
     | '/settings'
     | '/api/chat'
+    | '/auth/reset'
     | '/checkout/return'
     | '/docs/account'
     | '/docs/billing'
@@ -582,7 +549,6 @@ export interface FileRouteTypes {
     | '/docs/safety'
     | '/docs/send-later'
     | '/docs'
-    | '/.mcp/invoke-tool/$tool'
     | '/admin/agents'
     | '/admin/calls'
     | '/admin/feedback'
@@ -595,20 +561,17 @@ export interface FileRouteTypes {
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
     | '/api/public/payments/dodo-webhook'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/calm'
     | '/cookies'
     | '/docs'
-    | '/mcp'
     | '/privacy'
     | '/terms'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
+    | '/_authenticated/calm-space'
     | '/_authenticated/checkout'
     | '/_authenticated/companion'
     | '/_authenticated/dashboard'
@@ -622,6 +585,7 @@ export interface FileRouteTypes {
     | '/_authenticated/send-later'
     | '/_authenticated/settings'
     | '/api/chat'
+    | '/auth_/reset'
     | '/checkout/return'
     | '/docs/account'
     | '/docs/billing'
@@ -636,7 +600,6 @@ export interface FileRouteTypes {
     | '/docs/safety'
     | '/docs/send-later'
     | '/docs/'
-    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/agents'
     | '/_authenticated/admin/calls'
     | '/_authenticated/admin/feedback'
@@ -649,76 +612,35 @@ export interface FileRouteTypes {
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
     | '/api/public/payments/dodo-webhook'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CalmRoute: typeof CalmRoute
   CookiesRoute: typeof CookiesRoute
   DocsRoute: typeof DocsRouteWithChildren
-  McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
-  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
-  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
+  AuthResetRoute: typeof AuthResetRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
-  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicGoogleCalendarCallbackRoute: typeof ApiPublicGoogleCalendarCallbackRoute
   ApiPublicHooksCalendarSyncRoute: typeof ApiPublicHooksCalendarSyncRoute
   ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
   ApiPublicHooksSendLaterRoute: typeof ApiPublicHooksSendLaterRoute
   ApiPublicHooksTelnyxRoute: typeof ApiPublicHooksTelnyxRoute
   ApiPublicPaymentsDodoWebhookRoute: typeof ApiPublicPaymentsDodoWebhookRoute
-  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
-  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/docs': {
-      id: '/docs'
-      path: '/docs'
-      fullPath: '/docs'
-      preLoaderRoute: typeof DocsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cookies': {
-      id: '/cookies'
-      path: '/cookies'
-      fullPath: '/cookies'
-      preLoaderRoute: typeof CookiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -728,193 +650,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/docs/': {
-      id: '/docs/'
-      path: '/'
-      fullPath: '/docs/'
-      preLoaderRoute: typeof DocsIndexRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/send-later': {
-      id: '/docs/send-later'
-      path: '/send-later'
-      fullPath: '/docs/send-later'
-      preLoaderRoute: typeof DocsSendLaterRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/safety': {
-      id: '/docs/safety'
-      path: '/safety'
-      fullPath: '/docs/safety'
-      preLoaderRoute: typeof DocsSafetyRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/medication': {
-      id: '/docs/medication'
-      path: '/medication'
-      fullPath: '/docs/medication'
-      preLoaderRoute: typeof DocsMedicationRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/listeners': {
-      id: '/docs/listeners'
-      path: '/listeners'
-      fullPath: '/docs/listeners'
-      preLoaderRoute: typeof DocsListenersRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/insights': {
-      id: '/docs/insights'
-      path: '/insights'
-      fullPath: '/docs/insights'
-      preLoaderRoute: typeof DocsInsightsRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/getting-started': {
-      id: '/docs/getting-started'
-      path: '/getting-started'
-      fullPath: '/docs/getting-started'
-      preLoaderRoute: typeof DocsGettingStartedRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/faq': {
-      id: '/docs/faq'
-      path: '/faq'
-      fullPath: '/docs/faq'
-      preLoaderRoute: typeof DocsFaqRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/family': {
-      id: '/docs/family'
-      path: '/family'
-      fullPath: '/docs/family'
-      preLoaderRoute: typeof DocsFamilyRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/companion': {
-      id: '/docs/companion'
-      path: '/companion'
-      fullPath: '/docs/companion'
-      preLoaderRoute: typeof DocsCompanionRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/check-in': {
-      id: '/docs/check-in'
-      path: '/check-in'
-      fullPath: '/docs/check-in'
-      preLoaderRoute: typeof DocsCheckInRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/billing': {
-      id: '/docs/billing'
-      path: '/billing'
-      fullPath: '/docs/billing'
-      preLoaderRoute: typeof DocsBillingRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/account': {
-      id: '/docs/account'
-      path: '/account'
-      fullPath: '/docs/account'
-      preLoaderRoute: typeof DocsAccountRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/checkout/return': {
-      id: '/checkout/return'
-      path: '/checkout/return'
-      fullPath: '/checkout/return'
-      preLoaderRoute: typeof CheckoutReturnRouteImport
+    '/calm': {
+      id: '/calm'
+      path: '/calm'
+      fullPath: '/calm'
+      preLoaderRoute: typeof CalmRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/send-later': {
-      id: '/_authenticated/send-later'
-      path: '/send-later'
-      fullPath: '/send-later'
-      preLoaderRoute: typeof AuthenticatedSendLaterRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/safety': {
-      id: '/_authenticated/safety'
-      path: '/safety'
-      fullPath: '/safety'
-      preLoaderRoute: typeof AuthenticatedSafetyRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/reminders': {
-      id: '/_authenticated/reminders'
-      path: '/reminders'
-      fullPath: '/reminders'
-      preLoaderRoute: typeof AuthenticatedRemindersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/onboarding': {
-      id: '/_authenticated/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/listeners': {
-      id: '/_authenticated/listeners'
-      path: '/listeners'
-      fullPath: '/listeners'
-      preLoaderRoute: typeof AuthenticatedListenersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/invite': {
-      id: '/_authenticated/invite'
-      path: '/invite'
-      fullPath: '/invite'
-      preLoaderRoute: typeof AuthenticatedInviteRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/insights': {
-      id: '/_authenticated/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof AuthenticatedInsightsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/family': {
-      id: '/_authenticated/family'
-      path: '/family'
-      fullPath: '/family'
-      preLoaderRoute: typeof AuthenticatedFamilyRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/companion': {
-      id: '/_authenticated/companion'
-      path: '/companion'
-      fullPath: '/companion'
-      preLoaderRoute: typeof AuthenticatedCompanionRouteImport
+    '/_authenticated/calm-space': {
+      id: '/_authenticated/calm-space'
+      path: '/calm-space'
+      fullPath: '/calm-space'
+      preLoaderRoute: typeof AuthenticatedCalmSpaceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/checkout': {
@@ -924,19 +706,222 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/_authenticated/companion': {
+      id: '/_authenticated/companion'
+      path: '/companion'
+      fullPath: '/companion'
+      preLoaderRoute: typeof AuthenticatedCompanionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/family': {
+      id: '/_authenticated/family'
+      path: '/family'
+      fullPath: '/family'
+      preLoaderRoute: typeof AuthenticatedFamilyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/insights': {
+      id: '/_authenticated/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof AuthenticatedInsightsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invite': {
+      id: '/_authenticated/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof AuthenticatedInviteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/listeners': {
+      id: '/_authenticated/listeners'
+      path: '/listeners'
+      fullPath: '/listeners'
+      preLoaderRoute: typeof AuthenticatedListenersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reminders': {
+      id: '/_authenticated/reminders'
+      path: '/reminders'
+      fullPath: '/reminders'
+      preLoaderRoute: typeof AuthenticatedRemindersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/safety': {
+      id: '/_authenticated/safety'
+      path: '/safety'
+      fullPath: '/safety'
+      preLoaderRoute: typeof AuthenticatedSafetyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/send-later': {
+      id: '/_authenticated/send-later'
+      path: '/send-later'
+      fullPath: '/send-later'
+      preLoaderRoute: typeof AuthenticatedSendLaterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.mcp/list-tools': {
-      id: '/.mcp/list-tools'
-      path: '/.mcp/list-tools'
-      fullPath: '/.mcp/list-tools'
-      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+    '/auth_/reset': {
+      id: '/auth_/reset'
+      path: '/auth/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/checkout/return': {
+      id: '/checkout/return'
+      path: '/checkout/return'
+      fullPath: '/checkout/return'
+      preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/': {
+      id: '/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/account': {
+      id: '/docs/account'
+      path: '/account'
+      fullPath: '/docs/account'
+      preLoaderRoute: typeof DocsAccountRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/billing': {
+      id: '/docs/billing'
+      path: '/billing'
+      fullPath: '/docs/billing'
+      preLoaderRoute: typeof DocsBillingRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/check-in': {
+      id: '/docs/check-in'
+      path: '/check-in'
+      fullPath: '/docs/check-in'
+      preLoaderRoute: typeof DocsCheckInRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/companion': {
+      id: '/docs/companion'
+      path: '/companion'
+      fullPath: '/docs/companion'
+      preLoaderRoute: typeof DocsCompanionRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/family': {
+      id: '/docs/family'
+      path: '/family'
+      fullPath: '/docs/family'
+      preLoaderRoute: typeof DocsFamilyRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/faq': {
+      id: '/docs/faq'
+      path: '/faq'
+      fullPath: '/docs/faq'
+      preLoaderRoute: typeof DocsFaqRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/getting-started': {
+      id: '/docs/getting-started'
+      path: '/getting-started'
+      fullPath: '/docs/getting-started'
+      preLoaderRoute: typeof DocsGettingStartedRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/insights': {
+      id: '/docs/insights'
+      path: '/insights'
+      fullPath: '/docs/insights'
+      preLoaderRoute: typeof DocsInsightsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/listeners': {
+      id: '/docs/listeners'
+      path: '/listeners'
+      fullPath: '/docs/listeners'
+      preLoaderRoute: typeof DocsListenersRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/medication': {
+      id: '/docs/medication'
+      path: '/medication'
+      fullPath: '/docs/medication'
+      preLoaderRoute: typeof DocsMedicationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/safety': {
+      id: '/docs/safety'
+      path: '/safety'
+      fullPath: '/docs/safety'
+      preLoaderRoute: typeof DocsSafetyRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/send-later': {
+      id: '/docs/send-later'
+      path: '/send-later'
+      fullPath: '/docs/send-later'
+      preLoaderRoute: typeof DocsSendLaterRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/_authenticated/admin/agents': {
+      id: '/_authenticated/admin/agents'
+      path: '/admin/agents'
+      fullPath: '/admin/agents'
+      preLoaderRoute: typeof AuthenticatedAdminAgentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/calls': {
+      id: '/_authenticated/admin/calls'
+      path: '/admin/calls'
+      fullPath: '/admin/calls'
+      preLoaderRoute: typeof AuthenticatedAdminCallsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/feedback': {
+      id: '/_authenticated/admin/feedback'
+      path: '/admin/feedback'
+      fullPath: '/admin/feedback'
+      preLoaderRoute: typeof AuthenticatedAdminFeedbackRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/agent/console': {
+      id: '/_authenticated/agent/console'
+      path: '/agent/console'
+      fullPath: '/agent/console'
+      preLoaderRoute: typeof AuthenticatedAgentConsoleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/companion/': {
       id: '/_authenticated/companion/'
@@ -952,81 +937,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompanionThreadIdRouteImport
       parentRoute: typeof AuthenticatedCompanionRoute
     }
-    '/_authenticated/agent/console': {
-      id: '/_authenticated/agent/console'
-      path: '/agent/console'
-      fullPath: '/agent/console'
-      preLoaderRoute: typeof AuthenticatedAgentConsoleRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/feedback': {
-      id: '/_authenticated/admin/feedback'
-      path: '/admin/feedback'
-      fullPath: '/admin/feedback'
-      preLoaderRoute: typeof AuthenticatedAdminFeedbackRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/calls': {
-      id: '/_authenticated/admin/calls'
-      path: '/admin/calls'
-      fullPath: '/admin/calls'
-      preLoaderRoute: typeof AuthenticatedAdminCallsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/agents': {
-      id: '/_authenticated/admin/agents'
-      path: '/admin/agents'
-      fullPath: '/admin/agents'
-      preLoaderRoute: typeof AuthenticatedAdminAgentsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/payments/dodo-webhook': {
-      id: '/api/public/payments/dodo-webhook'
-      path: '/api/public/payments/dodo-webhook'
-      fullPath: '/api/public/payments/dodo-webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsDodoWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/telnyx': {
-      id: '/api/public/hooks/telnyx'
-      path: '/api/public/hooks/telnyx'
-      fullPath: '/api/public/hooks/telnyx'
-      preLoaderRoute: typeof ApiPublicHooksTelnyxRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/send-later': {
-      id: '/api/public/hooks/send-later'
-      path: '/api/public/hooks/send-later'
-      fullPath: '/api/public/hooks/send-later'
-      preLoaderRoute: typeof ApiPublicHooksSendLaterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/call-sla': {
-      id: '/api/public/hooks/call-sla'
-      path: '/api/public/hooks/call-sla'
-      fullPath: '/api/public/hooks/call-sla'
-      preLoaderRoute: typeof ApiPublicHooksCallSlaRouteImport
+    '/api/public/google-calendar/callback': {
+      id: '/api/public/google-calendar/callback'
+      path: '/api/public/google-calendar/callback'
+      fullPath: '/api/public/google-calendar/callback'
+      preLoaderRoute: typeof ApiPublicGoogleCalendarCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/calendar-sync': {
@@ -1036,11 +951,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksCalendarSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/google-calendar/callback': {
-      id: '/api/public/google-calendar/callback'
-      path: '/api/public/google-calendar/callback'
-      fullPath: '/api/public/google-calendar/callback'
-      preLoaderRoute: typeof ApiPublicGoogleCalendarCallbackRouteImport
+    '/api/public/hooks/call-sla': {
+      id: '/api/public/hooks/call-sla'
+      path: '/api/public/hooks/call-sla'
+      fullPath: '/api/public/hooks/call-sla'
+      preLoaderRoute: typeof ApiPublicHooksCallSlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/send-later': {
+      id: '/api/public/hooks/send-later'
+      path: '/api/public/hooks/send-later'
+      fullPath: '/api/public/hooks/send-later'
+      preLoaderRoute: typeof ApiPublicHooksSendLaterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/telnyx': {
+      id: '/api/public/hooks/telnyx'
+      path: '/api/public/hooks/telnyx'
+      fullPath: '/api/public/hooks/telnyx'
+      preLoaderRoute: typeof ApiPublicHooksTelnyxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/dodo-webhook': {
+      id: '/api/public/payments/dodo-webhook'
+      path: '/api/public/payments/dodo-webhook'
+      fullPath: '/api/public/payments/dodo-webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsDodoWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1063,6 +999,7 @@ const AuthenticatedCompanionRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCalmSpaceRoute: typeof AuthenticatedCalmSpaceRoute
   AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedCompanionRoute: typeof AuthenticatedCompanionRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -1082,6 +1019,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCalmSpaceRoute: AuthenticatedCalmSpaceRoute,
   AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedCompanionRoute: AuthenticatedCompanionRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
@@ -1141,25 +1079,20 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CalmRoute: CalmRoute,
   CookiesRoute: CookiesRoute,
   DocsRoute: DocsRouteWithChildren,
-  McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
-  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
-  Char91DotwellKnownChar93OauthProtectedResourceRoute:
-    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
+  AuthResetRoute: AuthResetRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
-  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicGoogleCalendarCallbackRoute: ApiPublicGoogleCalendarCallbackRoute,
   ApiPublicHooksCalendarSyncRoute: ApiPublicHooksCalendarSyncRoute,
   ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
   ApiPublicHooksSendLaterRoute: ApiPublicHooksSendLaterRoute,
   ApiPublicHooksTelnyxRoute: ApiPublicHooksTelnyxRoute,
   ApiPublicPaymentsDodoWebhookRoute: ApiPublicPaymentsDodoWebhookRoute,
-  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
-  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

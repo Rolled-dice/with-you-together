@@ -18,6 +18,23 @@ export const Route = createFileRoute("/_authenticated")({
   pendingMs: 0,
   wrapInSuspense: true,
   beforeLoad: async ({ location }) => {
+    // Safety net: a password-recovery link creates a real session, so it's
+    // possible to land on an authenticated page while still "mid recovery".
+    // The root layout's inline script flags this before the app boots; honor
+    // it here too so the user always finishes setting a new password first.
+    let recoveryPending = false;
+    if (typeof window !== "undefined") {
+      try {
+        recoveryPending = window.sessionStorage.getItem("sn_recovery_pending") === "1";
+        if (recoveryPending) window.sessionStorage.removeItem("sn_recovery_pending");
+      } catch {
+        // sessionStorage unavailable (e.g. private mode) — treat as not pending.
+      }
+    }
+    if (recoveryPending) {
+      throw redirect({ to: "/auth/reset" });
+    }
+
     let session = (await supabase.auth.getSession()).data.session;
 
     if (!session) {

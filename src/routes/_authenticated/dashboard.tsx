@@ -15,6 +15,7 @@ import {
   ChartLineIcon,
   LifebuoyIcon,
   PhoneCallIcon,
+  FlowerLotusIcon,
 } from "@phosphor-icons/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -196,7 +197,9 @@ function MemberDashboard() {
   }
 
   const firstName = profile?.display_name?.split(" ")[0] ?? "friend";
-  const tier = profile?.care_tier ?? "free";
+  // Prefer the effective tier from the quota (accounts for family members who
+  // inherit the owner's plan); fall back to the profile's own tier.
+  const tier = quota?.tier ?? profile?.care_tier ?? "free";
   const tierLabel = TIER_LABEL[tier] ?? "No active plan";
   const { text: greetText, icon: GreetIcon } = greeting();
 
@@ -259,7 +262,7 @@ function MemberDashboard() {
             </blockquote>
           </div>
 
-          <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+          <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             {/* Tall targets: 52px clears the 44px minimum comfortably. */}
             <Button
               asChild
@@ -281,6 +284,20 @@ function MemberDashboard() {
               </Link>
             </Button>
           </div>
+
+          {/* A quiet way out when a check-in feels like too much right now. */}
+          <Link
+            to="/calm-space"
+            className="mt-3 flex min-h-12 items-center gap-3 rounded-2xl border border-brand-primary/15 bg-plate-periwinkle/15 px-4 py-2.5 transition-colors hover:bg-plate-periwinkle/25"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card text-brand-primary">
+              <FlowerLotusIcon className="h-5 w-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[15px] font-bold text-foreground">Feeling tense?</span>
+              <span className="block text-sm text-muted-foreground">Breathe for a minute, or let a worry float away.</span>
+            </span>
+          </Link>
         </div>
       </section>
 

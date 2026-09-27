@@ -61,13 +61,9 @@ export const getMyAiQuota = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("care_tier")
-      .eq("id", userId)
-      .maybeSingle();
-
-    const tier = profile?.care_tier ?? "free";
+    // Members inherit the family owner's plan — resolve the effective tier.
+    const { getEffectiveTier } = await import("@/lib/tier.server");
+    const { tier } = await getEffectiveTier(supabase, userId);
     const limit = getTierLimit(tier);
     const unlimited = limit === UNLIMITED;
     const start = dayStart();

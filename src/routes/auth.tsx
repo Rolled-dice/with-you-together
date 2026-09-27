@@ -6,7 +6,6 @@ import { SpinnerGapIcon, WarningCircleIcon, WifiSlashIcon } from "@phosphor-icon
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,25 +63,41 @@ function AuthPage() {
     let cancelled = false;
     const fallback = window.setTimeout(() => {
       if (!cancelled) setCheckingSession(false);
-    }, 900);
+    }, 3000);
 
-    supabase.auth
-      .getSession()
-      .then(({ data }) => {
+    async function resolveSession() {
+      // For PKCE OAuth returns (/auth?code=...), the Supabase client exchanges
+      // the code once during initialization (detectSessionInUrl). getSession()
+      // waits for that to finish, so we never exchange the single-use code
+      // ourselves (doing so twice fails with "invalid flow state").
+      const hadCode = new URLSearchParams(window.location.search).has("code");
+      try {
+        const { data } = await supabase.auth.getSession();
         if (cancelled) return;
         window.clearTimeout(fallback);
         if (data.session) {
           window.location.replace(redirectTo);
-        } else {
-          setCheckingSession(false);
+          return;
         }
-      })
-      .catch(() => {
+        if (hadCode) {
+          // The code was stale or already used (e.g. a page reload). Drop it
+          // from the URL so a refresh doesn't retry it; the user can sign in again.
+          const clean = new URL(window.location.href);
+          clean.searchParams.delete("code");
+          window.history.replaceState(null, "", clean.pathname + clean.search + clean.hash);
+          toast.error("Google sign-in didn't finish", {
+            description: "Please try Continue with Google again.",
+          });
+        }
+        setCheckingSession(false);
+      } catch {
         if (!cancelled) {
           window.clearTimeout(fallback);
           setCheckingSession(false);
         }
-      });
+      }
+    }
+    void resolveSession();
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
@@ -352,6 +367,10 @@ function OAuthLockGroup({ children }: { children: (lock: AuthLock) => React.Reac
 function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // "signin" = normal login; "reset" = forgot-password email-entry mode.
+  const [mode, setMode] = useState<"signin" | "reset">("signin");
+  const [resetSent, setResetSent] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const busy = lock.busy === "signin";
   const disabled = lock.busy !== null;
 
@@ -374,6 +393,82 @@ function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     await attemptSignIn();
+  }
+
+  async function onSendReset(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return toast.error("Enter your email to reset your password.");
+    setResetting(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    });
+    setResetting(false);
+    // Don't reveal whether an account exists — always show the same success state.
+    if (error && !/rate/i.test(error.message)) {
+      // Only surface hard errors (e.g. rate limit); otherwise show neutral success.
+      console.error("[auth] reset request error", error);
+    }
+    setResetSent(true);
+  }
+
+  if (mode === "reset") {
+    return (
+      <motion.form onSubmit={onSendReset} className="space-y-4" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold">Reset your password</h3>
+          <p className="text-sm text-muted-foreground">
+            {resetSent
+              ? "If an account exists for that email, we've sent a link to reset your password."
+              : "Enter your email and we'll send you a link to set a new password."}
+          </p>
+        </div>
+        {!resetSent && (
+          <FieldRow>
+            <Label htmlFor="reset-email">Email</Label>
+            <Input
+              id="reset-email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="rounded-brand transition-all focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+            />
+          </FieldRow>
+        )}
+        <FieldRow>
+          {resetSent ? (
+            <Button
+              type="button"
+              onClick={() => {
+                setMode("signin");
+                setResetSent(false);
+              }}
+              className="w-full rounded-brand bg-brand-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-primary/90"
+            >
+              Back to sign in
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={resetting}
+              className="w-full rounded-brand bg-brand-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-primary/90 hover:shadow-md"
+            >
+              {resetting ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Send reset link
+            </Button>
+          )}
+        </FieldRow>
+        {!resetSent && (
+          <button
+            type="button"
+            onClick={() => setMode("signin")}
+            className="text-sm text-muted-foreground underline underline-offset-4"
+          >
+            Back to sign in
+          </button>
+        )}
+      </motion.form>
+    );
   }
 
   return (
@@ -399,7 +494,16 @@ function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }
         />
       </FieldRow>
       <FieldRow>
-        <Label htmlFor="signin-password">Password</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="signin-password">Password</Label>
+          <button
+            type="button"
+            onClick={() => setMode("reset")}
+            className="text-xs font-medium text-primary underline underline-offset-4"
+          >
+            Forgot password?
+          </button>
+        </div>
         <Input
           id="signin-password"
           type="password"
@@ -478,13 +582,17 @@ function OAuthButton({
   async function attempt() {
     if (!lock.acquire(provider)) return;
     try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
+      // Native Supabase OAuth (off Lovable Cloud). Configure the Google/Apple
+      // providers in the Supabase dashboard; the browser is redirected to the
+      // provider and back to /auth, where the session is established.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
+        },
       });
-      if (result.error) throw result.error;
-      if (result.redirected) return; // browser navigates away, keep lock held
-      // Popup flow: session is set, navigate immediately.
-      window.location.replace(redirectTo);
+      if (error) throw error;
+      return; // browser navigates away to the provider; keep the lock held
     } catch (err) {
       const info = classifyAuthError(err);
       toast.error(info.title, {

@@ -64,10 +64,12 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.family_session_pool TO authentica
 GRANT ALL ON public.family_session_pool TO service_role;
 ALTER TABLE public.family_session_pool ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Family members can view pool" ON public.family_session_pool;
 CREATE POLICY "Family members can view pool"
   ON public.family_session_pool FOR SELECT TO authenticated
   USING (public.get_user_family_id(auth.uid()) = family_id);
 
+DROP POLICY IF EXISTS "Family admins can manage pool" ON public.family_session_pool;
 CREATE POLICY "Family admins can manage pool"
   ON public.family_session_pool FOR ALL TO authenticated
   USING (public.is_family_admin(auth.uid(), family_id))
@@ -89,17 +91,21 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.family_session_allocations TO aut
 GRANT ALL ON public.family_session_allocations TO service_role;
 ALTER TABLE public.family_session_allocations ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Family members can view allocations" ON public.family_session_allocations;
 CREATE POLICY "Family members can view allocations"
   ON public.family_session_allocations FOR SELECT TO authenticated
   USING (public.get_user_family_id(auth.uid()) = family_id);
 
+DROP POLICY IF EXISTS "Family admins can manage allocations" ON public.family_session_allocations;
 CREATE POLICY "Family admins can manage allocations"
   ON public.family_session_allocations FOR ALL TO authenticated
   USING (public.is_family_admin(auth.uid(), family_id))
   WITH CHECK (public.is_family_admin(auth.uid(), family_id));
 
+DROP TRIGGER IF EXISTS pool_set_updated_at ON public.family_session_pool;
 CREATE TRIGGER pool_set_updated_at BEFORE UPDATE ON public.family_session_pool
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+DROP TRIGGER IF EXISTS alloc_set_updated_at ON public.family_session_allocations;
 CREATE TRIGGER alloc_set_updated_at BEFORE UPDATE ON public.family_session_allocations
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 

@@ -30,7 +30,7 @@ import {
   createMemory as createMemoryFn,
   deleteMemory as deleteMemoryFn,
 } from "@/lib/memories.functions";
-import { cancelDodoSubscription, getMyDodoSubscription } from "@/lib/dodo.functions";
+import { cancelDodoSubscription, getMyDodoSubscription, getMyCoverage } from "@/lib/dodo.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -42,6 +42,8 @@ import {
   SparkleIcon,
 } from "@phosphor-icons/react";
 import { WebhookEventsCard } from "@/components/webhook-events-card";
+import { PhoneField, toE164, fromE164 } from "@/components/phone-field";
+import type { CountryCode } from "libphonenumber-js";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
@@ -69,6 +71,11 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 type TierId = "free" | "care" | "care_plus";
 
+const TIER_LABEL_SETTINGS: Record<string, string> = {
+  care: PLAN_DISPLAY.care.name,
+  care_plus: PLAN_DISPLAY.care_plus.name,
+};
+
 function SettingsPage() {
   const profileFn = useServerFn(getMyProfile);
   const updateFn = useServerFn(updateMyProfile);
@@ -87,6 +94,12 @@ function SettingsPage() {
     queryFn: () => dodoSubFn(),
   });
 
+  const coverageFn = useServerFn(getMyCoverage);
+  const { data: coverage } = useQuery({
+    queryKey: ["my-coverage"],
+    queryFn: () => coverageFn(),
+  });
+
   const [displayName, setDisplayName] = useState("");
   const [fullName, setFullName] = useState("");
   const [pronouns, setPronouns] = useState("");
@@ -94,7 +107,11 @@ function SettingsPage() {
   const [intent, setIntent] = useState("");
   const [language, setLanguage] = useState<"en" | "hi">("en");
   const [currency, setCurrency] = useState<Currency>("usd");
-  const [phone, setPhone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode>("IN");
+  const [phoneNational, setPhoneNational] = useState("");
+  // The E.164 value composed from the picker; null until the local number is
+  // valid for the chosen country. Used for saving and verifying.
+  const phone = toE164(phoneCountry, phoneNational) ?? "";
 
   useEffect(() => {
     if (!profile) return;
@@ -103,7 +120,12 @@ function SettingsPage() {
     setPronouns(profile.pronouns ?? "");
     setTimezone(profile.timezone ?? "");
     setIntent(profile.care_intent ?? "");
-    setPhone(((profile as any).phone as string | null) ?? "");
+    const seed = fromE164(
+      (profile as any).phone as string | null,
+      ((profile as any).phone_country as CountryCode | null) ?? "IN",
+    );
+    setPhoneCountry(seed.country);
+    setPhoneNational(seed.national);
     setLanguage(((profile as any).preferred_language as "en" | "hi") ?? "en");
     const prefCur = (profile as any).preferred_currency as Currency | null;
     setCurrency(prefCur ?? currencyForCountry((profile as any).phone_country));
@@ -143,7 +165,8 @@ function SettingsPage() {
           care_intent: intent || null,
           preferred_language: language,
           preferred_currency: currency,
-          phone: phone.trim() || null,
+          phone: phone || null,
+          phone_country: phoneNational.trim() ? phoneCountry : null,
         },
       }),
     onSuccess: () => {
@@ -221,15 +244,28 @@ function SettingsPage() {
         description="Care Membership, profile, and privacy, all in your hands."
       />
 
-      <div className="grid gap-6">
+      <div className="grid gap-4 sm:gap-6">
         <Card data-page-reveal className="rounded-brand border-border bg-card">
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle className="flex items-center gap-2 text-base font-medium">
               <HandHeartIcon className="h-4 w-4 text-brand-accent" />
               Care Membership
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4">
+          <CardContent className="grid gap-4 p-4 pt-0 sm:p-6 sm:pt-0">
+            {coverage?.isMember ? (
+              <div className="rounded-brand border border-brand-primary/30 bg-brand-primary/5 p-4 text-sm">
+                <p className="font-medium text-foreground">
+                  Covered by {coverage.ownerName ? `${coverage.ownerName}'s` : "your family's"}{" "}
+                  {TIER_LABEL_SETTINGS[coverage.tier] ?? "Care"} membership
+                </p>
+                <p className="mt-1 text-muted-foreground">
+                  Your family owner manages billing for the whole circle. You don't need your own
+                  plan — your Companion and Listener access come from the shared membership.
+                </p>
+              </div>
+            ) : (
+              <>
             {cancelsAt ? (
               <div className="rounded-brand border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
                 Your membership will end on <strong>{cancelsAt}</strong>. You'll keep access until
@@ -300,7 +336,7 @@ function SettingsPage() {
                   <div
                     key={plan}
                     className={cn(
-                      "flex flex-col gap-3 rounded-brand border p-4",
+                      "flex flex-col gap-2 rounded-brand border p-3 sm:gap-3 sm:p-4",
                       active
                         ? "border-brand-primary bg-brand-primary/5"
                         : info.highlight
@@ -364,14 +400,16 @@ function SettingsPage() {
                 );
               })}
             </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card data-page-reveal className="rounded-brand border-border bg-card">
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-base font-medium">Profile</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
+          <CardContent className="grid gap-3 p-4 pt-0 sm:gap-4 sm:p-6 sm:pt-0 md:grid-cols-2">
             <Field label="Full name">
               <Input
                 value={fullName}
@@ -417,33 +455,33 @@ function SettingsPage() {
               </p>
             </Field>
             <Field label="Mobile number">
-              <div className="flex items-center gap-2">
-                <Input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1 555 000 1234"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  className="rounded-brand"
+              <div className="flex flex-col gap-2">
+                <PhoneField
+                  country={phoneCountry}
+                  nationalNumber={phoneNational}
+                  onCountryChange={setPhoneCountry}
+                  onNationalNumberChange={setPhoneNational}
                 />
-                {(profile as any).phone_verified && phone === ((profile as any).phone ?? "") ? (
-                  <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
-                ) : (
-                  <>
-                    <Badge variant="secondary" className="rounded-full whitespace-nowrap">
-                      Not verified
-                    </Badge>
-                    <PhoneVerifyDialog
-                      phone={phone}
-                      country={(profile as any).phone_country ?? "IN"}
-                      onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
-                    />
-                  </>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {(profile as any).phone_verified && phone && phone === ((profile as any).phone ?? "") ? (
+                    <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
+                  ) : (
+                    <>
+                      <Badge variant="secondary" className="rounded-full whitespace-nowrap">
+                        Not verified
+                      </Badge>
+                      <PhoneVerifyDialog
+                        phone={phone}
+                        country={phoneCountry}
+                        onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
+                      />
+                    </>
+                  )}
+                </div>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Include your country code. Save it first, then verify, a listener can only call a
-                verified number.
+                Pick your country, then enter your number. Save it first, then verify, a listener
+                can only call a verified number.
               </p>
             </Field>
             <Field label="What brings you here?">
@@ -472,11 +510,13 @@ function SettingsPage() {
 
         {profile?.id && <WebhookEventsCard userId={profile.id} />}
 
+        <SecurityCard />
+
         <Card data-page-reveal className="rounded-brand border-border bg-card">
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-base font-medium">Account</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <Button variant="outline" onClick={handleSignOut} className="rounded-brand">
               <SignOutIcon className="mr-2 h-4 w-4" />
               Sign out
@@ -499,13 +539,151 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+/**
+ * Account security: change password and change email for the signed-in user.
+ * Both use native Supabase auth (updateUser). Changing the email triggers a
+ * confirmation email to the new address before it takes effect. Users who
+ * signed in with Google/Apple have no password to change — we surface a note
+ * instead of a broken form.
+ */
+function SecurityCard() {
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null);
+  const [isOAuthOnly, setIsOAuthOnly] = useState(false);
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const [newEmail, setNewEmail] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data.user;
+      if (!user) return;
+      setCurrentEmail(user.email ?? null);
+      const providers = (user.app_metadata?.providers as string[] | undefined) ?? [];
+      // If the only identity is a social provider, there's no password to set.
+      setIsOAuthOnly(providers.length > 0 && !providers.includes("email"));
+    });
+  }, []);
+
+  async function onChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPassword.length < 8) return toast.error("Use at least 8 characters.");
+    if (newPassword !== confirmPassword) return toast.error("Passwords don't match.");
+    setSavingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setSavingPassword(false);
+    if (error) return toast.error(error.message);
+    setNewPassword("");
+    setConfirmPassword("");
+    toast.success("Password updated.");
+  }
+
+  async function onChangeEmail(e: React.FormEvent) {
+    e.preventDefault();
+    const email = newEmail.trim();
+    if (!email || !email.includes("@")) return toast.error("Enter a valid email address.");
+    if (email === currentEmail) return toast.error("That's already your email.");
+    setSavingEmail(true);
+    const { error } = await supabase.auth.updateUser(
+      { email },
+      { emailRedirectTo: `${window.location.origin}/dashboard` },
+    );
+    setSavingEmail(false);
+    if (error) return toast.error(error.message);
+    setNewEmail("");
+    toast.success("Check your new email", {
+      description: "We sent a confirmation link. Your email changes once you confirm it.",
+    });
+  }
+
+  return (
+    <Card data-page-reveal className="rounded-brand border-border bg-card">
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-base font-medium">Security</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6 p-4 pt-0 sm:space-y-8 sm:p-6 sm:pt-0">
+        {/* Change password */}
+        <form onSubmit={onChangePassword} className="space-y-4">
+          <h3 className="text-sm font-medium">Change password</h3>
+          {isOAuthOnly ? (
+            <p className="text-sm text-muted-foreground">
+              You sign in with Google or Apple, so there's no password to change here.
+            </p>
+          ) : (
+            <>
+              <Field label="New password">
+                <Input
+                  type="password"
+                  minLength={8}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="At least 8 characters"
+                  className="rounded-brand"
+                />
+              </Field>
+              <Field label="Confirm new password">
+                <Input
+                  type="password"
+                  minLength={8}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="rounded-brand"
+                />
+              </Field>
+              <Button
+                type="submit"
+                disabled={savingPassword || newPassword.length < 8 || newPassword !== confirmPassword}
+                className="rounded-brand bg-brand-primary text-primary-foreground"
+              >
+                {savingPassword ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Update password
+              </Button>
+            </>
+          )}
+        </form>
+
+        {/* Change email */}
+        <form onSubmit={onChangeEmail} className="space-y-4 border-t border-border pt-6">
+          <div>
+            <h3 className="text-sm font-medium">Change email</h3>
+            {currentEmail && (
+              <p className="mt-1 text-xs text-muted-foreground">Current: {currentEmail}</p>
+            )}
+          </div>
+          <Field label="New email">
+            <Input
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="rounded-brand"
+            />
+          </Field>
+          <Button
+            type="submit"
+            disabled={savingEmail || !newEmail.trim()}
+            variant="outline"
+            className="rounded-brand"
+          >
+            {savingEmail ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Send confirmation to new email
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 function PhoneVerifyDialog({
   phone,
   country,
   onVerified,
 }: {
   phone: string;
-  country: string;
+  country: CountryCode;
   onVerified: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -570,7 +748,7 @@ function PhoneVerifyDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="rounded-full">
+        <Button variant="outline" size="sm" className="rounded-full" disabled={!phone}>
           Verify
         </Button>
       </DialogTrigger>
@@ -592,7 +770,7 @@ function PhoneVerifyDialog({
           {verificationError ? (
             <div
               role="alert"
-              className="rounded-brand border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive-foreground"
+              className="rounded-brand border border-destructive/30 bg-destructive/5 p-3 text-sm font-medium text-destructive"
             >
               {verificationError}
             </div>
@@ -700,10 +878,10 @@ function BillingHistoryCard() {
 
   return (
     <Card data-page-reveal className="rounded-brand border-border bg-card">
-      <CardHeader>
+      <CardHeader className="p-4 sm:p-6">
         <CardTitle className="text-base font-medium">Billing history</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
         {isLoading ? (
           <Skeleton className="h-10 w-full rounded-brand" />
         ) : !data || data.length === 0 ? (
@@ -774,10 +952,10 @@ function CompanionMemoryCard() {
 
   return (
     <Card data-page-reveal className="rounded-brand border-border bg-card">
-      <CardHeader>
+      <CardHeader className="p-4 sm:p-6">
         <CardTitle className="text-base font-medium">Companion memory</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-4 p-4 pt-0 sm:p-6 sm:pt-0">
         <p className="text-sm text-muted-foreground">
           Short notes you'd like the Companion to keep in mind, only you can see these.
         </p>

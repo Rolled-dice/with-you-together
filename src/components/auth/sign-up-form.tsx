@@ -42,6 +42,11 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
   const [loading, setLoading] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [guardianConfirmed, setGuardianConfirmed] = useState(false);
+  // Email OTP verification phase: after signUp with no session, collect the
+  // 6-digit code Supabase emailed ({{ .Token }}) and confirm via verifyOtp.
+  const [awaitingCode, setAwaitingCode] = useState(false);
+  const [code, setCode] = useState("");
+  const [resending, setResending] = useState(false);
 
   const countryOptions = useMemo(() => {
     return getCountries().map((c) => ({
@@ -83,18 +88,20 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
+        // options.data is written directly to raw_user_meta_data, which the
+        // handle_new_user() trigger reads at the top level (full_name, phone,
+        // date_of_birth, ...). Do NOT nest under another `data` key or the
+        // trigger sees nothing and the profile is created without these fields.
         data: {
-          data: {
-            full_name: fullName,
-            display_name: fullName,
-            date_of_birth: dob,
-            phone: e164,
-            phone_country: country,
-            legal_terms_accepted_at: new Date().toISOString(),
-            terms_version: "2026-09-25",
-            privacy_version: "2026-09-25",
-            guardian_consent_confirmed: age < 18,
-          },
+          full_name: fullName,
+          display_name: fullName,
+          date_of_birth: dob,
+          phone: e164,
+          phone_country: country,
+          legal_terms_accepted_at: new Date().toISOString(),
+          terms_version: "2026-09-25",
+          privacy_version: "2026-09-25",
+          guardian_consent_confirmed: age < 18,
         },
       },
     });
@@ -103,15 +110,113 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
       return toast.error(error.message);
     }
     if (!data.session) {
-      toast.success("Check your email to confirm your account, then sign in.");
+      // Email confirmation is on: Supabase sent a 6-digit code. Move to the
+      // code-entry step rather than asking the user to click a link.
+      setAwaitingCode(true);
+      toast.success("We emailed you a 6-digit code. Enter it below to finish.");
       return;
     }
     toast.success("Welcome to SomeoneNear!");
     window.location.replace(redirectTo);
   }
 
+  async function onVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    const token = code.trim();
+    if (token.length < 6) return toast.error("Enter the code from your email.");
+    setLoading(true);
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "signup",
+    });
+    setLoading(false);
+    if (error) {
+      return toast.error(error.message);
+    }
+    if (!data.session) {
+      return toast.error("Verification failed. Request a new code and try again.");
+    }
+    toast.success("Welcome to SomeoneNear!");
+    window.location.replace(redirectTo);
+  }
+
+  async function onResendCode() {
+    setResending(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    setResending(false);
+    if (error) return toast.error(error.message);
+    toast.success("Sent a fresh code to your email.");
+  }
+
   const maxDob = new Date().toISOString().slice(0, 10);
   const currentAge = ageFromDob(dob);
+
+  if (awaitingCode) {
+    return (
+      <motion.form
+        onSubmit={onVerifyCode}
+        className="space-y-4"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.05 } },
+        }}
+      >
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold">Verify your email</h3>
+          <p className="text-sm text-muted-foreground">
+            Enter the code we sent to <span className="font-medium">{email}</span>.
+          </p>
+        </div>
+        <FieldRow>
+          <Label htmlFor="signup-otp">Verification code</Label>
+          <Input
+            id="signup-otp"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            required
+            maxLength={6}
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            className="rounded-brand tracking-[0.4em] text-center text-lg transition-all focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+            placeholder="000000"
+          />
+        </FieldRow>
+        <FieldRow>
+          <Button
+            type="submit"
+            disabled={loading || code.trim().length < 6}
+            className="w-full rounded-brand bg-brand-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-primary/90 hover:shadow-md"
+          >
+            {loading ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Verify and continue
+          </Button>
+        </FieldRow>
+        <div className="flex items-center justify-between text-sm">
+          <button
+            type="button"
+            onClick={onResendCode}
+            disabled={resending}
+            className="font-medium text-primary underline underline-offset-4 disabled:opacity-60"
+          >
+            {resending ? "Sending…" : "Resend code"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAwaitingCode(false);
+              setCode("");
+            }}
+            className="text-muted-foreground underline underline-offset-4"
+          >
+            Use a different email
+          </button>
+        </div>
+      </motion.form>
+    );
+  }
 
   return (
     <motion.form

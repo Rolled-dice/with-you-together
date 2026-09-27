@@ -47,3 +47,17 @@ brand/
 .env.local
 .env.*.local
 
+
+# Local dev tunnel binary (downloaded, not committed)
+cloudflared.exe
+
+# Filled-in Cloudflare Worker secrets for `wrangler secret bulk` (plaintext — never commit)
+secrets.production.local.json
+
+# Generated cron helper with live tunnel host + key (do not commit)
+supabase/cron-localhost.filled.sql
+
+# Build-time backup files (created by the Cloudflare migration)
+package.json.bak
+pnpm-lock.yaml.bak
+package-lock.json

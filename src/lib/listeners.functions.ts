@@ -20,12 +20,20 @@ export const listMyBookings = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("listener_bookings")
       .select(
-        "id, listener_id, requested_at, duration_minutes, note, status, listeners(name)",
+        "id, listener_id, requested_at, duration_minutes, note, status, crm_state, listeners(name)",
       )
       .eq("user_id", context.userId)
       .order("requested_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data;
+  });
+
+/** Member-facing session balance for this month (drives the listeners summary). */
+export const getMySessionBalance = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { getSessionBalance } = await import("@/lib/family-sessions.server");
+    return getSessionBalance(context.supabase, context.userId);
   });
 
 /**
@@ -119,6 +127,24 @@ export const requestBooking = createServerFn({ method: "POST" })
       };
     }
 
+    // Monthly Listener allowance. Family members (and owners) draw from the
+    // family pool; solo users draw from their own plan's allowance. Both are
+    // gated here before we assign a listener; the actual consume happens after
+    // a successful insert.
+    const { getSessionBalance } = await import("@/lib/family-sessions.server");
+    const balance = await getSessionBalance(context.supabase, context.userId);
+    if (balance.available <= 0) {
+      return {
+        ok: false as const,
+        code: "no_sessions_left" as const,
+        message: balance.inFamily
+          ? "Your family's Listener sessions for this month are used up. Ask the family owner to allocate more, or try again next month."
+          : balance.totalSessions === 0
+            ? "Listener sessions aren't included on your current plan. Upgrade to book a call."
+            : "You've used all your Listener sessions for this month. They'll refresh next month, or upgrade for more.",
+      };
+    }
+
     // Auto-assign: least-loaded active listener.
     const { data: listeners, error: lerr } = await context.supabase
       .from("listeners")
@@ -179,6 +205,11 @@ export const requestBooking = createServerFn({ method: "POST" })
         message: "We couldn't complete your booking. Please try again.",
       };
     }
+
+    // Charge one session against the family pool (no-op for solo users).
+    const { consumeSession } = await import("@/lib/family-sessions.server");
+    await consumeSession(context.supabase, context.userId);
+
     return { ok: true as const, id: inserted?.id };
   });
 
@@ -215,6 +246,14 @@ export const rescheduleBooking = createServerFn({ method: "POST" })
         "Reschedules must be made at least 2 hours before your session. This session has been marked used so our team can reallocate the slot.",
       );
     }
+    // On-time reschedule: draw one from the family's monthly reschedule
+    // allowance (no-op for solo users). Blocked when the allowance is used up.
+    const { consumeReschedule } = await import("@/lib/family-sessions.server");
+    const resResult = await consumeReschedule(context.supabase, context.userId);
+    if (!resResult.ok) {
+      throw new Error(resResult.message);
+    }
+
     const newAt = combineToUtc(data.preferred_day, data.preferred_time, data.time_zone);
     const { error } = await context.supabase
       .from("listener_bookings")

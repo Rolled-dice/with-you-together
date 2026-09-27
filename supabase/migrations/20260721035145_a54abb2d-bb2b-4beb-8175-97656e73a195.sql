@@ -1,4 +1,4 @@
-CREATE TABLE public.stripe_webhook_events (
+CREATE TABLE IF NOT EXISTS public.stripe_webhook_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   stripe_event_id text NOT NULL UNIQUE,
   event_type text NOT NULL,
@@ -13,30 +13,34 @@ CREATE TABLE public.stripe_webhook_events (
   processed_at timestamptz
 );
 
-CREATE INDEX idx_swe_received_at ON public.stripe_webhook_events(received_at DESC);
-CREATE INDEX idx_swe_user_id ON public.stripe_webhook_events(user_id);
-CREATE INDEX idx_swe_env ON public.stripe_webhook_events(environment);
+CREATE INDEX IF NOT EXISTS idx_swe_received_at ON public.stripe_webhook_events(received_at DESC);
+CREATE INDEX IF NOT EXISTS idx_swe_user_id ON public.stripe_webhook_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_swe_env ON public.stripe_webhook_events(environment);
 
 GRANT SELECT ON public.stripe_webhook_events TO authenticated;
 GRANT ALL ON public.stripe_webhook_events TO service_role;
 
 ALTER TABLE public.stripe_webhook_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own webhook events" ON public.stripe_webhook_events;
 CREATE POLICY "Users can view own webhook events"
   ON public.stripe_webhook_events FOR SELECT
   TO authenticated
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Service role manages webhook events" ON public.stripe_webhook_events;
 CREATE POLICY "Service role manages webhook events"
   ON public.stripe_webhook_events FOR ALL
   TO service_role
   USING (true) WITH CHECK (true);
 
-CREATE TYPE public.feedback_category as enum (
-  'feature_request','bug_report','product_feedback','ai_feedback','listener_feedback','support'
-);
+DO $$ BEGIN
+  CREATE TYPE public.feedback_category as enum (
+    'feature_request','bug_report','product_feedback','ai_feedback','listener_feedback','support'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE public.feedback_submissions (
+CREATE TABLE IF NOT EXISTS public.feedback_submissions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete set null,
   category public.feedback_category not null,
@@ -54,12 +58,14 @@ grant all on public.feedback_submissions to service_role;
 
 alter table public.feedback_submissions enable row level security;
 
+drop policy if exists "Anyone can submit feedback" on public.feedback_submissions;
 create policy "Anyone can submit feedback"
   on public.feedback_submissions
   for insert
   to anon, authenticated
   with check (true);
 
+drop policy if exists "Users can view their own feedback" on public.feedback_submissions;
 create policy "Users can view their own feedback"
   on public.feedback_submissions
   for select
@@ -67,9 +73,11 @@ create policy "Users can view their own feedback"
   using (user_id = auth.uid());
 
 -- Roles
-CREATE TYPE public.app_role AS ENUM ('admin', 'moderator', 'user');
+DO $$ BEGIN
+  CREATE TYPE public.app_role AS ENUM ('admin', 'moderator', 'user');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE public.user_roles (
+CREATE TABLE IF NOT EXISTS public.user_roles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   role public.app_role NOT NULL,
@@ -82,6 +90,7 @@ GRANT ALL ON public.user_roles TO service_role;
 
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own roles" ON public.user_roles;
 CREATE POLICY "Users can view their own roles"
   ON public.user_roles FOR SELECT
   TO authenticated
@@ -101,30 +110,37 @@ AS $$
 $$;
 
 -- Feedback triage columns
-CREATE TYPE public.feedback_priority AS ENUM ('low', 'normal', 'high', 'urgent');
-CREATE TYPE public.feedback_status AS ENUM ('new', 'in_review', 'planned', 'resolved', 'archived');
+DO $$ BEGIN
+  CREATE TYPE public.feedback_priority AS ENUM ('low', 'normal', 'high', 'urgent');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.feedback_status AS ENUM ('new', 'in_review', 'planned', 'resolved', 'archived');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 ALTER TABLE public.feedback_submissions
-  ADD COLUMN priority public.feedback_priority NOT NULL DEFAULT 'normal',
-  ADD COLUMN triage_status public.feedback_status NOT NULL DEFAULT 'new',
-  ADD COLUMN admin_notes text,
-  ADD COLUMN updated_at timestamptz NOT NULL DEFAULT now();
+  ADD COLUMN IF NOT EXISTS priority public.feedback_priority NOT NULL DEFAULT 'normal',
+  ADD COLUMN IF NOT EXISTS triage_status public.feedback_status NOT NULL DEFAULT 'new',
+  ADD COLUMN IF NOT EXISTS admin_notes text,
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
 
+DROP TRIGGER IF EXISTS feedback_submissions_set_updated_at ON public.feedback_submissions;
 CREATE TRIGGER feedback_submissions_set_updated_at
   BEFORE UPDATE ON public.feedback_submissions
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Admin read + update policies
+DROP POLICY IF EXISTS "Admins can view all feedback" ON public.feedback_submissions;
 CREATE POLICY "Admins can view all feedback"
   ON public.feedback_submissions FOR SELECT
   TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
 
+DROP POLICY IF EXISTS "Admins can update feedback" ON public.feedback_submissions;
 CREATE POLICY "Admins can update feedback"
   ON public.feedback_submissions FOR UPDATE
   TO authenticated
   USING (public.has_role(auth.uid(), 'admin'))
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
-CREATE INDEX feedback_submissions_triage_idx
+CREATE INDEX IF NOT EXISTS feedback_submissions_triage_idx
   ON public.feedback_submissions (triage_status, priority, created_at DESC);

@@ -52,7 +52,7 @@ export const Route = createFileRoute("/_authenticated/admin/calls")({
     ],
   }),
   component: AdminCallsPage,
-  errorComponent: ({ error }) => <div className="p-8 text-sm text-primary">Something went wrong: {error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-8 text-sm text-primary">Something went wrong: {error instanceof Error ? error.message : String(error)}</div>,
 });
 
 const ACTIVE_STATES: CrmState[] = ["requested", "assigned", "confirmed", "in_call"];

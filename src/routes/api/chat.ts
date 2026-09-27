@@ -64,7 +64,11 @@ export const Route = createFileRoute("/api/chat")({
           .select("care_tier, display_name")
           .eq("id", userId)
           .maybeSingle();
-        const limit = getTierLimit(profile?.care_tier);
+        // Family members inherit the owner's plan, so gate on the effective
+        // tier (own tier when not in a family, else the family owner's tier).
+        const { getEffectiveTier } = await import("@/lib/tier.server");
+        const { tier: effectiveTier } = await getEffectiveTier(supabase, userId);
+        const limit = getTierLimit(effectiveTier);
         if (limit !== UNLIMITED) {
           const dayStart = new Date();
           dayStart.setUTCHours(0, 0, 0, 0);

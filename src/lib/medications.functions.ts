@@ -205,7 +205,7 @@ export const parsePrescription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => ParseInput.parse(i))
   .handler(async ({ context, data }) => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
+    const apiKey = process.env["GEMINI_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured");
 
     const { data: signed, error: sErr } = await context.supabase.storage
@@ -213,56 +213,58 @@ export const parsePrescription = createServerFn({ method: "POST" })
       .createSignedUrl(data.image_path, 300);
     if (sErr || !signed?.signedUrl) throw new Error("Could not read prescription image");
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.6-flash",
-        response_format: { type: "json_object" },
+    // Fetch the image bytes so we can hand them straight to Gemini as an image
+    // part (Web-standard fetch — Cloudflare Worker safe, no Node APIs).
+    const imgRes = await fetch(signed.signedUrl);
+    if (!imgRes.ok) throw new Error("Could not read prescription image");
+    const imageBytes = new Uint8Array(await imgRes.arrayBuffer());
+    const mediaType = imgRes.headers.get("content-type") || "image/jpeg";
+
+    const { generateText } = await import("ai");
+    const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
+    const google = createGoogleGenerativeAI({ apiKey });
+    const model = google(process.env["GEMINI_VISION_MODEL"] || "gemini-2.5-flash");
+
+    const SYSTEM =
+      "You are a careful medical assistant. Extract medications from a prescription image. " +
+      "Return STRICT JSON only (no markdown, no code fences) matching: " +
+      '{ "doctor": string|null, "date": string|null, "medications": [{ "name", "dosage", "form", "frequency", "duration", "instructions", "times_per_day", "when_to_take" }] }. ' +
+      "times_per_day is an integer 1-6. when_to_take is one of morning, afternoon, evening, night, or an array of these. " +
+      "If unsure, use null. Never invent medications you can't read.";
+
+    let text: string;
+    try {
+      const result = await generateText({
+        model,
+        maxRetries: 1,
+        system: SYSTEM,
         messages: [
-          {
-            role: "system",
-            content:
-              "You are a careful medical assistant. Extract medications from a prescription image. " +
-              "Return STRICT JSON matching: { doctor: string|null, date: string|null, medications: [{ name, dosage, form, frequency, duration, instructions, times_per_day, when_to_take }] }. " +
-              "times_per_day is an integer 1-6. when_to_take is one of morning, afternoon, evening, night, or an array of these. " +
-              "If unsure, use null. Never invent medications you can't read.",
-          },
           {
             role: "user",
             content: [
               { type: "text", text: "Extract all medications from this prescription:" },
-              { type: "image_url", image_url: { url: signed.signedUrl } },
+              { type: "image", image: imageBytes, mediaType },
             ],
           },
         ],
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text();
-      let message = body.slice(0, 240);
-      try {
-        const errorBody = JSON.parse(body) as { error?: { message?: string }; message?: string };
-        message = errorBody.error?.message ?? errorBody.message ?? message;
-      } catch {
-        // The plain response text is already captured above.
+      });
+      text = result.text;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (/quota|429|rate/i.test(message)) {
+        throw new Error("The photo reader is busy right now. Please try again shortly.");
       }
-      if (res.status === 429) throw new Error(`The photo reader is busy right now. ${message}`);
-      if (res.status === 402) throw new Error(message || "This workspace needs more AI credits before photos can be read.");
-      if (res.status === 403) throw new Error(message || "Photo reading is paused by the workspace administrator.");
-      if (res.status === 401) throw new Error("Photo reading is not configured correctly yet.");
-      throw new Error(message || "We could not read this prescription photo.");
+      if (/api key|401|permission|403/i.test(message)) {
+        throw new Error("Photo reading is not configured correctly yet.");
+      }
+      throw new Error("We could not read this prescription photo.");
     }
 
-    const json = await res.json();
-    const text = json?.choices?.[0]?.message?.content ?? "{}";
+    // Gemini may wrap JSON in ```json fences — strip them before parsing.
+    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
     let parsed: z.infer<typeof ParsedPrescription> = { medications: [] };
     try {
-      parsed = ParsedPrescription.parse(JSON.parse(text));
+      parsed = ParsedPrescription.parse(JSON.parse(cleaned));
     } catch {
       throw new Error("We could not confidently read the medicine details. Try a brighter, closer photo.");
     }

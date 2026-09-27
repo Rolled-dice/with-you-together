@@ -1,4 +1,5 @@
-/** Send It Later: scheduled text/voice/video messages with media stored on S3. */
+/** Send It Later: scheduled text/voice/video messages with media stored in
+ *  Supabase Storage (bucket: send-later) via the helpers in s3.server.ts. */
 
 import { s3Put, s3ReadUrl } from "@/lib/s3.server";
 

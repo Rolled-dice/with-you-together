@@ -90,10 +90,26 @@ export const getFamilyPool = createServerFn({ method: "GET" })
     const pool = await ensurePool(context.supabase, ctx.familyId, ctx.tier);
     const period = currentPeriodStart();
 
+    // family_members has no display_name column; resolve names from profiles
+    // (same pattern as getMyFamily). Selecting display_name off family_members
+    // makes PostgREST error out, which previously left members empty and hid
+    // the per-member allocation inputs.
     const { data: members } = await context.supabase
       .from("family_members")
-      .select("user_id, role, display_name")
+      .select("user_id, role")
       .eq("family_id", ctx.familyId);
+
+    const memberIds = (members ?? []).map((m: any) => m.user_id as string).filter(Boolean);
+    const names = new Map<string, string>();
+    if (memberIds.length) {
+      const { data: profs } = await context.supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", memberIds);
+      for (const p of profs ?? []) {
+        names.set(p.id as string, (p.display_name as string) ?? "Member");
+      }
+    }
 
     const { data: allocs } = await context.supabase
       .from("family_session_allocations")
@@ -111,7 +127,7 @@ export const getFamilyPool = createServerFn({ method: "GET" })
     const memberRows = (members ?? []).map((m: any) => ({
       user_id: m.user_id as string,
       role: m.role as string,
-      display_name: (m.display_name as string) ?? "Member",
+      display_name: names.get(m.user_id as string) ?? "Member",
       allocated: allocationsByUser.get(m.user_id)?.allocated ?? 0,
       used: allocationsByUser.get(m.user_id)?.used ?? 0,
     }));

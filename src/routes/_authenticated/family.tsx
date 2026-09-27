@@ -96,12 +96,10 @@ function FamilyPage() {
       {!data?.family ? (
         <EmptyState hasFamilyTier={hasFamilyTier} />
       ) : (
-        <>
+        <div className="grid gap-4 sm:gap-6">
           <FamilyView data={data} />
-          <div className="mt-6">
-            <SessionAllocationPanel />
-          </div>
-        </>
+          <SessionAllocationPanel />
+        </div>
       )}
     </AppShell>
   );
@@ -210,15 +208,15 @@ function FamilyView({
   const invitationLink = (token: string) => `${window.location.origin}/invite?token=${token}`;
 
   return (
-    <div className="grid gap-6">
-      <Card data-page-reveal className="rounded-brand border-border bg-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base font-medium">
-            <UsersIcon className="h-4 w-4 text-brand-accent" />
-            {family!.name}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
+    <div className="grid gap-4 sm:gap-6">
+    <Card data-page-reveal className="rounded-brand border-border bg-card">
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="flex items-center gap-2 text-base font-medium">
+          <UsersIcon className="h-4 w-4 text-brand-accent" />
+          {family!.name}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4 p-4 pt-0 sm:p-6 sm:pt-0">
           {isOwner && (
             <div className="flex flex-col gap-2 sm:flex-row">
               <div className="flex-1">
@@ -243,7 +241,7 @@ function FamilyView({
           )}
 
           <div>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium">Members ({members.length}/4)</p>
               {isAdmin && members.length < 4 && (
                 <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
@@ -312,22 +310,22 @@ function FamilyView({
                 </Dialog>
               )}
             </div>
-            <div className="grid gap-2">
+            <div className="mt-2 grid gap-2">
               {members.map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-center justify-between rounded-brand border border-border bg-background/40 px-3 py-2"
+                  className="flex items-center justify-between gap-2 rounded-brand border border-border bg-background/40 px-3 py-2"
                 >
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex min-w-0 items-center gap-2 text-sm">
                     {m.role === "owner" ? (
-                      <CrownIcon className="h-4 w-4 text-brand-accent" />
+                      <CrownIcon className="h-4 w-4 shrink-0 text-brand-accent" />
                     ) : m.role === "adult" ? (
-                      <ShieldCheckIcon className="h-4 w-4 text-brand-accent" />
+                      <ShieldCheckIcon className="h-4 w-4 shrink-0 text-brand-accent" />
                     ) : (
-                      <UsersIcon className="h-4 w-4 text-muted-foreground" />
+                      <UsersIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
                     )}
-                    <span>{m.display_name ?? "Member"}</span>
-                    <Badge variant="secondary" className="rounded-full text-[10px] uppercase">
+                    <span className="truncate">{m.display_name ?? "Member"}</span>
+                    <Badge variant="secondary" className="shrink-0 rounded-full text-[10px] uppercase">
                       {m.role}
                     </Badge>
                   </div>
@@ -335,6 +333,7 @@ function FamilyView({
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="shrink-0"
                       onClick={() => {
                         if (confirm(`Remove ${m.display_name ?? "this member"}?`)) {
                           removeFn({ data: { member_id: m.id } })
@@ -361,16 +360,16 @@ function FamilyView({
                 {invites.map((inv) => (
                   <div
                     key={inv.id}
-                    className="flex items-center justify-between rounded-brand border border-dashed border-border px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-2 rounded-brand border border-dashed border-border px-3 py-2 text-sm"
                   >
-                    <div className="flex items-center gap-2">
-                      <EnvelopeSimpleIcon className="h-4 w-4 text-muted-foreground" />
-                      <span>{inv.email}</span>
-                      <Badge variant="secondary" className="rounded-full text-[10px] uppercase">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <EnvelopeSimpleIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{inv.email}</span>
+                      <Badge variant="secondary" className="shrink-0 rounded-full text-[10px] uppercase">
                         {inv.role}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex shrink-0 items-center gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -443,16 +442,10 @@ function FamilyView({
         </CardContent>
       </Card>
 
-      <Card data-page-reveal className="rounded-brand border-border bg-card">
-        <CardHeader>
-          <CardTitle className="text-base font-medium">Privacy in your circle</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Family members share the Care Membership tier and the roster. Moods and
-          Companion conversations remain private to each person and are protected by row-level
-          security.
-        </CardContent>
-      </Card>
+      <p className="rounded-brand border border-dashed border-border bg-muted/30 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+        Family members share the Care Membership tier and the roster. Moods and Companion
+        conversations stay private to each person, protected by row-level security.
+      </p>
     </div>
   );
 }
@@ -514,14 +507,14 @@ function SessionAllocationPanel() {
 
   return (
     <Card data-page-reveal className="rounded-brand border-border bg-card">
-      <CardHeader>
+      <CardHeader className="p-4 sm:p-6">
         <CardTitle className="flex items-center gap-2 text-base font-medium">
           <CalendarCheckIcon className="h-4 w-4 text-brand-accent" />
           Listener sessions, this month
         </CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="grid gap-3 sm:grid-cols-3">
+      <CardContent className="grid gap-4 p-4 pt-0 sm:p-6 sm:pt-0">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <StatBlock
             label="Total this month"
             value={`${pool.totalUsed} / ${pool.totalSessions}`}
@@ -544,7 +537,7 @@ function SessionAllocationPanel() {
             {pool.members.map((m) => (
               <div
                 key={m.user_id}
-                className="flex items-center justify-between gap-3 rounded-brand border border-border bg-background/40 px-3 py-2"
+                className="flex items-center justify-between gap-2 rounded-brand border border-border bg-background/40 px-3 py-2"
               >
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium truncate">{m.display_name}</div>
@@ -564,7 +557,7 @@ function SessionAllocationPanel() {
                       [m.user_id]: Number(e.target.value) || 0,
                     }))
                   }
-                  className="w-24 rounded-brand text-center"
+                  className="w-16 shrink-0 rounded-brand text-center sm:w-24"
                 />
               </div>
             ))}
@@ -606,11 +599,11 @@ function SessionAllocationPanel() {
 
 function StatBlock({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-brand border border-border bg-background/40 p-3">
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+    <div className="rounded-brand border border-border bg-background/40 p-2 sm:p-3">
+      <div className="text-[10px] uppercase leading-tight tracking-wide text-muted-foreground sm:text-[11px]">
         {label}
       </div>
-      <div className="mt-1 text-lg font-semibold tabular-nums">{value}</div>
+      <div className="mt-1 text-base font-semibold tabular-nums sm:text-lg">{value}</div>
     </div>
   );
 }

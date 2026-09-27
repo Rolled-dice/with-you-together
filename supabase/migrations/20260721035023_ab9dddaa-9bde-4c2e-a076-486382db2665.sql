@@ -1,5 +1,5 @@
 -- FAMILIES
-CREATE TABLE public.families (
+CREATE TABLE IF NOT EXISTS public.families (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -11,9 +11,11 @@ GRANT ALL ON public.families TO service_role;
 ALTER TABLE public.families ENABLE ROW LEVEL SECURITY;
 
 -- FAMILY MEMBERS
-CREATE TYPE public.family_role AS ENUM ('owner', 'adult', 'teen');
+DO $$ BEGIN
+  CREATE TYPE public.family_role AS ENUM ('owner', 'adult', 'teen');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE public.family_members (
+CREATE TABLE IF NOT EXISTS public.family_members (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   family_id uuid NOT NULL REFERENCES public.families(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -26,12 +28,12 @@ GRANT ALL ON public.family_members TO service_role;
 ALTER TABLE public.family_members ENABLE ROW LEVEL SECURITY;
 
 -- FAMILY INVITATIONS
-CREATE TABLE public.family_invitations (
+CREATE TABLE IF NOT EXISTS public.family_invitations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   family_id uuid NOT NULL REFERENCES public.families(id) ON DELETE CASCADE,
   email text NOT NULL,
   role public.family_role NOT NULL DEFAULT 'adult',
-  token text NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(24), 'hex'),
+  token text NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(24), 'hex'),
   status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','revoked')),
   invited_by uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   expires_at timestamptz NOT NULL DEFAULT (now() + interval '14 days'),
@@ -60,55 +62,66 @@ REVOKE ALL ON FUNCTION public.is_family_admin(uuid, uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.is_family_admin(uuid, uuid) TO authenticated, service_role;
 
 -- POLICIES: families
+DROP POLICY IF EXISTS "members can view their family" ON public.families;
 CREATE POLICY "members can view their family"
   ON public.families FOR SELECT TO authenticated
   USING (id = public.get_user_family_id(auth.uid()));
 
+DROP POLICY IF EXISTS "authenticated can create family they own" ON public.families;
 CREATE POLICY "authenticated can create family they own"
   ON public.families FOR INSERT TO authenticated
   WITH CHECK (owner_id = auth.uid());
 
+DROP POLICY IF EXISTS "owner can update family" ON public.families;
 CREATE POLICY "owner can update family"
   ON public.families FOR UPDATE TO authenticated
   USING (owner_id = auth.uid()) WITH CHECK (owner_id = auth.uid());
 
+DROP POLICY IF EXISTS "owner can delete family" ON public.families;
 CREATE POLICY "owner can delete family"
   ON public.families FOR DELETE TO authenticated
   USING (owner_id = auth.uid());
 
 -- POLICIES: family_members
+DROP POLICY IF EXISTS "members view their family roster" ON public.family_members;
 CREATE POLICY "members view their family roster"
   ON public.family_members FOR SELECT TO authenticated
   USING (family_id = public.get_user_family_id(auth.uid()));
 
 -- Owner inserts self as first member (handled via server fn); admins add others via server fn using service role.
+DROP POLICY IF EXISTS "owner inserts self" ON public.family_members;
 CREATE POLICY "owner inserts self"
   ON public.family_members FOR INSERT TO authenticated
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "leave family (self)" ON public.family_members;
 CREATE POLICY "leave family (self)"
   ON public.family_members FOR DELETE TO authenticated
   USING (user_id = auth.uid());
 
 -- POLICIES: invitations
+DROP POLICY IF EXISTS "family admins view invites" ON public.family_invitations;
 CREATE POLICY "family admins view invites"
   ON public.family_invitations FOR SELECT TO authenticated
   USING (public.is_family_admin(auth.uid(), family_id));
 
+DROP POLICY IF EXISTS "family admins create invites" ON public.family_invitations;
 CREATE POLICY "family admins create invites"
   ON public.family_invitations FOR INSERT TO authenticated
   WITH CHECK (public.is_family_admin(auth.uid(), family_id) AND invited_by = auth.uid());
 
+DROP POLICY IF EXISTS "family admins revoke invites" ON public.family_invitations;
 CREATE POLICY "family admins revoke invites"
   ON public.family_invitations FOR UPDATE TO authenticated
   USING (public.is_family_admin(auth.uid(), family_id))
   WITH CHECK (public.is_family_admin(auth.uid(), family_id));
 
 -- Trigger: updated_at
+DROP TRIGGER IF EXISTS families_set_updated_at ON public.families;
 CREATE TRIGGER families_set_updated_at BEFORE UPDATE ON public.families
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
-CREATE TABLE public.billing_events (
+CREATE TABLE IF NOT EXISTS public.billing_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   event_type text NOT NULL,
@@ -127,18 +140,20 @@ CREATE TABLE public.billing_events (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_billing_events_user ON public.billing_events(user_id, created_at DESC);
-CREATE INDEX idx_billing_events_sub ON public.billing_events(stripe_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_billing_events_user ON public.billing_events(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_billing_events_sub ON public.billing_events(stripe_subscription_id);
 
 GRANT SELECT ON public.billing_events TO authenticated;
 GRANT ALL ON public.billing_events TO service_role;
 
 ALTER TABLE public.billing_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users view own billing events" ON public.billing_events;
 CREATE POLICY "Users view own billing events"
   ON public.billing_events FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Service role manages billing events" ON public.billing_events;
 CREATE POLICY "Service role manages billing events"
   ON public.billing_events FOR ALL
   USING (auth.role() = 'service_role')

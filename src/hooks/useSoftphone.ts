@@ -15,10 +15,116 @@ export type SoftphoneStatus =
  *
  * The SDK is imported dynamically so it never runs during SSR.
  */
+/** Public ringback asset, looped while the member is being dialled. */
+const RINGBACK_SRC = "/sounds/ringback.mp3";
+
+/**
+ * Ringback player used while the member is being dialled. Primary source is the
+ * looping asset at public/sounds/ringback.mp3; if that can't load or the
+ * browser blocks playback, it falls back to a synthesised dual-frequency ring
+ * (440 + 480 Hz, classic cadence) so the agent always hears *something*.
+ * One instance per softphone; start()/stop() are idempotent.
+ */
+function createRingtone() {
+  let stopped = true;
+
+  // --- File-based ringback ---
+  let el: HTMLAudioElement | null = null;
+
+  // --- Synth fallback ---
+  let ctx: AudioContext | null = null;
+  let timer: ReturnType<typeof setInterval> | null = null;
+
+  function ringBurst(duration = 1.8) {
+    if (!ctx) return;
+    const t0 = ctx.currentTime + 0.02;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0, t0);
+    master.gain.linearRampToValueAtTime(0.18, t0 + 0.05);
+    master.gain.setValueAtTime(0.18, t0 + duration - 0.08);
+    master.gain.linearRampToValueAtTime(0, t0 + duration);
+    master.connect(ctx.destination);
+    for (const freq of [440, 480]) {
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      osc.connect(master);
+      osc.start(t0);
+      osc.stop(t0 + duration);
+    }
+  }
+
+  function startSynth() {
+    if (stopped || typeof window === "undefined") return;
+    const AC = window.AudioContext ?? (window as any).webkitAudioContext;
+    if (!AC) return;
+    try {
+      ctx = new AC();
+      void ctx.resume?.();
+    } catch {
+      ctx = null;
+      return;
+    }
+    ringBurst();
+    timer = setInterval(() => ringBurst(), 6000);
+  }
+
+  function stopSynth() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    if (ctx) {
+      const dead = ctx;
+      ctx = null;
+      void dead.close?.().catch(() => {});
+    }
+  }
+
+  return {
+    get active() {
+      return !stopped;
+    },
+    start() {
+      if (!stopped) return;
+      if (typeof window === "undefined") return;
+      stopped = false;
+      try {
+        el = new Audio(RINGBACK_SRC);
+        el.loop = true;
+        el.volume = 0.7;
+        // If the file plays, use it. If it's blocked or missing, fall back.
+        el.play().catch(() => {
+          el = null;
+          startSynth();
+        });
+      } catch {
+        el = null;
+        startSynth();
+      }
+    },
+    stop() {
+      stopped = true;
+      if (el) {
+        try {
+          el.pause();
+          el.currentTime = 0;
+        } catch {
+          /* ignore */
+        }
+        el = null;
+      }
+      stopSynth();
+    },
+  };
+}
+
 export function useSoftphone(getToken: () => Promise<{ token: string }>) {
   const clientRef = useRef<any>(null);
   const callRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ringtoneRef = useRef<ReturnType<typeof createRingtone> | null>(null);
+  if (!ringtoneRef.current) ringtoneRef.current = createRingtone();
   const [status, setStatusState] = useState<SoftphoneStatus>("idle");
   const statusRef = useRef<SoftphoneStatus>("idle");
   const errorRef = useRef<string | null>(null);
@@ -37,6 +143,67 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(t);
   }, [status]);
+
+  // Watches the remote audio element and stops the ringback once the member's
+  // audio actually starts flowing (i.e. they answered and the legs bridged).
+  // Uses a Web Audio analyser on the remote MediaStream to detect real signal;
+  // falls back to a hard cap so the ring can never loop forever.
+  const audioWatchRef = useRef<{
+    raf: number | null;
+    ac: AudioContext | null;
+    cap: ReturnType<typeof setTimeout> | null;
+  }>({ raf: null, ac: null, cap: null });
+
+  const stopRemoteAudioWatch = useCallback(() => {
+    const w = audioWatchRef.current;
+    if (w.raf != null) cancelAnimationFrame(w.raf);
+    if (w.cap) clearTimeout(w.cap);
+    if (w.ac) void w.ac.close?.().catch(() => {});
+    audioWatchRef.current = { raf: null, ac: null, cap: null };
+  }, []);
+
+  const startRemoteAudioWatch = useCallback(() => {
+    stopRemoteAudioWatch();
+    const el = audioRef.current;
+    const stream = (el?.srcObject as MediaStream | null) ?? null;
+    // Safety cap: never ring longer than 45s even if detection fails.
+    const cap = setTimeout(() => ringtoneRef.current?.stop(), 45_000);
+    audioWatchRef.current.cap = cap;
+
+    if (!stream || typeof window === "undefined") return;
+    const AC = window.AudioContext ?? (window as any).webkitAudioContext;
+    if (!AC) return;
+    let ac: AudioContext;
+    try {
+      ac = new AC();
+    } catch {
+      return;
+    }
+    audioWatchRef.current.ac = ac;
+    const source = ac.createMediaStreamSource(stream);
+    const analyser = ac.createAnalyser();
+    analyser.fftSize = 512;
+    source.connect(analyser);
+    const buf = new Uint8Array(analyser.frequencyBinCount);
+
+    const tick = () => {
+      analyser.getByteTimeDomainData(buf);
+      // Deviation from the 128 midpoint = actual audio energy from the member.
+      let peak = 0;
+      for (let i = 0; i < buf.length; i += 1) {
+        const d = Math.abs(buf[i] - 128);
+        if (d > peak) peak = d;
+      }
+      if (peak > 4) {
+        // Member audio is flowing — the call is truly connected.
+        ringtoneRef.current?.stop();
+        stopRemoteAudioWatch();
+        return;
+      }
+      audioWatchRef.current.raf = requestAnimationFrame(tick);
+    };
+    audioWatchRef.current.raf = requestAnimationFrame(tick);
+  }, [stopRemoteAudioWatch]);
 
   const connect = useCallback(async () => {
     if (clientRef.current) return;
@@ -87,13 +254,22 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
         switch (call.state) {
           case "ringing":
             setStatus("ringing");
+            // Auto-answer the agent leg immediately; the ringback keeps playing
+            // to signal "calling the member" until their audio actually flows.
             void call.answer();
             break;
           case "active":
+            // The agent leg is up, but the member has NOT answered yet — the
+            // two legs are only bridged (and audio only starts) once the member
+            // picks up. Ring until we detect that remote audio.
             setStatus("on_call");
+            ringtoneRef.current?.start();
+            startRemoteAudioWatch();
             break;
           case "hangup":
           case "destroy":
+            ringtoneRef.current?.stop();
+            stopRemoteAudioWatch();
             callRef.current = null;
             setMuted(false);
             setHeld(false);
@@ -141,6 +317,8 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
   );
 
   const disconnect = useCallback(async (updateStatus = true) => {
+    ringtoneRef.current?.stop();
+    stopRemoteAudioWatch();
     try {
       await callRef.current?.hangup();
     } catch {
@@ -175,12 +353,14 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
   }, [held]);
 
   const hangup = useCallback(async () => {
+    ringtoneRef.current?.stop();
+    stopRemoteAudioWatch();
     try {
       await callRef.current?.hangup();
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [stopRemoteAudioWatch]);
 
   const sendDigit = useCallback((digit: string) => {
     callRef.current?.dtmf(digit);

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PrivacyChoicesButton } from "@/components/privacy-choices-button";
 
 import {
@@ -15,7 +15,16 @@ import {
   PillIcon,
   HeadphonesIcon,
   CalendarHeartIcon,
+  FlowerLotusIcon,
+  DotsThreeCircleIcon,
 } from "@phosphor-icons/react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,6 +37,7 @@ import { useAppPageMotion } from "@/hooks/use-app-page-motion";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
+  { to: "/calm-space", label: "Calm", icon: FlowerLotusIcon },
   { to: "/companion", label: "Companion", icon: ChatCircleIcon },
   { to: "/listeners", label: "Listeners", icon: UsersIcon },
   { to: "/reminders", label: "Medication", icon: PillIcon },
@@ -51,6 +61,13 @@ const ADMIN_NAV = [
 
 const AGENT_NAV = [{ to: "/agent/console", label: "Agent console", icon: HeadphonesIcon }] as const;
 
+// Mobile bottom bar keeps at most 5 slots so nothing scrolls sideways or hides
+// off-screen: 4 everyday destinations + "More" for the rest.
+const MOBILE_PRIMARY = ["/dashboard", "/calm-space", "/companion", "/listeners"];
+const MOBILE_LABEL: Record<string, string> = { "/dashboard": "Home" };
+
+type NavItem = { to: string; label: string; icon: typeof SquaresFourIcon };
+
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
@@ -64,12 +81,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   // set no data-page-* attributes simply get nothing, so this is safe for
   // screens like the dashboard that run their own timeline.
   useAppPageMotion(mainRef);
-
-  // Keep the active tab visible in the horizontally-scrollable mobile nav.
-  useEffect(() => {
-    const active = mobileNavRef.current?.querySelector<HTMLElement>('[data-active="true"]');
-    active?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
-  }, [pathname]);
 
   const { isAdmin, isAgent } = useRouteContext({ from: "/_authenticated" });
   const rolesLoading = false;
@@ -191,37 +202,135 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </main>
 
-          {/* Mobile bottom nav */}
-          <nav
-            ref={mobileNavRef}
-            className="fixed inset-x-0 bottom-0 z-50 flex overflow-x-auto overscroll-x-contain border-t border-border bg-sidebar/95 backdrop-blur [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden"
-            style={{
-              paddingBottom: "env(safe-area-inset-bottom)",
-            }}
-            aria-label="Main navigation"
-          >
-            {navItems.map((item) => {
-              const active = pathname === item.to || pathname.startsWith(item.to + "/");
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  data-active={active ? "true" : undefined}
-                  className={cn(
-                    "flex min-h-16 min-w-20 flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium transition-colors active:bg-sidebar-accent/60",
-                    active ? "text-brand-accent" : "text-sidebar-foreground/70",
-                  )}
-                >
-                  <Icon className="h-5 w-5" strokeWidth={2} />
-                  <span className="block max-w-full whitespace-nowrap leading-none">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Mobile bottom nav: max 5 even slots, no sideways scrolling. */}
+          <MobileNav
+            navRef={mobileNavRef}
+            items={navItems as readonly NavItem[]}
+            pathname={pathname}
+            showMore={!isStaff}
+            onSignOut={signOut}
+          />
         </div>
       </div>
     </div>
+  );
+}
+
+function isActive(pathname: string, to: string) {
+  return pathname === to || pathname.startsWith(to + "/");
+}
+
+function MobileNav({
+  navRef,
+  items,
+  pathname,
+  showMore,
+  onSignOut,
+}: {
+  navRef: React.RefObject<HTMLElement | null>;
+  items: readonly NavItem[];
+  pathname: string;
+  showMore: boolean;
+  onSignOut: () => void;
+}) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const primary = showMore ? items.filter((i) => MOBILE_PRIMARY.includes(i.to)) : items;
+  const rest = showMore ? items.filter((i) => !MOBILE_PRIMARY.includes(i.to)) : [];
+  const moreActive = rest.some((i) => isActive(pathname, i.to));
+
+  const tabClass = (active: boolean) =>
+    cn(
+      "flex min-h-16 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-[12px] font-semibold transition-colors active:bg-sidebar-accent/60",
+      active ? "text-brand-accent" : "text-sidebar-foreground/70",
+    );
+
+  return (
+    <>
+      <nav
+        ref={navRef}
+        className="fixed inset-x-0 bottom-0 z-50 flex border-t border-border bg-sidebar/95 backdrop-blur md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        aria-label="Main navigation"
+      >
+        {primary.map((item) => {
+          const active = isActive(pathname, item.to);
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              data-active={active ? "true" : undefined}
+              aria-current={active ? "page" : undefined}
+              className={tabClass(active)}
+            >
+              <Icon className="h-6 w-6" weight={active ? "fill" : "regular"} />
+              <span className="leading-none">{MOBILE_LABEL[item.to] ?? item.label}</span>
+            </Link>
+          );
+        })}
+        {rest.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setMoreOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={moreOpen}
+            data-active={moreActive ? "true" : undefined}
+            className={tabClass(moreActive)}
+          >
+            <DotsThreeCircleIcon className="h-6 w-6" weight={moreActive ? "fill" : "regular"} />
+            <span className="leading-none">More</span>
+          </button>
+        )}
+      </nav>
+
+      {rest.length > 0 && (
+        <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+          <SheetContent
+            side="bottom"
+            className="rounded-t-[2rem] px-4 pt-6"
+            style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+          >
+            <SheetHeader className="text-left">
+              <SheetTitle>More</SheetTitle>
+              <SheetDescription>Everything else, one tap away.</SheetDescription>
+            </SheetHeader>
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              {rest.map((item) => {
+                const active = isActive(pathname, item.to);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMoreOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border px-2 text-sm font-semibold transition-colors",
+                      active
+                        ? "border-brand-primary bg-brand-primary/10 text-brand-primary"
+                        : "border-border bg-card text-foreground active:bg-muted",
+                    )}
+                  >
+                    <Icon className="h-6 w-6" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setMoreOpen(false);
+                onSignOut();
+              }}
+              className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-muted-foreground active:bg-muted"
+            >
+              <SignOutIcon className="h-5 w-5" /> Sign out
+            </button>
+          </SheetContent>
+        </Sheet>
+      )}
+    </>
   );
 }
 

@@ -39,6 +39,7 @@ import {
   parsePrescription,
 } from "@/lib/medications.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { RearCameraDialog } from "@/components/rear-camera-dialog";
 
 type SetupMode = "scan" | "manual";
 type TimeChoice = { id: string; label: string; time: string; icon: typeof SunIcon };
@@ -111,6 +112,7 @@ export function MedicationOnboarding() {
   const [schedules, setSchedules] = useState<ScheduleDraft[]>([newSchedule()]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   useEffect(() => {
     const firstMember = family.data?.[0];
@@ -267,31 +269,31 @@ export function MedicationOnboarding() {
   const doseRows = (doses.data ?? []) as DoseRow[];
 
   return (
-    <div className="space-y-12">
-      <section aria-labelledby="medication-setup-title" className="overflow-hidden rounded-[2.5rem] border border-border bg-card shadow-gentle">
-        <div className="border-b border-border bg-surface px-5 py-6 sm:px-8">
-          <div className="flex items-start gap-4">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary" aria-hidden>
-              <PillIcon className="size-6" />
+    <div className="space-y-8 sm:space-y-12">
+      <section aria-labelledby="medication-setup-title" className="overflow-hidden rounded-[2rem] border border-border bg-card shadow-gentle sm:rounded-[2.5rem]">
+        <div className="border-b border-border bg-surface px-4 py-4 sm:px-8 sm:py-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary sm:size-12" aria-hidden>
+              <PillIcon className="size-5 sm:size-6" />
             </span>
             <div>
-              <p className="text-sm font-medium text-primary">Medication check-in</p>
-              <h2 id="medication-setup-title" className="mt-1 font-display text-2xl font-medium text-foreground sm:text-3xl">
+              <p className="text-xs font-medium text-primary sm:text-sm">Medication check-in</p>
+              <h2 id="medication-setup-title" className="mt-1 font-display text-lg font-medium text-foreground sm:text-2xl md:text-3xl">
                 Let’s set up your daily check-in
               </h2>
-              <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:mt-2 sm:text-base">
                 Start with a photo, or enter the details yourself. You will always get to review them before saving.
               </p>
             </div>
           </div>
         </div>
 
-        <CardContent className="space-y-8 p-5 sm:p-8">
+        <CardContent className="space-y-6 p-4 sm:space-y-8 sm:p-8">
           <div className="grid grid-cols-2 rounded-2xl bg-muted p-1.5" aria-label="Choose how to add a medicine">
             <Button
               type="button"
               variant="ghost"
-              className={cn("min-h-12 rounded-xl text-base", mode === "scan" && "bg-card text-foreground shadow-soft hover:bg-card")}
+              className={cn("min-h-11 rounded-xl text-sm sm:min-h-12 sm:text-base", mode === "scan" && "bg-card text-foreground shadow-soft hover:bg-card")}
               onClick={() => setMode("scan")}
               aria-pressed={mode === "scan"}
             >
@@ -300,7 +302,7 @@ export function MedicationOnboarding() {
             <Button
               type="button"
               variant="ghost"
-              className={cn("min-h-12 rounded-xl text-base", mode === "manual" && "bg-card text-foreground shadow-soft hover:bg-card")}
+              className={cn("min-h-11 rounded-xl text-sm sm:min-h-12 sm:text-base", mode === "manual" && "bg-card text-foreground shadow-soft hover:bg-card")}
               onClick={() => setMode("manual")}
               aria-pressed={mode === "manual"}
             >
@@ -312,7 +314,7 @@ export function MedicationOnboarding() {
             <div className="space-y-4 animate-gentle-rise">
               <div
                 className={cn(
-                  "relative flex min-h-72 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-primary/35 bg-primary/5 px-6 py-10 text-center transition-colors",
+                  "relative flex min-h-56 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-primary/35 bg-primary/5 px-4 py-6 text-center transition-colors sm:min-h-72 sm:px-6 sm:py-10",
                   isDragging && "border-primary bg-primary/10",
                   previewUrl && "border-solid bg-surface",
                 )}
@@ -323,25 +325,25 @@ export function MedicationOnboarding() {
               >
                 {previewUrl ? (
                   <>
-                    <img src={previewUrl} alt="Prescription selected for review" className="max-h-60 w-auto max-w-full rounded-2xl object-contain shadow-soft" />
-                    <Button type="button" variant="secondary" className="mt-5 min-h-11 rounded-xl" onClick={() => fileInputRef.current?.click()}>
+                    <img src={previewUrl} alt="Prescription selected for review" className="max-h-44 w-auto max-w-full rounded-2xl object-contain shadow-soft sm:max-h-60" />
+                    <Button type="button" variant="secondary" className="mt-4 min-h-11 rounded-xl sm:mt-5" onClick={() => fileInputRef.current?.click()}>
                       <ImageIcon /> Choose a different photo
                     </Button>
                   </>
                 ) : (
                   <>
-                    <span className="flex size-16 items-center justify-center rounded-full bg-surface text-primary shadow-soft" aria-hidden>
-                      <ImageIcon className="size-7" />
+                    <span className="flex size-12 items-center justify-center rounded-full bg-surface text-primary shadow-soft sm:size-16" aria-hidden>
+                      <ImageIcon className="size-6 sm:size-7" />
                     </span>
-                    <h3 className="mt-5 font-display text-xl font-medium text-foreground">Add a clear photo</h3>
-                    <p className="mt-2 max-w-md text-base leading-relaxed text-muted-foreground">
+                    <h3 className="mt-4 font-display text-lg font-medium text-foreground sm:mt-5 sm:text-xl">Add a clear photo</h3>
+                    <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground sm:mt-2 sm:text-base">
                       A pill bottle label or prescription works well. Keep the name and instructions in focus.
                     </p>
-                    <div className="mt-6 flex flex-wrap justify-center gap-3">
-                      <Button type="button" className="min-h-11 rounded-xl px-5 text-base" onClick={() => fileInputRef.current?.click()}>
+                    <div className="mt-4 flex flex-wrap justify-center gap-2 sm:mt-6 sm:gap-3">
+                      <Button type="button" className="min-h-11 rounded-xl px-4 text-sm sm:px-5 sm:text-base" onClick={() => fileInputRef.current?.click()}>
                         <ImageIcon /> Choose photo
                       </Button>
-                      <Button type="button" variant="outline" className="min-h-11 rounded-xl px-5 text-base" onClick={() => cameraInputRef.current?.click()}>
+                      <Button type="button" variant="outline" className="min-h-11 rounded-xl px-4 text-sm sm:px-5 sm:text-base" onClick={() => setCameraOpen(true)}>
                         <CameraIcon /> Use camera
                       </Button>
                     </div>
@@ -349,9 +351,16 @@ export function MedicationOnboarding() {
                 )}
                 <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="sr-only" onChange={(event) => chooseFile(event.target.files?.[0])} />
                 <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={(event) => chooseFile(event.target.files?.[0])} />
+                {/* Rear-lens camera; falls back to the native capture input above. */}
+                <RearCameraDialog
+                  open={cameraOpen}
+                  onOpenChange={setCameraOpen}
+                  onCapture={(captured) => chooseFile(captured)}
+                  onFallback={() => cameraInputRef.current?.click()}
+                />
               </div>
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">JPG, PNG, WEBP or HEIC · up to 10 MB</p>
+                <p className="text-xs text-muted-foreground sm:text-sm">JPG, PNG, WEBP or HEIC · up to 10 MB</p>
                 <Button type="button" className="min-h-12 rounded-xl px-6 text-base" disabled={!file || scan.isPending} onClick={() => scan.mutate()}>
                   {scan.isPending ? <><SpinnerGapIcon className="animate-spin" /> Reading the photo…</> : <><SparkleIcon /> Read this photo</>}
                 </Button>
@@ -396,39 +405,39 @@ export function MedicationOnboarding() {
 
       <TodayDoses rows={doseRows} isLoading={doses.isLoading} onLog={(id, status) => log.mutate({ id, status })} isPending={log.isPending} />
 
-      <section aria-labelledby="medications-title" className="space-y-4">
+      <section aria-labelledby="medications-title" className="space-y-3 sm:space-y-4">
         <div>
-          <p className="text-sm font-medium text-primary">Your medicines</p>
-          <h2 id="medications-title" className="font-display text-2xl font-medium text-foreground">Everything in one calm place</h2>
+          <p className="text-xs font-medium text-primary sm:text-sm">Your medicines</p>
+          <h2 id="medications-title" className="font-display text-lg font-medium text-foreground sm:text-2xl">Everything in one calm place</h2>
         </div>
         {medications.isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2"><Skeleton className="h-40 rounded-3xl" /><Skeleton className="h-40 rounded-3xl" /></div>
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4"><Skeleton className="h-32 rounded-3xl sm:h-40" /><Skeleton className="h-32 rounded-3xl sm:h-40" /></div>
         ) : medicationRows.length === 0 ? (
           <QuietEmptyState variant="note" title="No medicines here yet" body="When you are ready, add the first one above. We will take it one step at a time." />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
             {medicationRows.map((medication) => (
-              <Card key={medication.id} className="rounded-3xl border-border bg-card shadow-gentle">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-4">
+              <Card key={medication.id} className="rounded-2xl border-border bg-card shadow-gentle sm:rounded-3xl">
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-3 sm:gap-4">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2"><PillIcon className="size-5 text-primary" /><h3 className="truncate font-display text-lg font-medium">{medication.name}</h3></div>
-                      <p className="mt-1 text-base text-muted-foreground">{[medication.dosage, medication.form].filter(Boolean).join(" · ") || "Dose not added"}</p>
+                      <div className="flex items-center gap-2"><PillIcon className="size-4 shrink-0 text-primary sm:size-5" /><h3 className="truncate font-display text-base font-medium sm:text-lg">{medication.name}</h3></div>
+                      <p className="mt-1 text-sm text-muted-foreground sm:text-base">{[medication.dosage, medication.form].filter(Boolean).join(" · ") || "Dose not added"}</p>
                     </div>
-                    <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11 rounded-xl" aria-label={`Remove ${medication.name}`} disabled={removeMedication.isPending} onClick={() => removeMedication.mutate(medication.id)}>
+                    <Button type="button" variant="ghost" size="icon" className="min-h-10 min-w-10 shrink-0 rounded-xl sm:min-h-11 sm:min-w-11" aria-label={`Remove ${medication.name}`} disabled={removeMedication.isPending} onClick={() => removeMedication.mutate(medication.id)}>
                       <TrashIcon />
                     </Button>
                   </div>
                   {medication.medication_schedules && medication.medication_schedules.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
                       {medication.medication_schedules.map((schedule) => (
-                        <span key={schedule.id} className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-sm text-foreground">
-                          <ClockIcon className="size-4 text-primary" /> {timeLabel(schedule.time_of_day)} {schedule.with_food ? "· with food" : ""}
+                        <span key={schedule.id} className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-xs text-foreground sm:px-3 sm:py-1.5 sm:text-sm">
+                          <ClockIcon className="size-3.5 text-primary sm:size-4" /> {timeLabel(schedule.time_of_day)} {schedule.with_food ? "· with food" : ""}
                         </span>
                       ))}
                     </div>
                   )}
-                  {medication.instructions && <p className="mt-4 border-t border-border pt-3 text-sm leading-relaxed text-muted-foreground">{medication.instructions}</p>}
+                  {medication.instructions && <p className="mt-3 border-t border-border pt-3 text-xs leading-relaxed text-muted-foreground sm:mt-4 sm:text-sm">{medication.instructions}</p>}
                 </CardContent>
               </Card>
             ))}
@@ -473,12 +482,12 @@ function MedicationForm({
   fromScan: boolean;
 }) {
   return (
-    <div className="space-y-8 animate-gentle-rise">
+    <div className="space-y-6 animate-gentle-rise sm:space-y-8">
       {fromScan && <GentleNudge title="We filled in what we could read" body="Please check the medicine, dose, and reminder times. You are in control of what gets saved." />}
 
-      <fieldset className="space-y-5">
-        <legend className="font-display text-xl font-medium text-foreground">The medicine</legend>
-        <div className="grid gap-5 sm:grid-cols-2">
+      <fieldset className="space-y-4 sm:space-y-5">
+        <legend className="font-display text-lg font-medium text-foreground sm:text-xl">The medicine</legend>
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
           {familyMembers.length > 1 && (
             <div className="space-y-2 sm:col-span-2">
               <Label className="text-base" htmlFor="medication-person">Who is this for?</Label>
@@ -510,23 +519,23 @@ function MedicationForm({
         </div>
       </fieldset>
 
-      <fieldset className="space-y-5 border-t border-border pt-7">
-        <legend className="pr-3 font-display text-xl font-medium text-foreground">When should we check in?</legend>
-        <p className="text-base leading-relaxed text-muted-foreground">Choose the moments that feel natural. You can adjust the exact time below.</p>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <fieldset className="space-y-4 border-t border-border pt-5 sm:space-y-5 sm:pt-7">
+        <legend className="pr-3 font-display text-lg font-medium text-foreground sm:text-xl">When should we check in?</legend>
+        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">Choose the moments that feel natural. You can adjust the exact time below.</p>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
           {PRESET_TIMES.map((preset) => {
             const Icon = preset.icon;
             const selected = schedules.some((schedule) => schedule.time === preset.time);
             return (
-              <Button key={preset.id} type="button" variant="outline" className={cn("h-auto min-h-20 flex-col rounded-2xl px-3 py-4 text-base", selected && "border-primary bg-primary/10 text-foreground hover:bg-primary/10")} onClick={() => togglePreset(preset)} aria-pressed={selected}>
-                <Icon className="size-5 text-primary" /><span>{preset.label}</span><span className="text-xs font-normal text-muted-foreground">{timeLabel(preset.time)}</span>
+              <Button key={preset.id} type="button" variant="outline" className={cn("h-auto min-h-16 flex-col rounded-2xl px-2 py-3 text-sm sm:min-h-20 sm:px-3 sm:py-4 sm:text-base", selected && "border-primary bg-primary/10 text-foreground hover:bg-primary/10")} onClick={() => togglePreset(preset)} aria-pressed={selected}>
+                <Icon className="size-4 text-primary sm:size-5" /><span>{preset.label}</span><span className="text-[11px] font-normal text-muted-foreground sm:text-xs">{timeLabel(preset.time)}</span>
               </Button>
             );
           })}
         </div>
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {schedules.map((schedule, index) => (
-            <div key={schedule.id} className="grid gap-3 rounded-2xl bg-surface p-4 sm:grid-cols-[1fr_auto_auto] sm:items-center">
+            <div key={schedule.id} className="grid gap-3 rounded-2xl bg-surface p-3 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:p-4">
               <div className="space-y-2">
                 <Label className="text-base" htmlFor={`medication-time-${schedule.id}`}>Reminder {index + 1}</Label>
                 <Input id={`medication-time-${schedule.id}`} type="time" value={schedule.time} onChange={(event) => setSchedules((current) => current.map((item) => item.id === schedule.id ? { ...item, time: event.target.value } : item))} className="min-h-12 rounded-xl bg-background px-4 text-base md:text-base" />
@@ -550,24 +559,24 @@ function MedicationForm({
 
 function TodayDoses({ rows, isLoading, onLog, isPending }: { rows: DoseRow[]; isLoading: boolean; onLog: (id: string, status: "taken" | "skipped") => void; isPending: boolean }) {
   return (
-    <section aria-labelledby="today-title" className="space-y-4">
+    <section aria-labelledby="today-title" className="space-y-3 sm:space-y-4">
       <div>
-        <p className="text-sm font-medium text-primary">Today</p>
-        <h2 id="today-title" className="font-display text-2xl font-medium text-foreground">One dose at a time</h2>
+        <p className="text-xs font-medium text-primary sm:text-sm">Today</p>
+        <h2 id="today-title" className="font-display text-lg font-medium text-foreground sm:text-2xl">One dose at a time</h2>
       </div>
-      {isLoading ? <Skeleton className="h-28 rounded-3xl" /> : rows.length === 0 ? (
-        <div className="rounded-3xl border border-border bg-surface p-6 text-base leading-relaxed text-muted-foreground">Nothing is due today. Your next check-in will appear here when it is ready.</div>
+      {isLoading ? <Skeleton className="h-24 rounded-3xl sm:h-28" /> : rows.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-surface p-4 text-sm leading-relaxed text-muted-foreground sm:rounded-3xl sm:p-6 sm:text-base">Nothing is due today. Your next check-in will appear here when it is ready.</div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {rows.map((dose) => {
             const isDone = dose.status === "taken" || dose.status === "skipped";
             return (
-              <div key={dose.id} className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-5 shadow-gentle sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
-                  <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-2xl", dose.status === "taken" ? "bg-mint text-foreground" : "bg-surface text-primary")} aria-hidden>{dose.status === "taken" ? <CheckIcon /> : <PillIcon />}</span>
-                  <div><h3 className="font-display text-lg font-medium">{dose.medications?.name ?? "Medicine"}</h3><p className="text-base text-muted-foreground">{timeLabel(new Date(dose.scheduled_at).toTimeString().slice(0, 5))}{dose.medications?.dosage ? ` · ${dose.medications.dosage}` : ""}</p></div>
+              <div key={dose.id} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-gentle sm:flex-row sm:items-center sm:justify-between sm:rounded-3xl sm:gap-4 sm:p-5">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-2xl sm:size-12", dose.status === "taken" ? "bg-mint text-foreground" : "bg-surface text-primary")} aria-hidden>{dose.status === "taken" ? <CheckIcon /> : <PillIcon />}</span>
+                  <div><h3 className="font-display text-base font-medium sm:text-lg">{dose.medications?.name ?? "Medicine"}</h3><p className="text-sm text-muted-foreground sm:text-base">{timeLabel(new Date(dose.scheduled_at).toTimeString().slice(0, 5))}{dose.medications?.dosage ? ` · ${dose.medications.dosage}` : ""}</p></div>
                 </div>
-                {isDone ? <span className="rounded-full bg-surface px-4 py-2 text-sm font-medium capitalize text-muted-foreground">{dose.status}</span> : (
+                {isDone ? <span className="w-fit rounded-full bg-surface px-4 py-2 text-sm font-medium capitalize text-muted-foreground">{dose.status}</span> : (
                   <div className="flex gap-2">
                     <Button type="button" className="min-h-11 flex-1 rounded-xl sm:flex-none" disabled={isPending} onClick={() => onLog(dose.id, "taken")}><CheckIcon /> Taken</Button>
                     <Button type="button" variant="ghost" className="min-h-11 flex-1 rounded-xl sm:flex-none" disabled={isPending} onClick={() => onLog(dose.id, "skipped")}>Skip</Button>

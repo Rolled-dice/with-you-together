@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PrivacyChoicesButton } from "@/components/privacy-choices-button";
 
@@ -8,6 +8,7 @@ import {
   ChatCircleTextIcon,
   CheckIcon,
   EnvelopeSimpleIcon,
+  FlowerLotusIcon,
   HeadphonesIcon,
   PhoneCallIcon,
   ShieldCheckIcon,
@@ -16,6 +17,7 @@ import {
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { JsonLd } from "@/components/json-ld";
 import { Wordmark } from "@/components/landing/brand-mark";
+import { CalmBand } from "@/components/landing/calm-invite";
 import { FeatureCarousel } from "@/components/landing/feature-carousel";
 import { RotatingHeadline } from "@/components/landing/rotating-headline";
 import { DashboardMockup, ListenerCallMockup } from "@/components/landing/hero-mockups";
@@ -80,6 +82,19 @@ export const Route = createFileRoute("/")({
  * -------------------------------------------------------------------------- */
 
 const HERO_PROOF = ["Trained, vetted listeners", "Nothing for them to install", "An update after every call"];
+
+/**
+ * Rotating lines for the marquee ribbon. Short, rhythmic, and standalone --
+ * each has to read cleanly even mid-loop, when the array's repeat meets its
+ * own start, so nothing longer than roughly one breath.
+ */
+const MARQUEE_LINES = [
+  "Checking in when they can’t.",
+  "Talk when you want. Get a check-in when you need one.",
+  "You can’t always be there. But what if someone could?",
+  "Being independent doesn’t mean you never need someone.",
+  "There are days when you want to talk, but don’t know who to call.",
+];
 
 /** The worry, in the visitor's own words — not our feature names. */
 const WORRIES: { label: string; answer: string; tone: OrbTone }[] = [
@@ -214,6 +229,59 @@ const FAQS = [
  * Small building blocks
  * -------------------------------------------------------------------------- */
 
+/**
+ * Top announcement bar. Rotates two messages so both the core product news and
+ * the "there's something free for you right now" nudge get seen, without piling
+ * two lines into one bar. Pauses for reduced-motion (shows the calm nudge, the
+ * one most useful to a first-time visitor).
+ */
+function AnnouncementBar() {
+  const messages = [
+    {
+      key: "meds",
+      node: (
+        <>
+          Medication reminders now land straight on their phone.{" "}
+          <Link to="/docs" className="font-semibold underline underline-offset-2">
+            See how
+          </Link>
+        </>
+      ),
+    },
+    {
+      key: "calm",
+      node: (
+        <>
+          Feeling stressed right now? Take a free calming minute.{" "}
+          <Link to="/calm" className="font-semibold underline underline-offset-2">
+            Start here
+          </Link>
+        </>
+      ),
+    },
+  ];
+
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setI(1); // land on the calm nudge, most useful to a first visit
+      return;
+    }
+    const id = window.setInterval(() => setI((n) => (n + 1) % messages.length), 6000);
+    return () => window.clearInterval(id);
+    // messages is a stable literal
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="bg-primary px-4 py-2.5 text-center text-sm text-primary-foreground">
+      <span aria-live="polite" key={messages[i].key} className="inline-block animate-in fade-in duration-500">
+        {messages[i].node}
+      </span>
+    </div>
+  );
+}
+
 /** The near-black pill used inside cards and plates. */
 function InkButton({ to, children }: { to: "/dashboard" | "/auth"; children: React.ReactNode }) {
   return (
@@ -260,12 +328,7 @@ function Landing() {
       <JsonLd data={SCHEMA} />
 
       {/* Announcement ---------------------------------------------------- */}
-      <div className="bg-primary px-4 py-2.5 text-center text-sm text-primary-foreground">
-        Medication reminders now land straight on their phone.{" "}
-        <Link to="/docs" className="font-semibold underline underline-offset-2">
-          See how
-        </Link>
-      </div>
+      <AnnouncementBar />
 
       {/* Nav ------------------------------------------------------------- */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
@@ -288,6 +351,13 @@ function Landing() {
             <a href="#pricing" className="transition-colors hover:text-foreground">
               Plans
             </a>
+            <Link
+              to="/calm"
+              className="inline-flex items-center gap-1.5 rounded-full bg-orb-periwinkle/15 px-3 py-1.5 text-brand-primary transition-colors hover:bg-orb-periwinkle/25"
+            >
+              <FlowerLotusIcon className="h-3.5 w-3.5" weight="fill" />
+              Calm space
+            </Link>
             <Link to="/docs" className="transition-colors hover:text-foreground">
               Docs
             </Link>
@@ -380,6 +450,9 @@ function Landing() {
           </div>
         </section>
 
+        {/* Calm space invite — the scroll-stopper for the second audience */}
+        <CalmBand />
+
         {/* Worries ----------------------------------------------------- */}
         <section id="worries" className="scroll-mt-20 px-6 py-16">
           <h2 data-reveal className="text-center text-2xl sm:text-3xl">
@@ -411,13 +484,42 @@ function Landing() {
         {/* Features, as an auto-advancing carousel ------------------- */}
         <FeatureCarousel />
 
-        {/* Marquee ---------------------------------------------------- */}
-        <div aria-hidden="true" className="mt-10 overflow-hidden border-y border-ink/10 bg-plate-saffron py-3.5">
+        {/* Marquee -----------------------------------------------------
+           A layered "eye magnet": the strip scrolls, each orb bobs on its
+           own timeline, and a soft light sweep drifts across the surface.
+           Pausing on hover/focus (data-marquee-pause) makes it feel like it
+           notices you, rather than being pure wallpaper. Rotating short
+           lines instead of one repeated phrase keeps a second pass through
+           the ribbon from reading as static. */}
+        <div
+          aria-hidden="true"
+          data-marquee-pause
+          className="relative mt-10 overflow-hidden border-y border-ink/10 bg-plate-saffron py-3.5"
+        >
+          {/* Shine sweep: a wide soft-white band, tiled so the sweep loops. */}
+          <div
+            data-marquee-shine
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-10 opacity-60 mix-blend-overlay"
+            style={{
+              backgroundImage:
+                "linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,0.9) 55%, transparent 70%)",
+              backgroundSize: "60% 100%",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "-60% 0",
+            }}
+          />
           <div data-marquee-track className="flex w-max items-center gap-8 whitespace-nowrap">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <span key={i} className="flex items-center gap-8 text-sm font-extrabold uppercase tracking-wide text-ink">
-                Checking in when they can&apos;t
-                <Orb tone={i % 2 === 0 ? "terracotta" : "navy"} face="calm" className="h-5 w-5" />
+            {[...MARQUEE_LINES, ...MARQUEE_LINES].map((line, i) => (
+              <span key={i} className="flex items-center gap-3 text-sm font-extrabold uppercase tracking-wide text-ink">
+                {line}
+                <span data-marquee-icon className="inline-flex">
+                  <Orb
+                    tone={i % 3 === 0 ? "terracotta" : i % 3 === 1 ? "navy" : "periwinkle"}
+                    face="calm"
+                    className="h-5 w-5"
+                  />
+                </span>
               </span>
             ))}
           </div>
@@ -663,6 +765,11 @@ function Landing() {
                     <a href="#pricing" className="hover:text-primary">
                       Plans
                     </a>
+                  </li>
+                  <li>
+                    <Link to="/calm" className="hover:text-primary">
+                      Calm space
+                    </Link>
                   </li>
                   <li>
                     <a href="#faq" className="hover:text-primary">

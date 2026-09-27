@@ -21,6 +21,7 @@ import {
   listMyBookings,
   requestBooking,
   rescheduleBooking,
+  getMySessionBalance,
 } from "@/lib/listeners.functions";
 import { getFeedbackPrompt } from "@/lib/session-feedback.functions";
 import { PostCallFeedbackCard } from "@/components/post-call-feedback-card";
@@ -98,7 +99,10 @@ function ListenersPage() {
   const rescheduleFn = useServerFn(rescheduleBooking);
   const feedbackPromptFn = useServerFn(getFeedbackPrompt);
 
+  const balanceFn = useServerFn(getMySessionBalance);
+
   const bookings = useQuery({ queryKey: ["listener-bookings"], queryFn: () => listBookingsFn() });
+  const balance = useQuery({ queryKey: ["session-balance"], queryFn: () => balanceFn() });
   const feedbackPrompt = useQuery({
     queryKey: ["session-feedback-prompt"],
     queryFn: () => feedbackPromptFn(),
@@ -134,6 +138,7 @@ function ListenersPage() {
       }
       setBookingError(null);
       qc.invalidateQueries({ queryKey: ["listener-bookings"] });
+      qc.invalidateQueries({ queryKey: ["session-balance"] });
       if (vars.booking_type === "emergency_callback") {
         toast.success("Callback requested. A Listener will reach you within the SLA.");
         setEmergencyOpen(false);
@@ -155,33 +160,52 @@ function ListenersPage() {
     onSuccess: () => {
       toast.success("Cancelled.");
       qc.invalidateQueries({ queryKey: ["listener-bookings"] });
+      qc.invalidateQueries({ queryKey: ["session-balance"] });
     },
     onError: (e) => toast.error((e as Error).message),
   });
 
+  // A call is "missed" when ops marked it missed/escalated (didn't start) — even
+  // if the member-facing status is still confirmed. Surface those separately so
+  // the member can rebook, instead of leaving them stuck under "upcoming".
+  const isMissed = (b: { crm_state?: string | null; status: string }) =>
+    b.crm_state === "missed" || b.crm_state === "escalated";
+
+  const missed = useMemo(
+    () => (bookings.data ?? []).filter((b) => isMissed(b) && b.status !== "cancelled"),
+    [bookings.data],
+  );
   const upcoming = useMemo(
     () =>
       (bookings.data ?? []).filter(
-        (b) => b.status === "requested" || b.status === "confirmed",
+        (b) => (b.status === "requested" || b.status === "confirmed") && !isMissed(b),
       ),
     [bookings.data],
   );
   const past = useMemo(
     () =>
       (bookings.data ?? []).filter(
-        (b) => b.status === "completed" || b.status === "cancelled",
+        (b) => (b.status === "completed" || b.status === "cancelled") && !isMissed(b),
       ),
     [bookings.data],
   );
+
+  // Prefill the booking form (used by "Rebook" on a missed call).
+  function rebookFrom(b: { requested_at: string; note: string | null }) {
+    setDay(b.requested_at.slice(0, 10));
+    setTime(b.requested_at.slice(11, 16));
+    const tzMatch = b.note?.match(/\[TZ:([^\]]+)\]/)?.[1];
+    if (tzMatch && TIMEZONES.includes(tzMatch)) setTz(tzMatch);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    toast.info("We filled the form with that time — pick a new slot and book again.");
+  }
 
   return (
     <AppShell>
       <JsonLd data={SERVICE_SCHEMA} />
       <PageHeader
-        eyebrow="Listeners"
-        slogan="Real ears. Real hearts."
         title="Book a Listener"
-        description="Our in-house team is trained to just… listen. Book ahead, and we'll match you with someone from the SomeoneNear roster."
+        description="Pick a time. A trained Listener will call your phone."
       />
 
       {feedbackPrompt.data && (
@@ -194,39 +218,51 @@ function ListenersPage() {
         </div>
       )}
 
-      {/* SLA + Rules strip */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <RuleTile
-          icon={AlarmIcon}
-          title="Scheduled in advance"
-          body="Choose a preferred day & time in your timezone. Sessions run 30-60 minutes."
-          delay={1}
-        />
-        <RuleTile
-          icon={ShieldCheckIcon}
-          title="In-house team, SLA-backed"
-          body="Every booking is picked up by a SomeoneNear Listener. Confirmed within 15 minutes."
-          delay={2}
-        />
-        <RuleTile
-          icon={CalendarDotIcon}
-          title="2-hour reschedule rule"
-          body="Reschedule up to 2 hours before the start. Later than that, the session counts as used."
-          delay={3}
-        />
-      </div>
+      {/* Sessions + reschedules left this month. Shown for family members
+          (shared pool) and solo users (own-plan allowance) alike. */}
+      {balance.data && (
+        <div className="mb-4 grid grid-cols-2 gap-2">
+          <div className="rounded-2xl border border-border bg-card px-3 py-2.5">
+            <p className="text-xs font-medium text-muted-foreground">Sessions left</p>
+            <p className="text-xl font-bold text-foreground">
+              {balance.data.available}
+              <span className="ml-1 text-sm font-normal text-muted-foreground">
+                of {balance.data.totalSessions}
+              </span>
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card px-3 py-2.5">
+            <p className="text-xs font-medium text-muted-foreground">Reschedules left</p>
+            <p className="text-xl font-bold text-foreground">
+              {balance.data.reschedulesRemaining}
+              <span className="ml-1 text-sm font-normal text-muted-foreground">
+                of {balance.data.reschedulesTotal}
+              </span>
+            </p>
+          </div>
+          {balance.data.available <= 0 && (
+            <p className="col-span-2 text-sm font-medium text-destructive">
+              {balance.data.inFamily
+                ? "All used up this month. The family owner can allocate more in Family."
+                : balance.data.totalSessions === 0
+                  ? "Listener sessions aren't included on your current plan."
+                  : "All used up this month. Your sessions refresh next month."}
+            </p>
+          )}
+        </div>
+      )}
 
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
-        {/* Booking form */}
+      <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr] lg:gap-6">
+        {/* Booking form — first thing on the page so it sits above the fold */}
         <Card data-page-reveal className="rounded-brand border-border bg-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base font-medium">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold">
               <HandHeartIcon className="h-4 w-4 text-brand-accent" />
               Schedule your next session
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="day">Preferred day</Label>
                 <Input
@@ -270,18 +306,18 @@ function ListenersPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="note">Anything to share ahead of time? (optional)</Label>
+              <Label htmlFor="note">Anything to share first? (optional)</Label>
               <Textarea
                 id="note"
-                rows={3}
+                rows={2}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="A word or two about how you're feeling, helps your Listener meet you where you are."
+                placeholder="A word or two on how you're feeling"
               />
             </div>
             {bookingError && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-brand border border-destructive/30 bg-destructive/5 p-3">
-                <p role="alert" className="text-sm text-destructive-foreground">
+                <p role="alert" className="text-sm font-medium text-destructive">
                   {bookingError.message}
                 </p>
                 {bookingError.settingsLink && (
@@ -328,7 +364,7 @@ function ListenersPage() {
               <FlowStep n={2} text="Our in-house Listener picks it up (SLA: 10 minutes)." />
               <FlowStep n={3} text="You'll get a call notification, join when you're ready." />
             </ol>
-            <div className="rounded-brand border border-destructive/25 bg-destructive/5 p-3 text-xs text-destructive-foreground/90">
+            <div className="rounded-brand border border-destructive/25 bg-destructive/5 p-3 text-sm font-medium text-destructive">
               If you're in danger, please call your local emergency line first.{" "}
               <Link to="/safety" className="underline underline-offset-4">Safety resources →</Link>
             </div>
@@ -382,6 +418,13 @@ function ListenersPage() {
         </Card>
       </div>
 
+      {/* How booking works — three short facts in one row, below the form */}
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <RuleTile icon={AlarmIcon} title="Book ahead" body="30–60 min sessions" />
+        <RuleTile icon={ShieldCheckIcon} title="Confirmed fast" body="Within 15 minutes" />
+        <RuleTile icon={CalendarDotIcon} title="Change freely" body="Up to 2 hours before" />
+      </div>
+
       {/* Bookings */}
       <div className="mt-8 space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Your sessions</h2>
@@ -390,33 +433,48 @@ function ListenersPage() {
             <Skeleton className="h-24 w-full rounded-brand" />
             <Skeleton className="h-24 w-full rounded-brand" />
           </div>
-        ) : upcoming.length === 0 && past.length === 0 ? (
+        ) : upcoming.length === 0 && past.length === 0 && missed.length === 0 ? (
           <EmptyState
             icon={<CalendarDotIcon className="h-6 w-6" />}
             title="Nothing on the calendar yet"
             description="Book your first session above. Our in-house Listener team takes it from there."
           />
         ) : (
-          <div className="divide-y divide-border rounded-xl border border-border bg-card">
-            {upcoming.map((b, i) => (
-              <BookingRow
-                key={b.id}
-                booking={b}
-                delay={i + 1}
-                onCancel={() => cancel.mutate(b.id)}
-                onReschedule={(preferred_day, preferred_time, time_zone) =>
-                  rescheduleFn({ data: { id: b.id, preferred_day, preferred_time, time_zone } })
-                    .then(() => {
-                      toast.success("Rescheduled.");
-                      qc.invalidateQueries({ queryKey: ["listener-bookings"] });
-                    })
-                    .catch((e) => toast.error((e as Error).message))
-                }
-              />
-            ))}
-            {past.map((b, i) => (
-              <BookingRow key={b.id} booking={b} delay={i + 1} past />
-            ))}
+          <div className="space-y-4">
+            {missed.length > 0 && (
+              <div className="overflow-hidden rounded-xl border border-amber-500/30 bg-amber-500/5">
+                <p className="px-4 pt-3 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                  Missed calls
+                </p>
+                <div className="divide-y divide-amber-500/20">
+                  {missed.map((b, i) => (
+                    <BookingRow key={b.id} booking={b} delay={i + 1} missed onRebook={() => rebookFrom(b)} />
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="divide-y divide-border rounded-xl border border-border bg-card">
+              {upcoming.map((b, i) => (
+                <BookingRow
+                  key={b.id}
+                  booking={b}
+                  delay={i + 1}
+                  onCancel={() => cancel.mutate(b.id)}
+                  onReschedule={(preferred_day, preferred_time, time_zone) =>
+                    rescheduleFn({ data: { id: b.id, preferred_day, preferred_time, time_zone } })
+                      .then(() => {
+                        toast.success("Rescheduled.");
+                        qc.invalidateQueries({ queryKey: ["listener-bookings"] });
+                        qc.invalidateQueries({ queryKey: ["session-balance"] });
+                      })
+                      .catch((e) => toast.error((e as Error).message))
+                  }
+                />
+              ))}
+              {past.map((b, i) => (
+                <BookingRow key={b.id} booking={b} delay={i + 1} past />
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -428,20 +486,16 @@ function RuleTile({
   icon: Icon,
   title,
   body,
-  delay,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   body: string;
-  delay: number;
 }) {
   return (
-    <div className="rounded-brand border border-border bg-card p-4">
-      <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary/15 text-brand-accent">
-        <Icon className="h-4 w-4" />
-      </div>
-      <p className="text-sm font-semibold text-foreground">{title}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{body}</p>
+    <div className="flex flex-col items-center rounded-2xl border border-border bg-card px-2 py-3 text-center">
+      <Icon className="h-5 w-5 text-brand-accent" />
+      <p className="mt-1.5 text-[13px] font-semibold leading-tight text-foreground">{title}</p>
+      <p className="mt-0.5 text-xs leading-tight text-muted-foreground">{body}</p>
     </div>
   );
 }
@@ -463,6 +517,7 @@ type Booking = {
   duration_minutes: number;
   note: string | null;
   status: string;
+  crm_state?: string | null;
   listeners: { name: string } | null;
 };
 
@@ -470,13 +525,17 @@ function BookingRow({
   booking,
   onCancel,
   onReschedule,
+  onRebook,
   past = false,
+  missed = false,
   delay = 1,
 }: {
   booking: Booking;
   onCancel?: () => void;
   onReschedule?: (day: string, time: string, tz: string) => void;
+  onRebook?: () => void;
   past?: boolean;
+  missed?: boolean;
   delay?: number;
 }) {
   const when = new Date(booking.requested_at);
@@ -510,15 +569,32 @@ function BookingRow({
                 Callback
               </Badge>
             )}
-            <Badge variant="outline" className="rounded-full text-[10px] capitalize">
-              {booking.status}
-            </Badge>
+            {missed ? (
+              <Badge className="rounded-full bg-amber-500/90 text-[10px] text-white">
+                {booking.crm_state === "escalated" ? "Missed (escalated)" : "Missed"}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="rounded-full text-[10px] capitalize">
+                {booking.status}
+              </Badge>
+            )}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Listener: {booking.listeners?.name ?? "Assigning…"}
+            {missed
+              ? "This call didn't take place. You can rebook a new time below."
+              : `Listener: ${booking.listeners?.name ?? "Assigning…"}`}
           </p>
         </div>
-        {!past && (
+        {missed && onRebook && (
+          <Button
+            size="sm"
+            className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
+            onClick={onRebook}
+          >
+            <CalendarDotIcon className="mr-1 h-4 w-4" /> Rebook
+          </Button>
+        )}
+        {!past && !missed && (
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-brand border border-border bg-surface px-2.5 py-1.5 text-xs text-muted-foreground">
               <PhoneIcon className="h-3.5 w-3.5 text-brand-accent" />
@@ -545,7 +621,7 @@ function BookingRow({
             )}
           </div>
         )}
-        {editing && !past && (
+        {editing && !past && !missed && (
           <div className="flex w-full flex-wrap items-end gap-2 border-t border-border pt-3 animate-fade-in">
             <Input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="w-40" />
             <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="w-32" />

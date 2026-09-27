@@ -824,3 +824,14 @@
     }
   }
 }
+
+/* Cookiebot's floating consent widget defaults to the bottom-left corner,
+ * which on mobile sits on top of the first bottom-nav tab (Home). Lift it
+ * above the 4rem nav plus the device safe area so both stay tappable. */
+@media (max-width: 767px) {
+  #CookiebotWidget,
+  #CookiebotWidget.CookiebotWidget-inactive {
+    bottom: calc(5rem + env(safe-area-inset-bottom)) !important;
+    left: 0.75rem !important;
+  }
+}

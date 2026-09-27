@@ -1,4 +1,4 @@
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name text,
   timezone text,
@@ -12,16 +12,19 @@ GRANT ALL ON public.profiles TO service_role;
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
 CREATE POLICY "Users can view own profile"
   ON public.profiles FOR SELECT
   TO authenticated
   USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   TO authenticated
@@ -44,6 +47,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -53,6 +57,7 @@ RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = now(); RETURN NEW; END;
 $$;
 
+DROP TRIGGER IF EXISTS profiles_set_updated_at ON public.profiles;
 CREATE TRIGGER profiles_set_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
@@ -62,9 +67,9 @@ REVOKE EXECUTE ON FUNCTION public.set_updated_at() FROM PUBLIC, anon, authentica
 REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
 
 ALTER TABLE public.profiles
-  ADD COLUMN onboarding_completed boolean NOT NULL DEFAULT false,
-  ADD COLUMN care_tier text NOT NULL DEFAULT 'free',
-  ADD COLUMN care_status text NOT NULL DEFAULT 'active',
-  ADD COLUMN care_since timestamptz NOT NULL DEFAULT now(),
-  ADD COLUMN pronouns text,
-  ADD COLUMN care_intent text;
+  ADD COLUMN IF NOT EXISTS onboarding_completed boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS care_tier text NOT NULL DEFAULT 'free',
+  ADD COLUMN IF NOT EXISTS care_status text NOT NULL DEFAULT 'active',
+  ADD COLUMN IF NOT EXISTS care_since timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS pronouns text,
+  ADD COLUMN IF NOT EXISTS care_intent text;

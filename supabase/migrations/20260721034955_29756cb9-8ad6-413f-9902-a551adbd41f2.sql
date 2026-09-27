@@ -1,4 +1,4 @@
-CREATE TABLE public.subscriptions (
+CREATE TABLE IF NOT EXISTS public.subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   stripe_subscription_id text NOT NULL UNIQUE,
@@ -14,23 +14,26 @@ CREATE TABLE public.subscriptions (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_subscriptions_user_id ON public.subscriptions(user_id);
-CREATE INDEX idx_subscriptions_stripe_id ON public.subscriptions(stripe_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON public.subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_id ON public.subscriptions(stripe_subscription_id);
 
 GRANT SELECT ON public.subscriptions TO authenticated;
 GRANT ALL ON public.subscriptions TO service_role;
 
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users view own subscriptions" ON public.subscriptions;
 CREATE POLICY "Users view own subscriptions"
   ON public.subscriptions FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Service role manages subscriptions" ON public.subscriptions;
 CREATE POLICY "Service role manages subscriptions"
   ON public.subscriptions FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
+DROP TRIGGER IF EXISTS subscriptions_updated_at ON public.subscriptions;
 CREATE TRIGGER subscriptions_updated_at
   BEFORE UPDATE ON public.subscriptions
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
@@ -87,6 +90,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS subscriptions_sync_care_tier ON public.subscriptions;
 CREATE TRIGGER subscriptions_sync_care_tier
   AFTER INSERT OR UPDATE ON public.subscriptions
   FOR EACH ROW EXECUTE FUNCTION public.sync_care_tier_from_subscription();
