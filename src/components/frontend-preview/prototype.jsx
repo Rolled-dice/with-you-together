@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
+import { Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { PreviewWorkspace } from "./workspace";
 import { PreviewBrandMark } from "./preview-brand";
 import { PLAN_DISPLAY } from "@/lib/currency";
@@ -55,6 +57,11 @@ import {
   CreditCardIcon as CreditCard,
   CopyIcon as Copy,
   SignInIcon as LogIn,
+  BookOpenIcon as BookOpen,
+  QuestionIcon as Question,
+  LifebuoyIcon as Lifebuoy,
+  ArrowUpRightIcon as ArrowUpRight,
+  CaretDownIcon as CaretDown,
 } from "@phosphor-icons/react";
 
 // ============================================================================
@@ -2417,6 +2424,32 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState("");
   const [authName, setAuthName] = useState("");
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session?.user) {
+        setCurrentUser({
+          email: data.session.user.email,
+          name: data.session.user.user_metadata?.full_name || data.session.user.email?.split("@")[0] || "My Account",
+        });
+      }
+    });
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser({
+          email: session.user.email,
+          name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "My Account",
+        });
+      } else {
+        setCurrentUser(null);
+      }
+    });
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  const [openFaqIndex, setOpenFaqIndex] = useState(0);
+
   // Step #7: Enhanced Invite Modal (Mobile No. OR Shareable Invite ID + Call Opt-In / Ignore)
   const [inviteMethod, setInviteMethod] = useState("mobile"); // 'mobile' | 'inviteId'
   const [inviteMobile, setInviteMobile] = useState("+91 98201 54321");
@@ -3084,6 +3117,35 @@ export default function App() {
                 {tab.label}
               </button>
             ))}
+
+            <Link
+              to="/listeners"
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                isDark
+                  ? "text-[var(--preview-cream)]/75 hover:text-[var(--preview-cream)]"
+                  : "text-[var(--preview-navy)]/75 hover:text-[var(--preview-navy)]"
+              }`}
+            >
+              Listeners
+            </Link>
+
+            <Link
+              to="/companion"
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                isDark
+                  ? "text-[var(--preview-cream)]/75 hover:text-[var(--preview-cream)]"
+                  : "text-[var(--preview-navy)]/75 hover:text-[var(--preview-navy)]"
+              }`}
+            >
+              Companion
+            </Link>
+
+            <Link
+              to="/docs/getting-started"
+              className="px-3 py-1.5 rounded-xl text-xs font-extrabold text-[var(--preview-orange)] hover:underline flex items-center gap-1"
+            >
+              <span>Docs</span>
+            </Link>
           </div>
 
           {/* Right Controls: Country Currency (#5), Google/Apple Sign In (#6), Theme, Avatars */}
@@ -3134,14 +3196,24 @@ export default function App() {
               <span className="hidden xl:inline">Avatars</span>
             </button>
 
-            {/* Step #6: Sign In with Google / Apple ID / Account */}
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-[var(--preview-navy)] text-[var(--preview-cream)] border border-[var(--preview-coral)] hover:bg-[var(--preview-orange)] transition-all flex items-center gap-1.5 shadow-sm"
-            >
-              <LogIn className="w-3.5 h-3.5 text-[var(--preview-coral)]" />
-              <span>{currentUser ? currentUser.name : "Sign In"}</span>
-            </button>
+            {/* Step #6: Sign In / Dashboard button */}
+            {currentUser ? (
+              <Link
+                to="/dashboard"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-[var(--preview-navy)] text-[var(--preview-cream)] border border-[var(--preview-coral)] hover:bg-[var(--preview-orange)] transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <LogIn className="w-3.5 h-3.5 text-[var(--preview-coral)]" />
+                <span>Dashboard</span>
+              </Link>
+            ) : (
+              <Link
+                to="/auth"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-[var(--preview-navy)] text-[var(--preview-cream)] border border-[var(--preview-coral)] hover:bg-[var(--preview-orange)] transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <LogIn className="w-3.5 h-3.5 text-[var(--preview-coral)]" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -3216,13 +3288,13 @@ export default function App() {
                       </p>
                     </div>
                     <div>
-                      <button
-                        onClick={() => setShowInviteModal(true)}
+                      <Link
+                        to="/auth"
                         className="w-full py-2.5 px-4 rounded-2xl bg-[var(--preview-orange)] hover:bg-[var(--preview-coral)] text-[var(--preview-cream)] hover:text-[var(--preview-navy)] text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md transition-colors"
                       >
                         <span>Start a Care Plan</span>
                         <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+                      </Link>
                       <p className="text-[10px] text-center font-bold opacity-65 mt-1.5">
                         No card needed · Ordinary phone call
                       </p>
@@ -3250,16 +3322,13 @@ export default function App() {
                       </p>
                     </div>
                     <div>
-                      <button
-                        onClick={() => {
-                          setAssistiveOpen(true);
-                          setAssistiveTask("listener");
-                        }}
+                      <Link
+                        to="/listeners"
                         className="w-full py-2.5 px-4 rounded-2xl bg-[var(--preview-gold)] hover:bg-[var(--preview-coral)] text-[var(--preview-navy)] text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md transition-colors"
                       >
                         <Headphones className="w-3.5 h-3.5" />
                         <span>Book a Listener Call →</span>
-                      </button>
+                      </Link>
                       <p className="text-[10px] text-center font-bold text-[var(--preview-gold)] mt-1.5">
                         100% Private · Empathetic Human Listeners
                       </p>
@@ -3309,12 +3378,20 @@ export default function App() {
                       <CheckCircle2 className="w-4 h-4 text-[var(--preview-coral)] flex-shrink-0" />
                       <span>{activeWorryObj.PromiseText}</span>
                     </div>
-                    <button
-                      onClick={() => setExperienceView("family-app")}
-                      className="text-[var(--preview-gold)] underline whitespace-nowrap font-extrabold"
-                    >
-                      Open Family Hub →
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setExperienceView("family-app")}
+                        className="text-[var(--preview-cream)]/75 hover:text-[var(--preview-cream)] underline whitespace-nowrap text-[11px]"
+                      >
+                        Interactive Hub
+                      </button>
+                      <Link
+                        to="/family"
+                        className="text-[var(--preview-gold)] underline whitespace-nowrap font-extrabold"
+                      >
+                        Open Family Hub →
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3742,6 +3819,405 @@ export default function App() {
               </div>
             </div>
           </section>
+
+          {/* ==========================================================================
+              SECTION 5: GET STARTED DOCUMENTATION & ONBOARDING GUIDE
+          ========================================================================== */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--preview-orange)]/15 text-[var(--preview-orange)] text-[11px] font-black uppercase tracking-wider mb-2">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>Onboarding &amp; Setup Docs</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-black">
+                  How SomeoneNear works in four simple steps.
+                </h2>
+                <p
+                  className={`text-sm font-medium mt-2 max-w-2xl ${
+                    isDark ? "text-[var(--preview-cream)]/75" : "text-[var(--preview-navy)]/75"
+                  }`}
+                >
+                  Everything you need to set up your family, configure check-in calls, and view live
+                  status on the 3D globe. No app downloads required for parents.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/docs/getting-started"
+                  className="px-4 py-2.5 rounded-2xl bg-[var(--preview-orange)] hover:bg-[var(--preview-coral)] text-[var(--preview-cream)] hover:text-[var(--preview-navy)] text-xs font-black transition-colors flex items-center gap-2 shadow-sm"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Read Full Docs</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  to="/docs"
+                  className={`px-4 py-2.5 rounded-2xl border-2 text-xs font-black transition-colors ${
+                    isDark
+                      ? "border-[var(--preview-cream)]/30 text-[var(--preview-cream)] hover:bg-white/10"
+                      : "border-[var(--preview-navy)] text-[var(--preview-navy)] hover:bg-[var(--preview-sand)]"
+                  }`}
+                >
+                  All Topic Guides
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                {
+                  step: "01",
+                  title: "Create Family Circle",
+                  desc: "Sign up in 60 seconds with email or phone. No credit card required to start.",
+                  tag: "Sign Up",
+                  route: "/auth",
+                  routeLabel: "Create Account →",
+                  docRoute: "/docs/getting-started",
+                },
+                {
+                  step: "02",
+                  title: "Add Loved Ones",
+                  desc: "Add parent phone numbers. Standard landline or mobile — no smartphone or apps needed.",
+                  tag: "Family",
+                  route: "/family",
+                  routeLabel: "Family Setup →",
+                  docRoute: "/docs/family",
+                },
+                {
+                  step: "03",
+                  title: "Book Listener Calls",
+                  desc: "Vetted, empathetic humans call at scheduled or flexible times for reassuring conversation.",
+                  tag: "Listeners",
+                  route: "/listeners",
+                  routeLabel: "Meet Listeners →",
+                  docRoute: "/docs/listeners",
+                },
+                {
+                  step: "04",
+                  title: "Live Globe & Calm Space",
+                  desc: "See daily updates on the 3D globe, track medicine strips, and relax in Calm Space.",
+                  tag: "Peace of Mind",
+                  route: "/calm",
+                  routeLabel: "Open Calm Space →",
+                  docRoute: "/docs/calm",
+                },
+              ].map((s) => (
+                <div
+                  key={s.step}
+                  className={`p-6 rounded-3xl border-2 flex flex-col justify-between transition-all hover:-translate-y-1 ${
+                    isDark
+                      ? "bg-[var(--preview-deep)] border-[var(--preview-dark-line)] hover:border-[var(--preview-gold)]"
+                      : "bg-[var(--preview-white)] border-[var(--preview-line)] hover:border-[var(--preview-navy)] shadow-sm"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="w-9 h-9 rounded-2xl bg-[var(--preview-navy)] text-[var(--preview-gold)] text-xs font-black flex items-center justify-center">
+                        {s.step}
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[var(--preview-sand)] text-[var(--preview-navy)]">
+                        {s.tag}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-extrabold mb-2">{s.title}</h3>
+                    <p
+                      className={`text-xs leading-relaxed mb-6 ${
+                        isDark ? "text-[var(--preview-cream)]/75" : "text-[var(--preview-navy)]/75"
+                      }`}
+                    >
+                      {s.desc}
+                    </p>
+                  </div>
+                  <div className="pt-4 border-t border-[var(--preview-line)] dark:border-[var(--preview-dark-line)] flex items-center justify-between text-xs font-extrabold">
+                    <Link to={s.route} className="text-[var(--preview-orange)] hover:underline">
+                      {s.routeLabel}
+                    </Link>
+                    <Link
+                      to={s.docRoute}
+                      className="opacity-60 hover:opacity-100 flex items-center gap-1 text-[11px]"
+                    >
+                      <span>Docs</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ==========================================================================
+              SECTION 6: FREQUENTLY ASKED QUESTIONS (FAQ)
+          ========================================================================== */}
+          <section
+            className={`py-16 border-t ${
+              isDark
+                ? "bg-[var(--preview-darkest)] border-[var(--preview-dark-line)]"
+                : "bg-[var(--preview-sand)]/40 border-[var(--preview-line)]"
+            }`}
+          >
+            <div className="max-w-4xl mx-auto px-4 sm:px-8">
+              <div className="text-center max-w-xl mx-auto mb-10">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-[var(--preview-orange)]">
+                  Got questions?
+                </span>
+                <h2 className="text-3xl font-black mt-1">Frequently asked questions.</h2>
+                <p
+                  className={`text-xs sm:text-sm font-medium mt-2 ${
+                    isDark ? "text-[var(--preview-cream)]/75" : "text-[var(--preview-navy)]/75"
+                  }`}
+                >
+                  Everything you want to know about phone calls, privacy, listeners, and care plans.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    q: "Do my parents need a smartphone, internet connection, or app installed?",
+                    a: "No! SomeoneNear is built specifically so parents need zero technology. A friendly, verified human listener dials their ordinary phone number — landline or basic mobile. They just pick up and chat.",
+                  },
+                  {
+                    q: "Who are the listeners and how are they vetted?",
+                    a: "Our listeners are carefully vetted through identity verification, criminal background checks, and rigorous empathy assessments. They are trained in warm active listening, respectful conversational boundaries, and crisis escalation protocols.",
+                  },
+                  {
+                    q: "What updates do family members receive after a call?",
+                    a: "Immediately following each completed check-in, family circle members receive a concise 3-line reassurance summary detailing mood, general wellness, and any special notes or follow-ups. The 3D family globe updates in real time.",
+                  },
+                  {
+                    q: "How does the Medication Pill Strip photo reminder work?",
+                    a: "You can upload a photo of the exact pill strip or bottle. When the scheduled dose time arrives, the system rings their phone or prompts the app. Once taken, your family globe displays the green checkmark instantly.",
+                  },
+                  {
+                    q: "Is our conversation private and secure?",
+                    a: "Yes. Calls are strictly private. We never sell or monetize personal or health information. Data is encrypted in transit and at rest with role-based family access permissions.",
+                  },
+                  {
+                    q: "What if there is an emergency during a call?",
+                    a: "SomeoneNear is a non-clinical companionship service, not an emergency dispatcher. However, if a listener identifies an urgent crisis, our safety protocol immediately alerts family contacts and directs emergency guidance.",
+                  },
+                ].map((faq, idx) => {
+                  const isOpen = openFaqIndex === idx;
+                  return (
+                    <div
+                      key={faq.q}
+                      className={`rounded-2xl border-2 transition-all overflow-hidden ${
+                        isDark
+                          ? "bg-[var(--preview-deep)] border-[var(--preview-dark-line)]"
+                          : "bg-[var(--preview-white)] border-[var(--preview-line)]"
+                      }`}
+                    >
+                      <button
+                        onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                        className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 font-extrabold text-sm sm:text-base hover:text-[var(--preview-orange)] transition-colors"
+                      >
+                        <span>{faq.q}</span>
+                        <CaretDown
+                          className={`w-4 h-4 flex-shrink-0 text-[var(--preview-orange)] transition-transform duration-200 ${
+                            isOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {isOpen && (
+                        <div
+                          className={`px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm font-medium leading-relaxed border-t ${
+                            isDark
+                              ? "border-[var(--preview-dark-line)] text-[var(--preview-cream)]/80"
+                              : "border-[var(--preview-line)]/50 text-[var(--preview-navy)]/80"
+                          }`}
+                        >
+                          {faq.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="text-center mt-8">
+                <Link
+                  to="/docs/faq"
+                  className="inline-flex items-center gap-1.5 text-xs font-black text-[var(--preview-orange)] hover:underline"
+                >
+                  <Question className="w-4 h-4" />
+                  <span>Have more questions? Read our complete FAQ documentation →</span>
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          {/* ==========================================================================
+              SECTION 7: COMPREHENSIVE PRODUCTION FOOTER (NEW-UI BRAND PALETTE)
+          ========================================================================== */}
+          <footer className="bg-[var(--preview-navy)] text-[var(--preview-cream)] border-t border-[var(--preview-gold)]/30 mt-16">
+            {/* Crisis Disclaimer Notice Banner */}
+            <div className="bg-[var(--preview-darkest)] border-b border-[var(--preview-white)]/10 py-3.5 px-4 sm:px-8">
+              <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-full bg-[var(--preview-coral)] text-[var(--preview-navy)] font-black text-[10px] uppercase tracking-wider">
+                    Crisis &amp; Safety Notice
+                  </span>
+                  <span className="font-bold opacity-85">
+                    SomeoneNear is a non-clinical companionship service, not an emergency response hotline.
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-[11px] font-black text-[var(--preview-gold)]">
+                  <span>US: 988 or 911</span>
+                  <span>·</span>
+                  <span>India: 112 / 1800-599-0019</span>
+                  <span>·</span>
+                  <span>UK: 111 or 999</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Footer Links Grid */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 py-14">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+                {/* Brand Info (2 Cols) */}
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <PreviewBrandMark size={36} />
+                    <span className="text-xl font-black tracking-tight text-[var(--preview-cream)]">
+                      SomeoneNear
+                    </span>
+                  </div>
+                  <p className="text-xs text-[var(--preview-cream)]/75 leading-relaxed max-w-sm">
+                    Everyday human presence &amp; care for your loved ones, anywhere in the world.
+                    Connecting older adults via ordinary phone calls and keeping families gently synchronized on the 3D globe.
+                  </p>
+                  <div className="flex items-center gap-2 pt-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-xs font-extrabold text-[var(--preview-gold)]">
+                      24/7 Global Care Network Active
+                    </span>
+                  </div>
+                </div>
+
+                {/* Col 1: Product */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-[var(--preview-gold)]">
+                    Product
+                  </h4>
+                  <ul className="space-y-2 text-xs font-bold text-[var(--preview-cream)]/80">
+                    <li>
+                      <Link to="/family" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Family Hub
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/listeners" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Verified Listeners
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/companion" className="hover:text-[var(--preview-coral)] transition-colors">
+                        AI Companion
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/calm" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Calm Space
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/connected-home" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Connected Home
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Col 2: Documentation */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-[var(--preview-gold)]">
+                    Documentation
+                  </h4>
+                  <ul className="space-y-2 text-xs font-bold text-[var(--preview-cream)]/80">
+                    <li>
+                      <Link to="/docs/getting-started" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Getting Started
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/docs/family" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Family Setup Guide
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/docs/check-in" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Check-in Calls
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/docs/safety" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Safety &amp; Vetting
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/docs/medication" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Medication Strips
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/docs/faq" className="hover:text-[var(--preview-coral)] transition-colors">
+                        FAQ Knowledge Base
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Col 3: Legal & Support */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-[var(--preview-gold)]">
+                    Legal &amp; Support
+                  </h4>
+                  <ul className="space-y-2 text-xs font-bold text-[var(--preview-cream)]/80">
+                    <li>
+                      <Link to="/privacy" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Privacy Policy
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/terms" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Terms of Service
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/cookies" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Cookie Preferences
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/docs/billing" className="hover:text-[var(--preview-coral)] transition-colors">
+                        Billing &amp; Refunds
+                      </Link>
+                    </li>
+                    <li className="pt-2">
+                      <a
+                        href="mailto:care@someonenear.com"
+                        className="text-[var(--preview-gold)] hover:underline flex items-center gap-1.5"
+                      >
+                        <span>care@someonenear.com</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Bottom Copyright Bar */}
+              <div className="mt-12 pt-8 border-t border-[var(--preview-white)]/15 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-[var(--preview-cream)]/60">
+                <p>© 2026 SomeoneNear Technologies Inc. All rights reserved.</p>
+                <div className="flex items-center gap-4">
+                  <span>Built with warm human empathy &amp; care.</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--preview-orange)]" />
+                  <span>v2.4 Production</span>
+                </div>
+              </div>
+            </div>
+          </footer>
         </main>
       )}
 
