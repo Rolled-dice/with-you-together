@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { AppNotification } from "@/lib/notifications.functions";
 import { cn } from "@/lib/utils";
 import { NotificationList } from "@/components/notifications/notification-list";
+import { useNavigate } from "@tanstack/react-router";
 
 /**
  * CONTAINER (data + platform coupled — Tier 2/3, see
@@ -18,6 +19,7 @@ import { NotificationList } from "@/components/notifications/notification-list";
 export function NotificationBell({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const q = useQuery({
     queryKey: ["notifications"],
@@ -90,6 +92,11 @@ export function NotificationBell({ className }: { className?: string }) {
           <NotificationList
             className="max-h-80 overflow-y-auto p-2"
             items={items}
+            onOpen={(item) => {
+              setOpen(false);
+              if (item.kind === "family_reminder") void navigate({ to: "/reminders", search: { view: "everyday" } });
+              else void navigate({ to: item.kind === "send_later" ? "/send-later" : item.kind?.startsWith("family_") ? "/family" : "/listeners" });
+            }}
             onDismiss={(id) => {
               void supabase
                 .from("notifications")

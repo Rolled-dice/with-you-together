@@ -7,9 +7,7 @@ import { BellRingingIcon, CheckIcon, SpinnerGapIcon, PillIcon, PlusIcon, TrashIc
 
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { MedicationOnboarding } from "@/components/medication-onboarding";
-import { GoogleCalendarCard } from "@/components/google-calendar-card";
-import { MedicationCalendarPrompt } from "@/components/medication-calendar-prompt";
-import { getGoogleCalendarStatus } from "@/lib/google-calendar.functions";
+import { CalendarSyncCard } from "@/components/calendar-sync-card";
 import { listMedications } from "@/lib/medications.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +22,7 @@ import { completeReminder, createReminder, deleteReminder, listReminders } from 
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/reminders")({
+  validateSearch: (search: Record<string, unknown>) => ({ view: search.view === "everyday" ? "everyday" as const : "medication" as const }),
   head: () => ({
     meta: [
       { title: "Medication Reminders · SomeoneNear" },
@@ -59,23 +58,13 @@ const RECURRENCES = [
 type ReminderRow = { id: string; title: string; due_at: string; category: string; recurrence: string | null };
 
 function RemindersPage() {
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const flag = params.get("calendar");
-    if (flag === "connected") gentleToast("Google Calendar connected", "Your reminders will sync from now on.");
-    else if (flag === "error") gentleProblem("We could not connect Google Calendar", "Please try again.");
-    if (flag) {
-      params.delete("calendar");
-      const qs = params.toString();
-      window.history.replaceState({}, "", window.location.pathname + (qs ? `?${qs}` : ""));
-    }
-  }, []);
-
+  const { view } = Route.useSearch();
+  const navigate = Route.useNavigate();
   return (
     <AppShell>
       <div className="mx-auto max-w-5xl">
         <PageHeader eyebrow="Care, made lighter" title="Medication & reminders" description="A calm place to remember what matters, for you or someone you love." />
-        <Tabs defaultValue="medication" className="space-y-5 sm:space-y-8">
+        <Tabs value={view} onValueChange={(value) => void navigate({ search: { view: value === "everyday" ? "everyday" : "medication" }, replace: true })} className="space-y-5 sm:space-y-8">
           <TabsList className="grid h-auto w-full grid-cols-2 rounded-2xl bg-surface p-1.5 sm:max-w-xl">
             <TabsTrigger value="medication" className="min-h-11 rounded-xl px-2 text-sm sm:min-h-12 sm:px-3 sm:text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><PillIcon className="mr-1.5 size-4 sm:mr-2 sm:size-5" /> Medication</TabsTrigger>
             <TabsTrigger value="everyday" className="min-h-11 rounded-xl px-2 text-sm sm:min-h-12 sm:px-3 sm:text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"><BellRingingIcon className="mr-1.5 size-4 sm:mr-2 sm:size-5" /> Everyday</TabsTrigger>
@@ -92,28 +81,16 @@ function RemindersPage() {
 }
 
 /**
- * Picks the right Google Calendar surface for the moment:
- *   - once connected -> the full card, so the sync toggle and disconnect stay
- *     reachable
- *   - medications exist but not connected -> the contextual "add these to your
- *     calendar?" prompt (the point of need)
- *   - no medications yet -> nothing, so a first-time member isn't nagged before
- *     they've added anything
- *
- * The old design showed the full Connect card unconditionally at the top, which
- * asked for calendar access before there was any reason to.
+ * Renders the zero-OAuth native calendar synchronization status card
+ * once medications have been added to the member's care plan.
  */
 function MedicationCalendarSlot() {
-  const statusFn = useServerFn(getGoogleCalendarStatus);
   const listMedsFn = useServerFn(listMedications);
-
-  const status = useQuery({ queryKey: ["google-calendar-status"], queryFn: () => statusFn() });
   const meds = useQuery({ queryKey: ["medications"], queryFn: () => listMedsFn() });
-
-  if (status.data?.connected) return <GoogleCalendarCard />;
-
   const hasMedications = Array.isArray(meds.data) && meds.data.length > 0;
-  return <MedicationCalendarPrompt hasMedications={hasMedications} />;
+  if (!hasMedications) return null;
+
+  return <CalendarSyncCard />;
 }
 
 function EverydayReminders() {

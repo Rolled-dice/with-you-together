@@ -33,6 +33,9 @@ export async function createScheduledMessage(
   if (when.getTime() < Date.now() + 60_000)
     throw new Error("Choose a time at least a few minutes in the future");
 
+  if (input.recipientUserId && !(await listFamilyContacts(context)).some((contact) => contact.userId === input.recipientUserId))
+    throw new Error("Choose an active member of your family.");
+
   let s3Key: string | null = null;
   if (input.kind !== "text") {
     if (!input.file) throw new Error("Record or upload your message first");
@@ -90,7 +93,7 @@ export async function cancelScheduledMessage(context: Ctx, id: string) {
 export async function getMediaUrl(context: Ctx, id: string) {
   const { data, error } = await context.supabase
     .from("scheduled_messages")
-    .select("s3_key, user_id, recipient_user_id")
+    .select("s3_key, user_id, recipient_user_id, status, scheduled_at")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -99,6 +102,8 @@ export async function getMediaUrl(context: Ctx, id: string) {
     (data.user_id !== context.userId && data.recipient_user_id !== context.userId)
   )
     throw new Error("No recording found");
+  if (data.user_id !== context.userId && (data.status !== "delivered" || new Date(data.scheduled_at).getTime() > Date.now()))
+    throw new Error("This recording has not been released yet.");
   return s3ReadUrl(data.s3_key);
 }
 
@@ -130,7 +135,7 @@ export async function listReceivedMessages(context: Ctx) {
 }
 
 /** Family members the user can address a message to. */
-export async function listFamilyContacts(context: Ctx) {
+export async function listFamilyContacts(context: Ctx): Promise<Array<{ userId: string; name: string }>> {
   const { data: famId, error: famErr } = await context.supabase.rpc(
     "get_user_family_id",
     { _uid: context.userId },

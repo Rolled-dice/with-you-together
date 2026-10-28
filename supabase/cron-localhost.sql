@@ -7,15 +7,13 @@
 --
 -- HOW TO USE:
 --   1. Start `pnpm dev` and your tunnel; copy the https tunnel host.
---   2. Replace the two placeholders below:
---        <TUNNEL_HOST>  e.g. someonenear-dev.ngrok-free.app  (NO scheme, NO trailing slash)
---        <PUBLISHABLE_KEY>  your project's sb_publishable_... (or legacy anon) key
---      The cron hook routes authorize callers by comparing this apikey header
---      against SUPABASE_ANON_KEY ?? SUPABASE_PUBLISHABLE_KEY.
+--   2. Replace <TUNNEL_HOST> with your tunnel hostname (no scheme).
+--      Store a random private secret in Vault as someonenear_cron_hook_secret
+--      and set the SAME value in the dev server's CRON_HOOK_SECRET.
 --   3. Run this whole file in the Supabase SQL editor.
 --   4. Re-run it whenever your tunnel host changes (ngrok free rotates hosts).
 --
--- Jobs rescheduled: send-later (*/5), calendar-sync (*/15), call-sla (*/5).
+-- Jobs: send-later (*/5), calendar-sync (*/15), call-sla (*/5), family-reminders (*).
 -- WhatsApp-reminders is intentionally NOT scheduled (simulation only).
 -- ===========================================================================
 
@@ -29,7 +27,10 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
     url := 'https://<TUNNEL_HOST>/api/public/hooks/send-later',
-    headers := '{"Content-Type": "application/json", "apikey": "<PUBLISHABLE_KEY>"}'::jsonb,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'someonenear_cron_hook_secret')
+    ),
     body := '{"source": "cron"}'::jsonb
   );
   $$
@@ -45,7 +46,10 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
     url := 'https://<TUNNEL_HOST>/api/public/hooks/calendar-sync',
-    headers := '{"Content-Type": "application/json", "apikey": "<PUBLISHABLE_KEY>"}'::jsonb,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'someonenear_cron_hook_secret')
+    ),
     body := '{"source": "cron"}'::jsonb
   );
   $$
@@ -62,11 +66,26 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
     url := 'https://<TUNNEL_HOST>/api/public/hooks/call-sla',
-    headers := '{"Content-Type": "application/json", "apikey": "<PUBLISHABLE_KEY>"}'::jsonb,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'someonenear_cron_hook_secret')
+    ),
     body := '{"source": "cron"}'::jsonb
   );
   $$
 );
 
+-- --- family reminders (every minute) --------------------------------------
+SELECT cron.unschedule('someonenear-family-reminders')
+WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'someonenear-family-reminders');
+SELECT cron.schedule('someonenear-family-reminders', '* * * * *', $$
+  SELECT net.http_post(
+    url := 'https://<TUNNEL_HOST>/api/public/hooks/family-reminders',
+    headers := jsonb_build_object('Content-Type','application/json','Authorization','Bearer ' ||
+      (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='someonenear_cron_hook_secret')),
+    body := '{"source":"cron"}'::jsonb
+  );
+$$);
+
 -- Verify what's scheduled:
---   SELECT jobname, schedule FROM cron.job ORDER BY jobname;
+SELECT jobname, schedule FROM cron.job ORDER BY jobname;

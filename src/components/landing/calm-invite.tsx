@@ -1,4 +1,4 @@
-﻿import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowRightIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
@@ -48,14 +48,14 @@ export function CalmBand() {
     <section className="px-6 py-10">
       <div
         data-reveal
-        className="mx-auto flex w-full max-w-6xl flex-col items-center gap-7 rounded-[32px] bg-plate-periwinkle px-7 py-10 text-background sm:px-12 md:flex-row md:justify-between md:py-12"
+        className="mx-auto flex w-full max-w-6xl flex-col items-center gap-7 rounded-[32px] bg-plate-periwinkle px-7 py-10 text-on-plate sm:px-12 md:flex-row md:justify-between md:py-12"
       >
         <div className="text-center md:text-left">
-          <p className="text-sm font-bold uppercase tracking-wide text-background/80">A minute for you</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-on-plate/80">A minute for you</p>
           <h2 className="mx-auto mt-1.5 max-w-md text-2xl leading-tight sm:text-3xl md:mx-0">
             Not here for someone else? This one&apos;s for you.
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-[0.975rem] leading-relaxed text-background/85 md:mx-0">
+          <p className="mx-auto mt-3 max-w-md text-[0.975rem] leading-relaxed text-on-plate/85 md:mx-0">
             Breathe along with a slow circle, or name a worry and watch it float away. No sign-up,
             nothing saved - just a quiet minute whenever a day feels heavy.
           </p>
@@ -71,7 +71,7 @@ export function CalmBand() {
                 <ArrowRightIcon className="ml-1.5 h-4 w-4" weight="bold" />
               </Link>
             </Button>
-            <span className="text-xs font-semibold text-background/75">Free · no sign-up</span>
+            <span className="text-xs font-semibold text-on-plate/75">Free · no sign-up</span>
           </div>
         </div>
 

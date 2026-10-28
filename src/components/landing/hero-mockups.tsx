@@ -123,10 +123,10 @@ export function ListenerCallMockup() {
 
             <div className="flex items-center gap-1.5 rounded-full bg-ink px-2.5 py-1">
               <PhoneCallIcon
-                className="h-2.5 w-2.5 text-background"
+                className="h-2.5 w-2.5 text-on-plate"
                 weight="fill"
               />
-              <span className="text-[9px] font-bold tabular-nums text-background">
+              <span className="text-[9px] font-bold tabular-nums text-on-plate">
                 08:12
               </span>
             </div>

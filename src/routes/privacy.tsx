@@ -40,9 +40,10 @@ function PrivacyPolicy() {
         <h3>Medication and prescription information</h3>
         <p>When you use medication reminders or prescription scanning, we process the medication details and images you provide to create schedules and reminders. Prescription images are used for text extraction and are not intended for diagnosis.</p>
         <h3>Sign-in and connected services</h3>
-        <p>If you use Google or Apple sign-in, we receive the account details you authorize, such as your email, name, and provider identifier. We never receive your Google or Apple password. If you connect Google Calendar, we use authorization tokens and the calendar information needed to create and synchronize the reminder events you request.</p>
+        <p>If you use Google or Apple sign-in, we receive the account details you authorize, such as your email, name, and provider identifier. We never receive your Google or Apple password. When calendar synchronization is enabled, event reminders and dose schedules are delivered directly via standard RFC 5545 / RFC 6047 calendar invitations without requiring third-party OAuth access or token permissions.</p>
         <h3>Calls, microphone, and messaging</h3>
         <p>Listener staff may use microphone access for browser calling. The member receives an ordinary phone call. Calls are not recorded by default. We process phone numbers, call status, timing, and operational notes needed to arrange and complete calls. WhatsApp or SMS messages may be queued or sent when those services are enabled.</p>
+        <p>Companion voice input is optional and starts only when you choose it and allow microphone access. Your browser&apos;s speech-recognition service may process audio for live transcription. Where live recognition is unavailable, a short recording is sent to Google Gemini for transcription. SomeoneNear does not store these audio recordings in its database or file storage. A recording may stay temporarily in browser memory so you can retry a failed transcription, and is cleared on completion, cancellation, or leaving the page. Provider processing is subject to the relevant provider&apos;s terms. You can review or edit the resulting text before sending it as a Companion message, or use typing without microphone access.</p>
         <h3>Payments and approximate region</h3>
         <p>Payment providers process payment details for memberships. SomeoneNear does not store full card numbers. We may infer a country or timezone from information such as your selected country, phone country code, browser settings, or network information to show suitable pricing, taxes, and reminder times. We do not use the service to track precise GPS location.</p>
       </section>
@@ -60,8 +61,20 @@ function PrivacyPolicy() {
 
       <section>
         <h2>Service providers and sharing</h2>
-        <p>We do not sell personal information or share it with third-party advertisers. We disclose only the information needed to providers that help operate the service. These currently include Lovable Cloud for application hosting, account services, and data storage; Google Gemini for Companion responses and prescription text extraction; Telnyx for listener calling; Google and Apple for sign-in or connected calendar services; enabled payment providers; and enabled email or messaging providers. A provider is involved only when its related feature is configured or used.</p>
+        <p>We do not sell personal information or share it with third-party advertisers. We disclose only the information needed to providers that help operate the service. These currently include Lovable Cloud for application hosting, account services, and data storage; Google Gemini for Companion responses and prescription text extraction; Amazon Web Services (AWS) and Amazon Bedrock for AI safety guardrail evaluations and encrypted memory storage; Telnyx for listener calling; Google and Apple for sign-in or connected calendar services; enabled payment providers; and enabled email or messaging providers. A provider is involved only when its related feature is configured or used. Switching backend service providers does not reduce your privacy rights.</p>
         <p>We may also disclose information when required by law, to protect a person from serious harm, or as part of a business transaction subject to appropriate safeguards.</p>
+      </section>
+
+      <section>
+        <h2>AI Companion, safety processing, and memory</h2>
+        <p>To provide safe and empathetic emotional companionship, our AI integration adheres to strict boundaries:</p>
+        <ul>
+          <li><strong>Safety evaluations:</strong> Amazon Web Services and Amazon Bedrock may process conversation prompts and generated responses to evaluate crisis indicators, self-harm risk, and safety boundaries.</li>
+          <li><strong>Minimized audit logs:</strong> Safety logs record categorized outcomes and technical metrics. They do not contain raw conversation transcripts or message text by default.</li>
+          <li><strong>Encrypted continuity summaries:</strong> To maintain continuity between chats without retaining full conversation histories in memory, a minimized, non-clinical summary of user-stated preferences and wellbeing goals may be created. Summaries and safety audit records are encrypted at rest and stored in the configured AWS region under pseudonymous identifiers.</li>
+          <li><strong>Memory controls:</strong> You can view your stored summary, request corrections, or clear your Companion memory at any time in Settings.</li>
+          <li><strong>Account deletion:</strong> Deleting your account queues the deletion or anonymization of your AI user summary and deletable safety events in accordance with our retention policy.</li>
+        </ul>
       </section>
 
       <section>

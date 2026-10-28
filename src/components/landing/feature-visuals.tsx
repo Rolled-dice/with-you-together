@@ -100,10 +100,10 @@ export function CheckInVisual() {
           <p className="text-xs font-bold">Priya · listener</p>
 
           <div className="flex items-center gap-1.5 rounded-full bg-ink px-3 py-1">
-            <PhoneCallIcon className="h-3 w-3 text-background" weight="fill" />
+            <PhoneCallIcon className="h-3 w-3 text-on-plate" weight="fill" />
             <span
               data-anim="timer"
-              className="text-[10px] font-bold tabular-nums text-background"
+              className="text-[10px] font-bold tabular-nums text-on-plate"
             >
               11:42
             </span>
@@ -314,7 +314,7 @@ export function RemindersVisual() {
                 </span>
                 <span
                   data-anim="hl"
-                  className="absolute inset-0 flex items-center justify-center rounded-full bg-orb-grass px-2.5 text-[8px] font-extrabold text-background"
+                  className="absolute inset-0 flex items-center justify-center rounded-full bg-orb-grass px-2.5 text-[8px] font-extrabold text-on-plate"
                 >
                   Taken
                 </span>
@@ -445,7 +445,7 @@ export function CompanionVisual() {
               <div
                 key={i}
                 data-msg
-                className="ml-auto w-fit max-w-[82%] rounded-2xl rounded-br-sm bg-ink px-2.5 py-1.5 text-[9.5px] font-medium text-background"
+                className="ml-auto w-fit max-w-[82%] rounded-2xl rounded-br-sm bg-ink px-2.5 py-1.5 text-[9.5px] font-medium text-on-plate"
               >
                 {m.text}
               </div>

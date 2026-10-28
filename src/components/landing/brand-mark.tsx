@@ -58,8 +58,8 @@ export function Wordmark({ className }: { className?: string }) {
     <span className={cn("flex items-center gap-2.5", className)}>
       <BrandMark className="h-10 w-auto" />
       <span className="text-2xl font-extrabold tracking-tight sm:text-[1.7rem]">
-        <span className="text-orb-navy">Someone</span>
-        <span className="text-orb-terracotta">Near</span>
+        <span className="text-brand-primary">Someone</span>
+        <span className="text-brand-accent">Near</span>
       </span>
     </span>
   );

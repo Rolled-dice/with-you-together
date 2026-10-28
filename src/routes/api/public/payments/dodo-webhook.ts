@@ -214,6 +214,13 @@ async function processWebhook(
     throw new Error("Dodo webhook missing metadata.userId");
   }
 
+  if (metadata.kind === "extra_call") {
+    if (eventType === "payment.succeeded") {
+      const { applyExtraCallPayment } = await import("@/lib/call-credits.server");
+      await applyExtraCallPayment(userId, resource, environment);
+    }
+    return;
+  }
   switch (eventType) {
     case "subscription.active":
       await upsertSubscription(supabase, resource, environment, eventId, "subscription.updated");

@@ -1,77 +1,37 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-
-const ReminderInput = z.object({
-  for_user_id: z.string().uuid(),
-  title: z.string().min(1).max(200),
-  description: z.string().max(1000).nullable().optional(),
-  category: z.enum(["general", "appointment", "bill", "hydration", "exercise", "birthday", "other"]).default("general"),
-  due_at: z.string(),
-  recurrence: z.enum(["none", "daily", "weekly", "monthly", "yearly"]).default("none"),
-});
+import { ReminderInput } from "./family-reminders.schemas";
+import { FamilyIdInput } from "./family.schemas";
+import { changeFamilyReminder, readFamilyReminders } from "./family-reminders.server";
 
 export const listReminders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("reminders")
-      .select("*")
-      .in("status", ["pending", "snoozed"])
-      .order("due_at", { ascending: true })
-      .limit(200);
-    if (error) throw new Error(error.message);
-    return data ?? [];
-  });
-
+  .handler(({ context }) => readFamilyReminders(context.userId, "list"));
+export const getFamilyToday = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(({ context }) => readFamilyReminders(context.userId, "today"));
 export const createReminder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => ReminderInput.parse(i))
-  .handler(async ({ context, data }) => {
-    const { data: row, error } = await context.supabase
-      .from("reminders")
-      .insert({ ...data, created_by: context.userId })
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    try {
-      const { syncNow } = await import("@/lib/calendar/sync.server");
-      await syncNow();
-    } catch (e) {
-      console.error("[calendar-sync] createReminder", e);
-    }
-    return row;
-  });
-
+  .handler(({ context, data }) => changeFamilyReminder(context.userId, "create", data));
 export const completeReminder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
-  .handler(async ({ context, data }) => {
-    const { error } = await context.supabase
-      .from("reminders")
-      .update({ status: "done", completed_at: new Date().toISOString() })
-      .eq("id", data.id);
-    if (error) throw new Error(error.message);
-    try {
-      const { syncNow } = await import("@/lib/calendar/sync.server");
-      await syncNow();
-    } catch (e) {
-      console.error("[calendar-sync] reminder mutation", e);
-    }
-    return { ok: true };
-  });
-
+  .inputValidator((i: unknown) => FamilyIdInput.parse(i))
+  .handler(({ context, data }) => changeFamilyReminder(context.userId, "complete", data));
 export const deleteReminder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
-  .handler(async ({ context, data }) => {
-    const { error } = await context.supabase.from("reminders").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
-    try {
-      const { syncNow } = await import("@/lib/calendar/sync.server");
-      await syncNow();
-    } catch (e) {
-      console.error("[calendar-sync] reminder mutation", e);
-    }
-    return { ok: true };
-  });
+  .inputValidator((i: unknown) => FamilyIdInput.parse(i))
+  .handler(({ context, data }) => changeFamilyReminder(context.userId, "delete", data));
+export const snoozeReminder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    FamilyIdInput.extend({ due_at: z.string().datetime({ offset: true }) }).parse(i),
+  )
+  .handler(({ context, data }) => changeFamilyReminder(context.userId, "snooze", data));
+export const shareReminderUpdate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    FamilyIdInput.extend({ update_text: z.string().trim().min(1).max(2000) }).parse(i),
+  )
+  .handler(({ context, data }) => changeFamilyReminder(context.userId, "update", data));

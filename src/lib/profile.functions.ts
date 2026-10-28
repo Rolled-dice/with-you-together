@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { FAMILY_AVATARS } from "./family-avatars";
 
 export const getMyProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -17,6 +18,10 @@ export const getMyProfile = createServerFn({ method: "GET" })
   });
 
 const ProfileInput = z.object({
+  avatar_url: z
+    .string()
+    .refine((value) => FAMILY_AVATARS.includes(value), "Choose an available avatar.")
+    .optional(),
   display_name: z.string().max(100).nullable().optional(),
   full_name: z.string().max(100).nullable().optional(),
   pronouns: z.string().max(50).nullable().optional(),
@@ -77,10 +82,12 @@ export const updateCareTier = createServerFn({ method: "POST" })
 export const markPhoneVerified = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({
-      phone: z.string().max(30),
-      phone_country: z.string().length(2).optional(),
-    }).parse(input),
+    z
+      .object({
+        phone: z.string().max(30),
+        phone_country: z.string().length(2).optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase

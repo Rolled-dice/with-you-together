@@ -62,7 +62,7 @@ export const createMedication = createServerFn({ method: "POST" })
     // Seed today's dose logs
     await seedDoseLogs(context.supabase, row.id);
     try {
-      const { syncNow } = await import("@/lib/calendar/sync.server");
+      const { syncNow } = await import("@/lib/calendar-sync");
       await syncNow();
     } catch (e) {
       console.error("[calendar-sync] createMedication", e);
@@ -80,7 +80,7 @@ export const deleteMedication = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     try {
-      const { syncNow } = await import("@/lib/calendar/sync.server");
+      const { syncNow } = await import("@/lib/calendar-sync");
       await syncNow();
     } catch (e) {
       console.error("[calendar-sync] medication mutation", e);
@@ -114,7 +114,7 @@ export const listFamilyMembers = createServerFn({ method: "GET" })
       .from("profiles")
       .select("id, display_name, full_name")
       .in("id", ids);
-    return (members ?? []).map((m) => {
+    return (members ?? []).filter((m) => m.user_id === context.userId).map((m) => {
       const p = profiles?.find((pp) => pp.id === m.user_id);
       return {
         user_id: m.user_id,
@@ -131,6 +131,7 @@ export const listTodaysDoses = createServerFn({ method: "GET" })
     const { data: meds } = await context.supabase
       .from("medications")
       .select("id")
+      .eq("for_user_id", context.userId)
       .eq("is_active", true);
     for (const m of meds ?? []) {
       await seedDoseLogs(context.supabase, m.id);
@@ -170,12 +171,23 @@ export const logDose = createServerFn({ method: "POST" })
       .eq("id", data.dose_id);
     if (error) throw new Error(error.message);
     try {
-      const { syncNow } = await import("@/lib/calendar/sync.server");
+      const { syncNow } = await import("@/lib/calendar-sync");
       await syncNow();
     } catch (e) {
       console.error("[calendar-sync] medication mutation", e);
     }
     return { ok: true };
+  });
+
+export const getPrescriptionUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ medication_id: z.string().uuid() }).parse(i))
+  .handler(async ({ context, data }) => {
+    const { data: medication, error } = await context.supabase.from("medications").select("prescription_image_path").eq("id", data.medication_id).maybeSingle();
+    if (error || !medication?.prescription_image_path) throw new Error("This prescription is not available to you.");
+    const { data: signed, error: storageError } = await context.supabase.storage.from("prescriptions").createSignedUrl(medication.prescription_image_path, 60);
+    if (storageError || !signed) throw new Error("This prescription is not available to you.");
+    return { url: signed.signedUrl };
   });
 
 // ---- Prescription parsing via Lovable AI Vision ----

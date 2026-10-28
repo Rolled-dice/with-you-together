@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { ExtraCallPurchase } from "@/components/extra-call-purchase";
 import { JsonLd } from "@/components/json-ld";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -111,7 +112,7 @@ function ListenersPage() {
   const [day, setDay] = useState(todayIso());
   const [time, setTime] = useState("18:00");
   const [tz, setTz] = useState(TIMEZONES.includes(DEFAULT_TZ) ? DEFAULT_TZ : "Asia/Kolkata");
-  const [duration, setDuration] = useState(45);
+  const duration = 15;
   const [note, setNote] = useState("");
   const [bookingError, setBookingError] = useState<{ message: string; settingsLink: boolean } | null>(null);
 
@@ -123,7 +124,7 @@ function ListenersPage() {
       preferred_day: string;
       preferred_time: string;
       time_zone: string;
-      duration_minutes: number;
+      duration_minutes: 15;
       note: string;
       booking_type: "scheduled" | "emergency_callback";
     }) => requestFn({ data: input }),
@@ -218,6 +219,8 @@ function ListenersPage() {
         </div>
       )}
 
+      <ExtraCallPurchase />
+
       {/* Sessions + reschedules left this month. Shown for family members
           (shared pool) and solo users (own-plan allowance) alike. */}
       {balance.data && (
@@ -295,14 +298,7 @@ function ListenersPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>Session length</Label>
-                <Select value={String(duration)} onValueChange={(v) => setDuration(Number(v))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">60 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
+                <p className="py-2 text-base">15 minutes</p>
               </div>
             </div>
             <div className="space-y-1.5">
@@ -385,7 +381,7 @@ function ListenersPage() {
                         preferred_day: todayIso(),
                         preferred_time: "12:00",
                         time_zone: tz,
-                        duration_minutes: 30,
+                        duration_minutes: 15,
                         note: emergencyNote,
                         booking_type: "emergency_callback",
                       })

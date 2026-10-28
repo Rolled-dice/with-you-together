@@ -1,10 +1,18 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  useRouter,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "sonner";
+import { AppThemeSync } from "@/components/app-theme";
 
 function NotFoundComponent() {
   return (
@@ -35,10 +43,17 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          This page didn't load
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          {error instanceof Error ? error.message : "Something went wrong on our end. You can try refreshing or head back home."}
         </p>
+        {error instanceof Error && error.stack && (
+          <pre className="mt-4 p-2 text-left text-xs bg-black/40 text-red-300 overflow-auto max-h-48 rounded">
+            {error.stack}
+          </pre>
+        )}
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -89,6 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "stylesheet", href: appCss },
       // Square, padded, genuinely transparent icons built by
       // scripts/clean-logo.ps1 from the original artwork.
@@ -100,7 +116,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap",
       },
-      { rel: "preconnect", href: "https://jflufaxdwzrohslviqeb.supabase.co", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://jflufaxdwzrohslviqeb.supabase.co",
+        crossOrigin: "anonymous",
+      },
       { rel: "dns-prefetch", href: "https://jflufaxdwzrohslviqeb.supabase.co" },
     ],
   }),
@@ -112,7 +132,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/*
           Cookiebot hydration guard. Cookiebot's auto-blocking inserts a
@@ -129,6 +149,12 @@ function RootShell({ children }: { children: ReactNode }) {
         */}
         <script async src="/cb-anchor.js" />
         <noscript id="head-hydration-anchor" />
+        <script
+          id="app-theme"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('someonenear-theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){}})();`,
+          }}
+        />
         <HeadContent />
         {/*
           Password-recovery links land on the Site URL root with the session
@@ -189,7 +215,8 @@ function RootComponent() {
     if (typeof window !== "undefined") {
       const hash = window.location.hash || "";
       const onReset = window.location.pathname.startsWith("/auth/reset");
-      const looksLikeRecovery = /type=recovery/.test(hash) || (/access_token=/.test(hash) && /recovery/.test(hash));
+      const looksLikeRecovery =
+        /type=recovery/.test(hash) || (/access_token=/.test(hash) && /recovery/.test(hash));
       if (looksLikeRecovery && !onReset) {
         // Preserve the hash so the reset page's client can establish the session.
         window.location.replace(`/auth/reset${window.location.hash}`);
@@ -215,6 +242,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AppThemeSync />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster
@@ -223,7 +251,8 @@ function RootComponent() {
         duration={5000}
         toastOptions={{
           classNames: {
-            toast: "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
+            toast:
+              "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
             title: "font-display font-medium",
             description: "text-muted-foreground",
             actionButton: "rounded-full bg-primary text-primary-foreground",

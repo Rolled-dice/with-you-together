@@ -16,7 +16,10 @@ export const Route = createFileRoute("/_authenticated/companion")({
   head: () => ({
     meta: [
       { title: "Companion | SomeoneNear" },
-      { name: "description", content: "A calm AI Companion to talk things through, on your terms." },
+      {
+        name: "description",
+        content: "A calm AI Companion to talk things through, on your terms.",
+      },
     ],
   }),
   component: CompanionLayout,
@@ -55,7 +58,7 @@ function CompanionLayout() {
 
   return (
     <AppShell>
-      <div className="flex h-[calc(100dvh_-_9.75rem_-_env(safe-area-inset-bottom))] min-h-[32rem] gap-4 animate-fade-up md:h-[calc(100vh_-_6rem)] md:min-h-[36rem] md:gap-6">
+      <div className="flex h-[calc(100dvh_-_9.75rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] min-h-72 gap-4 md:h-[calc(100dvh_-_5rem)] md:gap-6">
         <aside className="hidden w-64 shrink-0 flex-col gap-3 md:flex">
           <Button
             onClick={() => createMut.mutate()}
@@ -80,7 +83,7 @@ function CompanionLayout() {
                         to="/companion/$threadId"
                         params={{ threadId: c.id }}
                         className={cn(
-                          "block truncate rounded-brand px-3 py-2 pr-8 text-sm transition-colors",
+                          "block min-h-11 truncate rounded-brand px-3 py-3 pr-12 text-sm transition-colors",
                           active
                             ? "bg-brand-primary/10 text-foreground"
                             : "text-muted-foreground hover:bg-muted",
@@ -96,7 +99,7 @@ function CompanionLayout() {
                             deleteMut.mutate(c.id);
                           }
                         }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-background hover:text-foreground group-hover:opacity-100"
+                        className="absolute right-0 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-background hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
                         aria-label="Delete conversation"
                       >
                         <TrashIcon className="h-3.5 w-3.5" />
@@ -113,14 +116,14 @@ function CompanionLayout() {
           </p>
         </aside>
 
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-brand border border-border bg-card card-lift animate-slide-in-up">
-          <header className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-brand border border-border bg-card">
+          <header className="flex min-h-14 shrink-0 items-center gap-2 border-b border-border px-4 py-2">
             <ChatCircleIcon className="h-4 w-4 text-brand-accent" />
-            <h1 className="text-sm font-medium">Companion</h1>
+            <h1 className="text-base font-medium">Companion</h1>
             <Button
               size="sm"
               variant="outline"
-              className="ml-auto rounded-brand md:hidden"
+              className="ml-auto min-h-11 rounded-md md:hidden"
               onClick={() => createMut.mutate()}
               disabled={createMut.isPending}
             >

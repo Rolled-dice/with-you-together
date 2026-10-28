@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rolled-dice-with-you-together",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "routes": [
+    {
+      "pattern": "www.someonenear.com",
+      "zone_name": "someonenear.com",
+      "custom_domain": true
+    }
+  ],
+  "workers_dev": true,
+  "ratelimits": [
+    {
+      "name": "COMPANION_VOICE_LIMITER",
+      "namespace_id": "2026100201",
+      "simple": { "limit": 4, "period": 60 }
+    }
+  ],
+  "vars": {
+    "CALENDAR_ORGANIZER_EMAIL": "noreply@someonenear.com",
+    "GEMINI_MODEL": "gemini-3-flash-preview",
+    "AWS_REGION": "us-east-1",
+    "AWS_BEDROCK_GUARDRAIL_VERSION": "1",
+    "AWS_SUMMARY_TABLE_NAME": "someonenear-ai-user-summaries",
+    "AWS_SAFETY_TABLE_NAME": "someonenear-ai-safety-audits",
+    "AI_GENERATION_PROVIDER": "gemini",
+    "AI_SAFETY_PROVIDER": "bedrock",
+    "AI_SUMMARY_STORE": "aws",
+    "AI_SAFETY_LOG_SINK": "aws"
+  }
+}

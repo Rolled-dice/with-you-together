@@ -34,6 +34,22 @@ Public tests (landing page, auth form render, protected-route redirect)
 always run. Authenticated tests are automatically **skipped** when
 `TEST_EMAIL` / `TEST_PASSWORD` are not set.
 
+## Companion voice tests
+
+The voice composer tests mount the real composer against a local Vite server,
+without a hosted account. Speech recognition is simulated to test draft
+preservation, permission denial, manual sending, and 44px controls at desktop,
+390px, and 320px widths. They do not measure real-world transcription accuracy.
+These fixture tests skip against non-local deployment URLs.
+
+To use an installed browser instead of downloading Playwright Chromium:
+
+```powershell
+$env:PLAYWRIGHT_BASE_URL='http://127.0.0.1:8082'
+$env:PLAYWRIGHT_BROWSER_CHANNEL='msedge' # or 'chrome'
+npm run test:e2e -- tests/e2e/voice-composer.spec.ts
+```
+
 ## What is covered
 
 - **Public**: `/` loads, `/auth` renders the sign-in form, `/dashboard`

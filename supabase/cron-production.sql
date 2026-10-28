@@ -6,15 +6,14 @@
 -- editor for the project that backs production.
 --
 -- HOW TO USE:
---   1. Replace the single placeholder below:
---        <PUBLISHABLE_KEY>  your project's sb_publishable_... (or legacy anon) key.
---      The cron hook routes authorize callers by comparing this apikey header
---      against SUPABASE_ANON_KEY ?? SUPABASE_PUBLISHABLE_KEY.
+--   1. Store a random private secret in Supabase Vault named
+--      someonenear_cron_hook_secret and configure the SAME value as the
+--      Worker secret CRON_HOOK_SECRET. Never use a publishable/anon key.
 --   2. Run this whole file once. It is idempotent (unschedule-then-schedule),
 --      so re-running it is safe and simply refreshes the jobs.
 --
 -- Host is fixed to www.someonenear.com (no tunnel, no trailing slash).
--- Jobs rescheduled: send-later (*/5), calendar-sync (*/15), call-sla (*/5).
+-- Jobs: send-later (*/5), calendar-sync (*/15), call-sla (*/5), family-reminders (*).
 -- WhatsApp-reminders is intentionally NOT scheduled (simulation only) — add it
 -- below only once a real WhatsApp provider is configured.
 -- ===========================================================================
@@ -29,7 +28,10 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
     url := 'https://www.someonenear.com/api/public/hooks/send-later',
-    headers := '{"Content-Type": "application/json", "apikey": "sb_publishable_AwKwAQONQMKAcmAD_4p0lg_89hRrMtE"}'::jsonb,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'someonenear_cron_hook_secret')
+    ),
     body := '{"source": "cron"}'::jsonb
   );
   $$
@@ -45,7 +47,10 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
     url := 'https://www.someonenear.com/api/public/hooks/calendar-sync',
-    headers := '{"Content-Type": "application/json", "apikey": "sb_publishable_AwKwAQONQMKAcmAD_4p0lg_89hRrMtE"}'::jsonb,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'someonenear_cron_hook_secret')
+    ),
     body := '{"source": "cron"}'::jsonb
   );
   $$
@@ -61,7 +66,10 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
     url := 'https://www.someonenear.com/api/public/hooks/call-sla',
-    headers := '{"Content-Type": "application/json", "apikey": "sb_publishable_AwKwAQONQMKAcmAD_4p0lg_89hRrMtE"}'::jsonb,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'someonenear_cron_hook_secret')
+    ),
     body := '{"source": "cron"}'::jsonb
   );
   $$
@@ -79,11 +87,26 @@ SELECT cron.schedule(
 --   $$
 --   SELECT net.http_post(
 --     url := 'https://www.someonenear.com/api/public/hooks/whatsapp-reminders',
---     headers := '{"Content-Type": "application/json", "apikey": "<PUBLISHABLE_KEY>"}'::jsonb,
+--     headers := jsonb_build_object(
+--       'Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'someonenear_cron_hook_secret')
+--     ),
 --     body := '{"source": "cron"}'::jsonb
 --   );
 --   $$
 -- );
 
+-- --- family reminder inbox + background delivery (every minute) ------------
+SELECT cron.unschedule('someonenear-family-reminders')
+WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'someonenear-family-reminders');
+SELECT cron.schedule('someonenear-family-reminders', '* * * * *', $$
+  SELECT net.http_post(
+    url := 'https://www.someonenear.com/api/public/hooks/family-reminders',
+    headers := jsonb_build_object('Content-Type','application/json','Authorization','Bearer ' ||
+      (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='someonenear_cron_hook_secret')),
+    body := '{"source":"cron"}'::jsonb
+  );
+$$);
+
 -- Verify what's scheduled:
---   SELECT jobname, schedule FROM cron.job ORDER BY jobname;
+SELECT jobname, schedule FROM cron.job ORDER BY jobname;

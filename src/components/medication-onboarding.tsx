@@ -265,8 +265,8 @@ export function MedicationOnboarding() {
   }
 
   const isReviewingScan = mode === "scan" && parsedData !== null;
-  const medicationRows = (medications.data ?? []) as MedicationRow[];
-  const doseRows = (doses.data ?? []) as DoseRow[];
+  const medicationRows = ((medications.data ?? []) as MedicationRow[]).filter((medication) => medication.for_user_id === forUserId);
+  const doseRows = (doses.data ?? []).filter((dose) => dose.for_user_id === forUserId) as DoseRow[];
 
   return (
     <div className="space-y-8 sm:space-y-12">

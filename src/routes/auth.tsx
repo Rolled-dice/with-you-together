@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FieldRow } from "@/components/auth/field-row";
 import { classifyAuthError } from "@/lib/auth-errors";
 import { safeAuthRedirect } from "@/lib/auth-routing";
+import { PhoneSignIn } from "@/components/auth/phone-sign-in";
 
 const SignUpForm = lazy(() => import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })));
 
@@ -213,6 +214,7 @@ function AuthPage() {
             </div>
           )}
 
+          <PhoneSignIn redirectTo={redirectTo} />
           <Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")} className="mt-6">
             <TabsList className="grid w-full grid-cols-2 rounded-brand">
               <TabsTrigger value="signin" className="rounded-brand transition-all">

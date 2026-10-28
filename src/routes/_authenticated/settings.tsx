@@ -1,5 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { BackgroundReminders } from "@/components/background-reminders";
+import { ThemePreferences } from "@/components/app-theme";
+import { removeCurrentPushDevice } from "@/lib/push-browser";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +33,10 @@ import {
   createMemory as createMemoryFn,
   deleteMemory as deleteMemoryFn,
 } from "@/lib/memories.functions";
+import {
+  getMyCompanionSummary as getMyCompanionSummaryFn,
+  clearMyCompanionSummary as clearMyCompanionSummaryFn,
+} from "@/lib/ai/memory.functions";
 import { cancelDodoSubscription, getMyDodoSubscription, getMyCoverage } from "@/lib/dodo.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -196,6 +203,7 @@ function SettingsPage() {
   const manageLabel = "Cancel membership";
 
   async function handleSignOut() {
+    await removeCurrentPushDevice(true);
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
@@ -245,6 +253,8 @@ function SettingsPage() {
       />
 
       <div className="grid gap-4 sm:gap-6">
+        <ThemePreferences />
+        <BackgroundReminders />
         <Card data-page-reveal className="rounded-brand border-border bg-card">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="flex items-center gap-2 text-base font-medium">
@@ -927,12 +937,19 @@ function CompanionMemoryCard() {
   const listFn = useServerFn(listMemoriesFn);
   const createFn = useServerFn(createMemoryFn);
   const deleteFn = useServerFn(deleteMemoryFn);
+  const getSummaryFn = useServerFn(getMyCompanionSummaryFn);
+  const clearSummaryFn = useServerFn(clearMyCompanionSummaryFn);
   const qc = useQueryClient();
   const [content, setContent] = useState("");
 
   const { data: memories = [], isLoading } = useQuery({
     queryKey: ["memories"],
     queryFn: () => listFn(),
+  });
+
+  const { data: summaryData, isLoading: summaryLoading } = useQuery({
+    queryKey: ["companion-summary"],
+    queryFn: () => getSummaryFn(),
   });
 
   const addMut = useMutation({
@@ -950,51 +967,112 @@ function CompanionMemoryCard() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["memories"] }),
   });
 
+  const clearSummaryMut = useMutation({
+    mutationFn: () => clearSummaryFn(),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["companion-summary"] });
+      toast.success(res.message || "Companion AI memory cleared.");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
   return (
     <Card data-page-reveal className="rounded-brand border-border bg-card">
       <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-base font-medium">Companion memory</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4 p-4 pt-0 sm:p-6 sm:pt-0">
-        <p className="text-sm text-muted-foreground">
-          Short notes you'd like the Companion to keep in mind, only you can see these.
-        </p>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Input
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            maxLength={500}
-            placeholder="e.g. I use they/them. Walks help when I'm anxious."
-            className="rounded-brand"
-          />
-          <Button
-            onClick={() => addMut.mutate()}
-            disabled={!content.trim() || addMut.isPending}
-            className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
-          >
-            {addMut.isPending ? <SpinnerGapIcon className="h-4 w-4 animate-spin" /> : "Add"}
-          </Button>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-medium">Companion memory & continuity</CardTitle>
+          <Badge variant="outline" className="text-xs font-normal">
+            Encrypted AWS Storage
+          </Badge>
         </div>
-        {isLoading ? (
-          <Skeleton className="h-10 w-full rounded-brand" />
-        ) : memories.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No memories yet.</p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {memories.map((m) => (
-              <li key={m.id} className="flex items-start justify-between gap-3 py-2 text-sm">
-                <span className="flex-1">{m.content}</span>
-                <button
-                  type="button"
-                  onClick={() => delMut.mutate(m.id)}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+      </CardHeader>
+      <CardContent className="flex flex-col gap-6 p-4 pt-0 sm:p-6 sm:pt-0">
+        <div>
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+            Explicit Notes
+          </h4>
+          <p className="text-sm text-muted-foreground mb-3">
+            Short notes you'd like the Companion to keep in mind. Only you can see these.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              maxLength={500}
+              placeholder="e.g. I use they/them. Walks help when I'm anxious."
+              className="rounded-brand"
+            />
+            <Button
+              onClick={() => addMut.mutate()}
+              disabled={!content.trim() || addMut.isPending}
+              className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
+            >
+              {addMut.isPending ? <SpinnerGapIcon className="h-4 w-4 animate-spin" /> : "Add"}
+            </Button>
+          </div>
+          {isLoading ? (
+            <Skeleton className="mt-3 h-10 w-full rounded-brand" />
+          ) : memories.length === 0 ? (
+            <p className="mt-3 text-xs text-muted-foreground">No explicit notes yet.</p>
+          ) : (
+            <ul className="mt-3 divide-y divide-border">
+              {memories.map((m) => (
+                <li key={m.id} className="flex items-start justify-between gap-3 py-2 text-sm">
+                  <span className="flex-1">{m.content}</span>
+                  <button
+                    type="button"
+                    onClick={() => delMut.mutate(m.id)}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="border-t border-border pt-4">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              AI Conversational Continuity Summary
+            </h4>
+            {summaryData?.summary && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (confirm("Clear your Companion continuity memory? This permanently deletes it from secure storage.")) {
+                    clearSummaryMut.mutate();
+                  }
+                }}
+                disabled={clearSummaryMut.isPending}
+                className="h-7 text-xs text-destructive hover:bg-destructive/10"
+              >
+                {clearSummaryMut.isPending ? "Clearing..." : "Clear Memory"}
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            A non-clinical summary of communication preferences and wellbeing goals, kept strictly private under a pseudonymous key.
+          </p>
+
+          {summaryLoading ? (
+            <Skeleton className="h-16 w-full rounded-brand" />
+          ) : summaryData?.summary?.summaryText ? (
+            <div className="rounded-brand border border-border/70 bg-muted/40 p-3 text-sm">
+              <p className="whitespace-pre-wrap">{summaryData.summary.summaryText}</p>
+              <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>Version {summaryData.summary.version}</span>
+                <span>Last updated: {new Date(summaryData.summary.updatedAt).toLocaleDateString()}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-brand border border-dashed border-border p-3 text-xs text-muted-foreground">
+              No continuity summary recorded yet. As you talk with your Companion, helpful non-clinical preferences will be summarized here.
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

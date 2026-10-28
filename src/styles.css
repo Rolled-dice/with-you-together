@@ -1,12 +1,217 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "./components/care-ui/care-ui.css";
 
 @custom-variant dark (&:is(.dark *));
 
 /* Touch devices: used to raise tap targets to >=44px only on coarse pointers,
  * so desktop density (Harbor) is unchanged. */
 @custom-variant coarse (@media (pointer: coarse));
+
+.family-experience {
+  min-width: 0;
+  color: var(--foreground);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+.family-experience :is(input, select, textarea) {
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+.family-experience :is(input:not([type="radio"]):not([type="checkbox"]), select) {
+  min-height: 48px;
+}
+.family-experience button:not([role]):not([aria-label]):not(.absolute) {
+  min-height: 44px;
+  height: auto;
+  max-width: 100%;
+  white-space: normal;
+  padding-block: 0.625rem;
+}
+.family-experience :is(fieldset, input, label, [role="tabpanel"]) {
+  min-width: 0;
+}
+.family-select {
+  border: 1px solid var(--input);
+  border-radius: var(--radius-brand);
+  background: var(--background);
+  color: var(--foreground);
+  padding: 10px 12px;
+  min-width: 0;
+  max-width: 100%;
+}
+.family-select:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.family-tabs [role="tab"] {
+  min-height: 44px;
+  flex: 1 1 8rem;
+  gap: 0.5rem;
+  white-space: normal;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.family-tabs [role="tab"][data-state="active"] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.family-reminder {
+  animation: family-appear 180ms ease-out;
+}
+.family-globe-pin {
+  visibility: hidden;
+  width: 72px;
+}
+.family-globe {
+  height: 390px;
+  max-width: 760px;
+  touch-action: pan-y;
+}
+.family-globe canvas {
+  cursor: grab;
+}
+.family-globe canvas:active {
+  cursor: grabbing;
+}
+.family-globe-controls button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.family-globe-portrait {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--background);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 4px 12px color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+.family-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-image: url("/family-avatars.png");
+  background-size: 446.914% 335.185%;
+  background-position: var(--avatar-x) var(--avatar-y);
+  background-repeat: no-repeat;
+}
+.family-member-avatar {
+  width: 44px;
+  height: 44px;
+}
+.family-avatar-option {
+  aspect-ratio: 1;
+  min-width: 44px;
+}
+.family-avatar-option > span {
+  height: 100%;
+}
+.family-update-cloud {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: -13px;
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 24px;
+  border-radius: 13px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--foreground) 12%, transparent);
+  font-size: 13px;
+  font-weight: 800;
+}
+.family-update-cloud::before,
+.family-update-cloud::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  background: inherit;
+  border-radius: 50%;
+}
+.family-globe-pin::after {
+  content: "";
+  position: absolute;
+  bottom: -13px;
+  width: 6px;
+  height: 6px;
+  background: var(--brand-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-accent) 12%, transparent);
+  pointer-events: none;
+}
+.family-update-cloud::before {
+  width: 17px;
+  height: 17px;
+  top: -5px;
+  left: 4px;
+}
+.family-update-cloud::after {
+  width: 5px;
+  height: 5px;
+  top: -6px;
+  right: 1px;
+  background: var(--brand-accent);
+}
+@media (min-width: 640px) {
+  .family-globe {
+    height: 440px;
+  }
+  .family-globe-pin {
+    width: 110px;
+  }
+  .family-globe-portrait {
+    width: 64px;
+    height: 64px;
+    border-width: 3px;
+  }
+  .family-update-cloud {
+    width: 39px;
+    height: 31px;
+    right: -14px;
+    font-size: 17px;
+  }
+  .family-update-cloud::before {
+    width: 23px;
+    height: 23px;
+    top: -7px;
+  }
+}
+.family-globe[data-globe-ready="true"] .family-globe-pin {
+  visibility: visible;
+}
+.family-globe[data-globe-ready="true"] .family-globe-placeholder {
+  display: none;
+}
+.family-experience .family-globe-pin {
+  min-height: 0;
+  padding-block: 0.25rem;
+}
+@keyframes family-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .family-experience *,
+  .family-experience *::before,
+  .family-experience *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
 
 /*
  * SomeoneNear design system — warm, calm, safe, friendly, human, minimal.
@@ -176,6 +381,7 @@
   --color-plate-periwinkle: #7f9dc4;
   --color-plate-terracotta: #a94a28;
   --color-plate-cream: #f8f4ef;
+  --color-on-plate: #fffdfb;
 
   /* Warm neutrals */
   --color-sand: #f8f4ef;
@@ -495,7 +701,11 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.1), transparent 65%);
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.1),
+    transparent 65%
+  );
   opacity: 0;
   transition: opacity 220ms ease;
   pointer-events: none;
@@ -605,7 +815,11 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.1), transparent 65%);
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.1),
+    transparent 65%
+  );
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
@@ -637,7 +851,11 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.12), transparent 60%);
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.12),
+    transparent 60%
+  );
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;

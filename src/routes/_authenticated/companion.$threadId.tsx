@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,12 +17,7 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
-import {
-  PromptInput,
-  PromptInputTextarea,
-  PromptInputFooter,
-  PromptInputSubmit,
-} from "@/components/ai-elements/prompt-input";
+import { CompanionComposer } from "@/components/companion-composer";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 
 export const Route = createFileRoute("/_authenticated/companion/$threadId")({
@@ -55,13 +51,7 @@ function CompanionThread() {
     );
   }
 
-  return (
-    <ChatSurface
-      key={threadId}
-      threadId={threadId}
-      initialMessages={initialUiMessages}
-    />
-  );
+  return <ChatSurface key={threadId} threadId={threadId} initialMessages={initialUiMessages} />;
 }
 
 function ChatSurface({
@@ -83,7 +73,7 @@ function ChatSurface({
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-            body: { messages, conversationId: id },
+            body: { messages: messages.slice(-1), conversationId: id },
           };
         },
       }),
@@ -91,6 +81,7 @@ function ChatSurface({
   );
 
   const qc = useQueryClient();
+  const [chatError, setChatError] = useState("");
   const quotaFn = useServerFn(getMyAiQuota);
   const { data: quota, refetch: refetchQuota } = useQuery({
     queryKey: ["ai-quota"],
@@ -104,9 +95,19 @@ function ChatSurface({
     onError: (err) => {
       const msg = (err as Error).message || "";
       if (msg.includes("quota_exceeded") || msg.includes("429")) {
-        toast.error("You've used today's Companion messages. They refill tomorrow, or upgrade to Care Plus.");
+        toast.error(
+          "You've used today's Companion messages. They refill tomorrow, or upgrade to Care Plus.",
+        );
       } else {
-        toast.error(msg || "Companion could not respond. Please try again shortly.");
+        let readable = "Companion could not respond. Please try again shortly.";
+        try {
+          const payload: unknown = JSON.parse(msg);
+          const parsed = z.object({ message: z.string().max(500) }).safeParse(payload);
+          if (parsed.success) readable = parsed.data.message;
+        } catch {
+          if (msg && !msg.startsWith("{")) readable = msg;
+        }
+        setChatError(readable);
       }
       console.error("[chat]", err);
     },
@@ -115,13 +116,8 @@ function ChatSurface({
     },
   });
 
-  const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, [threadId]);
   useEffect(() => {
     if (status === "ready") {
-      inputRef.current?.focus();
       refetchQuota();
     }
   }, [status, refetchQuota]);
@@ -129,7 +125,8 @@ function ChatSurface({
   const busy = status === "submitted" || status === "streaming";
   const unlimited = !!quota && quota.unlimited;
   const outOfQuota = !!quota && !unlimited && (quota.remaining ?? 0) <= 0;
-  const lowQuota = !!quota && !unlimited && (quota.remaining ?? 0) > 0 && (quota.remaining ?? 0) <= 5;
+  const lowQuota =
+    !!quota && !unlimited && (quota.remaining ?? 0) > 0 && (quota.remaining ?? 0) <= 5;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -140,8 +137,8 @@ function ChatSurface({
             (outOfQuota
               ? "bg-destructive/10 text-destructive"
               : lowQuota
-              ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-              : "bg-muted/40 text-muted-foreground")
+                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                : "bg-muted/40 text-muted-foreground")
           }
         >
           {outOfQuota
@@ -149,25 +146,25 @@ function ChatSurface({
             : `${quota.remaining} of ${quota.limit} Companion messages left today.`}
         </div>
       )}
-      <Conversation className="flex-1">
-        <ConversationContent className="mx-auto w-full max-w-2xl">
+      <Conversation className="min-h-0 flex-1">
+        <ConversationContent className="mx-auto w-full max-w-3xl gap-4 p-4 sm:p-6">
           {messages.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
               Take a breath. Say whatever's on your mind, even just a word.
             </div>
           ) : (
             messages.map((m) => {
-              const text = m.parts
-                .map((p) => (p.type === "text" ? p.text : ""))
-                .join("");
+              const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
               return (
                 <Message key={m.id} from={m.role === "user" ? "user" : "assistant"}>
                   {m.role === "assistant" ? (
-                    <div className="prose prose-sm max-w-none text-foreground prose-p:my-2 prose-headings:mt-3 prose-headings:mb-2 dark:prose-invert">
+                    <div className="prose max-w-none break-words text-base leading-relaxed text-foreground prose-p:my-2 prose-headings:mt-3 prose-headings:mb-2 dark:prose-invert [overflow-wrap:anywhere]">
                       <ReactMarkdown>{text}</ReactMarkdown>
                     </div>
                   ) : (
-                    <MessageContent>{text}</MessageContent>
+                    <MessageContent className="whitespace-pre-wrap break-words text-base leading-relaxed [overflow-wrap:anywhere]">
+                      {text}
+                    </MessageContent>
                   )}
                 </Message>
               );
@@ -175,35 +172,32 @@ function ChatSurface({
           )}
           {status === "submitted" ? (
             <Message from="assistant">
-              <Shimmer>Listening…</Shimmer>
+              <Shimmer>Thinking…</Shimmer>
             </Message>
           ) : null}
         </ConversationContent>
-        <ConversationScrollButton />
+        <ConversationScrollButton className="size-11" aria-label="Scroll to latest message" />
       </Conversation>
 
-      <div className="border-t border-border p-3">
-        <div className="mx-auto w-full max-w-2xl">
-          <PromptInput
-            onSubmit={(msg) => {
-              const text = msg.text?.trim();
-              if (!text) return;
+      <div className="shrink-0 border-t border-border p-3 sm:p-4">
+        <div className="mx-auto w-full max-w-3xl">
+          {chatError && (
+            <p role="alert" className="mb-3 break-words text-sm text-destructive">
+              {chatError}
+            </p>
+          )}
+          <CompanionComposer
+            status={status}
+            disabled={busy || outOfQuota}
+            onSend={(text) => {
               if (outOfQuota) {
                 toast.error("Monthly Companion limit reached. Upgrade in Settings.");
                 return;
               }
-              void sendMessage({ text });
+              setChatError("");
+              return sendMessage({ text });
             }}
-          >
-            <PromptInputTextarea
-              ref={inputRef}
-              placeholder={outOfQuota ? "Limit reached, upgrade to continue" : "What's on your mind?"}
-              disabled={busy || outOfQuota}
-            />
-            <PromptInputFooter className="justify-end">
-              <PromptInputSubmit status={status} disabled={busy || outOfQuota} />
-            </PromptInputFooter>
-          </PromptInput>
+          />
         </div>
       </div>
     </div>

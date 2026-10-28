@@ -1,15 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isAuthorizedCronRequest } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/call-sla")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key =
-          request.headers.get("apikey") ??
-          request.headers.get("authorization")?.replace("Bearer ", "");
-        const expected =
-          process.env["SUPABASE_ANON_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
-        if (!key || !expected || key !== expected) {
+        if (!(await isAuthorizedCronRequest(request))) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },
@@ -22,10 +18,10 @@ export const Route = createFileRoute("/api/public/hooks/call-sla")({
           return Response.json({ ok: true, ...result });
         } catch (e) {
           console.error("call-sla ladder failed", e);
-          return new Response(
-            JSON.stringify({ ok: false, error: e instanceof Error ? e.message : "failed" }),
-            { status: 500, headers: { "Content-Type": "application/json" } },
-          );
+          return new Response(JSON.stringify({ ok: false, error: "Call SLA processing failed" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
         }
       },
     },

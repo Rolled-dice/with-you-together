@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { combineToUtc } from "./listeners.functions";
+import { combineToUtc } from "./time-zone";
 
 /**
  * Characterization tests for `combineToUtc`. It interprets a day (YYYY-MM-DD)
@@ -67,5 +67,20 @@ describe("combineToUtc", () => {
     // (The fail-soft-to-0 behavior lives in tzOffsetMinutes in call-crm.server.ts,
     // a separate function — not here.) Pinning the real contract: it throws.
     expect(() => combineToUtc("2026-06-15", "09:00", "Not/AZone")).toThrow();
+  });
+
+  it("uses the new offset on the daylight-saving transition day", () => {
+    expect(combineToUtc("2026-03-08", "03:30", "America/New_York")).toBe("2026-03-08T07:30:00.000Z");
+    expect(combineToUtc("2026-11-01", "09:00", "America/New_York")).toBe("2026-11-01T14:00:00.000Z");
+  });
+
+  it("rejects skipped and repeated wall-clock times instead of silently changing the appointment", () => {
+    expect(() => combineToUtc("2026-03-08", "02:30", "America/New_York")).toThrow(/does not exist/);
+    expect(() => combineToUtc("2026-11-01", "01:30", "America/New_York")).toThrow(/occurs twice/);
+  });
+
+  it("rejects impossible dates and out-of-range times", () => {
+    expect(() => combineToUtc("2026-02-30", "09:00", "UTC")).toThrow();
+    expect(() => combineToUtc("2026-06-15", "24:30", "UTC")).toThrow();
   });
 });

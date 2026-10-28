@@ -19,6 +19,7 @@ export type NotificationItem = {
   severity: string;
   read_at: string | null;
   created_at: string;
+  kind?: string;
 };
 
 const SEVERITY_CLASS: Record<string, string> = {
@@ -31,10 +32,12 @@ export function NotificationList({
   items,
   onDismiss,
   className,
+  onOpen,
 }: {
   items: NotificationItem[];
   onDismiss: (id: string) => void;
   className?: string;
+  onOpen?: (item: NotificationItem) => void;
 }) {
   if (items.length === 0) {
     return (
@@ -55,7 +58,7 @@ export function NotificationList({
           )}
         >
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-medium text-foreground">{n.title}</p>
+            {onOpen ? <button type="button" className="min-h-11 text-left text-sm font-medium text-foreground underline-offset-4 hover:underline" onClick={() => onOpen(n)}>{n.title}</button> : <p className="text-sm font-medium text-foreground">{n.title}</p>}
             <button
               type="button"
               aria-label="Dismiss"

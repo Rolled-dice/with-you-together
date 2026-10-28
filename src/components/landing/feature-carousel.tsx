@@ -71,7 +71,7 @@ const SLIDES: Slide[] = [
     title: "Tablets, without the nagging",
     body: "Each dose lands on their phone as an ordinary calendar reminder — nothing new to learn, no app to open. One tap marks it taken, we log it for the family, and then we stay quiet. Snap a photo of the prescription and we'll read the schedule off it.",
     plate: "bg-plate-grass",
-    ink: "text-background",
+    ink: "text-on-plate",
     Visual: RemindersVisual,
     ambient: remindersAmbient,
   },
@@ -81,7 +81,7 @@ const SLIDES: Slide[] = [
     title: "An AI that's awake at 2am",
     body: "Some nights the call is hours away. Our AI companion picks up in seconds — warm, unhurried, and honest about what it is. Answer in a word or skip it entirely. Private to them, and nothing is ever scored.",
     plate: "bg-plate-navy",
-    ink: "text-background",
+    ink: "text-on-plate",
     Visual: CompanionVisual,
     ambient: companionAmbient,
   },
@@ -102,7 +102,7 @@ const SLIDES: Slide[] = [
     body: "Write a message now and choose when it should arrive — a birthday, an anniversary, the morning of a hospital appointment. You can't always be there at the right moment, but something of you can.",
     plate: "bg-plate-terracotta",
     // Light type: warm charcoal on terracotta only reaches ~3.3:1.
-    ink: "text-background",
+    ink: "text-on-plate",
     Visual: SendLaterVisual,
     ambient: sendLaterAmbient,
   },
@@ -234,7 +234,7 @@ export function FeatureCarousel() {
               aria-current={i === active ? "true" : undefined}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 i === active
-                  ? "bg-ink text-background"
+                  ? "bg-ink text-on-plate"
                   : "border border-border bg-card text-muted-foreground hover:border-ink/25 hover:text-foreground"
               }`}
             >

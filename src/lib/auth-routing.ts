@@ -1,7 +1,7 @@
 const DEFAULT_AUTH_DESTINATION = "/dashboard";
 
 function isSafeRelativePath(value: string): boolean {
-  return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/auth");
+  return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/auth") && !/[\\\u0000-\u001f]/.test(value);
 }
 
 export function safeAuthRedirect(value?: string | null): string {

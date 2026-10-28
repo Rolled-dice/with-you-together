@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalmRouteImport } from './routes/calm'
+import { Route as ConnectedHomeRouteImport } from './routes/connected-home'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -31,6 +32,7 @@ import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedSendLaterRouteImport } from './routes/_authenticated/send-later'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiCompanionTranscriptionRouteImport } from './routes/api/companion-transcription'
 import { Route as AuthResetRouteImport } from './routes/auth_.reset'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
@@ -52,9 +54,11 @@ import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authen
 import { Route as AuthenticatedAgentConsoleRouteImport } from './routes/_authenticated/agent.console'
 import { Route as AuthenticatedCompanionIndexRouteImport } from './routes/_authenticated/companion.index'
 import { Route as AuthenticatedCompanionThreadIdRouteImport } from './routes/_authenticated/companion.$threadId'
+import { Route as ApiPublicAuthSmsRouteImport } from './routes/api/public/auth-sms'
 import { Route as ApiPublicGoogleCalendarCallbackRouteImport } from './routes/api/public/google-calendar/callback'
 import { Route as ApiPublicHooksCalendarSyncRouteImport } from './routes/api/public/hooks/calendar-sync'
 import { Route as ApiPublicHooksCallSlaRouteImport } from './routes/api/public/hooks/call-sla'
+import { Route as ApiPublicHooksFamilyRemindersRouteImport } from './routes/api/public/hooks/family-reminders'
 import { Route as ApiPublicHooksSendLaterRouteImport } from './routes/api/public/hooks/send-later'
 import { Route as ApiPublicHooksTelnyxRouteImport } from './routes/api/public/hooks/telnyx'
 import { Route as ApiPublicPaymentsDodoWebhookRouteImport } from './routes/api/public/payments/dodo-webhook'
@@ -76,6 +80,11 @@ const AuthRoute = AuthRouteImport.update({
 const CalmRoute = CalmRouteImport.update({
   id: '/calm',
   path: '/calm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectedHomeRoute = ConnectedHomeRouteImport.update({
+  id: '/connected-home',
+  path: '/connected-home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -168,6 +177,12 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCompanionTranscriptionRoute =
+  ApiCompanionTranscriptionRouteImport.update({
+    id: '/api/companion-transcription',
+    path: '/api/companion-transcription',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthResetRoute = AuthResetRouteImport.update({
   id: '/auth_/reset',
   path: '/auth/reset',
@@ -278,6 +293,11 @@ const AuthenticatedCompanionThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedCompanionRoute,
   } as any)
+const ApiPublicAuthSmsRoute = ApiPublicAuthSmsRouteImport.update({
+  id: '/api/public/auth-sms',
+  path: '/api/public/auth-sms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicGoogleCalendarCallbackRoute =
   ApiPublicGoogleCalendarCallbackRouteImport.update({
     id: '/api/public/google-calendar/callback',
@@ -295,6 +315,12 @@ const ApiPublicHooksCallSlaRoute = ApiPublicHooksCallSlaRouteImport.update({
   path: '/api/public/hooks/call-sla',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksFamilyRemindersRoute =
+  ApiPublicHooksFamilyRemindersRouteImport.update({
+    id: '/api/public/hooks/family-reminders',
+    path: '/api/public/hooks/family-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksSendLaterRoute = ApiPublicHooksSendLaterRouteImport.update({
   id: '/api/public/hooks/send-later',
   path: '/api/public/hooks/send-later',
@@ -316,6 +342,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/calm': typeof CalmRoute
+  '/connected-home': typeof ConnectedHomeRoute
   '/cookies': typeof CookiesRoute
   '/docs': typeof DocsRouteWithChildren
   '/privacy': typeof PrivacyRoute
@@ -334,6 +361,7 @@ export interface FileRoutesByFullPath {
   '/send-later': typeof AuthenticatedSendLaterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/companion-transcription': typeof ApiCompanionTranscriptionRoute
   '/auth/reset': typeof AuthResetRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
@@ -354,10 +382,12 @@ export interface FileRoutesByFullPath {
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
+  '/api/public/auth-sms': typeof ApiPublicAuthSmsRoute
   '/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/google-calendar/callback': typeof ApiPublicGoogleCalendarCallbackRoute
   '/api/public/hooks/calendar-sync': typeof ApiPublicHooksCalendarSyncRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/family-reminders': typeof ApiPublicHooksFamilyRemindersRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
@@ -366,6 +396,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/calm': typeof CalmRoute
+  '/connected-home': typeof ConnectedHomeRoute
   '/cookies': typeof CookiesRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
@@ -382,6 +413,7 @@ export interface FileRoutesByTo {
   '/send-later': typeof AuthenticatedSendLaterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/companion-transcription': typeof ApiCompanionTranscriptionRoute
   '/auth/reset': typeof AuthResetRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
@@ -402,10 +434,12 @@ export interface FileRoutesByTo {
   '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
+  '/api/public/auth-sms': typeof ApiPublicAuthSmsRoute
   '/companion': typeof AuthenticatedCompanionIndexRoute
   '/api/public/google-calendar/callback': typeof ApiPublicGoogleCalendarCallbackRoute
   '/api/public/hooks/calendar-sync': typeof ApiPublicHooksCalendarSyncRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/family-reminders': typeof ApiPublicHooksFamilyRemindersRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
@@ -416,6 +450,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/calm': typeof CalmRoute
+  '/connected-home': typeof ConnectedHomeRoute
   '/cookies': typeof CookiesRoute
   '/docs': typeof DocsRouteWithChildren
   '/privacy': typeof PrivacyRoute
@@ -434,6 +469,7 @@ export interface FileRoutesById {
   '/_authenticated/send-later': typeof AuthenticatedSendLaterRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/companion-transcription': typeof ApiCompanionTranscriptionRoute
   '/auth_/reset': typeof AuthResetRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/docs/account': typeof DocsAccountRoute
@@ -454,10 +490,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/_authenticated/agent/console': typeof AuthenticatedAgentConsoleRoute
   '/_authenticated/companion/$threadId': typeof AuthenticatedCompanionThreadIdRoute
+  '/api/public/auth-sms': typeof ApiPublicAuthSmsRoute
   '/_authenticated/companion/': typeof AuthenticatedCompanionIndexRoute
   '/api/public/google-calendar/callback': typeof ApiPublicGoogleCalendarCallbackRoute
   '/api/public/hooks/calendar-sync': typeof ApiPublicHooksCalendarSyncRoute
   '/api/public/hooks/call-sla': typeof ApiPublicHooksCallSlaRoute
+  '/api/public/hooks/family-reminders': typeof ApiPublicHooksFamilyRemindersRoute
   '/api/public/hooks/send-later': typeof ApiPublicHooksSendLaterRoute
   '/api/public/hooks/telnyx': typeof ApiPublicHooksTelnyxRoute
   '/api/public/payments/dodo-webhook': typeof ApiPublicPaymentsDodoWebhookRoute
@@ -468,6 +506,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/calm'
+    | '/connected-home'
     | '/cookies'
     | '/docs'
     | '/privacy'
@@ -486,6 +525,7 @@ export interface FileRouteTypes {
     | '/send-later'
     | '/settings'
     | '/api/chat'
+    | '/api/companion-transcription'
     | '/auth/reset'
     | '/checkout/return'
     | '/docs/account'
@@ -506,10 +546,12 @@ export interface FileRouteTypes {
     | '/admin/feedback'
     | '/agent/console'
     | '/companion/$threadId'
+    | '/api/public/auth-sms'
     | '/companion/'
     | '/api/public/google-calendar/callback'
     | '/api/public/hooks/calendar-sync'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/family-reminders'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
     | '/api/public/payments/dodo-webhook'
@@ -518,6 +560,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/calm'
+    | '/connected-home'
     | '/cookies'
     | '/privacy'
     | '/terms'
@@ -534,6 +577,7 @@ export interface FileRouteTypes {
     | '/send-later'
     | '/settings'
     | '/api/chat'
+    | '/api/companion-transcription'
     | '/auth/reset'
     | '/checkout/return'
     | '/docs/account'
@@ -554,10 +598,12 @@ export interface FileRouteTypes {
     | '/admin/feedback'
     | '/agent/console'
     | '/companion/$threadId'
+    | '/api/public/auth-sms'
     | '/companion'
     | '/api/public/google-calendar/callback'
     | '/api/public/hooks/calendar-sync'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/family-reminders'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
     | '/api/public/payments/dodo-webhook'
@@ -567,6 +613,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/calm'
+    | '/connected-home'
     | '/cookies'
     | '/docs'
     | '/privacy'
@@ -585,6 +632,7 @@ export interface FileRouteTypes {
     | '/_authenticated/send-later'
     | '/_authenticated/settings'
     | '/api/chat'
+    | '/api/companion-transcription'
     | '/auth_/reset'
     | '/checkout/return'
     | '/docs/account'
@@ -605,10 +653,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/feedback'
     | '/_authenticated/agent/console'
     | '/_authenticated/companion/$threadId'
+    | '/api/public/auth-sms'
     | '/_authenticated/companion/'
     | '/api/public/google-calendar/callback'
     | '/api/public/hooks/calendar-sync'
     | '/api/public/hooks/call-sla'
+    | '/api/public/hooks/family-reminders'
     | '/api/public/hooks/send-later'
     | '/api/public/hooks/telnyx'
     | '/api/public/payments/dodo-webhook'
@@ -619,16 +669,20 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CalmRoute: typeof CalmRoute
+  ConnectedHomeRoute: typeof ConnectedHomeRoute
   CookiesRoute: typeof CookiesRoute
   DocsRoute: typeof DocsRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiCompanionTranscriptionRoute: typeof ApiCompanionTranscriptionRoute
   AuthResetRoute: typeof AuthResetRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
+  ApiPublicAuthSmsRoute: typeof ApiPublicAuthSmsRoute
   ApiPublicGoogleCalendarCallbackRoute: typeof ApiPublicGoogleCalendarCallbackRoute
   ApiPublicHooksCalendarSyncRoute: typeof ApiPublicHooksCalendarSyncRoute
   ApiPublicHooksCallSlaRoute: typeof ApiPublicHooksCallSlaRoute
+  ApiPublicHooksFamilyRemindersRoute: typeof ApiPublicHooksFamilyRemindersRoute
   ApiPublicHooksSendLaterRoute: typeof ApiPublicHooksSendLaterRoute
   ApiPublicHooksTelnyxRoute: typeof ApiPublicHooksTelnyxRoute
   ApiPublicPaymentsDodoWebhookRoute: typeof ApiPublicPaymentsDodoWebhookRoute
@@ -662,6 +716,13 @@ declare module '@tanstack/react-router' {
       path: '/calm'
       fullPath: '/calm'
       preLoaderRoute: typeof CalmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connected-home': {
+      id: '/connected-home'
+      path: '/connected-home'
+      fullPath: '/connected-home'
+      preLoaderRoute: typeof ConnectedHomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -788,6 +849,13 @@ declare module '@tanstack/react-router' {
       path: '/api/chat'
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/companion-transcription': {
+      id: '/api/companion-transcription'
+      path: '/api/companion-transcription'
+      fullPath: '/api/companion-transcription'
+      preLoaderRoute: typeof ApiCompanionTranscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth_/reset': {
@@ -937,6 +1005,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompanionThreadIdRouteImport
       parentRoute: typeof AuthenticatedCompanionRoute
     }
+    '/api/public/auth-sms': {
+      id: '/api/public/auth-sms'
+      path: '/api/public/auth-sms'
+      fullPath: '/api/public/auth-sms'
+      preLoaderRoute: typeof ApiPublicAuthSmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/google-calendar/callback': {
       id: '/api/public/google-calendar/callback'
       path: '/api/public/google-calendar/callback'
@@ -956,6 +1031,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/call-sla'
       fullPath: '/api/public/hooks/call-sla'
       preLoaderRoute: typeof ApiPublicHooksCallSlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/family-reminders': {
+      id: '/api/public/hooks/family-reminders'
+      path: '/api/public/hooks/family-reminders'
+      fullPath: '/api/public/hooks/family-reminders'
+      preLoaderRoute: typeof ApiPublicHooksFamilyRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/send-later': {
@@ -1080,16 +1162,20 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CalmRoute: CalmRoute,
+  ConnectedHomeRoute: ConnectedHomeRoute,
   CookiesRoute: CookiesRoute,
   DocsRoute: DocsRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiCompanionTranscriptionRoute: ApiCompanionTranscriptionRoute,
   AuthResetRoute: AuthResetRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
+  ApiPublicAuthSmsRoute: ApiPublicAuthSmsRoute,
   ApiPublicGoogleCalendarCallbackRoute: ApiPublicGoogleCalendarCallbackRoute,
   ApiPublicHooksCalendarSyncRoute: ApiPublicHooksCalendarSyncRoute,
   ApiPublicHooksCallSlaRoute: ApiPublicHooksCallSlaRoute,
+  ApiPublicHooksFamilyRemindersRoute: ApiPublicHooksFamilyRemindersRoute,
   ApiPublicHooksSendLaterRoute: ApiPublicHooksSendLaterRoute,
   ApiPublicHooksTelnyxRoute: ApiPublicHooksTelnyxRoute,
   ApiPublicPaymentsDodoWebhookRoute: ApiPublicPaymentsDodoWebhookRoute,

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { PrivacyChoicesButton } from "@/components/privacy-choices-button";
 
 import {
@@ -34,6 +34,9 @@ import { BrandMark } from "@/components/landing/brand-mark";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 import { useCardInteractions } from "@/hooks/use-card-interactions";
 import { useAppPageMotion } from "@/hooks/use-app-page-motion";
+import { removeCurrentPushDevice } from "@/lib/push-browser";
+import { ThemeToggle } from "@/components/app-theme";
+import { QuickCareActions } from "@/components/care-ui/quick-care-actions";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
@@ -89,6 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navItems = isAdmin ? ADMIN_NAV : isAgent ? AGENT_NAV : rolesLoading ? [] : NAV;
 
   async function signOut() {
+    await removeCurrentPushDevice(true);
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
@@ -104,7 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             48px-tall rows, 20px icons. The active row is a solid navy pill
             because a tinted background alone is easy to miss with reduced
             contrast sensitivity. */}
-        <aside className="hidden flex-col border-r border-sidebar-border bg-sidebar md:flex md:w-72 lg:w-[19rem]">
+        <aside className="hidden flex-col border-r border-sidebar-border bg-sidebar md:flex md:w-60 lg:w-64">
           <div className="flex items-center justify-between gap-2 border-b border-sidebar-border px-5 py-5">
             <Brand />
             {!rolesLoading && !isStaff ? <NotificationBell /> : null}
@@ -134,6 +138,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="px-3 pb-4">
+            <div className="mb-3 px-4">
+              <ThemeToggle />
+            </div>
             {!rolesLoading && !isStaff ? (
               <div className="rounded-2xl border border-sidebar-border bg-card px-4 py-3.5">
                 <p className="text-sm font-bold text-sidebar-foreground">Care Membership</p>
@@ -174,14 +181,17 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         {/* Main */}
-        <div className="flex flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile top bar */}
           <header
             className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:hidden"
             style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}
           >
             <Brand compact />
-            {!rolesLoading && !isStaff ? <NotificationBell /> : null}
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              {!rolesLoading && !isStaff ? <NotificationBell /> : null}
+            </div>
           </header>
 
           {/* Keyed on pathname so the entrance replays on navigation. The ref
@@ -194,6 +204,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="flex-1 px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
           >
             {children}
+            {!isStaff && <QuickCareActions />}
             <div className="mt-12 flex flex-wrap justify-center gap-x-4 gap-y-2 border-t border-border pt-6 text-xs text-muted-foreground md:hidden">
               <Link to="/privacy">Privacy</Link>
               <Link to="/terms">Terms</Link>
@@ -342,8 +353,8 @@ function Brand({ compact = false }: { compact?: boolean }) {
     <Link to="/" className="flex items-center gap-2">
       <BrandMark className={compact ? "h-7 w-auto" : "h-9 w-auto"} />
       <span className={cn("font-extrabold tracking-tight", compact ? "text-base" : "text-lg")}>
-        <span className="text-orb-navy">Someone</span>
-        <span className="text-orb-terracotta">Near</span>
+        <span className="text-brand-primary">Someone</span>
+        <span className="text-brand-accent">Near</span>
       </span>
     </Link>
   );
@@ -390,7 +401,9 @@ export function PageHeader({
         <div data-page-sub>
           {slogan && <p className="mt-1.5 text-base text-muted-foreground">{slogan}</p>}
           {description && (
-            <p className="mt-2 max-w-2xl text-[1.0625rem] leading-relaxed text-muted-foreground">{description}</p>
+            <p className="mt-2 max-w-2xl text-[1.0625rem] leading-relaxed text-muted-foreground">
+              {description}
+            </p>
           )}
         </div>
       </div>

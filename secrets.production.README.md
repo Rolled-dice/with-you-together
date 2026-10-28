@@ -35,9 +35,11 @@ Worker's runtime secrets in one shot with `wrangler secret bulk`.
 
 - **SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / SUPABASE_PUBLISHABLE_KEY** — from
   Supabase → Project Settings → API. Use the **production** project's values.
-- **SUPABASE_ANON_KEY** — the cron/webhook hooks compare the incoming apikey
-  against this (falling back to the publishable key). Set it equal to
-  `SUPABASE_PUBLISHABLE_KEY`.
+- **CRON_HOOK_SECRET**: a random private secret of at least 32 characters for
+  scheduled hooks. Use the same value in Supabase Vault under
+  `someonenear_cron_hook_secret`. Never reuse a publishable or anon key.
+  See [the rollout checklist](docs/security-fixes-rollout.md).
+- **SUPABASE_ANON_KEY**: optional legacy client key, not cron authentication.
 - **TELNYX_SIP_CREDENTIAL_ID** — the telephony *credential* UUID
   (`ff1e5027-...`), NOT the Call Control App ID.
 - **GEMINI_API_KEY** — Google AI Studio key for Companion chat + prescription OCR.

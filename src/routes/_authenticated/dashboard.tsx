@@ -26,6 +26,8 @@ import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import { PLAN_DISPLAY } from "@/lib/currency";
 import { Orb, type OrbTone } from "@/components/landing/playroom-orb";
 import { useDashboardMotion } from "@/hooks/use-dashboard-motion";
+import { getMyFamily } from "@/lib/family.functions";
+import { FamilyToday } from "@/components/family-today";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -68,6 +70,8 @@ function greeting(): { text: string; icon: typeof SunIcon } {
 }
 
 function Dashboard() {
+  const familyFn = useServerFn(getMyFamily);
+  const family = useQuery({ queryKey: ["family"], queryFn: () => familyFn() });
   const adminFn = useServerFn(isCurrentUserAdmin);
   const adminQ = useQuery({
     queryKey: ["admin", "role-check"],
@@ -84,6 +88,20 @@ function Dashboard() {
   }
 
   if (adminQ.data?.isAdmin) return <AdminDashboard />;
+
+  if (family.data?.family && family.data.myRole !== "owner")
+    return (
+      <AppShell>
+        <div className="family-experience">
+          <PageHeader
+            eyebrow={family.data.family.name}
+            title="Today"
+            description="Your reminders and updates, all in one place."
+          />
+          <FamilyToday family={family.data} />
+        </div>
+      </AppShell>
+    );
 
   return <MemberDashboard />;
 }
@@ -107,7 +125,9 @@ function AdminDashboard() {
               Review the call queue, assign agents, monitor service levels, and resolve call flags.
             </p>
             <Button asChild className="mt-5">
-              <Link to="/admin/calls">Open Call CRM <ArrowUpRightIcon className="h-4 w-4" /></Link>
+              <Link to="/admin/calls">
+                Open Call CRM <ArrowUpRightIcon className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
@@ -163,9 +183,7 @@ function MemberDashboard() {
         ]);
         setProfile(prof);
         if (entries?.length) {
-          const days = new Set(
-            entries.map((e) => new Date(e.created_at as string).toDateString()),
-          );
+          const days = new Set(entries.map((e) => new Date(e.created_at as string).toDateString()));
           let s = 0;
           const cur = new Date();
           while (days.has(cur.toDateString())) {
@@ -218,235 +236,233 @@ function MemberDashboard() {
   return (
     <AppShell>
       <div ref={rootRef}>
-      {/* HERO CHECK-IN.
+        {/* HERO CHECK-IN.
           Deliberately calm: a warm cream card, not a saturated plate. Many
           members are elderly, so this screen prioritises readable type and
           high contrast over decoration. Colour appears once, as a single
           friendly orb — boldness spent in one place rather than spread across
           the page. */}
-      <section className="relative overflow-hidden rounded-[24px] border border-border bg-surface px-6 py-8 sm:px-9 sm:py-10">
-        <div
-          aria-hidden="true"
-          data-dash-orb
-          className="pointer-events-none absolute -right-8 -top-8 hidden sm:block"
-        >
-          {/* Watches the cursor — the one piece of liveliness on an otherwise
-              deliberately calm screen. */}
-          <Orb tone="saffron" face="smile" gaze className="h-32 w-32 opacity-80" />
-        </div>
-
-        <div className="relative max-w-xl">
+        <section className="relative overflow-hidden rounded-[24px] border border-border bg-surface px-6 py-8 sm:px-9 sm:py-10">
           <div
-            data-dash-pill
-            className="inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-sm font-semibold text-muted-foreground"
+            aria-hidden="true"
+            data-dash-orb
+            className="pointer-events-none absolute -right-8 -top-8 hidden sm:block"
           >
-            <GreetIcon className="h-4 w-4" />
-            {greetText}
+            {/* Watches the cursor — the one piece of liveliness on an otherwise
+              deliberately calm screen. */}
+            <Orb tone="saffron" face="smile" gaze className="h-32 w-32 opacity-80" />
           </div>
 
-          <h1
-            data-dash-headline
-            className="mt-4 text-[1.9rem] font-extrabold leading-[1.1] tracking-tight sm:text-[2.4rem]"
-          >
-            {greetText}, {firstName}
-          </h1>
-
-          <div data-dash-sub>
-            {/* 17px body, not 15px: this is the reading size for the whole app. */}
-            <p className="mt-3 max-w-lg text-[1.0625rem] leading-relaxed text-muted-foreground">
-              A few minutes for you can make a big difference. Ready for today&apos;s
-              check-in?
-            </p>
-            <blockquote className="mt-4 border-l-[3px] border-orb-terracotta/50 pl-3.5 text-base italic text-muted-foreground">
-              &ldquo;{quote}&rdquo;
-            </blockquote>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
-            {/* Tall targets: 52px clears the 44px minimum comfortably. */}
-            <Button
-              asChild
-              data-dash-cta
-              className="h-[52px] rounded-full px-7 text-base font-bold"
+          <div className="relative max-w-xl">
+            <div
+              data-dash-pill
+              className="inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-sm font-semibold text-muted-foreground"
             >
-              <Link to="/companion">
-                <SparkleIcon className="mr-2 h-5 w-5" /> Start today&apos;s check-in
-              </Link>
-            </Button>
-            <Button
-              asChild
-              data-dash-cta
-              variant="outline"
-              className="h-[52px] rounded-full border-2 px-7 text-base font-bold"
+              <GreetIcon className="h-4 w-4" />
+              {greetText}
+            </div>
+
+            <h1
+              data-dash-headline
+              className="mt-4 text-[1.9rem] font-extrabold leading-[1.1] tracking-tight sm:text-[2.4rem]"
             >
-              <Link to="/insights">
-                <ChartLineIcon className="mr-2 h-5 w-5" /> Quick mood check-in
-              </Link>
-            </Button>
+              {greetText}, {firstName}
+            </h1>
+
+            <div data-dash-sub>
+              {/* 17px body, not 15px: this is the reading size for the whole app. */}
+              <p className="mt-3 max-w-lg text-[1.0625rem] leading-relaxed text-muted-foreground">
+                A few minutes for you can make a big difference. Ready for today&apos;s check-in?
+              </p>
+              <blockquote className="mt-4 border-l-[3px] border-orb-terracotta/50 pl-3.5 text-base italic text-muted-foreground">
+                &ldquo;{quote}&rdquo;
+              </blockquote>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+              {/* Tall targets: 52px clears the 44px minimum comfortably. */}
+              <Button
+                asChild
+                data-dash-cta
+                className="h-[52px] rounded-full px-7 text-base font-bold"
+              >
+                <Link to="/companion">
+                  <SparkleIcon className="mr-2 h-5 w-5" /> Start today&apos;s check-in
+                </Link>
+              </Button>
+              <Button
+                asChild
+                data-dash-cta
+                variant="outline"
+                className="h-[52px] rounded-full border-2 px-7 text-base font-bold"
+              >
+                <Link to="/insights">
+                  <ChartLineIcon className="mr-2 h-5 w-5" /> Quick mood check-in
+                </Link>
+              </Button>
+            </div>
+
+            {/* A quiet way out when a check-in feels like too much right now. */}
+            <Link
+              to="/calm-space"
+              className="mt-3 flex min-h-12 items-center gap-3 rounded-2xl border border-brand-primary/15 bg-plate-periwinkle/15 px-4 py-2.5 transition-colors hover:bg-plate-periwinkle/25"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card text-brand-primary">
+                <FlowerLotusIcon className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[15px] font-bold text-foreground">Feeling tense?</span>
+                <span className="block text-sm text-muted-foreground">
+                  Breathe for a minute, or let a worry float away.
+                </span>
+              </span>
+            </Link>
           </div>
+        </section>
 
-          {/* A quiet way out when a check-in feels like too much right now. */}
-          <Link
-            to="/calm-space"
-            className="mt-3 flex min-h-12 items-center gap-3 rounded-2xl border border-brand-primary/15 bg-plate-periwinkle/15 px-4 py-2.5 transition-colors hover:bg-plate-periwinkle/25"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card text-brand-primary">
-              <FlowerLotusIcon className="h-5 w-5" />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-[15px] font-bold text-foreground">Feeling tense?</span>
-              <span className="block text-sm text-muted-foreground">Breathe for a minute, or let a worry float away.</span>
-            </span>
-          </Link>
-        </div>
-      </section>
-
-
-      {/* STATS ROW — separate cards rather than one divided slab, so each can
+        {/* STATS ROW — separate cards rather than one divided slab, so each can
           carry its own tone and animate in independently. */}
-      <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          tone="terracotta"
-          icon={<FireIcon className="h-4 w-4" />}
-          label="Current streak"
-          // Numeric stats count up; the unit stays static beside them.
-          countTo={streak}
-          unit={streak === 1 ? "day" : "days"}
-          hint={streak > 0 ? "Keep it going" : "Start today"}
-        />
-        <StatCard
-          tone="periwinkle"
-          icon={<ChartLineIcon className="h-4 w-4" />}
-          label="Mood check-ins"
-          countTo={checkInCount}
-          hint="Private and yours"
-        />
-        <StatCard
-          tone="navy"
-          icon={<HandHeartIcon className="h-4 w-4" />}
-          label="Membership"
-          value={tierLabel}
-          hint={profile?.care_status ?? "active"}
-        />
-        <StatCard
-          tone="grass"
-          icon={<SparkleIcon className="h-4 w-4" />}
-          label="Companion quota"
-          value={
-            quotaLoading || !quota ? "…" : quotaUnlimited ? "Unlimited" : String(quota.remaining)
-          }
-          hint={quotaUnlimited ? "Chat as much as you need" : `Refills ${resetsAt ?? "daily"}`}
-        />
-      </section>
+        <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            tone="terracotta"
+            icon={<FireIcon className="h-4 w-4" />}
+            label="Current streak"
+            // Numeric stats count up; the unit stays static beside them.
+            countTo={streak}
+            unit={streak === 1 ? "day" : "days"}
+            hint={streak > 0 ? "Keep it going" : "Start today"}
+          />
+          <StatCard
+            tone="periwinkle"
+            icon={<ChartLineIcon className="h-4 w-4" />}
+            label="Mood check-ins"
+            countTo={checkInCount}
+            hint="Private and yours"
+          />
+          <StatCard
+            tone="navy"
+            icon={<HandHeartIcon className="h-4 w-4" />}
+            label="Membership"
+            value={tierLabel}
+            hint={profile?.care_status ?? "active"}
+          />
+          <StatCard
+            tone="grass"
+            icon={<SparkleIcon className="h-4 w-4" />}
+            label="Companion quota"
+            value={
+              quotaLoading || !quota ? "…" : quotaUnlimited ? "Unlimited" : String(quota.remaining)
+            }
+            hint={quotaUnlimited ? "Chat as much as you need" : `Refills ${resetsAt ?? "daily"}`}
+          />
+        </section>
 
-      {/* QUICK ACCESS.
+        {/* QUICK ACCESS.
           Cards stay white with a single coloured orb per destination. Four
           full-bleed plates read as a rainbow and flattened the hierarchy —
           colour works better here as a way to tell items apart at a glance
           than as a background. */}
-      <section data-dash-section className="mt-10">
-        <div className="mb-4 flex items-baseline justify-between gap-3">
-          <h2 className="text-xl font-extrabold tracking-tight">Quick access</h2>
-          <span className="hidden text-sm text-muted-foreground sm:inline">
-            Everything a tap away
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <QuickTile
-            to="/companion"
-            orb="navy"
-            title="AI Companion"
-            desc="Talk it through, gently."
-          />
-          <QuickTile
-            to="/listeners"
-            orb="terracotta"
-            title="Human Listener"
-            desc="A real person, on your schedule."
-          />
-          <QuickTile
-            to="/insights"
-            orb="periwinkle"
-            title="Mood Insights"
-            desc="See your patterns over time."
-          />
-          <QuickTile
-            to="/family"
-            orb="grass"
-            title="Family Circle"
-            desc="Share only what you choose."
-          />
-        </div>
-      </section>
-
-      {/* ACHIEVEMENTS + SIDE */}
-      <section data-dash-section className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-[24px] border border-border bg-card p-5 sm:p-6">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="flex items-center gap-2 text-base font-extrabold tracking-tight">
-              <TrophyIcon className="h-4 w-4 text-orb-terracotta" weight="fill" /> Achievements
-            </h3>
-            <Link
+        <section data-dash-section className="mt-10">
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <h2 className="text-xl font-extrabold tracking-tight">Quick access</h2>
+            <span className="hidden text-sm text-muted-foreground sm:inline">
+              Everything a tap away
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <QuickTile
+              to="/companion"
+              orb="navy"
+              title="AI Companion"
+              desc="Talk it through, gently."
+            />
+            <QuickTile
+              to="/listeners"
+              orb="terracotta"
+              title="Human Listener"
+              desc="A real person, on your schedule."
+            />
+            <QuickTile
               to="/insights"
-              className="inline-flex items-center gap-1 text-xs font-bold text-orb-terracotta hover:underline"
-            >
-              View all <ArrowUpRightIcon className="h-3 w-3" />
-            </Link>
+              orb="periwinkle"
+              title="Mood Insights"
+              desc="See your patterns over time."
+            />
+            <QuickTile
+              to="/family"
+              orb="grass"
+              title="Family Circle"
+              desc="Share only what you choose."
+            />
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-4 sm:gap-3">
-            {badges.map((b, i) => (
-              <div
-                key={b.label}
-                data-dash-badge
-                className={`flex flex-col items-center gap-2 rounded-2xl border p-3 text-center sm:p-4 ${
-                  b.earned
-                    ? "border-orb-terracotta/35 bg-orb-terracotta/8"
-                    : "border-border bg-muted/40"
-                }`}
-              >
-                {/* Earned badges get a real character orb; unearned stay a
-                    muted outline, so progress reads instantly. */}
-                {b.earned ? (
-                  <Orb
-                    tone={BADGE_TONES[i % BADGE_TONES.length]}
-                    face="smile"
-                    className="h-10 w-10 sm:h-11 sm:w-11"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground sm:h-11 sm:w-11">
-                    <StarIcon className="h-5 w-5" />
-                  </div>
-                )}
-                <span className="text-xs font-bold leading-tight">{b.label}</span>
-                {b.earned && (
-                  <span className="text-[11px] font-semibold text-orb-terracotta">
-                    Earned
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        </section>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-          <SideCard
-            to="/insights"
-            eyebrow="Insights"
-            title="Your mood trends"
-            desc="See patterns over time. Gently."
-            icon={<ChartLineIcon className="h-5 w-5" />}
-            tone="periwinkle"
-          />
-          <SideCard
-            to="/safety"
-            eyebrow="Feeling overwhelmed?"
-            title="Safety toolkit"
-            desc="Grounding, hotlines, one-tap help."
-            icon={<LifebuoyIcon className="h-5 w-5" />}
-            tone="terracotta"
-          />
-        </div>
-      </section>
+        {/* ACHIEVEMENTS + SIDE */}
+        <section data-dash-section className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+          <div className="rounded-[24px] border border-border bg-card p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="flex items-center gap-2 text-base font-extrabold tracking-tight">
+                <TrophyIcon className="h-4 w-4 text-orb-terracotta" weight="fill" /> Achievements
+              </h3>
+              <Link
+                to="/insights"
+                className="inline-flex items-center gap-1 text-xs font-bold text-orb-terracotta hover:underline"
+              >
+                View all <ArrowUpRightIcon className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-4 sm:gap-3">
+              {badges.map((b, i) => (
+                <div
+                  key={b.label}
+                  data-dash-badge
+                  className={`flex flex-col items-center gap-2 rounded-2xl border p-3 text-center sm:p-4 ${
+                    b.earned
+                      ? "border-orb-terracotta/35 bg-orb-terracotta/8"
+                      : "border-border bg-muted/40"
+                  }`}
+                >
+                  {/* Earned badges get a real character orb; unearned stay a
+                    muted outline, so progress reads instantly. */}
+                  {b.earned ? (
+                    <Orb
+                      tone={BADGE_TONES[i % BADGE_TONES.length]}
+                      face="smile"
+                      className="h-10 w-10 sm:h-11 sm:w-11"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground sm:h-11 sm:w-11">
+                      <StarIcon className="h-5 w-5" />
+                    </div>
+                  )}
+                  <span className="text-xs font-bold leading-tight">{b.label}</span>
+                  {b.earned && (
+                    <span className="text-[11px] font-semibold text-orb-terracotta">Earned</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <SideCard
+              to="/insights"
+              eyebrow="Insights"
+              title="Your mood trends"
+              desc="See patterns over time. Gently."
+              icon={<ChartLineIcon className="h-5 w-5" />}
+              tone="periwinkle"
+            />
+            <SideCard
+              to="/safety"
+              eyebrow="Feeling overwhelmed?"
+              title="Safety toolkit"
+              desc="Grounding, hotlines, one-tap help."
+              icon={<LifebuoyIcon className="h-5 w-5" />}
+              tone="terracotta"
+            />
+          </div>
+        </section>
       </div>
     </AppShell>
   );
@@ -454,12 +470,12 @@ function MemberDashboard() {
 
 /** Maps an orb tone to its icon-chip classes, so tone lives in one place. */
 const TONE_CHIP: Record<OrbTone, string> = {
-  saffron: "bg-orb-saffron/20 text-ink",
-  pink: "bg-orb-pink/25 text-ink",
+  saffron: "bg-orb-saffron/20 text-foreground",
+  pink: "bg-orb-pink/25 text-foreground",
   aqua: "bg-orb-aqua/20 text-orb-aqua",
   grass: "bg-orb-grass/15 text-orb-grass",
-  navy: "bg-orb-navy/12 text-orb-navy",
-  periwinkle: "bg-orb-periwinkle/25 text-orb-navy",
+  navy: "bg-primary/12 text-primary",
+  periwinkle: "bg-orb-periwinkle/25 text-primary",
   terracotta: "bg-orb-terracotta/15 text-orb-terracotta",
 };
 
@@ -503,9 +519,7 @@ function StatCard({
             <span data-dash-counter={countTo} className="text-[2rem] tabular-nums">
               {countTo.toLocaleString()}
             </span>
-            {unit && (
-              <span className="text-base font-bold text-muted-foreground">{unit}</span>
-            )}
+            {unit && <span className="text-base font-bold text-muted-foreground">{unit}</span>}
           </>
         ) : (
           <span className="truncate text-xl">{value}</span>

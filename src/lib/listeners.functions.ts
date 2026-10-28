@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { combineToUtc } from "./time-zone";
 
 export const listListeners = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -47,41 +48,11 @@ const BookingInput = z.object({
   preferred_day: z.string().min(4), // YYYY-MM-DD
   preferred_time: z.string().min(3), // HH:MM (24h)
   time_zone: z.string().min(1),
-  duration_minutes: z.number().int().min(15).max(120).default(45),
+  duration_minutes: z.literal(15).default(15),
   note: z.string().max(1000).default(""),
   booking_type: z.enum(["scheduled", "emergency_callback"]).default("scheduled"),
 });
 
-export function combineToUtc(day: string, time: string, timeZone: string): string {
-  // Interpret day+time in the user's timezone and convert to a real UTC instant.
-  // Uses Intl trick: build a Date that we believe is UTC, then figure the local offset.
-  const iso = `${day}T${time.length === 5 ? time + ":00" : time}`;
-  const naive = new Date(iso + "Z"); // pretend UTC
-  const fmt = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
-  const parts = fmt.formatToParts(naive).reduce<Record<string, string>>((acc, p) => {
-    if (p.type !== "literal") acc[p.type] = p.value;
-    return acc;
-  }, {});
-  const asIfTz = Date.UTC(
-    Number(parts.year),
-    Number(parts.month) - 1,
-    Number(parts.day),
-    Number(parts.hour === "24" ? "00" : parts.hour),
-    Number(parts.minute),
-    Number(parts.second),
-  );
-  const offset = asIfTz - naive.getTime();
-  return new Date(naive.getTime() - offset).toISOString();
-}
 
 export const requestBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -188,8 +159,7 @@ export const requestBooking = createServerFn({ method: "POST" })
         user_id: context.userId,
         listener_id: assigned,
         requested_at: requestedAt,
-        duration_minutes:
-          data.booking_type === "emergency_callback" ? 30 : data.duration_minutes,
+        duration_minutes: 15,
         note: prefix + data.note,
         status: data.booking_type === "emergency_callback" ? "requested" : "confirmed",
         crm_state: "requested",
@@ -202,14 +172,11 @@ export const requestBooking = createServerFn({ method: "POST" })
       return {
         ok: false as const,
         code: "booking_failed" as const,
-        message: "We couldn't complete your booking. Please try again.",
+        message: error.code === "P0001" ? error.message : "We couldn't complete your booking. Please try again.",
       };
     }
 
-    // Charge one session against the family pool (no-op for solo users).
-    const { consumeSession } = await import("@/lib/family-sessions.server");
-    await consumeSession(context.supabase, context.userId);
-
+    // The database reserves a credit in the same transaction as the booking.
     return { ok: true as const, id: inserted?.id };
   });
 
@@ -236,24 +203,12 @@ export const rescheduleBooking = createServerFn({ method: "POST" })
     const now = Date.now();
     const twoHoursMs = 2 * 60 * 60 * 1000;
     if (startsAt - now < twoHoursMs) {
-      // Mark original as used so ops can reallocate the freed slot.
-      await context.supabase
-        .from("listener_bookings")
-        .update({ status: "completed", note: "[USED_BY_LATE_RESCHEDULE]" })
-        .eq("id", data.id)
-        .eq("user_id", context.userId);
       throw new Error(
-        "Reschedules must be made at least 2 hours before your session. This session has been marked used so our team can reallocate the slot.",
+        "Reschedules must be made at least 2 hours before your session. Your existing booking has not changed.",
       );
     }
     // On-time reschedule: draw one from the family's monthly reschedule
     // allowance (no-op for solo users). Blocked when the allowance is used up.
-    const { consumeReschedule } = await import("@/lib/family-sessions.server");
-    const resResult = await consumeReschedule(context.supabase, context.userId);
-    if (!resResult.ok) {
-      throw new Error(resResult.message);
-    }
-
     const newAt = combineToUtc(data.preferred_day, data.preferred_time, data.time_zone);
     const { error } = await context.supabase
       .from("listener_bookings")

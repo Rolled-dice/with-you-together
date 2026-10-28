@@ -35,7 +35,7 @@ export const PLAN_DISPLAY: Record<
 > = {
   care: {
     name: "Care",
-    note: "For one loved one you want to keep an eye on",
+    note: "Individual membership, just for you",
     inrLabel: "₹3,999",
     usdLabel: "$49",
     sessions: 18,
@@ -44,7 +44,7 @@ export const PLAN_DISPLAY: Record<
     bullets: [
       "18 Check-In calls a month",
       "15 minutes per call",
-      "Family dashboard updates after every call",
+      "Your own private wellbeing space",
       "Companion chat with a daily message allowance",
     ],
   },

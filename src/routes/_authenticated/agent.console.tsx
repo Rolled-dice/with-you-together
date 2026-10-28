@@ -19,6 +19,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { FamilyVerificationQueue } from "@/components/family-verification-queue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -269,6 +270,7 @@ function AgentConsolePage() {
       />
 
       <SoftphoneDock phone={phone} onGoAvailable={() => presenceFn({ data: { state: "available" } })} />
+      <FamilyVerificationQueue />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[320px_1fr]">
         <Card className="rounded-3xl border-border bg-surface shadow-gentle">

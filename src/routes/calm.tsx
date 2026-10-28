@@ -6,6 +6,8 @@ import { PrivacyChoicesButton } from "@/components/privacy-choices-button";
 import { Button } from "@/components/ui/button";
 import { CalmSpace } from "@/components/calm/calm-space";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "@/components/app-theme";
+import { QuickCareActions } from "@/components/care-ui/quick-care-actions";
 
 const TITLE = "A calm minute — breathe and let it go | SomeoneNear";
 const DESCRIPTION =
@@ -51,17 +53,23 @@ function PublicCalm() {
     <div className="min-h-dvh bg-background text-foreground">
       {/* Landing-style nav so the space feels part of the same site. */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
-        <nav className="mx-auto flex h-[4.5rem] w-full max-w-5xl items-center justify-between gap-4 px-5 sm:px-6">
+        <nav className="care-header-nav mx-auto flex min-h-[4.5rem] w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link to="/" aria-label="SomeoneNear home">
-            <Wordmark />
+            <Wordmark className="care-wordmark" />
           </Link>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <QuickCareActions inline />
             {!signedIn && (
-              <Button asChild variant="ghost" className="hidden rounded-full font-semibold sm:inline-flex">
+              <Button
+                asChild
+                variant="ghost"
+                className="hidden rounded-full font-semibold sm:inline-flex"
+              >
                 <Link to="/auth">Log in</Link>
               </Button>
             )}
-            <Button asChild className="rounded-full px-5 font-bold">
+            <Button asChild className="hidden rounded-full px-5 font-bold min-[400px]:inline-flex">
               <Link to={cta}>{signedIn ? "Open app" : "Try for free"}</Link>
             </Button>
           </div>
@@ -92,7 +100,12 @@ function PublicCalm() {
             companion, and gentle check-ins for the people you love.
           </p>
           <div className="mt-5">
-            <Button asChild size="lg" data-magnetic className="rounded-full px-8 text-base font-bold">
+            <Button
+              asChild
+              size="lg"
+              data-magnetic
+              className="rounded-full px-8 text-base font-bold"
+            >
               <Link to={cta}>
                 {signedIn ? "Open SomeoneNear" : "Explore SomeoneNear"}
                 <ArrowRightIcon className="ml-2 h-4 w-4" />

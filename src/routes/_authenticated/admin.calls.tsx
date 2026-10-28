@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { FamilyVerificationQueue } from "@/components/family-verification-queue";
 import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
 import {
   assignBookingAgent,
@@ -245,6 +246,7 @@ function CallsConsole() {
         description="Queue, routing, SLA ladder and flags for every listener call."
       />
 
+      <FamilyVerificationQueue />
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
         <StatTile
           icon={<PhoneCallIcon className="h-4 w-4" />}

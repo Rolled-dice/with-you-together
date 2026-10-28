@@ -61,3 +61,18 @@ supabase/cron-localhost.filled.sql
 package.json.bak
 pnpm-lock.yaml.bak
 package-lock.json
+
+# Kiro agent skills and IDE-specific files (not part of the app)
+.agents/
+.aider-desk/
+skills-lock.json
+.kiro/
+
+# Terraform
+terraform/.terraform/
+*.tfstate*
+*.tfvars
+
+# Test runs & preview artifacts
+artifacts/
+test-results/

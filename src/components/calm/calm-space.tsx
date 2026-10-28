@@ -6,10 +6,12 @@ import {
   PlayIcon,
   WindIcon,
   FlowerLotusIcon,
+  GameControllerIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { ChatakArcade } from "./chatak-arcade";
 
 /**
  * The Calm space: guided breathing and a no-score "let it float" game.
@@ -25,10 +27,12 @@ import { cn } from "@/lib/utils";
  * clearly on the warm canvas instead of washing out.
  */
 
-type Mode = "breathe" | "float";
+type Mode = "breathe" | "float" | "chatak";
 
 export function CalmSpace() {
   const [mode, setMode] = useState<Mode>("breathe");
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
 
   return (
     <>
@@ -36,12 +40,26 @@ export function CalmSpace() {
       <div
         role="tablist"
         aria-label="Choose an activity"
-        className="mb-5 inline-flex w-full rounded-full border border-border bg-muted/50 p-1 sm:w-auto"
+        onKeyDown={(event) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+          const modes: Mode[] = ["breathe", "float", "chatak"];
+          const index =
+            event.key === "Home"
+              ? 0
+              : event.key === "End"
+                ? 2
+                : (modes.indexOf(mode) + (event.key === "ArrowRight" ? 1 : 2)) % 3;
+          setMode(modes[index]);
+          event.currentTarget.querySelectorAll<HTMLButtonElement>("[role='tab']")[index]?.focus();
+        }}
+        className="mb-5 inline-flex w-full flex-wrap gap-1 rounded-lg border border-border bg-muted/50 p-1 sm:w-auto"
       >
         {(
           [
             { id: "breathe", label: "Breathe", icon: WindIcon },
             { id: "float", label: "Let it float", icon: FlowerLotusIcon },
+            { id: "chatak", label: "Chatak-Patak", icon: GameControllerIcon },
           ] as const
         ).map((t) => {
           const selected = mode === t.id;
@@ -51,10 +69,14 @@ export function CalmSpace() {
               key={t.id}
               type="button"
               role="tab"
+              id={`calm-tab-${t.id}`}
+              aria-controls="calm-activity"
+              tabIndex={selected ? 0 : -1}
+              disabled={!ready}
               aria-selected={selected}
               onClick={() => setMode(t.id)}
               className={cn(
-                "flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors sm:flex-none",
+                "flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold transition-colors sm:flex-none sm:px-5",
                 selected
                   ? "bg-brand-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
@@ -67,7 +89,9 @@ export function CalmSpace() {
         })}
       </div>
 
-      {mode === "breathe" ? <Breathing /> : <FloatAway />}
+      <div id="calm-activity" role="tabpanel" aria-labelledby={`calm-tab-${mode}`}>
+        {mode === "breathe" ? <Breathing /> : mode === "float" ? <FloatAway /> : <ChatakArcade />}
+      </div>
     </>
   );
 }
@@ -122,7 +146,11 @@ function Breathing() {
   const [running, setRunning] = useState(false);
   // One state object, advanced by a pure tick, so StrictMode's double-invoked
   // updaters can't skip a phase.
-  const [clock, setClock] = useState({ phaseIndex: 0, secondsLeft: pattern.phases[0].seconds, rounds: 0 });
+  const [clock, setClock] = useState({
+    phaseIndex: 0,
+    secondsLeft: pattern.phases[0].seconds,
+    rounds: 0,
+  });
   const { phaseIndex, secondsLeft, rounds } = clock;
   const phase = pattern.phases[phaseIndex];
 
@@ -158,13 +186,22 @@ function Breathing() {
   const targetScale = running ? phase.scale : 0.7;
 
   return (
-    <section className="grid gap-5 md:grid-cols-[1.2fr_1fr] md:items-center" aria-label="Guided breathing">
+    <section
+      className="grid gap-5 md:grid-cols-[1.2fr_1fr] md:items-center"
+      aria-label="Guided breathing"
+    >
       {/* Short on phones so the rhythm picker + Start button stay above the bottom nav.
           The stage uses a periwinkle wash so the navy orb has clear contrast. */}
       <div className="relative flex h-[32dvh] min-h-52 w-full items-center justify-center overflow-hidden rounded-[2rem] bg-gradient-to-br from-orb-periwinkle/45 via-orb-periwinkle/25 to-plate-cream md:h-auto md:aspect-square md:max-h-[60dvh]">
         {/* Soft halo rings, static — only the orb itself moves. Height-driven + aspect-square keeps them circular. */}
-        <div aria-hidden className="absolute aspect-square h-[92%] rounded-full border border-brand-primary/20" />
-        <div aria-hidden className="absolute aspect-square h-[74%] rounded-full border border-brand-primary/20" />
+        <div
+          aria-hidden
+          className="absolute aspect-square h-[92%] rounded-full border border-brand-primary/20"
+        />
+        <div
+          aria-hidden
+          className="absolute aspect-square h-[74%] rounded-full border border-brand-primary/20"
+        />
 
         {reduceMotion ? (
           <div
@@ -183,10 +220,17 @@ function Breathing() {
         )}
 
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center text-primary-foreground">
-          <p aria-live="polite" className="max-w-[8.5rem] text-lg font-bold leading-snug drop-shadow-sm sm:max-w-[11rem] sm:text-2xl">
+          <p
+            aria-live="polite"
+            className="max-w-[8.5rem] text-lg font-bold leading-snug drop-shadow-sm sm:max-w-[11rem] sm:text-2xl"
+          >
             {cue}
           </p>
-          {running && <p className="mt-1 text-4xl font-extrabold tabular-nums drop-shadow-sm">{secondsLeft}</p>}
+          {running && (
+            <p className="mt-1 text-4xl font-extrabold tabular-nums drop-shadow-sm">
+              {secondsLeft}
+            </p>
+          )}
         </div>
       </div>
 
@@ -290,7 +334,11 @@ function FloatAway() {
         drift: (Math.random() - 0.5) * 60,
         top: 10 + Math.random() * 60,
         tone: BUBBLE_TONES[Math.floor(Math.random() * BUBBLE_TONES.length)],
-        word: word ?? (Math.random() < 0.35 ? SOFT_WORDS[Math.floor(Math.random() * SOFT_WORDS.length)] : undefined),
+        word:
+          word ??
+          (Math.random() < 0.35
+            ? SOFT_WORDS[Math.floor(Math.random() * SOFT_WORDS.length)]
+            : undefined),
       };
       setBubbles((b) => [...b.slice(-11), bubble]);
     },
@@ -343,13 +391,21 @@ function FloatAway() {
               animate={
                 reduceMotion
                   ? { opacity: 1 }
-                  : { y: "-60dvh", x: [0, b.drift, -b.drift / 2, b.drift / 3], opacity: [0, 1, 1, 0.9] }
+                  : {
+                      y: "-60dvh",
+                      x: [0, b.drift, -b.drift / 2, b.drift / 3],
+                      opacity: [0, 1, 1, 0.9],
+                    }
               }
               exit={{ scale: 1.35, opacity: 0, transition: { duration: 0.25 } }}
               transition={
                 reduceMotion
                   ? { duration: 0.6 }
-                  : { duration: b.duration, ease: [0.25, 0.1, 0.25, 1], x: { duration: b.duration, ease: "easeInOut" } }
+                  : {
+                      duration: b.duration,
+                      ease: [0.25, 0.1, 0.25, 1],
+                      x: { duration: b.duration, ease: "easeInOut" },
+                    }
               }
               onAnimationComplete={() => {
                 if (!reduceMotion) setBubbles((all) => all.filter((x) => x.id !== b.id));
