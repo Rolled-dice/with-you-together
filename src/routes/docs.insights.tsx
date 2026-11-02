@@ -5,7 +5,10 @@ export const Route = createFileRoute("/docs/insights")({
   head: () => ({
     meta: [
       { title: "Insights | SomeoneNear Docs" },
-      { name: "description", content: "See gentle patterns in your mood over time, for your eyes only." },
+      {
+        name: "description",
+        content: "See gentle patterns in your mood over time, for your eyes only.",
+      },
       { property: "og:title", content: "Insights | SomeoneNear Docs" },
       { property: "og:description", content: "Gentle mood patterns over time." },
     ],
@@ -39,7 +42,10 @@ function Page() {
       <DocSection title="Common questions">
         <MiniFaq
           items={[
-            { q: "Do I need to check in every day?", a: "No, even a couple of check-ins a week shape the trend." },
+            {
+              q: "Do I need to check in every day?",
+              a: "No, even a couple of check-ins a week shape the trend.",
+            },
             { q: "Can I turn off Insights?", a: "Yes, from Account → Preferences." },
           ]}
         />

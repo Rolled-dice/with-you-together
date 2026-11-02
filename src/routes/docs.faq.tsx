@@ -1,39 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DocHeader, MiniFaq } from "@/components/docs/docs-shell";
-
+import { DocHeader, DocSection } from "@/components/docs/docs-shell";
 export const Route = createFileRoute("/docs/faq")({
-  head: () => ({
-    meta: [
-      { title: "FAQ | SomeoneNear Docs" },
-      { name: "description", content: "Answers to the most common questions about SomeoneNear." },
-      { property: "og:title", content: "FAQ | SomeoneNear Docs" },
-      { property: "og:description", content: "Answers to common questions about SomeoneNear." },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Common questions | SomeoneNear Docs" }] }),
   component: Page,
 });
-
 function Page() {
   return (
     <>
-      <DocHeader eyebrow="Help" title="Frequently asked questions" />
-      <MiniFaq
-        items={[
-          { q: "Is SomeoneNear therapy?", a: "No. SomeoneNear is warm supportive company, chat, mood check-ins, and calls with trained listeners. For clinical care, please see a licensed professional." },
-          { q: "Who can read my Companion chats?", a: "Only you. Family members and owners can't read your private content." },
-          { q: "Can I use SomeoneNear without a family?", a: "Absolutely, the Care plan works for one person and one loved one." },
-          { q: "What is a Check-In?", a: "A 15-minute call from a SomeoneNear team member to your loved one, to see how they're doing, and a short update on your family dashboard afterwards. See the Check-In page." },
-          { q: "How do Check-Ins work in my plan?", a: "Care includes 18 Check-Ins a month and Care Plus includes 30, each 15 minutes. Any family member can use them until they run out." },
-          { q: "How do listener calls reach me?", a: "The listener calls the verified mobile number on your profile, no app or link needed. Bookings need at least two hours' notice." },
-          { q: "Can SomeoneNear remind me to take my medicine?", a: "Yes, add medicines by scanning a prescription photo or typing them in, and we'll nudge you at each dose time. See the Medication page." },
-          { q: "What happens after my free trial?", a: "You keep your account and can pick a plan any time. Trial content isn't deleted." },
-          { q: "Can I use SomeoneNear in Hindi (or other languages)?", a: "Companion understands major languages including Hindi. We're adding more UI translations soon." },
-          { q: "Does SomeoneNear work on desktop?", a: "Yes, SomeoneNear works on any modern browser. Phone is where most people spend time." },
-          { q: "Can kids use SomeoneNear?", a: "Kids 13+ can have their own account. Younger children can be added as cared-for profiles by a parent." },
-          { q: "How do I contact support?", a: "Use the Feedback button in the app, or email support from your Account page." },
-          { q: "How do I delete everything?", a: "From Account → Data → Delete account. See the Account page for details." },
-        ]}
+      <DocHeader
+        eyebrow="SomeoneNear guides"
+        title="Common questions"
+        intro="Clear answers, at your pace."
       />
+      <DocSection title="Are device notifications enabled?">
+        <p>
+          Background push delivery is not available in this release. You can read your updates in
+          the notification inbox while using the app.
+        </p>
+      </DocSection>
+      <DocSection title="Can I send a voice message?">
+        <p>
+          Send Later supports scheduled voice messages for available family contacts. Recording
+          requires browser microphone permission. Upload a supported recording if your browser
+          cannot record.
+        </p>
+      </DocSection>
+      <DocSection title="Can I use it on my phone?">
+        <p>
+          Yes. Your main navigation sits at the bottom of the screen on mobile. On desktop, use the
+          sidebar.
+        </p>
+      </DocSection>
+      <DocSection title="Does Companion replace professional help?">
+        <p>
+          No. Companion is an AI feature for everyday reflection. Use the Safety page for grounding
+          resources and independent support services when needed.
+        </p>
+      </DocSection>
     </>
   );
 }

@@ -1,14 +1,22 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
+import { BootstrapLoader, DataError } from "@/components/feedback/load-state";
+import { PrivateSessionBoundary } from "@/features/session/session-boundary";
+import { RealtimeRecovery } from "@/features/notifications/use-notifications";
+import { safeAuthRedirect } from "@/lib/auth-routing";
+import { capabilities } from "@/lib/frontend/capabilities";
+
 function AuthGateLoader() {
+  return <BootstrapLoader message="Checking your session…" />;
+}
+function AuthenticatedLayout() {
+  const { user } = Route.useRouteContext();
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-3 text-muted-foreground">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-        <p className="text-sm">Checking your session…</p>
-      </div>
-    </div>
+    <PrivateSessionBoundary userId={user.id}>
+      <RealtimeRecovery userId={user.id} />
+      <Outlet />
+    </PrivateSessionBoundary>
   );
 }
 
@@ -21,7 +29,7 @@ export const Route = createFileRoute("/_authenticated")({
     let session = (await supabase.auth.getSession()).data.session;
 
     if (!session) {
-      throw redirect({ to: "/auth", search: { redirect: location.href } });
+      throw redirect({ to: "/auth", search: { redirect: safeAuthRedirect(location.href) } });
     }
 
     const expiresAtMs = session.expires_at ? session.expires_at * 1000 : 0;
@@ -33,7 +41,7 @@ export const Route = createFileRoute("/_authenticated")({
       if (refreshError || !refreshed.session) {
         throw redirect({
           to: "/auth",
-          search: { reason: "session_expired", redirect: location.href },
+          search: { reason: "session_expired", redirect: safeAuthRedirect(location.href) },
         });
       }
       session = refreshed.session;
@@ -45,12 +53,27 @@ export const Route = createFileRoute("/_authenticated")({
       void supabase.auth.refreshSession();
     }
 
-    const [{ data: isAdmin }, { data: isAgent }] = await Promise.all([
-      supabase.rpc("has_role", { _user_id: session.user.id, _role: "admin" }),
-      supabase.rpc("is_call_agent", { _uid: session.user.id }),
-    ]);
+    const { data: verified, error: verificationError } = await supabase.auth.getUser();
+    if (verificationError || verified.user?.id !== session.user.id) {
+      throw redirect({ to: "/auth", search: { redirect: safeAuthRedirect(location.href) } });
+    }
+    const [{ data: isAdmin, error: adminError }, { data: isAgent, error: agentError }] =
+      await Promise.all([
+        supabase.rpc("has_role", { _user_id: session.user.id, _role: "admin" }),
+        supabase.rpc("is_call_agent", { _uid: session.user.id }),
+      ]);
 
-    const path = location.pathname;
+    if (adminError || agentError)
+      throw new Error("Unable to verify account permissions. Please retry.");
+    const current = (await supabase.auth.getSession()).data.session;
+    if (current?.user.id !== session.user.id) throw redirect({ to: "/auth" });
+    const path = location.pathname.replace(/\/+$/, "") || "/";
+    if (
+      (!capabilities.outboundCallBooking && path === "/listeners") ||
+      (!capabilities.purchase && path === "/checkout")
+    ) {
+      throw redirect({ to: "/dashboard" });
+    }
     // const isAdminPage = path === "/admin/calls";
     const isAdminPage = path.startsWith("/admin/");
 
@@ -72,5 +95,7 @@ export const Route = createFileRoute("/_authenticated")({
     return { user: session.user, isAdmin: Boolean(isAdmin), isAgent: Boolean(isAgent) };
   },
 
-  component: () => <Outlet />,
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
+  errorComponent: ({ reset }) => <DataError retry={reset} />,
+  component: AuthenticatedLayout,
 });

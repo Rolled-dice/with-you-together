@@ -1,11 +1,22 @@
+function hasControlCharacters(value: string) {
+  return Array.from(value).some((char) => char.charCodeAt(0) < 32);
+}
+
 const DEFAULT_AUTH_DESTINATION = "/dashboard";
 
 function isSafeRelativePath(value: string): boolean {
-  return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/auth");
+  return (
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !value.includes("\\") &&
+    !hasControlCharacters(value) &&
+    !value.startsWith("/auth")
+  );
 }
 
 export function safeAuthRedirect(value?: string | null): string {
-  if (!value) return DEFAULT_AUTH_DESTINATION;
+  if (!value || value.includes("\\") || hasControlCharacters(value))
+    return DEFAULT_AUTH_DESTINATION;
 
   if (isSafeRelativePath(value)) return value;
   if (typeof window === "undefined") return DEFAULT_AUTH_DESTINATION;

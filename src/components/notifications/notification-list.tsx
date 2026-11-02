@@ -39,7 +39,7 @@ export function NotificationList({
   if (items.length === 0) {
     return (
       <p className={cn("px-2 py-6 text-center text-sm text-muted-foreground", className)}>
-        Nothing yet. Call reminders will appear here.
+        Nothing yet. Your updates will appear here.
       </p>
     );
   }
@@ -60,7 +60,7 @@ export function NotificationList({
               type="button"
               aria-label="Dismiss"
               onClick={() => onDismiss(n.id)}
-              className="text-muted-foreground transition-colors hover:text-foreground active:text-foreground"
+              className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground active:text-foreground"
             >
               <XIcon className="h-3.5 w-3.5" />
             </button>

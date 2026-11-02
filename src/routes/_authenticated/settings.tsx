@@ -1,3 +1,7 @@
+import { timeZoneSchema } from "@/lib/frontend/time";
+import { DataError } from "@/components/feedback/load-state";
+import { capabilities } from "@/lib/frontend/capabilities";
+import { NotificationPermissionStatus } from "@/features/notifications/permission-status";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,7 +81,12 @@ function SettingsPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
-  const { data: profile, isLoading } = useQuery({
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    refetch: retryProfile,
+  } = useQuery({
     queryKey: ["me"],
     queryFn: () => profileFn(),
   });
@@ -99,14 +108,14 @@ function SettingsPage() {
   useEffect(() => {
     if (!profile) return;
     setDisplayName(profile.display_name ?? "");
-    setFullName((profile as any).full_name ?? "");
+    setFullName(profile.full_name ?? "");
     setPronouns(profile.pronouns ?? "");
     setTimezone(profile.timezone ?? "");
     setIntent(profile.care_intent ?? "");
-    setPhone(((profile as any).phone as string | null) ?? "");
-    setLanguage(((profile as any).preferred_language as "en" | "hi") ?? "en");
-    const prefCur = (profile as any).preferred_currency as Currency | null;
-    setCurrency(prefCur ?? currencyForCountry((profile as any).phone_country));
+    setPhone((profile.phone as string | null) ?? "");
+    setLanguage((profile.preferred_language as "en" | "hi") ?? "en");
+    const prefCur = profile.preferred_currency as Currency | null;
+    setCurrency(prefCur ?? currencyForCountry(profile.phone_country));
   }, [profile]);
 
   useEffect(() => {
@@ -139,7 +148,7 @@ function SettingsPage() {
           display_name: displayName || null,
           full_name: fullName || null,
           pronouns: pronouns || null,
-          timezone: timezone || null,
+          timezone: timezone ? timeZoneSchema.parse(timezone) : null,
           care_intent: intent || null,
           preferred_language: language,
           preferred_currency: currency,
@@ -148,6 +157,7 @@ function SettingsPage() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["me"] });
+      qc.invalidateQueries({ queryKey: ["time-zone"] });
       toast.success("Saved");
     },
     onError: (e) => toast.error((e as Error).message),
@@ -173,15 +183,22 @@ function SettingsPage() {
   const manageLabel = "Cancel membership";
 
   async function handleSignOut() {
-    await qc.cancelQueries();
+    void qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
 
+  if (isError)
+    return (
+      <AppShell>
+        <DataError retry={() => void retryProfile()} />
+      </AppShell>
+    );
   if (isLoading || !profile) {
     return (
       <AppShell>
+        <NotificationPermissionStatus />
         <div className="flex flex-col gap-3">
           <Skeleton className="h-4 w-16" />
           <Skeleton className="h-8 w-56" />
@@ -213,6 +230,7 @@ function SettingsPage() {
 
   return (
     <AppShell>
+      <NotificationPermissionStatus />
       <PaymentTestModeBanner />
       <PageHeader
         eyebrow="Settings"
@@ -328,9 +346,11 @@ function SettingsPage() {
                       <div className="text-[11px] text-muted-foreground">per month</div>
                     </div>
                     <ul className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
-                      {info.bullets.map((b) => (
-                        <li key={b}>· {b}</li>
-                      ))}
+                      {info.bullets
+                        .filter((b) => !/call|check-in|safety net|telnyx/i.test(b))
+                        .map((b) => (
+                          <li key={b}>· {b}</li>
+                        ))}
                     </ul>
                     {active ? (
                       <Button
@@ -345,13 +365,19 @@ function SettingsPage() {
                         ) : null}
                         {manageLabel}
                       </Button>
-                    ) : (
+                    ) : capabilities.purchase ? (
                       <Button
                         size="sm"
                         onClick={() =>
                           navigate({
                             to: "/checkout",
-                            search: { price: priceId as any },
+                            search: {
+                              price: priceId as
+                                | "care_monthly_inr"
+                                | "care_monthly_usd"
+                                | "care_plus_monthly_inr"
+                                | "care_plus_monthly_usd",
+                            },
                           })
                         }
                         className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
@@ -359,7 +385,7 @@ function SettingsPage() {
                         <SparkleIcon className="mr-2 h-3 w-3" />
                         {hasPaidSub ? "Switch plan" : "Choose plan"}
                       </Button>
-                    )}
+                    ) : null}
                   </div>
                 );
               })}
@@ -426,24 +452,25 @@ function SettingsPage() {
                   autoComplete="tel"
                   className="rounded-brand"
                 />
-                {(profile as any).phone_verified && phone === ((profile as any).phone ?? "") ? (
+                {profile.phone_verified && phone === (profile.phone ?? "") ? (
                   <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
                 ) : (
                   <>
                     <Badge variant="secondary" className="rounded-full whitespace-nowrap">
                       Not verified
                     </Badge>
-                    <PhoneVerifyDialog
-                      phone={phone}
-                      country={(profile as any).phone_country ?? "IN"}
-                      onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
-                    />
+                    {capabilities.outboundCallBooking && (
+                      <PhoneVerifyDialog
+                        phone={phone}
+                        country={profile.phone_country ?? "IN"}
+                        onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
+                      />
+                    )}
                   </>
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Include your country code. Save it first, then verify, a listener can only call a
-                verified number.
+                Include your country code when saving your contact number.
               </p>
             </Field>
             <Field label="What brings you here?">

@@ -1,3 +1,4 @@
+import { DataError, DataSkeleton } from "@/components/feedback/load-state";
 import { createFileRoute, Link, Outlet, useNavigate, useParams } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,10 @@ export const Route = createFileRoute("/_authenticated/companion")({
   head: () => ({
     meta: [
       { title: "Companion | SomeoneNear" },
-      { name: "description", content: "A calm AI Companion to talk things through, on your terms." },
+      {
+        name: "description",
+        content: "A calm AI Companion to talk things through, on your terms.",
+      },
     ],
   }),
   component: CompanionLayout,
@@ -30,7 +34,12 @@ function CompanionLayout() {
   const deleteFn = useServerFn(deleteConversation);
   const params = useParams({ strict: false }) as { threadId?: string };
 
-  const { data: conversations = [] } = useQuery({
+  const {
+    data: conversations = [],
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["conversations"],
     queryFn: () => listFn(),
   });
@@ -66,7 +75,11 @@ function CompanionLayout() {
             New conversation
           </Button>
           <div className="flex-1 overflow-y-auto rounded-brand border border-border bg-card p-2">
-            {conversations.length === 0 ? (
+            {isPending ? (
+              <DataSkeleton />
+            ) : isError ? (
+              <DataError retry={() => void refetch()} />
+            ) : conversations.length === 0 ? (
               <p className="p-3 text-xs text-muted-foreground">
                 Your conversations will appear here, always private.
               </p>
@@ -127,6 +140,30 @@ function CompanionLayout() {
               <PlusIcon className="mr-1 h-3.5 w-3.5" /> New
             </Button>
           </header>
+          <details className="border-b border-border p-3 md:hidden">
+            <summary className="min-h-11 cursor-pointer font-semibold">Your conversations</summary>
+            {isPending ? (
+              <DataSkeleton />
+            ) : isError ? (
+              <DataError retry={() => void refetch()} />
+            ) : conversations.length ? (
+              <ul>
+                {conversations.map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      className="block min-h-11 py-3"
+                      to="/companion/$threadId"
+                      params={{ threadId: c.id }}
+                    >
+                      {c.title || "Untitled conversation"}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No conversations yet.</p>
+            )}
+          </details>
           <Outlet />
         </section>
       </div>

@@ -22,7 +22,6 @@ export const DOC_GROUPS: DocGroup[] = [
     links: [
       { to: "/docs/check-in", label: "Check-In" },
       { to: "/docs/companion", label: "Companion" },
-      { to: "/docs/listeners", label: "Listeners" },
       { to: "/docs/family", label: "Family Circle" },
       { to: "/docs/insights", label: "Insights" },
       { to: "/docs/medication", label: "Medication" },
@@ -97,7 +96,12 @@ export function DocsShell() {
           <div className="flex items-center gap-2">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open docs menu">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden"
+                  aria-label="Open docs menu"
+                >
                   <ListIcon className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -116,7 +120,12 @@ export function DocsShell() {
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="hidden rounded-full font-semibold sm:inline-flex">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="hidden rounded-full font-semibold sm:inline-flex"
+            >
               <Link to="/">Back to site</Link>
             </Button>
             <Button asChild size="sm" className="rounded-full font-bold">
@@ -136,7 +145,9 @@ export function DocsShell() {
         <main className="min-w-0 flex-1 py-8">
           {/* Breadcrumb */}
           <div className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
-            <Link to="/docs" className="hover:text-foreground">Docs</Link>
+            <Link to="/docs" className="hover:text-foreground">
+              Docs
+            </Link>
             {current && current.to !== "/docs" && (
               <>
                 <CaretRightIcon className="h-3 w-3" />
@@ -162,7 +173,9 @@ export function DocsShell() {
                   </div>
                   <div className="mt-1 font-bold group-hover:text-primary">{prev.label}</div>
                 </Link>
-              ) : <div />}
+              ) : (
+                <div />
+              )}
               {next ? (
                 <Link
                   to={next.to}
@@ -173,7 +186,9 @@ export function DocsShell() {
                   </div>
                   <div className="mt-1 font-bold group-hover:text-primary">{next.label}</div>
                 </Link>
-              ) : <div />}
+              ) : (
+                <div />
+              )}
             </nav>
           )}
         </main>
@@ -195,9 +210,7 @@ export function DocHeader({
 }) {
   return (
     <header className="mb-8">
-      {eyebrow && (
-        <div className="mb-2 text-sm font-bold text-orb-terracotta">{eyebrow}</div>
-      )}
+      {eyebrow && <div className="mb-2 text-sm font-bold text-orb-terracotta">{eyebrow}</div>}
       <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
       {intro && (
         <p className="mt-3 text-[1.0625rem] leading-relaxed text-muted-foreground sm:text-lg">

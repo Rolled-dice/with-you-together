@@ -50,12 +50,17 @@ export const Route = createFileRoute("/_authenticated/admin/feedback")({
   }),
   component: AdminFeedbackPage,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-red-600">Something went wrong: {error.message}</div>
+    <div className="p-8 text-sm text-red-600">
+      Something went wrong: {error instanceof Error ? error.message : "Please try again."}
+    </div>
   ),
   notFoundComponent: () => <div className="p-8 text-sm">Not found.</div>,
 });
 
-const CATEGORY_META: Record<FeedbackCategory, { label: string; Icon: typeof BugIcon; tone: string }> = {
+const CATEGORY_META: Record<
+  FeedbackCategory,
+  { label: string; Icon: typeof BugIcon; tone: string }
+> = {
   feature_request: { label: "Feature request", Icon: LightbulbIcon, tone: "bg-mint/40" },
   bug_report: { label: "Bug", Icon: BugIcon, tone: "bg-blush/50" },
   product_feedback: { label: "Product", Icon: ChatCircleTextIcon, tone: "bg-peach/60" },
@@ -64,12 +69,17 @@ const CATEGORY_META: Record<FeedbackCategory, { label: string; Icon: typeof BugI
   support: { label: "Support", Icon: LifebuoyIcon, tone: "bg-sunrise/40" },
 };
 
-const PRIORITY_META: Record<FeedbackPriority, { label: string; className: string; rank: number }> = {
-  urgent: { label: "Urgent", className: "bg-red-100 text-red-800 border-red-200", rank: 0 },
-  high: { label: "High", className: "bg-orange-100 text-orange-800 border-orange-200", rank: 1 },
-  normal: { label: "Normal", className: "bg-neutral-100 text-neutral-700 border-neutral-200", rank: 2 },
-  low: { label: "Low", className: "bg-slate-100 text-slate-600 border-slate-200", rank: 3 },
-};
+const PRIORITY_META: Record<FeedbackPriority, { label: string; className: string; rank: number }> =
+  {
+    urgent: { label: "Urgent", className: "bg-red-100 text-red-800 border-red-200", rank: 0 },
+    high: { label: "High", className: "bg-orange-100 text-orange-800 border-orange-200", rank: 1 },
+    normal: {
+      label: "Normal",
+      className: "bg-neutral-100 text-neutral-700 border-neutral-200",
+      rank: 2,
+    },
+    low: { label: "Low", className: "bg-slate-100 text-slate-600 border-slate-200", rank: 3 },
+  };
 
 const STATUS_META: Record<FeedbackStatus, { label: string; className: string }> = {
   new: { label: "New", className: "bg-sky-100 text-sky-800 border-sky-200" },
@@ -145,7 +155,8 @@ function AdminFeedbackPage() {
         if (r.triage_status === "resolved" || r.triage_status === "archived") return false;
       } else if (status !== "all" && r.triage_status !== status) return false;
       if (q) {
-        const hay = `${r.subject ?? ""} ${r.message} ${r.email ?? ""} ${r.page ?? ""}`.toLowerCase();
+        const hay =
+          `${r.subject ?? ""} ${r.message} ${r.email ?? ""} ${r.page ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -165,7 +176,11 @@ function AdminFeedbackPage() {
   }, [rows, category, priority, status, query, sort]);
 
   if (roleQ.isLoading) {
-    return <PageShell><Skeleton className="h-40 w-full rounded-2xl" /></PageShell>;
+    return (
+      <PageShell>
+        <Skeleton className="h-40 w-full rounded-2xl" />
+      </PageShell>
+    );
   }
 
   if (!roleQ.data?.isAdmin) {
@@ -177,10 +192,14 @@ function AdminFeedbackPage() {
           </div>
           <h1 className="text-lg font-semibold">Admins only</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            This dashboard is for the SomeoneNear product team. Ask an owner to grant you the <code>admin</code> role.
+            This dashboard is for the SomeoneNear product team. Ask an owner to grant you the{" "}
+            <code>admin</code> role.
           </p>
           <Button asChild variant="ghost" className="mt-4">
-            <Link to="/dashboard"><ArrowLeftIcon className="mr-2 h-4 w-4" />Back to dashboard</Link>
+            <Link to="/dashboard">
+              <ArrowLeftIcon className="mr-2 h-4 w-4" />
+              Back to dashboard
+            </Link>
           </Button>
         </div>
       </PageShell>
@@ -198,7 +217,10 @@ function AdminFeedbackPage() {
           </p>
         </div>
         <Button asChild variant="ghost" size="sm">
-          <Link to="/dashboard"><ArrowLeftIcon className="mr-2 h-4 w-4" />Dashboard</Link>
+          <Link to="/dashboard">
+            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            Dashboard
+          </Link>
         </Button>
       </div>
 
@@ -217,23 +239,41 @@ function AdminFeedbackPage() {
           placeholder="Search subject, message, email…"
           className="h-9 min-w-[180px] flex-1 rounded-xl border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-coral/40"
         />
-        <FilterSelect value={category} onValueChange={(v) => setCategory(v as CategoryFilter)} placeholder="Category">
+        <FilterSelect
+          value={category}
+          onValueChange={(v) => setCategory(v as CategoryFilter)}
+          placeholder="Category"
+        >
           <SelectItem value="all">All categories</SelectItem>
           {(Object.keys(CATEGORY_META) as FeedbackCategory[]).map((k) => (
-            <SelectItem key={k} value={k}>{CATEGORY_META[k].label}</SelectItem>
+            <SelectItem key={k} value={k}>
+              {CATEGORY_META[k].label}
+            </SelectItem>
           ))}
         </FilterSelect>
-        <FilterSelect value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)} placeholder="Priority">
+        <FilterSelect
+          value={priority}
+          onValueChange={(v) => setPriority(v as PriorityFilter)}
+          placeholder="Priority"
+        >
           <SelectItem value="all">All priorities</SelectItem>
           {(Object.keys(PRIORITY_META) as FeedbackPriority[]).map((k) => (
-            <SelectItem key={k} value={k}>{PRIORITY_META[k].label}</SelectItem>
+            <SelectItem key={k} value={k}>
+              {PRIORITY_META[k].label}
+            </SelectItem>
           ))}
         </FilterSelect>
-        <FilterSelect value={status} onValueChange={(v) => setStatus(v as StatusFilter)} placeholder="Status">
+        <FilterSelect
+          value={status}
+          onValueChange={(v) => setStatus(v as StatusFilter)}
+          placeholder="Status"
+        >
           <SelectItem value="open">Open (not resolved/archived)</SelectItem>
           <SelectItem value="all">All statuses</SelectItem>
           {(Object.keys(STATUS_META) as FeedbackStatus[]).map((k) => (
-            <SelectItem key={k} value={k}>{STATUS_META[k].label}</SelectItem>
+            <SelectItem key={k} value={k}>
+              {STATUS_META[k].label}
+            </SelectItem>
           ))}
         </FilterSelect>
         <FilterSelect value={sort} onValueChange={(v) => setSort(v as SortMode)} placeholder="Sort">
@@ -345,7 +385,9 @@ function FeedbackCard({
   return (
     <li className="rounded-2xl border bg-card p-4 shadow-soft transition hover:shadow-md">
       <div className="flex flex-wrap items-start gap-3">
-        <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${cat.tone}`}>
+        <span
+          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${cat.tone}`}
+        >
           <cat.Icon className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
@@ -353,42 +395,63 @@ function FeedbackCard({
             <Badge variant="outline" className="rounded-full text-[10px] uppercase tracking-wider">
               {cat.label}
             </Badge>
-            <Badge className={`rounded-full border text-[10px] uppercase tracking-wider ${PRIORITY_META[row.priority].className}`}>
+            <Badge
+              className={`rounded-full border text-[10px] uppercase tracking-wider ${PRIORITY_META[row.priority].className}`}
+            >
               {PRIORITY_META[row.priority].label}
             </Badge>
-            <Badge className={`rounded-full border text-[10px] uppercase tracking-wider ${STATUS_META[row.triage_status].className}`}>
+            <Badge
+              className={`rounded-full border text-[10px] uppercase tracking-wider ${STATUS_META[row.triage_status].className}`}
+            >
               {STATUS_META[row.triage_status].label}
             </Badge>
             <span className="text-xs text-muted-foreground">
               {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
             </span>
-            {saving && <SpinnerGapIcon className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+            {saving && (
+              <SpinnerGapIcon className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+            )}
           </div>
           {row.subject && <h3 className="mt-1.5 font-semibold leading-snug">{row.subject}</h3>}
           <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800">{row.message}</p>
           <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
             {row.email && (
               <span>
-                From <a className="underline underline-offset-2" href={`mailto:${row.email}`}>{row.email}</a>
+                From{" "}
+                <a className="underline underline-offset-2" href={`mailto:${row.email}`}>
+                  {row.email}
+                </a>
               </span>
             )}
-            {row.page && <span>Page: <code>{row.page}</code></span>}
-            <span>Ref: <code>WU-{row.id.replace(/-/g, "").slice(0, 6).toUpperCase()}</code></span>
+            {row.page && (
+              <span>
+                Page: <code>{row.page}</code>
+              </span>
+            )}
+            <span>
+              Ref: <code>WU-{row.id.replace(/-/g, "").slice(0, 6).toUpperCase()}</code>
+            </span>
           </div>
         </div>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
         <div className="flex items-center gap-1.5">
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Priority</span>
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            Priority
+          </span>
           <Select
             value={row.priority}
             onValueChange={(v) => onChange({ priority: v as FeedbackPriority })}
           >
-            <SelectTrigger className="h-8 w-[110px] rounded-lg text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-[110px] rounded-lg text-xs">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {(Object.keys(PRIORITY_META) as FeedbackPriority[]).map((k) => (
-                <SelectItem key={k} value={k}>{PRIORITY_META[k].label}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {PRIORITY_META[k].label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -399,10 +462,14 @@ function FeedbackCard({
             value={row.triage_status}
             onValueChange={(v) => onChange({ triage_status: v as FeedbackStatus })}
           >
-            <SelectTrigger className="h-8 w-[130px] rounded-lg text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-[130px] rounded-lg text-xs">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {(Object.keys(STATUS_META) as FeedbackStatus[]).map((k) => (
-                <SelectItem key={k} value={k}>{STATUS_META[k].label}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {STATUS_META[k].label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

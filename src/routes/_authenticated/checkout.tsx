@@ -1,3 +1,4 @@
+import { requireCapability } from "@/lib/frontend/capabilities";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { useState } from "react";
@@ -65,6 +66,7 @@ function DodoCheckout({ price }: { price: z.infer<typeof PriceParam> }) {
   async function startCheckout() {
     setLoading(true);
     try {
+      requireCapability("purchase");
       const result = await createDodoCheckout({
         data: {
           priceId: price,

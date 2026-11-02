@@ -1,10 +1,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  useRouter,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { supabase } from "@/integrations/supabase/client";
+import { SessionLifecycle } from "@/features/session/session-boundary";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -29,17 +36,20 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportLovableError(new Error("A page failed to render"), {
+      boundary: "tanstack_root_error_component",
+    });
   }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          This page didn't load
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
@@ -74,14 +84,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, human listener calls, mood insights, and a shared circle that keeps your loved ones close.",
+          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, reminders, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { name: "author", content: "SomeoneNear" },
       { property: "og:title", content: "SomeoneNear Checking in when they can't" },
       {
         property: "og:description",
         content:
-          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, human listener calls, mood insights, and a shared circle that keeps your loved ones close.",
+          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, reminders, mood insights, and a shared circle that keeps your loved ones close.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -89,22 +99,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "twitter:description",
         content:
-          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, human listener calls, mood insights, and a shared circle that keeps your loved ones close.",
+          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, reminders, mood insights, and a shared circle that keeps your loved ones close.",
       },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       // Square, padded, genuinely transparent icons built by
       // scripts/clean-logo.ps1 from the original artwork.
       { rel: "icon", href: "/favicon-64.png?v=6", type: "image/png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=6" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap",
+        rel: "preload",
+        href: "/fonts/figtree.ttf",
+        as: "font",
+        type: "font/ttf",
+        crossOrigin: "anonymous",
       },
-      { rel: "preconnect", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://hagqbqxsedoqdoqdbtqt.supabase.co",
+        crossOrigin: "anonymous",
+      },
       { rel: "dns-prefetch", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co" },
     ],
   }),
@@ -138,22 +154,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const router = useRouter();
-
-  useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      if (event === "SIGNED_OUT") {
-        void queryClient.cancelQueries().then(() => queryClient.clear());
-      }
-      router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
-    });
-    return () => data.subscription.unsubscribe();
-  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SessionLifecycle />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster
@@ -162,7 +166,8 @@ function RootComponent() {
         duration={5000}
         toastOptions={{
           classNames: {
-            toast: "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
+            toast:
+              "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
             title: "font-display font-medium",
             description: "text-muted-foreground",
             actionButton: "rounded-full bg-primary text-primary-foreground",

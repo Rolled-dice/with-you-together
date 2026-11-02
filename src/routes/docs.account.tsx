@@ -1,67 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DocHeader, DocSection, Steps, Callout, MiniFaq, TryItNow } from "@/components/docs/docs-shell";
-
+import { DocHeader, DocSection } from "@/components/docs/docs-shell";
 export const Route = createFileRoute("/docs/account")({
-  head: () => ({
-    meta: [
-      { title: "Your account | SomeoneNear Docs" },
-      { name: "description", content: "Profile, notifications, and deleting your SomeoneNear account." },
-      { property: "og:title", content: "Your account | SomeoneNear Docs" },
-      { property: "og:description", content: "Manage your SomeoneNear account." },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Your account | SomeoneNear Docs" }] }),
   component: Page,
 });
-
 function Page() {
   return (
     <>
       <DocHeader
-        eyebrow="Account"
+        eyebrow="SomeoneNear guides"
         title="Your account"
-        intro="Small settings that make SomeoneNear feel like yours."
+        intro="A private space that stays yours."
       />
-
-      <DocSection title="Profile">
-        <p>Update your name, photo, and pronouns from <em>Account → Profile</em>. Changes show up right away in your Companion and Family Circle.</p>
-      </DocSection>
-
-      <DocSection title="Mobile number">
+      <DocSection title="Profile and timezone">
         <p>
-          Your mobile number is where a listener calls you. Add or change it in Settings, when it
-          changes, we'll send a short code by text or a quick call to verify the new number before
-          your next booking.
+          Update your name, preferences and timezone in Settings. Use a valid IANA timezone such as
+          Asia/Kolkata.
         </p>
       </DocSection>
-
-      <DocSection title="Notifications">
-        <Steps
-          items={[
-            { title: "Daily check-in", body: "A gentle reminder at your chosen time." },
-            { title: "Family activity", body: "Only high-level events | never anyone's private content." },
-            { title: "Booking reminders", body: "10 minutes before your listener call." },
-          ]}
-        />
+      <DocSection title="Signing out">
+        <p>
+          Sign out when you finish on a shared device. Your private workspace is cleared when your
+          session ends or your account changes.
+        </p>
       </DocSection>
-
-      <DocSection title="Change email or password">
-        <p>Open <em>Account → Sign-in</em>. You'll get a confirmation email to make the change.</p>
-      </DocSection>
-
-      <DocSection title="Delete your account">
-        <p>From <em>Account → Data</em>, choose <strong>Delete account</strong>. This removes your chats, mood check-ins, insights, and profile within 30 days.</p>
-        <Callout tone="warn" title="This can't be undone">Your data is permanently removed once the 30-day window passes.</Callout>
-      </DocSection>
-
-      <TryItNow to="/settings" label="Open account settings" />
-
-      <DocSection title="Common questions">
-        <MiniFaq
-          items={[
-            { q: "What happens to my family plan if I delete?", a: "Ownership transfers to the next adult in your circle, or the plan ends if you're the only owner." },
-            { q: "Can I pause notifications?", a: "Yes, set quiet hours from Notifications." },
-          ]}
-        />
+      <DocSection title="Membership">
+        <p>
+          Settings shows your existing membership and available management controls. New purchases
+          are currently unavailable.
+        </p>
       </DocSection>
     </>
   );

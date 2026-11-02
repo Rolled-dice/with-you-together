@@ -1,3 +1,4 @@
+import { timeZoneSchema } from "@/lib/frontend/time";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,6 +59,10 @@ function OnboardingPage() {
       toast.error("Please share what we can call you.");
       return;
     }
+    if (!timeZoneSchema.safeParse(timezone).success) {
+      toast.error("Choose a valid timezone, such as Asia/Kolkata.");
+      return;
+    }
     const trimmedPhone = phone.trim();
     if (trimmedPhone && !/^\+?[0-9][0-9\s-]{6,17}$/.test(trimmedPhone)) {
       toast.error("Please enter a valid mobile number with country code.");
@@ -108,8 +113,8 @@ function OnboardingPage() {
           <CardHeader>
             <CardTitle className="text-2xl font-semibold">A gentle welcome</CardTitle>
             <CardDescription>
-              A few soft questions so SomeoneNear can meet you where you are. Nothing here is shared , 
-              it's yours.
+              A few soft questions so SomeoneNear can meet you where you are. Nothing here is shared
+              , it's yours.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -146,8 +151,8 @@ function OnboardingPage() {
                   autoComplete="tel"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Include your country code. This is where a listener calls you and where reminders
-                  arrive. You can change it any time in Settings.
+                  Include your country code. This is your contact number. You can change it any time
+                  in Settings.
                 </p>
               </div>
 

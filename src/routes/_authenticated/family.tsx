@@ -1,3 +1,6 @@
+import { capabilities } from "@/lib/frontend/capabilities";
+import { DataError, DataSkeleton } from "@/components/feedback/load-state";
+import { useIdentity } from "@/features/session/session-store";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,7 +52,6 @@ import {
   UsersIcon,
 } from "@phosphor-icons/react";
 
-
 export const Route = createFileRoute("/_authenticated/family")({
   head: () => ({
     meta: [
@@ -64,25 +66,42 @@ export const Route = createFileRoute("/_authenticated/family")({
 });
 
 function FamilyPage() {
+  const { userId } = useIdentity();
   const familyFn = useServerFn(getMyFamily);
   const profileFn = useServerFn(getMyProfile);
 
-  const { data: profile } = useQuery({ queryKey: ["me"], queryFn: () => profileFn() });
-  const { data, isLoading } = useQuery({ queryKey: ["family"], queryFn: () => familyFn() });
+  const {
+    data: profile,
+    isPending: profileLoading,
+    isError: profileError,
+    refetch: retryProfile,
+  } = useQuery({ queryKey: ["me", userId], queryFn: () => profileFn() });
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["family", userId],
+    queryFn: () => familyFn(),
+  });
 
-  if (isLoading) {
+  if (isError || profileError)
     return (
       <AppShell>
-        <div className="flex h-40 items-center justify-center">
-          <SpinnerGapIcon className="h-5 w-5 animate-spin text-brand-primary" />
-        </div>
+        <DataError
+          retry={() => {
+            void refetch();
+            void retryProfile();
+          }}
+        />
+      </AppShell>
+    );
+  if (isLoading || profileLoading) {
+    return (
+      <AppShell>
+        <DataSkeleton />
       </AppShell>
     );
   }
 
   // Mirrors the server gate in family.functions.ts: any paid plan.
-  const hasFamilyTier =
-    profile?.care_tier === "care" || profile?.care_tier === "care_plus";
+  const hasFamilyTier = profile?.care_tier === "care" || profile?.care_tier === "care_plus";
 
   return (
     <AppShell>
@@ -90,7 +109,7 @@ function FamilyPage() {
         eyebrow="Family"
         slogan="Closer, even from far."
         title="Your circle"
-        description="Companion chats stay private. Owner allocates the family's monthly Listener sessions."
+        description="Your people, together. Companion conversations stay private, and family access follows each member’s role."
       />
 
       {!data?.family ? (
@@ -99,14 +118,13 @@ function FamilyPage() {
         <>
           <FamilyView data={data} />
           <div className="mt-6">
-            <SessionAllocationPanel />
+            {capabilities.outboundCallBooking && <SessionAllocationPanel />}
           </div>
         </>
       )}
     </AppShell>
   );
 }
-
 
 function EmptyState({ hasFamilyTier }: { hasFamilyTier: boolean }) {
   const createFn = useServerFn(createFamily);
@@ -132,8 +150,8 @@ function EmptyState({ hasFamilyTier }: { hasFamilyTier: boolean }) {
       <CardContent className="grid gap-4">
         {!hasFamilyTier ? (
           <div className="rounded-brand border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
-            Family sharing is included with the <strong>Family</strong> Care Membership. Upgrade
-            from Settings to invite up to 4 members.
+            Family sharing requires an eligible Care membership. Review your current access in
+            Settings. New purchases are not available in this release.
           </div>
         ) : (
           <>
@@ -163,11 +181,7 @@ function EmptyState({ hasFamilyTier }: { hasFamilyTier: boolean }) {
   );
 }
 
-function FamilyView({
-  data,
-}: {
-  data: Awaited<ReturnType<typeof getMyFamily>>;
-}) {
+function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> }) {
   const qc = useQueryClient();
   const renameFn = useServerFn(renameFamily);
   const inviteFn = useServerFn(inviteFamilyMember);
@@ -290,8 +304,7 @@ function FamilyView({
                         </Select>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Their Companion chats stay private, only the tier and roster
-                        are shared.
+                        Their Companion chats stay private, only the tier and roster are shared.
                       </p>
                     </div>
                     <DialogFooter>
@@ -448,9 +461,8 @@ function FamilyView({
           <CardTitle className="text-base font-medium">Privacy in your circle</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Family members share the Care Membership tier and the roster. Moods and
-          Companion conversations remain private to each person and are protected by row-level
-          security.
+          Family members share the Care Membership tier and the roster. Moods and Companion
+          conversations remain private to each person and are protected by row-level security.
         </CardContent>
       </Card>
     </div>
@@ -505,10 +517,7 @@ function SessionAllocationPanel() {
   if (!pool) return null;
 
   const canEdit = pool.role === "owner" || pool.role === "adult";
-  const draftSum = Object.values(drafts).reduce(
-    (s, n) => s + (Number(n) || 0),
-    0,
-  );
+  const draftSum = Object.values(drafts).reduce((s, n) => s + (Number(n) || 0), 0);
   const remainingIfSaved = pool.totalSessions - draftSum;
   const overAllocated = draftSum > pool.totalSessions;
 
@@ -522,14 +531,8 @@ function SessionAllocationPanel() {
       </CardHeader>
       <CardContent className="grid gap-4">
         <div className="grid gap-3 sm:grid-cols-3">
-          <StatBlock
-            label="Total this month"
-            value={`${pool.totalUsed} / ${pool.totalSessions}`}
-          />
-          <StatBlock
-            label="Unallocated (family pool)"
-            value={`${pool.unallocated}`}
-          />
+          <StatBlock label="Total this month" value={`${pool.totalUsed} / ${pool.totalSessions}`} />
+          <StatBlock label="Unallocated (family pool)" value={`${pool.unallocated}`} />
           <StatBlock
             label="Reschedules used"
             value={`${pool.reschedulesUsed} / ${pool.reschedulesTotal}`}
@@ -576,8 +579,8 @@ function SessionAllocationPanel() {
           )}
           {!overAllocated && (
             <p className="mt-2 text-xs text-muted-foreground">
-              After save: {remainingIfSaved} sessions stay in the shared family pool,
-              available to any member.
+              After save: {remainingIfSaved} sessions stay in the shared family pool, available to
+              any member.
             </p>
           )}
           {canEdit && (
@@ -595,9 +598,8 @@ function SessionAllocationPanel() {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          The monthly session balance belongs to the family. Allocations reset each
-          month, sessions don't roll over. Rescheduling requires at least 2 hours
-          before the session.
+          The monthly session balance belongs to the family. Allocations reset each month, sessions
+          don't roll over. Rescheduling requires at least 2 hours before the session.
         </p>
       </CardContent>
     </Card>
@@ -607,9 +609,7 @@ function SessionAllocationPanel() {
 function StatBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-brand border border-border bg-background/40 p-3">
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className="mt-1 text-lg font-semibold tabular-nums">{value}</div>
     </div>
   );

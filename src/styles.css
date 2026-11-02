@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.theme-dark-disabled *));
 
 /* Touch devices: used to raise tap targets to >=44px only on coarse pointers,
  * so desktop density (Harbor) is unchanged. */
@@ -109,43 +109,6 @@
   --sidebar-accent-foreground: #2a2725;
   --sidebar-border: #e7e2da;
   --sidebar-ring: #25435f;
-}
-
-.dark {
-  /* Playroom after dark — same violet/orb relationship on a warm charcoal */
-  --background: #1c1a19;
-  --surface: #262322;
-  --foreground: #f5f1ec;
-  --card: #262322;
-  --card-foreground: #f5f1ec;
-  --popover: #262322;
-  --popover-foreground: #f5f1ec;
-  /* Navy can't carry a CTA on charcoal, so it lifts to a pale steel here
-   * while keeping the same hue relationship to the terracotta. */
-  --brand-primary: #8db3d4;
-  --brand-secondary: #2f2b29;
-  --brand-accent: #d9714a;
-  --primary: #8db3d4;
-  --primary-foreground: #1c1a19;
-  --secondary: #2f2b29;
-  --secondary-foreground: #f5f1ec;
-  --muted: #2b2826;
-  --muted-foreground: #a8a29b;
-  --accent: #223b52;
-  --accent-foreground: #f5f1ec;
-  --destructive: #e4756b;
-  --destructive-foreground: #2a1210;
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: #8db3d4;
-  --sidebar: #211f1e;
-  --sidebar-foreground: #f5f1ec;
-  --sidebar-primary: #8db3d4;
-  --sidebar-primary-foreground: #1c1a19;
-  --sidebar-accent: #2f2b29;
-  --sidebar-accent-foreground: #f5f1ec;
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: #8db3d4;
 }
 
 @theme inline {
@@ -495,7 +458,11 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.1), transparent 65%);
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.1),
+    transparent 65%
+  );
   opacity: 0;
   transition: opacity 220ms ease;
   pointer-events: none;
@@ -605,7 +572,11 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.1), transparent 65%);
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.1),
+    transparent 65%
+  );
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
@@ -637,7 +608,11 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgb(37 67 95 / 0.12), transparent 60%);
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.12),
+    transparent 60%
+  );
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
@@ -823,4 +798,134 @@
       animation-delay: -2.5s !important;
     }
   }
+}
+
+/* Production brand lock: original avatar artwork has its own immutable colors. */
+:root {
+  color-scheme: light;
+  --background: #f7f0e5;
+  --surface: #faf7f2;
+  --foreground: #102f50;
+  --card: #fffdf9;
+  --card-foreground: #102f50;
+  --popover: #fffdf9;
+  --popover-foreground: #102f50;
+  --brand-primary: #102f50;
+  --brand-secondary: #f7f0e5;
+  --brand-accent: #b04426;
+  --primary: #102f50;
+  --primary-foreground: #faf7f2;
+  --secondary: #efe7d7;
+  --secondary-foreground: #102f50;
+  --muted: #efe7d7;
+  --muted-foreground: #4a6076;
+  --accent: #efe7d7;
+  --accent-foreground: #102f50;
+  --border: #dfd3be;
+  --input: #dfd3be;
+  --ring: #102f50;
+  --sidebar: #efe7d7;
+  --sidebar-foreground: #102f50;
+  --sidebar-primary: #102f50;
+  --sidebar-primary-foreground: #faf7f2;
+  --sidebar-accent: #f7f0e5;
+  --sidebar-border: #dfd3be;
+}
+@theme inline {
+  --color-brand-orange: #d95732;
+  --color-brand-coral: #f36d89;
+  --color-brand-gold: #eab84b;
+  --color-orb-navy: #102f50;
+  --color-orb-terracotta: #b04426;
+  --color-orb-grass: #102f50;
+  --color-plate-grass: #f7f0e5;
+}
+html {
+  scroll-padding-top: 6rem;
+}
+body {
+  min-width: 320px;
+}
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+.sn-bootstrap {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: var(--background);
+}
+.sn-bootstrap-mark {
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  padding: 1.5rem;
+  animation: sn-breathe 3s ease-in-out infinite;
+}
+.sn-loading-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+.sn-loading-dots i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  animation: sn-breathe 1.4s infinite;
+}
+.sn-loading-dots i:nth-child(2) {
+  animation-delay: 0.2s;
+  background: #f36d89;
+}
+.sn-loading-dots i:nth-child(3) {
+  animation-delay: 0.4s;
+  background: #eab84b;
+}
+.sn-bootstrap-skeleton {
+  width: min(20rem, 100%);
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+.sn-bootstrap-skeleton span {
+  display: block;
+  height: 0.6rem;
+  margin: 0.6rem 0;
+  background: var(--muted);
+  border-radius: 1rem;
+}
+.sn-bootstrap-skeleton span:first-child {
+  width: 55%;
+}
+.sn-bootstrap-skeleton span:last-child {
+  width: 75%;
+}
+@keyframes sn-breathe {
+  50% {
+    transform: translateY(-4px);
+    opacity: 0.65;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@font-face {
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("/fonts/figtree.ttf") format("truetype");
 }

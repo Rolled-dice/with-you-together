@@ -1,13 +1,11 @@
+import { DataError } from "@/components/feedback/load-state";
+import { assertIdentity, getIdentity, useIdentity } from "@/features/session/session-store";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  NotePencilIcon,
-  TrashIcon,
-  LockSimpleIcon,
-} from "@phosphor-icons/react";
+import { NotePencilIcon, TrashIcon, LockSimpleIcon } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -139,6 +137,8 @@ function formatWhen(iso: string) {
  */
 export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) {
   const qc = useQueryClient();
+  const identity = useIdentity();
+  const journalKey = ["journal-entries", identity.userId] as const;
   const listFn = useServerFn(listJournalEntries);
   const createFn = useServerFn(createJournalEntry);
   const deleteFn = useServerFn(deleteJournalEntry);
@@ -146,8 +146,13 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
   const [body, setBody] = useState("");
   const [open, setOpen] = useState(false);
 
-  const { data: entries = [], isLoading } = useQuery({
-    queryKey: ["journal-entries"],
+  const {
+    data: entries = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: journalKey,
     queryFn: () => listFn(),
   });
 
@@ -194,14 +199,14 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
     onMutate: async (id) => {
       // Optimistic: pull the row out immediately so deletion feels instant.
       await qc.cancelQueries({ queryKey: ["journal-entries"] });
-      const prev = qc.getQueryData<JournalEntry[]>(["journal-entries"]);
-      qc.setQueryData<JournalEntry[]>(["journal-entries"], (old) =>
-        (old ?? []).filter((e) => e.id !== id),
-      );
-      return { prev };
+      assertIdentity(identity.generation);
+      const prev = qc.getQueryData<JournalEntry[]>(journalKey);
+      qc.setQueryData<JournalEntry[]>(journalKey, (old) => (old ?? []).filter((e) => e.id !== id));
+      return { prev, generation: identity.generation };
     },
     onError: (_e, _id, ctx) => {
-      if (ctx?.prev) qc.setQueryData(["journal-entries"], ctx.prev);
+      if (ctx?.generation !== getIdentity().generation) return;
+      if (ctx?.prev) qc.setQueryData(journalKey, ctx.prev);
       toast.error("Couldn't remove that entry");
     },
     onSettled: () => {
@@ -281,12 +286,13 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
       </AppCard>
 
       {/* Entry list */}
-      {isLoading ? (
+      {isError ? (
+        <DataError retry={() => void refetch()} />
+      ) : isLoading ? (
         <p className="mt-4 text-sm text-muted-foreground">Loading your journal…</p>
       ) : entries.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">
-          Nothing written yet. Your entries will gather here, oldest kept, newest
-          first.
+          Nothing written yet. Your entries will gather here, oldest kept, newest first.
         </p>
       ) : (
         <ul ref={listRef} className="mt-4 space-y-3">
@@ -313,9 +319,7 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
                     <TrashIcon className="h-4 w-4" />
                   </button>
                 </div>
-                {e.title ? (
-                  <p className="mt-2 text-base font-bold">{e.title}</p>
-                ) : null}
+                {e.title ? <p className="mt-2 text-base font-bold">{e.title}</p> : null}
                 <p className="mt-1.5 whitespace-pre-wrap text-[1.0625rem] leading-relaxed text-foreground/90">
                   {e.body}
                 </p>

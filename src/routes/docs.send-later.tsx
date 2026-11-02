@@ -20,8 +20,7 @@ export const Route = createFileRoute("/docs/send-later")({
       { property: "og:title", content: "Send It Later | SomeoneNear Docs" },
       {
         property: "og:description",
-        content:
-          "Schedule a text, voice, or video message to be delivered on a future day.",
+        content: "Schedule a text, voice, or video message to be delivered on a future day.",
       },
     ],
   }),
@@ -39,11 +38,10 @@ function Page() {
 
       <DocSection title="What it is">
         <p>
-          Send It Later holds a message for you until the day you choose, then
-          delivers it. A birthday note for a parent, a steady voice before a
-          hospital appointment, a video for an anniversary you'll be away for —
-          you prepare it in a calm moment, and it turns up right on time without
-          you having to remember.
+          Send It Later holds a message for you until the day you choose, then delivers it. A
+          birthday note for a parent, a steady voice before a hospital appointment, a video for an
+          anniversary you'll be away for — you prepare it in a calm moment, and it turns up right on
+          time without you having to remember.
         </p>
       </DocSection>
 
@@ -90,14 +88,13 @@ function Page() {
       </DocSection>
 
       <Callout tone="tip" title="Messages you receive gather in one place">
-        When someone schedules a message for you, it appears in your received
-        list on the day it's delivered — a quiet inbox for the things people
-        wanted you to have.
+        When someone schedules a message for you, it appears in your received list on the day it's
+        delivered — a quiet inbox for the things people wanted you to have.
       </Callout>
 
       <Callout tone="info" title="You're always in control">
-        A scheduled message is never final until it's delivered. Change your mind
-        and you can cancel it right up to the moment it would send.
+        A scheduled message is never final until it's delivered. Change your mind and you can cancel
+        it right up to the moment it would send.
       </Callout>
 
       <TryItNow to="/send-later" label="Open Send It Later" />

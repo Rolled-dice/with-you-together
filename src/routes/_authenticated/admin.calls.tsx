@@ -33,12 +33,25 @@ import {
 } from "@/lib/call-crm.functions";
 
 import { getRoutingConfig, getSupervisorSnapshot, saveRoutingConfig } from "@/lib/telnyx.functions";
-import { CRM_STATES, SLA_META, STATE_META, slaLevel, type CrmState, type QueueRow } from "@/lib/call-crm";
+import {
+  CRM_STATES,
+  SLA_META,
+  STATE_META,
+  slaLevel,
+  type CrmState,
+  type QueueRow,
+} from "@/lib/call-crm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/calls")({
   head: () => ({
@@ -52,7 +65,11 @@ export const Route = createFileRoute("/_authenticated/admin/calls")({
     ],
   }),
   component: AdminCallsPage,
-  errorComponent: ({ error }) => <div className="p-8 text-sm text-primary">Something went wrong: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-sm text-primary">
+      Something went wrong: {error instanceof Error ? error.message : "Please try again."}
+    </div>
+  ),
 });
 
 const ACTIVE_STATES: CrmState[] = ["requested", "assigned", "confirmed", "in_call"];
@@ -78,7 +95,11 @@ function AdminCallsPage() {
   if (!adminCheck?.isAdmin) {
     return (
       <AppShell>
-        <PageHeader eyebrow="Admin" title="Call operations" description="You don't have access to this panel." />
+        <PageHeader
+          eyebrow="Admin"
+          title="Call operations"
+          description="You don't have access to this panel."
+        />
         <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm underline">
           <ArrowLeftIcon className="h-4 w-4" /> Back to dashboard
         </Link>
@@ -233,7 +254,8 @@ function CallsConsole() {
     [rows, showAll],
   );
   const breached = rows.filter(
-    (r) => slaLevel(r.requested_at, r.crm_state) === "breached" && ACTIVE_STATES.includes(r.crm_state),
+    (r) =>
+      slaLevel(r.requested_at, r.crm_state) === "breached" && ACTIVE_STATES.includes(r.crm_state),
   ).length;
   const openFlags = (flags.data?.flags ?? []).filter((f) => !f.resolved);
 
@@ -310,7 +332,9 @@ function CallsConsole() {
                   return (
                     <tr key={row.id} className="border-b border-border/70 align-top last:border-0">
                       <td className="whitespace-nowrap p-3">
-                        <p className="font-medium">{new Date(row.requested_at).toLocaleDateString()}</p>
+                        <p className="font-medium">
+                          {new Date(row.requested_at).toLocaleDateString()}
+                        </p>
                         <p className="text-muted-foreground">
                           {new Date(row.requested_at).toLocaleTimeString([], {
                             hour: "2-digit",
@@ -345,7 +369,11 @@ function CallsConsole() {
                         {row.agent_id ? (
                           <Badge variant="secondary">Assigned</Badge>
                         ) : (
-                          <Button size="sm" disabled={autoAssign.isPending} onClick={() => autoAssign.mutate(row.id)}>
+                          <Button
+                            size="sm"
+                            disabled={autoAssign.isPending}
+                            onClick={() => autoAssign.mutate(row.id)}
+                          >
                             {autoAssign.isPending ? (
                               <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />
                             ) : (
@@ -380,7 +408,9 @@ function CallsConsole() {
                       </td>
 
                       <td className="max-w-[260px] p-3">
-                        <p className="line-clamp-3 text-muted-foreground">{row.note ?? "No notes"}</p>
+                        <p className="line-clamp-3 text-muted-foreground">
+                          {row.note ?? "No notes"}
+                        </p>
                       </td>
 
                       <td className="sticky right-0 min-w-[170px] bg-surface p-3">
@@ -405,7 +435,12 @@ function CallsConsole() {
                           </SelectContent>
                         </Select>
 
-                        <Button className="mt-2" size="sm" variant="outline" onClick={() => raise.mutate(row.id)}>
+                        <Button
+                          className="mt-2"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => raise.mutate(row.id)}
+                        >
                           <FlagIcon className="mr-1.5 h-4 w-4" />
                           Flag
                         </Button>
@@ -447,7 +482,8 @@ function CallsConsole() {
                     </Badge>
                   )}
                   <p className="truncate text-xs text-muted-foreground">
-                    {f.note ?? ", "} · {formatDistanceToNow(new Date(f.created_at), { addSuffix: true })}
+                    {f.note ?? ", "} ·{" "}
+                    {formatDistanceToNow(new Date(f.created_at), { addSuffix: true })}
                   </p>
                 </div>
                 {!f.resolved && (
@@ -521,7 +557,9 @@ function SupervisorBoard() {
           require_skill_match: Boolean(current.require_skill_match),
           timezone_tolerance_hours: Number(current.timezone_tolerance_hours),
           enforce_working_hours: Boolean(current.enforce_working_hours),
-          max_concurrent_override: current.max_concurrent_override ? Number(current.max_concurrent_override) : null,
+          max_concurrent_override: current.max_concurrent_override
+            ? Number(current.max_concurrent_override)
+            : null,
           skill_weight: Number(current.skill_weight),
           load_weight: Number(current.load_weight),
           timezone_weight: Number(current.timezone_weight),
@@ -645,7 +683,8 @@ function SupervisorBoard() {
               Enforce working hours
             </label>
             <Button size="sm" onClick={() => save.mutate()} disabled={!draft || save.isPending}>
-              {save.isPending && <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />} Save rules
+              {save.isPending && <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />} Save
+              rules
             </Button>
           </div>
         </div>

@@ -29,7 +29,6 @@ import { useAppPageMotion } from "@/hooks/use-app-page-motion";
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: SquaresFourIcon },
   { to: "/companion", label: "Companion", icon: ChatCircleIcon },
-  { to: "/listeners", label: "Listeners", icon: UsersIcon },
   { to: "/reminders", label: "Medication", icon: PillIcon },
   { to: "/send-later", label: "Send Later", icon: CalendarHeartIcon },
   { to: "/insights", label: "Insights", icon: ChartLineIcon },
@@ -78,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navItems = isAdmin ? ADMIN_NAV : isAgent ? AGENT_NAV : rolesLoading ? [] : NAV;
 
   async function signOut() {
-    await queryClient.cancelQueries();
+    void queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
@@ -86,7 +85,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
-      <SomeoneNearCursor />
+      <a
+        href="#app-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:bg-card focus:p-4"
+      >
+        Skip to content
+      </a>
       <div className="mx-auto flex min-h-dvh w-full max-w-[1400px]">
         {/* Sidebar (desktop).
             Sized for older eyes and less precise pointing: 16px labels,
@@ -99,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {!rolesLoading && !isStaff ? <NotificationBell /> : null}
           </div>
 
-          <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
+          <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-1 px-3 py-4">
             {navItems.map((item) => {
               const active = pathname === item.to || pathname.startsWith(item.to + "/");
               const Icon = item.icon;
@@ -163,7 +167,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         {/* Main */}
-        <div className="flex flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile top bar */}
           <header
             className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:hidden"
@@ -179,6 +183,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               wiring. */}
           <main
             key={pathname}
+            id="app-content"
+            tabIndex={-1}
             ref={mainRef}
             className="flex-1 px-4 py-6 pb-[calc(6.25rem_+_env(safe-area-inset-bottom))] sm:px-8 sm:py-10 md:pb-10"
           >
@@ -207,6 +213,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
                   data-active={active ? "true" : undefined}
                   className={cn(
                     "flex min-h-16 min-w-20 flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-medium transition-colors active:bg-sidebar-accent/60",
@@ -214,7 +221,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                   )}
                 >
                   <Icon className="h-5 w-5" strokeWidth={2} />
-                  <span className="block max-w-full whitespace-nowrap leading-none">{item.label}</span>
+                  <span className="block max-w-full whitespace-nowrap leading-none">
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}
@@ -281,7 +290,9 @@ export function PageHeader({
         <div data-page-sub>
           {slogan && <p className="mt-1.5 text-base text-muted-foreground">{slogan}</p>}
           {description && (
-            <p className="mt-2 max-w-2xl text-[1.0625rem] leading-relaxed text-muted-foreground">{description}</p>
+            <p className="mt-2 max-w-2xl text-[1.0625rem] leading-relaxed text-muted-foreground">
+              {description}
+            </p>
           )}
         </div>
       </div>

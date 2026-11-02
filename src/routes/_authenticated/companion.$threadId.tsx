@@ -1,3 +1,4 @@
+import { DataError, DataSkeleton } from "@/components/feedback/load-state";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
@@ -32,7 +33,12 @@ function CompanionThread() {
   const { threadId } = Route.useParams();
   const getMessages = useServerFn(getConversationMessages);
 
-  const { data: initial, isLoading } = useQuery({
+  const {
+    data: initial,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["messages", threadId],
     queryFn: () => getMessages({ data: { id: threadId } }),
   });
@@ -47,21 +53,16 @@ function CompanionThread() {
     [initial],
   );
 
+  if (isError) return <DataError retry={() => void refetch()} />;
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <SpinnerGapIcon className="h-5 w-5 animate-spin text-brand-primary" />
+        <DataSkeleton />
       </div>
     );
   }
 
-  return (
-    <ChatSurface
-      key={threadId}
-      threadId={threadId}
-      initialMessages={initialUiMessages}
-    />
-  );
+  return <ChatSurface key={threadId} threadId={threadId} initialMessages={initialUiMessages} />;
 }
 
 function ChatSurface({
@@ -97,24 +98,31 @@ function ChatSurface({
     queryFn: () => quotaFn(),
   });
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, stop, error, regenerate } = useChat({
     id: threadId,
     messages: initialMessages,
     transport,
     onError: (err) => {
       const msg = (err as Error).message || "";
       if (msg.includes("quota_exceeded") || msg.includes("429")) {
-        toast.error("You've used today's Companion messages. They refill tomorrow, or upgrade to Care Plus.");
+        toast.error(
+          "You've used today's Companion messages. Please check your allowance in Settings.",
+        );
       } else {
         toast.error(msg || "Companion could not respond. Please try again shortly.");
       }
-      console.error("[chat]", err);
     },
     onFinish: () => {
       qc.invalidateQueries({ queryKey: ["ai-quota"] });
     },
   });
 
+  useEffect(
+    () => () => {
+      void stop();
+    },
+    [stop],
+  );
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
     inputRef.current?.focus();
@@ -129,7 +137,8 @@ function ChatSurface({
   const busy = status === "submitted" || status === "streaming";
   const unlimited = !!quota && quota.unlimited;
   const outOfQuota = !!quota && !unlimited && (quota.remaining ?? 0) <= 0;
-  const lowQuota = !!quota && !unlimited && (quota.remaining ?? 0) > 0 && (quota.remaining ?? 0) <= 5;
+  const lowQuota =
+    !!quota && !unlimited && (quota.remaining ?? 0) > 0 && (quota.remaining ?? 0) <= 5;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -140,14 +149,20 @@ function ChatSurface({
             (outOfQuota
               ? "bg-destructive/10 text-destructive"
               : lowQuota
-              ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-              : "bg-muted/40 text-muted-foreground")
+                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                : "bg-muted/40 text-muted-foreground")
           }
         >
           {outOfQuota
-            ? `You've used today's ${quota.limit} Companion messages. They refill tomorrow, or upgrade to Care Plus in Settings for unlimited chats.`
+            ? `You've used today's ${quota.limit} Companion messages. Please check your allowance in Settings.`
             : `${quota.remaining} of ${quota.limit} Companion messages left today.`}
         </div>
+      )}
+      {error && (
+        <DataError
+          message="Companion could not finish this response."
+          retry={() => void regenerate()}
+        />
       )}
       <Conversation className="flex-1">
         <ConversationContent className="mx-auto w-full max-w-2xl">
@@ -157,9 +172,7 @@ function ChatSurface({
             </div>
           ) : (
             messages.map((m) => {
-              const text = m.parts
-                .map((p) => (p.type === "text" ? p.text : ""))
-                .join("");
+              const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
               return (
                 <Message key={m.id} from={m.role === "user" ? "user" : "assistant"}>
                   {m.role === "assistant" ? (
@@ -197,7 +210,9 @@ function ChatSurface({
           >
             <PromptInputTextarea
               ref={inputRef}
-              placeholder={outOfQuota ? "Limit reached, upgrade to continue" : "What's on your mind?"}
+              placeholder={
+                outOfQuota ? "Limit reached, upgrade to continue" : "What's on your mind?"
+              }
               disabled={busy || outOfQuota}
             />
             <PromptInputFooter className="justify-end">

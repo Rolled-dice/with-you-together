@@ -160,10 +160,7 @@ function CompanionEmpty() {
 
       {/* OPENERS */}
       <section data-page-reveal className="mt-10">
-        <SectionHeading
-          title="Start with a feeling"
-          hint="Tap one, or write your own"
-        />
+        <SectionHeading title="Start with a feeling" hint="Tap one, or write your own" />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {PROMPTS.map((p) => (
             <button
@@ -243,9 +240,7 @@ function CompanionEmpty() {
                   <FireIcon className="h-4 w-4 text-orb-terracotta" weight="fill" />
                   {streak > 0 ? "Keep it warm" : "Start today"}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  A little every day adds up.
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">A little every day adds up.</p>
               </div>
             </div>
           </AppCard>
@@ -266,8 +261,7 @@ function CompanionEmpty() {
       </section>
 
       <p className="mx-auto mt-10 max-w-md text-center text-sm text-muted-foreground">
-        Not therapy or an emergency service. In a crisis, call 988 (US) or your local
-        helpline.
+        Not therapy or an emergency service. In a crisis, call 988 (US) or your local helpline.
       </p>
     </div>
   );

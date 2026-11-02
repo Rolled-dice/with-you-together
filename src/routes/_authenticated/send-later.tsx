@@ -1,24 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
-import { format } from "date-fns";
-import {
-  CalendarHeartIcon,
-  MicrophoneIcon,
-  VideoCameraIcon,
-  TextTIcon,
-  StopIcon,
-  TrashIcon,
-  PlayIcon,
-  SpinnerGapIcon,
-  EnvelopeSimpleIcon,
-} from "@phosphor-icons/react";
+import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
+import { z } from "zod";
 import { toast } from "sonner";
-import { AppShell } from "@/components/app-shell";
+import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { DataError, DataSkeleton } from "@/components/feedback/load-state";
+import { useRecording, useObjectUrl } from "@/features/media/use-recording";
+import { mediaFile } from "@/features/media/recording";
+import { useIdentity, assertIdentity } from "@/features/session/session-store";
+import { useTimeZone } from "@/lib/frontend/use-time-zone";
+import { localInput, localToUtc, displayTime } from "@/lib/frontend/time";
 import {
   cancelSendLater,
   createSendLater,
@@ -30,397 +23,355 @@ import {
 
 export const Route = createFileRoute("/_authenticated/send-later")({
   component: SendLaterPage,
-  head: () => ({
-    meta: [
-      { title: "Send It Later | SomeoneNear" },
-      {
-        name: "description",
-        content:
-          "Schedule a text, voice, or video message for someone you love, delivered when it matters most.",
-      },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Send Later | SomeoneNear" }] }),
 });
-
-type Kind = "text" | "voice" | "video";
-
+const kindSchema = z.enum(["text", "voice", "video"]);
+const contactSchema = z.object({ userId: z.string().uuid(), name: z.string().min(1).max(120) });
+const messageSchema = z.object({
+  id: z.string().uuid(),
+  kind: kindSchema,
+  body: z.string().nullable(),
+  s3_key: z.string().nullable(),
+  scheduled_at: z.string(),
+  status: z.string(),
+  recipient_name: z.string().optional(),
+  profiles: z.object({ display_name: z.string().nullable() }).optional(),
+});
+const inputSchema = z.object({
+  recipient: contactSchema,
+  scheduledAt: z.string().datetime(),
+  body: z.string(),
+  kind: kindSchema,
+});
 function SendLaterPage() {
-  const queryClient = useQueryClient();
-  const [kind, setKind] = useState<Kind>("text");
-  const [recipient, setRecipient] = useState("");
-  const [recipientUserId, setRecipientUserId] = useState<string | null>(null);
+  const { userId, generation } = useIdentity();
+  const qc = useQueryClient();
+  const zone = useTimeZone();
+  const recorder = useRecording();
+  const previewUrl = useObjectUrl(recorder.blob);
+  const [kind, setKind] = useState<z.infer<typeof kindSchema>>("text");
+  const [recipientId, setRecipientId] = useState("");
   const [body, setBody] = useState("");
   const [when, setWhen] = useState("");
-  const [recording, setRecording] = useState(false);
-  const [blob, setBlob] = useState<Blob | null>(null);
-  const [duration, setDuration] = useState(0);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const startedRef = useRef(0);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const { data: messages = [], isLoading } = useQuery({
-    queryKey: ["send-later"],
-    queryFn: () => listSendLater(),
-    refetchInterval: 30_000,
+  const [playback, setPlayback] = useState<{ url: string; kind: "voice" | "video" } | null>(null);
+  const list = useServerFn(listSendLater);
+  const inbox = useServerFn(listReceivedSendLater);
+  const contactsFn = useServerFn(listSendLaterContacts);
+  const create = useServerFn(createSendLater);
+  const cancel = useServerFn(cancelSendLater);
+  const media = useServerFn(getSendLaterMedia);
+  const query = useQuery({
+    queryKey: ["send-later", userId],
+    enabled: !!userId,
+    retry: 1,
+    queryFn: async () => {
+      const [messages, received, contacts] = await Promise.all([list(), inbox(), contactsFn()]);
+      assertIdentity(generation);
+      return {
+        messages: z.array(messageSchema).parse(messages),
+        received: z.array(messageSchema).parse(received),
+        contacts: z.array(contactSchema).parse(contacts),
+      };
+    },
   });
-
-  const { data: received = [] } = useQuery({
-    queryKey: ["send-later-received"],
-    queryFn: () => listReceivedSendLater(),
-    refetchInterval: 30_000,
-  });
-
-  const { data: contacts = [] } = useQuery({
-    queryKey: ["send-later-contacts"],
-    queryFn: () => listSendLaterContacts(),
-  });
-
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["send-later"] });
-
-  const createMut = useMutation({
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["send-later", userId] });
+  const save = useMutation({
     mutationFn: async () => {
+      assertIdentity(generation);
+      if (!zone.data) throw new Error("Your timezone is still loading. Please try again.");
+      const parsed = inputSchema.parse({
+        recipient: query.data?.contacts.find((c) => c.userId === recipientId),
+        scheduledAt: localToUtc(when, zone.data),
+        body,
+        kind,
+      });
+      if (Date.parse(parsed.scheduledAt) < Date.now() + 60_000)
+        throw new Error("Choose a time at least a minute in the future.");
+      if (kind === "text" && !body.trim()) throw new Error("Write your message first.");
       const fd = new FormData();
-      fd.set("recipientName", recipient);
-      if (recipientUserId) fd.set("recipientUserId", recipientUserId);
+      fd.set("recipientName", parsed.recipient.name);
+      fd.set("recipientUserId", parsed.recipient.userId);
+      fd.set("scheduledAt", parsed.scheduledAt);
       fd.set("kind", kind);
       fd.set("body", body);
-      fd.set("scheduledAt", new Date(when).toISOString());
-      if (blob) {
-        const mime = kind === "video" ? "video/webm" : "audio/webm";
-        fd.set("file", new File([blob], `message.webm`, { type: blob.type || mime }));
-        fd.set("duration", String(Math.round(duration)));
+      if (kind !== "text") {
+        if (!recorder.blob) throw new Error("Record or upload your message first.");
+        fd.set("file", mediaFile(recorder.blob, kind));
+        fd.set("duration", String(Math.round(recorder.duration)));
       }
-      return createSendLater({ data: fd });
+      const result = await create({ data: fd });
+      assertIdentity(generation);
+      return result;
     },
     onSuccess: () => {
-      toast.success("It's scheduled 💌 We'll keep it safe until it's time.");
+      recorder.cancel();
       setBody("");
-      setBlob(null);
-      setDuration(0);
-      setRecipient("");
       setWhen("");
-      invalidate();
+      setRecipientId("");
+      toast.success("Your message is scheduled.");
+      void invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
-
-  const cancelMut = useMutation({
-    mutationFn: (id: string) => cancelSendLater({ data: { id } }),
+  const cancelMutation = useMutation({
+    mutationFn: async (id: string) => {
+      assertIdentity(generation);
+      await cancel({ data: { id } });
+      assertIdentity(generation);
+    },
     onSuccess: () => {
-      toast.success("Cancelled");
-      invalidate();
+      toast.success("Message cancelled.");
+      void invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: kind === "video",
-      });
-      const rec = new MediaRecorder(stream);
-      const parts: Blob[] = [];
-      rec.ondataavailable = (e) => parts.push(e.data);
-      rec.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        setBlob(new Blob(parts, { type: rec.mimeType }));
-        setDuration((Date.now() - startedRef.current) / 1000);
-      };
-      recorderRef.current = rec;
-      startedRef.current = Date.now();
-      rec.start();
-      setRecording(true);
-      setBlob(null);
-    } catch {
-      toast.error(
-        kind === "video"
-          ? "Camera/microphone blocked, allow access to record a video message."
-          : "Microphone blocked, allow access to record a voice message.",
-      );
-    }
-  };
-
-  const stopRecording = () => {
-    recorderRef.current?.stop();
-    setRecording(false);
-  };
-
-  const playMedia = async (id: string) => {
-    try {
-      const { url } = await getSendLaterMedia({ data: { id } });
-      window.open(url, "_blank");
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  };
-
-  const minWhen = new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16);
-
+  const play = useMutation({
+    mutationFn: async (message: z.infer<typeof messageSchema>) => {
+      const result = z
+        .object({ url: z.string().url() })
+        .parse(await media({ data: { id: message.id } }));
+      assertIdentity(generation);
+      if (new URL(result.url).protocol !== "https:") throw new Error("Recording unavailable.");
+      if (message.kind !== "text") setPlayback({ url: result.url, kind: message.kind });
+    },
+  });
+  const inputClass = "mt-2 min-h-12 w-full rounded-xl border border-input bg-card px-3 py-2";
+  const failure = save.error || cancelMutation.error || play.error;
   return (
     <AppShell>
-      <div className="mx-auto max-w-2xl space-y-8 pb-24">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 text-muted-foreground text-sm">
-            <EnvelopeSimpleIcon className="size-4" /> A little presence. A lot of difference.
-          </div>
-          <h1 className="text-2xl font-semibold">
-            Write something they'll be happy to receive…
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            A birthday, a tough day, or “listen when you miss me”, schedule it
-            and we'll keep it safe until it's time.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
-          <div className="flex gap-2">
-            {(
-              [
-                ["text", TextTIcon, "Text"],
-                ["voice", MicrophoneIcon, "Voice"],
-                ["video", VideoCameraIcon, "Video"],
-              ] as const
-            ).map(([k, Icon, label]) => (
-              <Button
-                key={k}
-                variant={kind === k ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setKind(k);
-                  setBlob(null);
+      <div className="mx-auto max-w-3xl space-y-6">
+        <PageHeader
+          eyebrow="A little presence"
+          title="Words for a moment that matters."
+          description="Schedule a message for someone in your family circle. They can find it in SomeoneNear when it arrives."
+        />
+        {query.isPending || zone.isPending ? (
+          <DataSkeleton />
+        ) : query.isError || zone.isError ? (
+          <DataError
+            retry={() => {
+              void query.refetch();
+              void zone.refetch();
+            }}
+          />
+        ) : (
+          <>
+            {query.data.contacts.length === 0 ? (
+              <p className="rounded-2xl border border-border bg-card p-6">
+                There are no family recipients yet. Add someone to your family circle before
+                scheduling a message.
+              </p>
+            ) : (
+              <form
+                className="space-y-5 rounded-3xl border border-border bg-card p-6"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (!save.isPending) save.mutate();
                 }}
               >
-                <Icon className="size-4" /> {label}
-              </Button>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <Input
-              placeholder="Send to: choose someone (e.g. Dad)"
-              value={recipient}
-              onChange={(e) => {
-                setRecipient(e.target.value);
-                setRecipientUserId(null);
-              }}
-            />
-            {contacts.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {contacts.map((c: any) => (
-                  <Button
-                    key={c.userId}
-                    type="button"
-                    size="sm"
-                    variant={recipientUserId === c.userId ? "default" : "outline"}
-                    onClick={() => {
-                      setRecipient(c.name);
-                      setRecipientUserId(c.userId);
-                    }}
-                  >
-                    {c.name}
-                  </Button>
-                ))}
-              </div>
-            )}
-            {recipientUserId && (
-              <p className="text-xs text-muted-foreground">
-                They'll get a notification in the app when it's delivered.
-              </p>
-            )}
-          </div>
-
-          {kind === "text" ? (
-            <Textarea
-              rows={5}
-              placeholder="Write from the heart…"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-            />
-          ) : (
-            <div className="rounded-xl border border-dashed border-border p-4 text-center space-y-3">
-              {blob ? (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Recording ready · {Math.round(duration)}s
-                  </p>
-                  <div className="flex justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const url = URL.createObjectURL(blob);
-                        window.open(url, "_blank");
+                <fieldset disabled={save.isPending} className="space-y-5 disabled:opacity-70">
+                  <legend className="font-semibold">Your message</legend>
+                  <label className="block">
+                    Message type
+                    <select
+                      className={inputClass}
+                      value={kind}
+                      onChange={(event) => {
+                        recorder.cancel();
+                        setKind(kindSchema.parse(event.target.value));
                       }}
                     >
-                      <PlayIcon className="size-4" /> Preview
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setBlob(null)}>
-                      Re-record
-                    </Button>
-                  </div>
-                </div>
-              ) : recording ? (
-                <Button variant="destructive" onClick={stopRecording}>
-                  <StopIcon className="size-4" /> Stop recording
-                </Button>
-              ) : (
-                <div className="flex justify-center gap-2">
-                  <Button variant="outline" onClick={startRecording}>
-                    <MicrophoneIcon className="size-4" /> Record {kind}
-                  </Button>
+                      <option value="text">Text</option>
+                      <option value="voice">Voice</option>
+                      <option value="video">Video</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    For
+                    <select
+                      className={inputClass}
+                      value={recipientId}
+                      onChange={(event) => setRecipientId(event.target.value)}
+                      required
+                    >
+                      <option value="">Choose a family member</option>
+                      {query.data.contacts.map((contact) => (
+                        <option key={contact.userId} value={contact.userId}>
+                          {contact.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {kind === "text" ? (
+                    <label className="block">
+                      Your words
+                      <textarea
+                        className={`${inputClass} min-h-32`}
+                        required
+                        value={body}
+                        onChange={(event) => setBody(event.target.value)}
+                      />
+                    </label>
+                  ) : (
+                    <div className="space-y-3">
+                      {recorder.requesting ? (
+                        <p role="status">Waiting for microphone permission…</p>
+                      ) : recorder.recording ? (
+                        <p role="status">Recording…</p>
+                      ) : null}
+                      <div className="flex flex-wrap gap-3">
+                        {recorder.recording ? (
+                          <Button type="button" onClick={recorder.stop}>
+                            Stop recording
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            disabled={recorder.requesting}
+                            onClick={() => void recorder.start(kind)}
+                          >
+                            Record {kind}
+                          </Button>
+                        )}
+                        <Button type="button" variant="outline" onClick={recorder.cancel}>
+                          Cancel recording
+                        </Button>
+                      </div>
+                      <label className="block text-sm">
+                        Or upload a recording (up to 25 MiB)
+                        <input
+                          className={inputClass}
+                          type="file"
+                          accept={
+                            kind === "voice"
+                              ? "audio/webm,audio/mp4,audio/mpeg,audio/ogg,audio/wav"
+                              : "video/webm,video/mp4"
+                          }
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (file) recorder.upload(file, kind);
+                            event.target.value = "";
+                          }}
+                        />
+                      </label>
+                      {previewUrl &&
+                        (kind === "video" ? (
+                          <video
+                            controls
+                            src={previewUrl}
+                            className="aspect-video w-full rounded-xl"
+                          />
+                        ) : (
+                          <audio controls src={previewUrl} className="w-full" />
+                        ))}
+                      {recorder.error && <p role="alert">{recorder.error}</p>}
+                    </div>
+                  )}
+                  <label className="block">
+                    Date & time ({zone.data})
+                    <input
+                      className={inputClass}
+                      type="datetime-local"
+                      required
+                      min={localInput(new Date(Date.now() + 120_000), zone.data)}
+                      value={when}
+                      onChange={(event) => setWhen(event.target.value)}
+                    />
+                  </label>
                   <Button
-                    variant="ghost"
-                    onClick={() => fileRef.current?.click()}
+                    type="submit"
+                    disabled={
+                      save.isPending ||
+                      recorder.recording ||
+                      recorder.requesting ||
+                      (kind !== "text" && !recorder.blob)
+                    }
                   >
-                    Upload a file
+                    {save.isPending ? "Scheduling…" : "Schedule message"}
                   </Button>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept={kind === "video" ? "video/*" : "audio/*"}
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) {
-                        setBlob(f);
-                        setDuration(0);
-                      }
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
-            <div>
-              <label className="text-xs text-muted-foreground">
-                Date &amp; time
-              </label>
-              <Input
-                type="datetime-local"
-                min={minWhen}
-                value={when}
-                onChange={(e) => setWhen(e.target.value)}
-              />
-            </div>
-            <Button
-              disabled={
-                createMut.isPending ||
-                !recipient.trim() ||
-                !when ||
-                (kind === "text" ? !body.trim() : !blob)
-              }
-              onClick={() => createMut.mutate()}
-            >
-              {createMut.isPending ? (
-                <SpinnerGapIcon className="size-4 animate-spin" />
-              ) : (
-                <CalendarHeartIcon className="size-4" />
-              )}
-              Schedule it
-            </Button>
-          </div>
-        </div>
-
-        {received.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="font-medium">For you 💌</h2>
-            {received.map((m: any) => (
-              <div
-                key={m.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
+                </fieldset>
+              </form>
+            )}
+            {failure && (
+              <div role="alert" className="rounded-xl border border-border bg-surface p-4">
+                <p>
+                  {failure instanceof z.ZodError
+                    ? "Please check the recipient and message details."
+                    : failure.message}
+                </p>
+                <p className="mt-2 text-sm">
+                  Your changes were not confirmed. Please check your message list before trying
+                  again.
+                </p>
+              </div>
+            )}
+            {playback && (
+              <section
+                aria-label="Message playback"
+                className="rounded-xl border border-border bg-card p-4"
               >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="capitalize">
-                      {m.kind}
-                    </Badge>
-                    <span className="font-medium truncate">
-                      From {m.profiles?.display_name ?? "someone who loves you"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {m.delivered_at
-                      ? format(new Date(m.delivered_at), "d MMMM · h:mm a")
-                      : ""}
-                  </p>
-                  {m.body && <p className="text-sm mt-1">{m.body}</p>}
-                </div>
-                {m.s3_key && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => playMedia(m.id)}
-                    aria-label="Play message"
-                  >
-                    <PlayIcon className="size-4" />
-                  </Button>
+                {playback.kind === "video" ? (
+                  <video controls src={playback.url} className="aspect-video w-full" />
+                ) : (
+                  <audio controls src={playback.url} className="w-full" />
                 )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="space-y-3">
-          <h2 className="font-medium">Your scheduled messages</h2>
-          {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
-          ) : messages.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nothing scheduled yet, your future hellos will live here.
-            </p>
-          ) : (
-            messages.map((m: any) => (
-              <div
-                key={m.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="capitalize">
-                      {m.kind}
-                    </Badge>
-                    <span className="font-medium truncate">
-                      {m.recipient_name}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {format(new Date(m.scheduled_at), "d MMMM · h:mm a")} ·{" "}
-                    <span className="capitalize">{m.status}</span>
+                <Button variant="ghost" onClick={() => setPlayback(null)}>
+                  Close playback
+                </Button>
+              </section>
+            )}
+            {[
+              { title: "For you", messages: query.data.received },
+              { title: "Your scheduled messages", messages: query.data.messages },
+            ].map((group) => (
+              <section key={group.title} className="space-y-3">
+                <h2 className="font-serif text-2xl font-bold">{group.title}</h2>
+                {group.messages.length === 0 ? (
+                  <p className="rounded-xl border border-border bg-surface p-5">
+                    No messages here yet.
                   </p>
-                  {m.body && (
-                    <p className="text-sm mt-1 line-clamp-2">{m.body}</p>
-                  )}
-                </div>
-                <div className="flex shrink-0 gap-1">
-                  {m.s3_key && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => playMedia(m.id)}
-                      aria-label="Play recording"
+                ) : (
+                  group.messages.map((message) => (
+                    <article
+                      key={message.id}
+                      className="rounded-2xl border border-border bg-card p-5"
                     >
-                      <PlayIcon className="size-4" />
-                    </Button>
-                  )}
-                  {m.status === "scheduled" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => cancelMut.mutate(m.id)}
-                      aria-label="Cancel message"
-                    >
-                      <TrashIcon className="size-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+                      <h3 className="font-semibold">
+                        {message.recipient_name ||
+                          message.profiles?.display_name ||
+                          "Family message"}
+                      </h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {displayTime(message.scheduled_at, zone.data)} · {message.status}
+                      </p>
+                      {message.body && (
+                        <p className="mt-3 whitespace-pre-wrap break-words">{message.body}</p>
+                      )}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {message.s3_key && (
+                          <Button
+                            variant="outline"
+                            disabled={play.isPending}
+                            onClick={() => play.mutate(message)}
+                          >
+                            Play recording
+                          </Button>
+                        )}
+                        {message.status === "scheduled" && (
+                          <Button
+                            variant="outline"
+                            disabled={cancelMutation.isPending}
+                            onClick={() => cancelMutation.mutate(message.id)}
+                          >
+                            Cancel message
+                          </Button>
+                        )}
+                      </div>
+                    </article>
+                  ))
+                )}
+              </section>
+            ))}
+          </>
+        )}
       </div>
     </AppShell>
   );
