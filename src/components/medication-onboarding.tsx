@@ -22,6 +22,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -91,7 +92,10 @@ function timeLabel(value: string) {
   return `${displayHours}:${minutes.slice(0, 2)} ${suffix}`;
 }
 
-export function MedicationOnboarding() {
+export function MedicationOnboarding({
+  setupOpen = false,
+  onSetupOpenChange,
+}: { setupOpen?: boolean; onSetupOpenChange?: (open: boolean) => void } = {}) {
   const qc = useQueryClient();
   const listMedsFn = useServerFn(listMedications);
   const listDosesFn = useServerFn(listTodaysDoses);
@@ -315,240 +319,248 @@ export function MedicationOnboarding() {
 
   return (
     <div className="space-y-12">
-      <section
-        aria-labelledby="medication-setup-title"
-        className="overflow-hidden rounded-[2.5rem] border border-border bg-card shadow-gentle"
-      >
-        <div className="border-b border-border bg-surface px-5 py-6 sm:px-8">
-          <div className="flex items-start gap-4">
-            <span
-              className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary"
-              aria-hidden
-            >
-              <PillIcon className="size-6" />
-            </span>
-            <div>
-              <p className="text-sm font-medium text-primary">Medication check-in</p>
-              <h2
-                id="medication-setup-title"
-                className="mt-1 font-display text-2xl font-medium text-foreground sm:text-3xl"
-              >
-                Let’s set up your daily check-in
-              </h2>
-              <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">
-                Start with a photo, or enter the details yourself. You will always get to review
-                them before saving.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <CardContent className="space-y-8 p-5 sm:p-8">
-          <div
-            className="grid grid-cols-2 rounded-2xl bg-muted p-1.5"
-            aria-label="Choose how to add a medicine"
+      <Dialog open={setupOpen} onOpenChange={onSetupOpenChange}>
+        <DialogContent className="sn-worker-dialog sn-medication-dialog">
+          <DialogTitle>Add a medication</DialogTitle>
+          <DialogDescription>
+            Start with a photo or enter the details, then review before saving.
+          </DialogDescription>
+          <section
+            aria-labelledby="medication-setup-title"
+            className="overflow-hidden rounded-[2.5rem] border border-border bg-card shadow-gentle"
           >
-            <Button
-              type="button"
-              variant="ghost"
-              className={cn(
-                "min-h-12 rounded-xl text-base",
-                mode === "scan" && "bg-card text-foreground shadow-soft hover:bg-card",
-              )}
-              onClick={() => setMode("scan")}
-              aria-pressed={mode === "scan"}
-            >
-              <ScanIcon /> <span className="hidden sm:inline">Scan prescription</span>
-              <span className="sm:hidden">Scan</span>
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className={cn(
-                "min-h-12 rounded-xl text-base",
-                mode === "manual" && "bg-card text-foreground shadow-soft hover:bg-card",
-              )}
-              onClick={() => setMode("manual")}
-              aria-pressed={mode === "manual"}
-            >
-              <PillIcon /> <span className="hidden sm:inline">Enter manually</span>
-              <span className="sm:hidden">Manual</span>
-            </Button>
-          </div>
-
-          {mode === "scan" && !isReviewingScan ? (
-            <div className="space-y-4 animate-gentle-rise">
-              <div
-                className={cn(
-                  "relative flex min-h-72 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-primary/35 bg-primary/5 px-6 py-10 text-center transition-colors",
-                  isDragging && "border-primary bg-primary/10",
-                  previewUrl && "border-solid bg-surface",
-                )}
-                onDragEnter={(event) => {
-                  event.preventDefault();
-                  setIsDragging(true);
-                }}
-                onDragOver={(event) => event.preventDefault()}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  setIsDragging(false);
-                  chooseFile(event.dataTransfer.files[0]);
-                }}
-              >
-                {previewUrl ? (
-                  <>
-                    <img
-                      src={previewUrl}
-                      alt="Prescription selected for review"
-                      className="max-h-60 w-auto max-w-full rounded-2xl object-contain shadow-soft"
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="mt-5 min-h-11 rounded-xl"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <ImageIcon /> Choose a different photo
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <span
-                      className="flex size-16 items-center justify-center rounded-full bg-surface text-primary shadow-soft"
-                      aria-hidden
-                    >
-                      <ImageIcon className="size-7" />
-                    </span>
-                    <h3 className="mt-5 font-display text-xl font-medium text-foreground">
-                      Add a clear photo
-                    </h3>
-                    <p className="mt-2 max-w-md text-base leading-relaxed text-muted-foreground">
-                      A pill bottle label or prescription works well. Keep the name and instructions
-                      in focus.
-                    </p>
-                    <div className="mt-6 flex flex-wrap justify-center gap-3">
-                      <Button
-                        type="button"
-                        className="min-h-11 rounded-xl px-5 text-base"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <ImageIcon /> Choose photo
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="min-h-11 rounded-xl px-5 text-base"
-                        onClick={() => cameraInputRef.current?.click()}
-                      >
-                        <CameraIcon /> Use camera
-                      </Button>
-                    </div>
-                  </>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                  className="sr-only"
-                  onChange={(event) => chooseFile(event.target.files?.[0])}
-                />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="sr-only"
-                  onChange={(event) => chooseFile(event.target.files?.[0])}
-                />
-              </div>
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">
-                  JPG, PNG, WEBP or HEIC · up to 10 MB
-                </p>
-                <Button
-                  type="button"
-                  className="min-h-12 rounded-xl px-6 text-base"
-                  disabled={!file || scan.isPending}
-                  onClick={() => scan.mutate()}
+            <div className="border-b border-border bg-surface px-5 py-6 sm:px-8">
+              <div className="flex items-start gap-4">
+                <span
+                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary"
+                  aria-hidden
                 >
-                  {scan.isPending ? (
-                    <>
-                      <SpinnerGapIcon className="animate-spin" /> Reading the photo…
-                    </>
-                  ) : (
-                    <>
-                      <SparkleIcon /> Read this photo
-                    </>
-                  )}
-                </Button>
-              </div>
-              <div role="status" aria-live="polite" className="sr-only">
-                {scan.isPending ? "Uploading and reading your prescription photo" : ""}
+                  <PillIcon className="size-6" />
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-primary">Medication check-in</p>
+                  <h2
+                    id="medication-setup-title"
+                    className="mt-1 font-display text-2xl font-medium text-foreground sm:text-3xl"
+                  >
+                    Let’s set up your daily check-in
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">
+                    Start with a photo, or enter the details yourself. You will always get to review
+                    them before saving.
+                  </p>
+                </div>
               </div>
             </div>
-          ) : (
-            <MedicationForm
-              familyMembers={family.data ?? []}
-              forUserId={forUserId}
-              setForUserId={setForUserId}
-              name={name}
-              setName={setName}
-              dosage={dosage}
-              setDosage={setDosage}
-              form={form}
-              setForm={setForm}
-              instructions={instructions}
-              setInstructions={setInstructions}
-              schedules={schedules}
-              setSchedules={setSchedules}
-              togglePreset={togglePreset}
-              fromScan={isReviewingScan}
-            />
-          )}
 
-          {(mode === "manual" || isReviewingScan) && (
-            <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-              {isReviewingScan ? (
+            <CardContent className="space-y-8 p-5 sm:p-8">
+              <div
+                className="grid grid-cols-2 rounded-2xl bg-muted p-1.5"
+                aria-label="Choose how to add a medicine"
+              >
                 <Button
                   type="button"
                   variant="ghost"
-                  className="min-h-11 rounded-xl"
-                  onClick={() => {
-                    setParsedData(null);
-                    setName("");
-                    setDosage("");
-                    setInstructions("");
-                  }}
+                  className={cn(
+                    "min-h-12 rounded-xl text-base",
+                    mode === "scan" && "bg-card text-foreground shadow-soft hover:bg-card",
+                  )}
+                  onClick={() => setMode("scan")}
+                  aria-pressed={mode === "scan"}
                 >
-                  <XIcon /> Try another photo
+                  <ScanIcon /> <span className="hidden sm:inline">Scan prescription</span>
+                  <span className="sm:hidden">Scan</span>
                 </Button>
-              ) : (
-                <span />
-              )}
-              <Button
-                type="button"
-                className="min-h-12 rounded-xl px-7 text-base"
-                disabled={!name.trim() || create.isPending}
-                onClick={() => create.mutate()}
-              >
-                {create.isPending ? (
-                  <>
-                    <SpinnerGapIcon className="animate-spin" /> Saving gently…
-                  </>
-                ) : (
-                  <>
-                    <CheckIcon /> Save my check-in
-                  </>
-                )}
-              </Button>
-              <div role="status" aria-live="polite" className="sr-only">
-                {create.isPending ? "Saving medication and reminder times" : ""}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className={cn(
+                    "min-h-12 rounded-xl text-base",
+                    mode === "manual" && "bg-card text-foreground shadow-soft hover:bg-card",
+                  )}
+                  onClick={() => setMode("manual")}
+                  aria-pressed={mode === "manual"}
+                >
+                  <PillIcon /> <span className="hidden sm:inline">Enter manually</span>
+                  <span className="sm:hidden">Manual</span>
+                </Button>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </section>
+
+              {mode === "scan" && !isReviewingScan ? (
+                <div className="space-y-4 animate-gentle-rise">
+                  <div
+                    className={cn(
+                      "relative flex min-h-72 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-primary/35 bg-primary/5 px-6 py-10 text-center transition-colors",
+                      isDragging && "border-primary bg-primary/10",
+                      previewUrl && "border-solid bg-surface",
+                    )}
+                    onDragEnter={(event) => {
+                      event.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setIsDragging(false);
+                      chooseFile(event.dataTransfer.files[0]);
+                    }}
+                  >
+                    {previewUrl ? (
+                      <>
+                        <img
+                          src={previewUrl}
+                          alt="Prescription selected for review"
+                          className="max-h-60 w-auto max-w-full rounded-2xl object-contain shadow-soft"
+                        />
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="mt-5 min-h-11 rounded-xl"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <ImageIcon /> Choose a different photo
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <span
+                          className="flex size-16 items-center justify-center rounded-full bg-surface text-primary shadow-soft"
+                          aria-hidden
+                        >
+                          <ImageIcon className="size-7" />
+                        </span>
+                        <h3 className="mt-5 font-display text-xl font-medium text-foreground">
+                          Add a clear photo
+                        </h3>
+                        <p className="mt-2 max-w-md text-base leading-relaxed text-muted-foreground">
+                          A pill bottle label or prescription works well. Keep the name and
+                          instructions in focus.
+                        </p>
+                        <div className="mt-6 flex flex-wrap justify-center gap-3">
+                          <Button
+                            type="button"
+                            className="min-h-11 rounded-xl px-5 text-base"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            <ImageIcon /> Choose photo
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="min-h-11 rounded-xl px-5 text-base"
+                            onClick={() => cameraInputRef.current?.click()}
+                          >
+                            <CameraIcon /> Use camera
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                      className="sr-only"
+                      onChange={(event) => chooseFile(event.target.files?.[0])}
+                    />
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="sr-only"
+                      onChange={(event) => chooseFile(event.target.files?.[0])}
+                    />
+                  </div>
+                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      JPG, PNG, WEBP or HEIC · up to 10 MB
+                    </p>
+                    <Button
+                      type="button"
+                      className="min-h-12 rounded-xl px-6 text-base"
+                      disabled={!file || scan.isPending}
+                      onClick={() => scan.mutate()}
+                    >
+                      {scan.isPending ? (
+                        <>
+                          <SpinnerGapIcon className="animate-spin" /> Reading the photo…
+                        </>
+                      ) : (
+                        <>
+                          <SparkleIcon /> Read this photo
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <div role="status" aria-live="polite" className="sr-only">
+                    {scan.isPending ? "Uploading and reading your prescription photo" : ""}
+                  </div>
+                </div>
+              ) : (
+                <MedicationForm
+                  familyMembers={family.data ?? []}
+                  forUserId={forUserId}
+                  setForUserId={setForUserId}
+                  name={name}
+                  setName={setName}
+                  dosage={dosage}
+                  setDosage={setDosage}
+                  form={form}
+                  setForm={setForm}
+                  instructions={instructions}
+                  setInstructions={setInstructions}
+                  schedules={schedules}
+                  setSchedules={setSchedules}
+                  togglePreset={togglePreset}
+                  fromScan={isReviewingScan}
+                />
+              )}
+
+              {(mode === "manual" || isReviewingScan) && (
+                <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+                  {isReviewingScan ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="min-h-11 rounded-xl"
+                      onClick={() => {
+                        setParsedData(null);
+                        setName("");
+                        setDosage("");
+                        setInstructions("");
+                      }}
+                    >
+                      <XIcon /> Try another photo
+                    </Button>
+                  ) : (
+                    <span />
+                  )}
+                  <Button
+                    type="button"
+                    className="min-h-12 rounded-xl px-7 text-base"
+                    disabled={!name.trim() || create.isPending}
+                    onClick={() => create.mutate()}
+                  >
+                    {create.isPending ? (
+                      <>
+                        <SpinnerGapIcon className="animate-spin" /> Saving gently…
+                      </>
+                    ) : (
+                      <>
+                        <CheckIcon /> Save my check-in
+                      </>
+                    )}
+                  </Button>
+                  <div role="status" aria-live="polite" className="sr-only">
+                    {create.isPending ? "Saving medication and reminder times" : ""}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </section>
+        </DialogContent>
+      </Dialog>
 
       {capabilities.localDayDoses && (
         <TodayDoses

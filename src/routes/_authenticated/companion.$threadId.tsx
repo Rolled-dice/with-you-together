@@ -24,6 +24,8 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { consumeCompanionDraft } from "@/lib/companion-draft";
+import { useIdentity } from "@/features/session/session-store";
 
 export const Route = createFileRoute("/_authenticated/companion/$threadId")({
   component: CompanionThread,
@@ -72,6 +74,7 @@ function ChatSurface({
   threadId: string;
   initialMessages: UIMessage[];
 }) {
+  const { userId, generation } = useIdentity();
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
@@ -116,6 +119,11 @@ function ChatSurface({
       qc.invalidateQueries({ queryKey: ["ai-quota"] });
     },
   });
+
+  useEffect(() => {
+    const text = consumeCompanionDraft(userId, generation, threadId);
+    if (text) void sendMessage({ text });
+  }, [userId, generation, threadId, sendMessage]);
 
   useEffect(
     () => () => {

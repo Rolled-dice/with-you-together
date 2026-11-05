@@ -3,6 +3,7 @@ import { DataError, DataSkeleton } from "@/components/feedback/load-state";
 import { useIdentity } from "@/features/session/session-store";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { MemberAvatar } from "@/components/prototype/member-avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,9 +107,9 @@ function FamilyPage() {
   return (
     <AppShell>
       <PageHeader
-        eyebrow="Family"
+        eyebrow="👨‍👩‍👧‍👦 Page 2 · Family Circle"
         slogan="Closer, even from far."
-        title="Your circle"
+        title="Manage your loved ones & call participation"
         description="Your people, together. Companion conversations stay private, and family access follows each member’s role."
       />
 
@@ -225,7 +226,7 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
 
   return (
     <div className="grid gap-6">
-      <Card data-page-reveal className="rounded-brand border-border bg-card">
+      <Card data-page-reveal className="sn-worker-family-hub rounded-brand border-border bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base font-medium">
             <UsersIcon className="h-4 w-4 text-brand-accent" />
@@ -325,29 +326,37 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
                 </Dialog>
               )}
             </div>
-            <div className="grid gap-2">
+            <div className="sn-live-family-grid">
               {members.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex items-center justify-between rounded-brand border border-border bg-background/40 px-3 py-2"
-                >
-                  <div className="flex items-center gap-2 text-sm">
-                    {m.role === "owner" ? (
-                      <CrownIcon className="h-4 w-4 text-brand-accent" />
-                    ) : m.role === "adult" ? (
-                      <ShieldCheckIcon className="h-4 w-4 text-brand-accent" />
-                    ) : (
-                      <UsersIcon className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span>{m.display_name ?? "Member"}</span>
-                    <Badge variant="secondary" className="rounded-full text-[10px] uppercase">
-                      {m.role}
-                    </Badge>
+                <div key={m.id} className="sn-live-family-card">
+                  <div className="sn-family-card-heading">
+                    <MemberAvatar id={m.user_id} size="md" />
+                    <div>
+                      {m.role === "owner" ? (
+                        <CrownIcon className="h-4 w-4 text-brand-accent" />
+                      ) : m.role === "adult" ? (
+                        <ShieldCheckIcon className="h-4 w-4 text-brand-accent" />
+                      ) : (
+                        <UsersIcon className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <h3>{m.display_name ?? "Member"}</h3>
+                      <Badge variant="secondary" className="rounded-full text-[10px] uppercase">
+                        {m.role}
+                      </Badge>
+                    </div>
                   </div>
+                  <p className="sn-family-card-note">
+                    {m.role === "owner"
+                      ? "Keeping your family circle connected."
+                      : m.role === "adult"
+                        ? "Sharing the everyday care, together."
+                        : "Part of your family’s own little space."}
+                  </p>
                   {isAdmin && m.role !== "owner" && (
                     <Button
                       variant="ghost"
                       size="sm"
+                      aria-label={`Remove ${m.display_name ?? "member"}`}
                       onClick={() => {
                         if (confirm(`Remove ${m.display_name ?? "this member"}?`)) {
                           removeFn({ data: { member_id: m.id } })

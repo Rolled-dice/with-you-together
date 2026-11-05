@@ -30,6 +30,16 @@ export const deleteConversation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
+    const { data: owned, error: ownershipError } = await context.supabase
+      .from("conversations")
+      .select("id")
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (ownershipError) throw new Error(ownershipError.message);
+    if (!owned) throw new Error("Record not found.");
+    const { createCompanionStore } = await import("./companion-store.server");
+    await createCompanionStore(process.env).clearSummary(context.userId);
     const { error } = await context.supabase
       .from("conversations")
       .delete()

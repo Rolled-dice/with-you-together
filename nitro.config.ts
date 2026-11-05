@@ -42,6 +42,20 @@ const privatePaths = [
   "/_serverFn/**",
 ];
 export default defineNitroConfig({
+  cloudflare: {
+    wrangler: {
+      name: "test_front",
+      account_id: "3c157fe5a87eba2eacbcb98d8e643b6a",
+      compatibility_date: "2026-11-05",
+      keep_vars: true,
+      observability: {
+        enabled: true,
+        head_sampling_rate: 0.1,
+        traces: { enabled: true, head_sampling_rate: 0.1 },
+      },
+    },
+  },
+
   routeRules: {
     "/**": { headers: securityHeaders },
     ...Object.fromEntries(

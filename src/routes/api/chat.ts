@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  type UIMessage,
+} from "ai";
+import { z } from "zod";
+import { generateCompanionReply } from "@/lib/companion-generation.server";
 import { createClient } from "@supabase/supabase-js";
 import { getTierLimit, UNLIMITED } from "@/lib/quota.functions";
 
@@ -40,13 +46,44 @@ export const Route = createFileRoute("/api/chat")({
         }
         const userId = userData.user.id;
 
-        const body = (await request.json()) as {
-          messages?: UIMessage[];
-          conversationId?: string;
+        const parsed = z
+          .object({
+            conversationId: z.string().uuid(),
+            messages: z
+              .array(
+                z.object({
+                  id: z.string().max(200),
+                  role: z.enum(["user", "assistant"]),
+                  parts: z
+                    .array(z.object({ type: z.string(), text: z.string().max(12000).optional() }))
+                    .max(100),
+                }),
+              )
+              .min(1)
+              .max(60),
+          })
+          .safeParse(await request.json().catch(() => null));
+        if (!parsed.success) return new Response("Bad request", { status: 400 });
+        const body = {
+          ...parsed.data,
+          messages: parsed.data.messages.map((message) => ({
+            ...message,
+            parts: message.parts
+              .filter((part) => part.type === "text")
+              .map((part) => ({ type: "text" as const, text: part.text ?? "" })),
+          })),
         };
-        if (!Array.isArray(body.messages) || !body.conversationId) {
+        const userMessage = body.messages.at(-1);
+        const userText = userMessage?.parts
+          .map((part) => part.text)
+          .join("")
+          ?.trim();
+        if (
+          userMessage?.role !== "user" ||
+          !userText ||
+          JSON.stringify(body.messages).length > 100000
+        )
           return new Response("Bad request", { status: 400 });
-        }
 
         // Verify conversation ownership
         const { data: convo, error: convoError } = await supabase
@@ -85,31 +122,6 @@ export const Route = createFileRoute("/api/chat")({
           }
         }
 
-
-        // Persist the latest user message
-        const lastMessage = body.messages[body.messages.length - 1];
-        if (lastMessage && lastMessage.role === "user") {
-          const text = lastMessage.parts
-            .map((p) => (p.type === "text" ? p.text : ""))
-            .join("");
-          if (text.trim()) {
-            await supabase.from("messages").insert({
-              conversation_id: body.conversationId,
-              user_id: userId,
-              role: "user",
-              content: text,
-            });
-            // Set title from first user message if still default
-            if (convo.title === "New conversation") {
-              const title = text.slice(0, 60);
-              await supabase
-                .from("conversations")
-                .update({ title })
-                .eq("id", body.conversationId);
-            }
-          }
-        }
-
         // Fetch user's saved companion memories to personalize
         const { data: memories } = await supabase
           .from("companion_memories")
@@ -126,39 +138,64 @@ export const Route = createFileRoute("/api/chat")({
         const displayName = profile && (profile as { display_name?: string }).display_name;
         const nameLine = displayName ? `\n\nYou're speaking with ${displayName}.` : "";
 
-        const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-        const result = streamText({
-          model: google("gemini-3-flash-preview"),
-          system: SYSTEM_PROMPT + nameLine + memoryBlock,
-          messages: await convertToModelMessages(body.messages),
-          maxRetries: 0,
-          onError: ({ error }) => {
-            console.error("[chat] stream error", error);
+        let generated: Awaited<ReturnType<typeof generateCompanionReply>>;
+        try {
+          generated = await generateCompanionReply({
+            environment: process.env,
+            subjectId: userId,
+            system: SYSTEM_PROMPT + nameLine + memoryBlock,
+            messages: await convertToModelMessages(body.messages as UIMessage[]),
+            userText,
+          });
+        } catch (error) {
+          console.error(
+            "[chat] Companion services unavailable",
+            error instanceof Error ? error.name : "UnknownError",
+          );
+          return new Response("Companion is temporarily unavailable. Please try again shortly.", {
+            status: 503,
+          });
+        }
+        const { error: saveError } = await supabase.from("messages").insert([
+          {
+            conversation_id: body.conversationId,
+            user_id: userId,
+            role: "user",
+            content: userText,
           },
-        });
-
-        return result.toUIMessageStreamResponse({
-          originalMessages: body.messages,
-          onError: (error) =>
-            error instanceof Error
-              ? error.message
-              : "Gemini could not respond. Please try again shortly.",
-          onFinish: async ({ responseMessage }) => {
-            const text = responseMessage.parts
-              .map((p) => (p.type === "text" ? p.text : ""))
-              .join("");
-            if (!text.trim()) return;
-            await supabase.from("messages").insert({
-              conversation_id: body.conversationId!,
-              user_id: userId,
-              role: "assistant",
-              content: text,
-            });
-            await supabase
-              .from("conversations")
-              .update({ updated_at: new Date().toISOString() })
-              .eq("id", body.conversationId!);
+          {
+            conversation_id: body.conversationId,
+            user_id: userId,
+            role: "assistant",
+            content: generated.text,
           },
+        ]);
+        if (saveError)
+          return new Response("We could not save this conversation. Please try again.", {
+            status: 503,
+          });
+        await generated.persistContinuity();
+        const reply = generated.text;
+        await supabase
+          .from("conversations")
+          .update({
+            updated_at: new Date().toISOString(),
+            ...(convo.title === "New conversation" ? { title: userText.slice(0, 60) } : {}),
+          })
+          .eq("id", body.conversationId)
+          .eq("user_id", userId);
+        // Emit only the completed, safety-checked reply. No unchecked token reaches the browser.
+        return createUIMessageStreamResponse({
+          stream: createUIMessageStream({
+            originalMessages: body.messages as UIMessage[],
+            execute: ({ writer }) => {
+              writer.write({ type: "start", messageId: crypto.randomUUID() });
+              writer.write({ type: "text-start", id: "reply" });
+              writer.write({ type: "text-delta", id: "reply", delta: reply });
+              writer.write({ type: "text-end", id: "reply" });
+              writer.write({ type: "finish", finishReason: "stop" });
+            },
+          }),
         });
       },
     },

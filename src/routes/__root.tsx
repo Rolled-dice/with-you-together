@@ -10,6 +10,9 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { PrivacyPreferences } from "@/components/privacy-preferences";
+import { WebsiteFeedback } from "@/components/website-feedback";
+import prototypeCss from "../prototype.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SessionLifecycle } from "@/features/session/session-boundary";
 import { Toaster } from "sonner";
@@ -104,6 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "stylesheet", href: prototypeCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
       // Square, padded, genuinely transparent icons built by
       // scripts/clean-logo.ps1 from the original artwork.
@@ -118,10 +122,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "preconnect",
-        href: "https://hagqbqxsedoqdoqdbtqt.supabase.co",
+        href: "https://jflufaxdwzrohslviqeb.supabase.co",
         crossOrigin: "anonymous",
       },
-      { rel: "dns-prefetch", href: "https://hagqbqxsedoqdoqdbtqt.supabase.co" },
+      { rel: "dns-prefetch", href: "https://jflufaxdwzrohslviqeb.supabase.co" },
     ],
   }),
   shellComponent: RootShell,
@@ -134,13 +138,6 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <script
-          id="Cookiebot"
-          src="https://consent.cookiebot.com/uc.js"
-          data-cbid="3a9d7ca9-0293-48e0-8195-dda50a5cb1d6"
-          data-blockingmode="auto"
-          type="text/javascript"
-        />
         <HeadContent />
       </head>
 
@@ -154,12 +151,30 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    // Cookiebot inserts head nodes; load after hydration so login can initialize.
+    // Local development uses the existing essential-only consent fallback.
+    if (
+      ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) ||
+      document.getElementById("Cookiebot")
+    )
+      return;
+    const script = document.createElement("script");
+    script.id = "Cookiebot";
+    script.src = "https://consent.cookiebot.com/uc.js";
+    script.async = true;
+    script.dataset.cbid = "3a9d7ca9-0293-48e0-8195-dda50a5cb1d6";
+    script.dataset.blockingmode = "auto";
+    document.head.appendChild(script);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <SessionLifecycle />
+      <WebsiteFeedback />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <PrivacyPreferences />
       <Toaster
         position="top-center"
         gap={12}

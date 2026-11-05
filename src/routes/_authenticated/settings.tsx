@@ -3,6 +3,7 @@ import { DataError } from "@/components/feedback/load-state";
 import { capabilities } from "@/lib/frontend/capabilities";
 import { NotificationPermissionStatus } from "@/features/notifications/permission-status";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { LaunchPricing } from "@/components/prototype/launch-pricing";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,11 +30,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { startPhoneVerification, confirmPhoneVerification } from "@/lib/phone-verify.functions";
-import {
-  listMemories as listMemoriesFn,
-  createMemory as createMemoryFn,
-  deleteMemory as deleteMemoryFn,
-} from "@/lib/memories.functions";
+import { CompanionMemoryCard } from "@/components/prototype/companion-memory";
 import { cancelDodoSubscription, getMyDodoSubscription } from "@/lib/dodo.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -233,13 +230,31 @@ function SettingsPage() {
       <NotificationPermissionStatus />
       <PaymentTestModeBanner />
       <PageHeader
-        eyebrow="Settings"
+        eyebrow="⚙️ Avatar & Account Preferences"
         slogan="Made just for you."
-        title="Your preferences"
+        title="Make your family space your own."
         description="Care Membership, profile, and privacy, all in your hands."
       />
 
       <div className="grid gap-6">
+        <Card className="sn-worker-avatar-settings">
+          <CardHeader>
+            <CardTitle>Editorial Avatar Studio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              Choose the illustrated look of your family circle, with the original SomeoneNear
+              artwork.
+            </p>
+            <button
+              type="button"
+              className="sn-worker-button"
+              onClick={() => window.dispatchEvent(new Event("sn:edit-member-avatars"))}
+            >
+              Customize family avatars
+            </button>
+          </CardContent>
+        </Card>
         <Card data-page-reveal className="rounded-brand border-border bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base font-medium">
@@ -308,88 +323,99 @@ function SettingsPage() {
               </div>
             </div>
 
-            {/* Plans */}
-            <div className="grid gap-3 md:grid-cols-2">
-              {plans.map((plan) => {
-                const info = PLAN_DISPLAY[plan];
-                const active = activeTier === plan;
-                const priceId = priceIdFor(plan, currency);
-                return (
-                  <div
-                    key={plan}
-                    className={cn(
-                      "flex flex-col gap-3 rounded-brand border p-4",
-                      active
-                        ? "border-brand-primary bg-brand-primary/5"
-                        : info.highlight
-                          ? "border-brand-accent/40 bg-brand-accent/5"
-                          : "border-border",
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-sm font-medium">{info.name}</span>
-                        {info.highlight && !active ? (
-                          <span className="ml-2 rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">
-                            Most chosen
-                          </span>
+            <LaunchPricing initialMarket={currency === "inr" ? "in" : "us"} />
+            {hasPaidSub && (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Existing memberships keep their purchased prices and allowances. The following
+                  controls describe the existing catalog.
+                </p>
+                {/* Plans */}
+                <div className="grid gap-3 md:grid-cols-2">
+                  {plans.map((plan) => {
+                    const info = PLAN_DISPLAY[plan];
+                    const active = activeTier === plan;
+                    const priceId = priceIdFor(plan, currency);
+                    return (
+                      <div
+                        key={plan}
+                        className={cn(
+                          "flex flex-col gap-3 rounded-brand border p-4",
+                          active
+                            ? "border-brand-primary bg-brand-primary/5"
+                            : info.highlight
+                              ? "border-brand-accent/40 bg-brand-accent/5"
+                              : "border-border",
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-sm font-medium">{info.name}</span>
+                            {info.highlight && !active ? (
+                              <span className="ml-2 rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">
+                                Most chosen
+                              </span>
+                            ) : null}
+                          </div>
+                          {active ? (
+                            <Badge className="rounded-full bg-brand-primary text-primary-foreground">
+                              <CheckIcon className="mr-1 h-3 w-3" /> Current
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <div>
+                          <div className="text-lg font-semibold">
+                            {displayPrice(plan, currency)}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">per month</div>
+                        </div>
+                        <ul className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
+                          {info.bullets
+                            .filter((b) => !/call|check-in|safety net|telnyx/i.test(b))
+                            .map((b) => (
+                              <li key={b}>· {b}</li>
+                            ))}
+                        </ul>
+                        {active ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => manageMut.mutate()}
+                            disabled={manageMut.isPending}
+                            className="rounded-brand"
+                          >
+                            {manageMut.isPending ? (
+                              <SpinnerGapIcon className="mr-2 h-3 w-3 animate-spin" />
+                            ) : null}
+                            {manageLabel}
+                          </Button>
+                        ) : capabilities.purchase ? (
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              navigate({
+                                to: "/checkout",
+                                search: {
+                                  price: priceId as
+                                    | "care_monthly_inr"
+                                    | "care_monthly_usd"
+                                    | "care_plus_monthly_inr"
+                                    | "care_plus_monthly_usd",
+                                },
+                              })
+                            }
+                            className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
+                          >
+                            <SparkleIcon className="mr-2 h-3 w-3" />
+                            {hasPaidSub ? "Switch plan" : "Choose plan"}
+                          </Button>
                         ) : null}
                       </div>
-                      {active ? (
-                        <Badge className="rounded-full bg-brand-primary text-primary-foreground">
-                          <CheckIcon className="mr-1 h-3 w-3" /> Current
-                        </Badge>
-                      ) : null}
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold">{displayPrice(plan, currency)}</div>
-                      <div className="text-[11px] text-muted-foreground">per month</div>
-                    </div>
-                    <ul className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
-                      {info.bullets
-                        .filter((b) => !/call|check-in|safety net|telnyx/i.test(b))
-                        .map((b) => (
-                          <li key={b}>· {b}</li>
-                        ))}
-                    </ul>
-                    {active ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => manageMut.mutate()}
-                        disabled={manageMut.isPending}
-                        className="rounded-brand"
-                      >
-                        {manageMut.isPending ? (
-                          <SpinnerGapIcon className="mr-2 h-3 w-3 animate-spin" />
-                        ) : null}
-                        {manageLabel}
-                      </Button>
-                    ) : capabilities.purchase ? (
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          navigate({
-                            to: "/checkout",
-                            search: {
-                              price: priceId as
-                                | "care_monthly_inr"
-                                | "care_monthly_usd"
-                                | "care_plus_monthly_inr"
-                                | "care_plus_monthly_usd",
-                            },
-                          })
-                        }
-                        className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
-                      >
-                        <SparkleIcon className="mr-2 h-3 w-3" />
-                        {hasPaidSub ? "Switch plan" : "Choose plan"}
-                      </Button>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -765,83 +791,6 @@ function BillingHistoryCard() {
                 </li>
               );
             })}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function CompanionMemoryCard() {
-  const listFn = useServerFn(listMemoriesFn);
-  const createFn = useServerFn(createMemoryFn);
-  const deleteFn = useServerFn(deleteMemoryFn);
-  const qc = useQueryClient();
-  const [content, setContent] = useState("");
-
-  const { data: memories = [], isLoading } = useQuery({
-    queryKey: ["memories"],
-    queryFn: () => listFn(),
-  });
-
-  const addMut = useMutation({
-    mutationFn: () => createFn({ data: { content } }),
-    onSuccess: () => {
-      setContent("");
-      qc.invalidateQueries({ queryKey: ["memories"] });
-      toast.success("Saved. The Companion will remember this.");
-    },
-    onError: (e) => toast.error((e as Error).message),
-  });
-
-  const delMut = useMutation({
-    mutationFn: (id: string) => deleteFn({ data: { id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["memories"] }),
-  });
-
-  return (
-    <Card data-page-reveal className="rounded-brand border-border bg-card">
-      <CardHeader>
-        <CardTitle className="text-base font-medium">Companion memory</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <p className="text-sm text-muted-foreground">
-          Short notes you'd like the Companion to keep in mind, only you can see these.
-        </p>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Input
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            maxLength={500}
-            placeholder="e.g. I use they/them. Walks help when I'm anxious."
-            className="rounded-brand"
-          />
-          <Button
-            onClick={() => addMut.mutate()}
-            disabled={!content.trim() || addMut.isPending}
-            className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
-          >
-            {addMut.isPending ? <SpinnerGapIcon className="h-4 w-4 animate-spin" /> : "Add"}
-          </Button>
-        </div>
-        {isLoading ? (
-          <Skeleton className="h-10 w-full rounded-brand" />
-        ) : memories.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No memories yet.</p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {memories.map((m) => (
-              <li key={m.id} className="flex items-start justify-between gap-3 py-2 text-sm">
-                <span className="flex-1">{m.content}</span>
-                <button
-                  type="button"
-                  onClick={() => delMut.mutate(m.id)}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
           </ul>
         )}
       </CardContent>

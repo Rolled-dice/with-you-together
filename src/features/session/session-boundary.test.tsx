@@ -27,6 +27,27 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 describe("session isolation", () => {
+  it("initializes a signed-in identity without restarting the initial route load", () => {
+    vi.useFakeTimers();
+    const client = new QueryClient();
+    const { unmount } = render(
+      <QueryClientProvider client={client}>
+        <SessionLifecycle />
+      </QueryClientProvider>,
+    );
+    try {
+      act(() => {
+        mocked.callback?.("INITIAL_SESSION", { user: { id: "A" } });
+        vi.runOnlyPendingTimers();
+      });
+      expect(getIdentity()).toMatchObject({ userId: "A", initialized: true });
+      expect(mocked.invalidate).not.toHaveBeenCalled();
+      expect(mocked.navigate).not.toHaveBeenCalled();
+    } finally {
+      unmount();
+      vi.useRealTimers();
+    }
+  });
   it("immediately clears A’s data when an auth event switches to B", () => {
     setIdentity("A");
     const client = new QueryClient();

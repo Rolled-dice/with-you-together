@@ -218,11 +218,33 @@ function InsightsPage() {
   return (
     <AppShell>
       <PageHeader
-        eyebrow="Patterns you can trust"
+        eyebrow="📈 Mood & Wellness Insights"
         slogan="Small patterns, big kindness."
         title="Mood insights"
         description="A gentle look at how you've been. Only visible to you."
       />
+
+      <div className="sn-worker-trust-grid sn-worker-insight-summary">
+        <article>
+          <span className="sn-worker-status">Your emotional warmth</span>
+          <h2>{stats.avgMood ? `${stats.avgMood.toFixed(1)} / 5` : "Your first check-in"}</h2>
+          <p>
+            {stats.avgMood
+              ? "Your average recorded mood in the selected period."
+              : "Your private mood pattern will appear after you check in."}
+          </p>
+        </article>
+        <article>
+          <span className="sn-worker-status">Care consistency</span>
+          <h2>{stats.streak}-day check-in streak</h2>
+          <p>A little space for yourself, one day at a time.</p>
+        </article>
+        <article>
+          <span className="sn-worker-status">Your reflections</span>
+          <h2>{stats.totalEntries} recorded entries</h2>
+          <p>Personal reflections and patterns, visible only to you.</p>
+        </article>
+      </div>
 
       {/* One consistent vertical rhythm for the whole page, instead of each
           section carrying its own ad-hoc mb-4/mb-6. */}

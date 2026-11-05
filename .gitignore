@@ -19,6 +19,7 @@ dist-ssr
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+supabase/.temp/
 
 # Editor directories and files
 .vscode/*
@@ -47,3 +48,7 @@ brand/
 .env.local
 .env.*.local
 
+
+# Local Playwright run artifacts
+test-results/
+playwright-report/

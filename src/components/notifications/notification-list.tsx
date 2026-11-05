@@ -31,10 +31,12 @@ export function NotificationList({
   items,
   onDismiss,
   className,
+  disabled = false,
 }: {
   items: NotificationItem[];
   onDismiss: (id: string) => void;
   className?: string;
+  disabled?: boolean;
 }) {
   if (items.length === 0) {
     return (
@@ -56,9 +58,11 @@ export function NotificationList({
         >
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm font-medium text-foreground">{n.title}</p>
+            {!n.read_at && <span className="text-xs font-semibold text-primary">Unread</span>}
             <button
               type="button"
               aria-label="Dismiss"
+              disabled={disabled}
               onClick={() => onDismiss(n.id)}
               className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground active:text-foreground"
             >

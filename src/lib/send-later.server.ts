@@ -1,8 +1,15 @@
-/** Send It Later: scheduled text/voice/video messages with media stored on S3. */
+/** Send It Later: scheduled text/voice/video messages with media stored in private Supabase Storage. */
 
-import { s3Put, s3ReadUrl } from "@/lib/s3.server";
+import {
+  putSendLaterMedia,
+  signSendLaterMedia,
+  removeSendLaterMedia,
+} from "@/lib/media-storage.server";
+import { mediaFile } from "@/features/media/recording";
 
-type Ctx = { supabase: any; userId: string };
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 const MAX_BYTES = 25 * 1024 * 1024;
 
@@ -31,15 +38,27 @@ export async function createScheduledMessage(
   if (Number.isNaN(when.getTime())) throw new Error("Pick a valid date and time");
   if (when.getTime() < Date.now() + 60_000)
     throw new Error("Choose a time at least a few minutes in the future");
+  const contacts = await listFamilyContacts(context);
+  if (
+    !input.recipientUserId ||
+    !contacts.some((contact) => contact.userId === input.recipientUserId)
+  )
+    throw new Error("Choose someone in your family circle.");
 
   let s3Key: string | null = null;
   if (input.kind !== "text") {
     if (!input.file) throw new Error("Record or upload your message first");
-    if (input.file.size > MAX_BYTES)
-      throw new Error("File is too large, keep it under 25 MB");
+    if (input.file.size > MAX_BYTES) throw new Error("File is too large, keep it under 25 MB");
     const ext = extFor(input.file.type);
-    s3Key = `send-later/${context.userId}/${crypto.randomUUID()}.${ext}`;
-    await s3Put(s3Key, await input.file.arrayBuffer(), input.file.type);
+    // The database guard retains the logical bucket prefix; Storage itself uses owner/file.
+    s3Key =
+      "send-later/" +
+      (await putSendLaterMedia(
+        context.supabase,
+        `${context.userId}/${crypto.randomUUID()}.${ext}`,
+        context.userId,
+        mediaFile(input.file, input.kind),
+      ));
   } else if (!input.body?.trim()) {
     throw new Error("Write your message first");
   }
@@ -58,7 +77,15 @@ export async function createScheduledMessage(
     })
     .select("id")
     .single();
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (s3Key)
+      try {
+        await removeSendLaterMedia(context.supabase, s3Key, context.userId);
+      } catch {
+        console.error("[send-later] Upload cleanup failed");
+      }
+    throw new Error(error.message);
+  }
   return { id: data.id as string };
 }
 
@@ -89,7 +116,7 @@ export async function cancelScheduledMessage(context: Ctx, id: string) {
 export async function getMediaUrl(context: Ctx, id: string) {
   const { data, error } = await context.supabase
     .from("scheduled_messages")
-    .select("s3_key, user_id, recipient_user_id")
+    .select("s3_key, user_id, recipient_user_id, status")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -98,7 +125,9 @@ export async function getMediaUrl(context: Ctx, id: string) {
     (data.user_id !== context.userId && data.recipient_user_id !== context.userId)
   )
     throw new Error("No recording found");
-  return s3ReadUrl(data.s3_key);
+  if (data.user_id !== context.userId && data.status !== "delivered")
+    throw new Error("This message has not arrived yet");
+  return signSendLaterMedia(data.s3_key, data.user_id);
 }
 
 /** Delivered messages addressed to the signed-in user. */
@@ -113,7 +142,7 @@ export async function listReceivedMessages(context: Ctx) {
     .order("delivered_at", { ascending: false });
   if (error) throw new Error(error.message);
   const rows = data ?? [];
-  const senderIds = [...new Set(rows.map((r: any) => r.user_id).filter(Boolean))];
+  const senderIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
   const names = new Map<string, string>();
   if (senderIds.length) {
     const { data: profs } = await context.supabase
@@ -122,7 +151,7 @@ export async function listReceivedMessages(context: Ctx) {
       .in("id", senderIds);
     for (const p of profs ?? []) names.set(p.id as string, (p.display_name as string) ?? "");
   }
-  return rows.map((r: any) => ({
+  return rows.map((r) => ({
     ...r,
     profiles: { display_name: names.get(r.user_id) || null },
   }));
@@ -130,10 +159,9 @@ export async function listReceivedMessages(context: Ctx) {
 
 /** Family members the user can address a message to. */
 export async function listFamilyContacts(context: Ctx) {
-  const { data: famId, error: famErr } = await context.supabase.rpc(
-    "get_user_family_id",
-    { _uid: context.userId },
-  );
+  const { data: famId, error: famErr } = await context.supabase.rpc("get_user_family_id", {
+    _uid: context.userId,
+  });
   if (famErr || !famId) return [];
   const { data, error } = await context.supabase
     .from("family_members")
@@ -141,18 +169,17 @@ export async function listFamilyContacts(context: Ctx) {
     .eq("family_id", famId)
     .neq("user_id", context.userId);
   if (error) throw new Error(error.message);
-  const ids = (data ?? []).map((m: any) => m.user_id as string);
+  const ids = (data ?? []).map((m) => m.user_id as string);
   if (!ids.length) return [];
   const { data: profs } = await context.supabase
     .from("profiles")
     .select("id, display_name")
     .in("id", ids);
   const names = new Map<string, string>(
-    (profs ?? []).map((p: any) => [p.id as string, p.display_name as string]),
+    (profs ?? []).map((p) => [p.id as string, p.display_name as string]),
   );
   return ids.map((id: string) => ({
     userId: id,
     name: names.get(id) || "Family member",
   }));
 }
-

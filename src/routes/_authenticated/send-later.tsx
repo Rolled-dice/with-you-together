@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/app-shell";
@@ -22,6 +22,9 @@ import {
 } from "@/lib/send-later.functions";
 
 export const Route = createFileRoute("/_authenticated/send-later")({
+  validateSearch: (search: Record<string, unknown>): { section?: "studio" } => ({
+    section: search.section === "studio" ? "studio" : undefined,
+  }),
   component: SendLaterPage,
   head: () => ({ meta: [{ title: "Send Later | SomeoneNear" }] }),
 });
@@ -50,6 +53,15 @@ function SendLaterPage() {
   const recorder = useRecording();
   const previewUrl = useObjectUrl(recorder.blob);
   const [kind, setKind] = useState<z.infer<typeof kindSchema>>("text");
+  const [vaultTab, setVaultTab] = useState("gallery");
+  const { section } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  useEffect(() => {
+    if (section !== "studio") return;
+    setVaultTab("studio");
+    setKind("voice");
+    void navigate({ search: { section: undefined }, replace: true });
+  }, [section, navigate]);
   const [recipientId, setRecipientId] = useState("");
   const [body, setBody] = useState("");
   const [when, setWhen] = useState("");
@@ -137,12 +149,33 @@ function SendLaterPage() {
   const failure = save.error || cancelMutation.error || play.error;
   return (
     <AppShell>
-      <div className="mx-auto max-w-3xl space-y-6">
+      <div className="sn-worker-vault space-y-6">
         <PageHeader
-          eyebrow="A little presence"
-          title="Words for a moment that matters."
+          eyebrow="💌 Page 5 · Memory Vault & Time Capsules"
+          title="A warm family scrapbook of voices, Polaroids & future letters."
           description="Schedule a message for someone in your family circle. They can find it in SomeoneNear when it arrives."
         />
+        <div className="sn-worker-game-tabs" role="tablist" aria-label="Memory vault sections">
+          {[
+            ["gallery", "🖼️ ① Polaroid & Vinyl Gallery"],
+            ["studio", "🎙️ ② 1-Click Voice Studio"],
+            ["capsules", "⏳ ③ Time Capsules"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={vaultTab === id}
+              onClick={() => {
+                recorder.cancel();
+                setVaultTab(id);
+                setKind(id === "studio" ? "voice" : "text");
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         {query.isPending || zone.isPending ? (
           <DataSkeleton />
         ) : query.isError || zone.isError ? (
@@ -154,142 +187,143 @@ function SendLaterPage() {
           />
         ) : (
           <>
-            {query.data.contacts.length === 0 ? (
-              <p className="rounded-2xl border border-border bg-card p-6">
-                There are no family recipients yet. Add someone to your family circle before
-                scheduling a message.
-              </p>
-            ) : (
-              <form
-                className="space-y-5 rounded-3xl border border-border bg-card p-6"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  if (!save.isPending) save.mutate();
-                }}
-              >
-                <fieldset disabled={save.isPending} className="space-y-5 disabled:opacity-70">
-                  <legend className="font-semibold">Your message</legend>
-                  <label className="block">
-                    Message type
-                    <select
-                      className={inputClass}
-                      value={kind}
-                      onChange={(event) => {
-                        recorder.cancel();
-                        setKind(kindSchema.parse(event.target.value));
-                      }}
-                    >
-                      <option value="text">Text</option>
-                      <option value="voice">Voice</option>
-                      <option value="video">Video</option>
-                    </select>
-                  </label>
-                  <label className="block">
-                    For
-                    <select
-                      className={inputClass}
-                      value={recipientId}
-                      onChange={(event) => setRecipientId(event.target.value)}
-                      required
-                    >
-                      <option value="">Choose a family member</option>
-                      {query.data.contacts.map((contact) => (
-                        <option key={contact.userId} value={contact.userId}>
-                          {contact.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  {kind === "text" ? (
+            {vaultTab !== "gallery" &&
+              (query.data.contacts.length === 0 ? (
+                <p className="rounded-2xl border border-border bg-card p-6">
+                  There are no family recipients yet. Add someone to your family circle before
+                  scheduling a message.
+                </p>
+              ) : (
+                <form
+                  className="space-y-5 rounded-3xl border border-border bg-card p-6"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    if (!save.isPending) save.mutate();
+                  }}
+                >
+                  <fieldset disabled={save.isPending} className="space-y-5 disabled:opacity-70">
+                    <legend className="font-semibold">Your message</legend>
                     <label className="block">
-                      Your words
-                      <textarea
-                        className={`${inputClass} min-h-32`}
-                        required
-                        value={body}
-                        onChange={(event) => setBody(event.target.value)}
-                      />
+                      Message type
+                      <select
+                        className={inputClass}
+                        value={kind}
+                        onChange={(event) => {
+                          recorder.cancel();
+                          setKind(kindSchema.parse(event.target.value));
+                        }}
+                      >
+                        <option value="text">Text</option>
+                        <option value="voice">Voice</option>
+                        <option value="video">Video</option>
+                      </select>
                     </label>
-                  ) : (
-                    <div className="space-y-3">
-                      {recorder.requesting ? (
-                        <p role="status">Waiting for microphone permission…</p>
-                      ) : recorder.recording ? (
-                        <p role="status">Recording…</p>
-                      ) : null}
-                      <div className="flex flex-wrap gap-3">
-                        {recorder.recording ? (
-                          <Button type="button" onClick={recorder.stop}>
-                            Stop recording
-                          </Button>
-                        ) : (
-                          <Button
-                            type="button"
-                            disabled={recorder.requesting}
-                            onClick={() => void recorder.start(kind)}
-                          >
-                            Record {kind}
-                          </Button>
-                        )}
-                        <Button type="button" variant="outline" onClick={recorder.cancel}>
-                          Cancel recording
-                        </Button>
-                      </div>
-                      <label className="block text-sm">
-                        Or upload a recording (up to 25 MiB)
-                        <input
-                          className={inputClass}
-                          type="file"
-                          accept={
-                            kind === "voice"
-                              ? "audio/webm,audio/mp4,audio/mpeg,audio/ogg,audio/wav"
-                              : "video/webm,video/mp4"
-                          }
-                          onChange={(event) => {
-                            const file = event.target.files?.[0];
-                            if (file) recorder.upload(file, kind);
-                            event.target.value = "";
-                          }}
+                    <label className="block">
+                      For
+                      <select
+                        className={inputClass}
+                        value={recipientId}
+                        onChange={(event) => setRecipientId(event.target.value)}
+                        required
+                      >
+                        <option value="">Choose a family member</option>
+                        {query.data.contacts.map((contact) => (
+                          <option key={contact.userId} value={contact.userId}>
+                            {contact.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    {kind === "text" ? (
+                      <label className="block">
+                        Your words
+                        <textarea
+                          className={`${inputClass} min-h-32`}
+                          required
+                          value={body}
+                          onChange={(event) => setBody(event.target.value)}
                         />
                       </label>
-                      {previewUrl &&
-                        (kind === "video" ? (
-                          <video
-                            controls
-                            src={previewUrl}
-                            className="aspect-video w-full rounded-xl"
+                    ) : (
+                      <div className="space-y-3">
+                        {recorder.requesting ? (
+                          <p role="status">Waiting for microphone permission…</p>
+                        ) : recorder.recording ? (
+                          <p role="status">Recording…</p>
+                        ) : null}
+                        <div className="flex flex-wrap gap-3">
+                          {recorder.recording ? (
+                            <Button type="button" onClick={recorder.stop}>
+                              Stop recording
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              disabled={recorder.requesting}
+                              onClick={() => void recorder.start(kind)}
+                            >
+                              Record {kind}
+                            </Button>
+                          )}
+                          <Button type="button" variant="outline" onClick={recorder.cancel}>
+                            Cancel recording
+                          </Button>
+                        </div>
+                        <label className="block text-sm">
+                          Or upload a recording (up to 25 MiB)
+                          <input
+                            className={inputClass}
+                            type="file"
+                            accept={
+                              kind === "voice"
+                                ? "audio/webm,audio/mp4,audio/mpeg,audio/ogg,audio/wav"
+                                : "video/webm,video/mp4"
+                            }
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              if (file) recorder.upload(file, kind);
+                              event.target.value = "";
+                            }}
                           />
-                        ) : (
-                          <audio controls src={previewUrl} className="w-full" />
-                        ))}
-                      {recorder.error && <p role="alert">{recorder.error}</p>}
-                    </div>
-                  )}
-                  <label className="block">
-                    Date & time ({zone.data})
-                    <input
-                      className={inputClass}
-                      type="datetime-local"
-                      required
-                      min={localInput(new Date(Date.now() + 120_000), zone.data)}
-                      value={when}
-                      onChange={(event) => setWhen(event.target.value)}
-                    />
-                  </label>
-                  <Button
-                    type="submit"
-                    disabled={
-                      save.isPending ||
-                      recorder.recording ||
-                      recorder.requesting ||
-                      (kind !== "text" && !recorder.blob)
-                    }
-                  >
-                    {save.isPending ? "Scheduling…" : "Schedule message"}
-                  </Button>
-                </fieldset>
-              </form>
-            )}
+                        </label>
+                        {previewUrl &&
+                          (kind === "video" ? (
+                            <video
+                              controls
+                              src={previewUrl}
+                              className="aspect-video w-full rounded-xl"
+                            />
+                          ) : (
+                            <audio controls src={previewUrl} className="w-full" />
+                          ))}
+                        {recorder.error && <p role="alert">{recorder.error}</p>}
+                      </div>
+                    )}
+                    <label className="block">
+                      Date & time ({zone.data})
+                      <input
+                        className={inputClass}
+                        type="datetime-local"
+                        required
+                        min={localInput(new Date(Date.now() + 120_000), zone.data)}
+                        value={when}
+                        onChange={(event) => setWhen(event.target.value)}
+                      />
+                    </label>
+                    <Button
+                      type="submit"
+                      disabled={
+                        save.isPending ||
+                        recorder.recording ||
+                        recorder.requesting ||
+                        (kind !== "text" && !recorder.blob)
+                      }
+                    >
+                      {save.isPending ? "Scheduling…" : "Schedule message"}
+                    </Button>
+                  </fieldset>
+                </form>
+              ))}
             {failure && (
               <div role="alert" className="rounded-xl border border-border bg-surface p-4">
                 <p>

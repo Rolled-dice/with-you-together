@@ -1,15 +1,11 @@
+import { schedulerAuthorized } from "@/lib/scheduler-auth.server";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/api/public/hooks/call-sla")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key =
-          request.headers.get("apikey") ??
-          request.headers.get("authorization")?.replace("Bearer ", "");
-        const expected =
-          process.env["SUPABASE_ANON_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
-        if (!key || !expected || key !== expected) {
+        if (!(await schedulerAuthorized(request, process.env.CRON_SECRET))) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },

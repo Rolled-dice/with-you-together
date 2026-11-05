@@ -8,7 +8,7 @@ vi.mock("@tanstack/react-start", () => ({
   useServerFn: (fn: unknown) => fn,
   createServerFn: () => ({ middleware: () => ({ handler: () => null }) }),
 }));
-vi.mock("@/lib/notifications.functions", () => ({ listMyNotifications: vi.fn() }));
+vi.mock("@/lib/notifications.functions", () => ({ getNotificationInbox: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     channel: mocked.channel,

@@ -44,8 +44,17 @@ import {
   listReminders,
 } from "@/lib/reminders.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadReminderCalendar } from "@/lib/reminder-calendar";
 
 export const Route = createFileRoute("/_authenticated/reminders")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { action?: "new-reminder" | "add-medication" } => ({
+    action:
+      search.action === "new-reminder" || search.action === "add-medication"
+        ? search.action
+        : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Medication Reminders · SomeoneNear" },
@@ -100,6 +109,16 @@ type ReminderRow = {
 };
 
 function RemindersPage() {
+  const { action } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const [selectedTab, setSelectedTab] = useState("medication");
+  const [setupOpen, setSetupOpen] = useState(false);
+  useEffect(() => {
+    if (!action) return;
+    setSelectedTab(action === "new-reminder" ? "everyday" : "medication");
+    if (action === "add-medication") setSetupOpen(true);
+    void navigate({ search: { action: undefined }, replace: true });
+  }, [action, navigate]);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const flag = params.get("calendar");
@@ -118,31 +137,56 @@ function RemindersPage() {
     <AppShell>
       <div className="mx-auto max-w-5xl">
         <PageHeader
-          eyebrow="Care, made lighter"
-          title="Medication & reminders"
+          eyebrow="💊 Page 4 · Photo Meds & Reminders"
+          title="Tablets, without the nagging."
           description="A calm place to remember what matters, for you or someone you love."
-        />
-        <Tabs defaultValue="medication" className="space-y-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 rounded-2xl bg-surface p-1.5 sm:max-w-xl">
+        >
+          <button type="button" className="sn-worker-button" onClick={() => setSetupOpen(true)}>
+            📷 + Add Pill-Strip Photo Med
+          </button>
+        </PageHeader>
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-8">
+          <TabsList className="sn-worker-subtabs grid h-auto w-full grid-cols-1 sm:grid-cols-3 rounded-2xl bg-surface p-1.5">
             <TabsTrigger
               value="medication"
               className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"
             >
-              <PillIcon className="mr-2 size-5" /> Medication
+              <PillIcon className="mr-2 size-5" /> ① Medication Log
             </TabsTrigger>
             <TabsTrigger
               value="everyday"
               className="min-h-12 rounded-xl px-3 text-base data-[state=active]:bg-card data-[state=active]:shadow-soft"
             >
-              <BellRingingIcon className="mr-2 size-5" /> Everyday reminder
+              <BellRingingIcon className="mr-2 size-5" /> ② Parent &amp; Self Reminders
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="min-h-12 rounded-xl px-3 text-base">
+              📅 ③ Calendar & Phone
             </TabsTrigger>
           </TabsList>
           <TabsContent value="medication" className="mt-0 space-y-6">
-            <MedicationCalendarSlot />
-            <MedicationOnboarding />
+            <MedicationOnboarding setupOpen={setupOpen} onSetupOpenChange={setSetupOpen} />
           </TabsContent>
           <TabsContent value="everyday" className="mt-0">
             <EverydayReminders />
+          </TabsContent>
+          <TabsContent value="calendar" className="mt-0">
+            <section className="sn-midnight-panel sn-companion-memory">
+              <span className="sn-worker-status">📅 Calendar on their phone</span>
+              <h2>A gentle nudge, in your calendar.</h2>
+              <p>
+                Open Parent &amp; Self Reminders and choose Download calendar on a saved reminder.
+                Import the file into Apple, Google or Outlook Calendar, then review its time and
+                alert. No account connection is required for a download.
+              </p>
+              <button
+                type="button"
+                className="sn-worker-button"
+                onClick={() => setSelectedTab("everyday")}
+              >
+                Open your reminders →
+              </button>
+            </section>
+            <GoogleCalendarCard />
           </TabsContent>
         </Tabs>
       </div>
@@ -365,6 +409,28 @@ function EverydayReminders() {
                     {zone.data ? displayTime(reminder.due_at, zone.data) : "Loading time…"}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        try {
+                          downloadReminderCalendar({
+                            id: reminder.id,
+                            title: reminder.title,
+                            dueAt: reminder.due_at,
+                            recurrence: reminder.recurrence,
+                          });
+                        } catch (error) {
+                          gentleProblem(
+                            "We could not create the calendar file",
+                            error instanceof Error ? error.message : "Please try again.",
+                          );
+                        }
+                      }}
+                    >
+                      📅 Download calendar
+                    </Button>
                     <Badge variant="secondary">
                       {CATEGORIES.find((item) => item.value === reminder.category)?.label ??
                         reminder.category}

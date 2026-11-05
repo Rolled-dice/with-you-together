@@ -1,3 +1,4 @@
+import { Wordmark } from "@/components/landing/brand-mark";
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 // import { HeartIcon, SpinnerGapIcon, WarningCircleIcon, WifiSlashIcon } from "@phosphor-icons/react";
@@ -6,7 +7,6 @@ import { SpinnerGapIcon, WarningCircleIcon, WifiSlashIcon } from "@phosphor-icon
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,14 +14,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FieldRow } from "@/components/auth/field-row";
 import { classifyAuthError } from "@/lib/auth-errors";
 import { safeAuthRedirect } from "@/lib/auth-routing";
+import { PasswordRecovery } from "@/components/auth/password-recovery";
 
-const SignUpForm = lazy(() => import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })));
+const SignUpForm = lazy(() =>
+  import("@/components/auth/sign-up-form").then((m) => ({ default: m.SignUpForm })),
+);
 
-type AuthSearch = { reason?: "session_expired" | "signed_out"; redirect?: string };
+type AuthSearch = {
+  reason?: "session_expired" | "signed_out";
+  redirect?: string;
+  mode?: "recovery" | "signup";
+};
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): AuthSearch => ({
-    reason: search.reason === "session_expired" || search.reason === "signed_out" ? search.reason : undefined,
+    mode: search.mode === "recovery" || search.mode === "signup" ? search.mode : undefined,
+    reason:
+      search.reason === "session_expired" || search.reason === "signed_out"
+        ? search.reason
+        : undefined,
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
   }),
   head: () => ({
@@ -37,9 +48,35 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const search = useSearch({ from: "/auth" });
   const redirectTo = safeAuthRedirect(search.redirect);
-  const [tab, setTab] = useState<"signin" | "signup">("signin");
+  const [tab, setTab] = useState<"signin" | "signup">(
+    search.mode === "signup" ? "signup" : "signin",
+  );
   const [checkingSession, setCheckingSession] = useState(true);
-  const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine !== false);
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [providers, setProviders] = useState({ google: false, apple: false });
+  const recovering = search.mode === "recovery";
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/auth/v1/settings`, {
+      headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) return;
+        const settings = await response.json();
+        setProviders({
+          google: settings.external?.google === true,
+          apple: settings.external?.apple === true,
+        });
+      })
+      .catch(() => {
+        /* Email sign-in remains available if provider settings cannot load. */
+      });
+    return () => controller.abort();
+  }, []);
+  const [online, setOnline] = useState(
+    typeof navigator === "undefined" ? true : navigator.onLine !== false,
+  );
 
   useEffect(() => {
     const on = () => setOnline(true);
@@ -61,6 +98,10 @@ function AuthPage() {
   }, [search.reason]);
 
   useEffect(() => {
+    if (recovering) {
+      setCheckingSession(false);
+      return;
+    }
     let cancelled = false;
     const fallback = window.setTimeout(() => {
       if (!cancelled) setCheckingSession(false);
@@ -94,7 +135,7 @@ function AuthPage() {
       window.clearTimeout(fallback);
       sub.subscription.unsubscribe();
     };
-  }, [redirectTo]);
+  }, [redirectTo, recovering]);
 
   // Prefetch the signup chunk only when the user shows intent (hovers/focuses the tab)
   const prefetchSignup = () => {
@@ -143,20 +184,12 @@ function AuthPage() {
           <span className="text-lg font-semibold tracking-tight">SomeoneNear</span>
         </Link> */}
 
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2.5" aria-label="SomeoneNear home">
-          <motion.img
-            src="/logo-mark.png"
-            alt=""
-            className="h-10 w-10 object-contain"
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 15 }}
-          />
-
-          <span className="text-lg font-extrabold tracking-tight">
-            <span className="text-orb-navy">Someone</span>
-            <span className="text-orb-terracotta">Near</span>
-          </span>
+        <Link
+          to="/"
+          className="mb-8 flex items-center justify-center gap-2.5"
+          aria-label="SomeoneNear home"
+        >
+          <Wordmark />
         </Link>
 
         <motion.div
@@ -166,7 +199,9 @@ function AuthPage() {
           transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
         >
           <h1 className="text-2xl font-semibold tracking-tight">Welcome</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in or create your Care Membership.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sign in or create your Care Membership.
+          </p>
 
           {!online && (
             <div
@@ -192,96 +227,134 @@ function AuthPage() {
               <div>
                 <p className="font-medium">Your session expired</p>
                 <p className="text-xs text-muted-foreground">
-                  For your safety we signed you out. Please sign in again to pick up where you left off.
+                  For your safety we signed you out. Please sign in again to pick up where you left
+                  off.
                 </p>
               </div>
             </div>
           )}
 
-          <Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")} className="mt-6">
-            <TabsList className="grid w-full grid-cols-2 rounded-brand">
-              <TabsTrigger value="signin" className="rounded-brand transition-all">
-                Sign in
-              </TabsTrigger>
-              <TabsTrigger
-                value="signup"
-                className="rounded-brand transition-all"
-                onMouseEnter={prefetchSignup}
-                onFocus={prefetchSignup}
-                onTouchStart={prefetchSignup}
-              >
-                Create account
-              </TabsTrigger>
-            </TabsList>
+          {forgotPassword || recovering ? (
+            <PasswordRecovery
+              reset={recovering}
+              onBack={() => {
+                if (recovering) window.location.assign("/auth");
+                else setForgotPassword(false);
+              }}
+            />
+          ) : (
+            <Tabs
+              value={tab}
+              onValueChange={(v) => setTab(v as "signin" | "signup")}
+              className="mt-6"
+            >
+              <TabsList className="grid w-full grid-cols-2 rounded-brand">
+                <TabsTrigger value="signin" className="rounded-brand transition-all">
+                  Sign in
+                </TabsTrigger>
+                <TabsTrigger
+                  value="signup"
+                  className="rounded-brand transition-all"
+                  onMouseEnter={prefetchSignup}
+                  onFocus={prefetchSignup}
+                  onTouchStart={prefetchSignup}
+                >
+                  Create account
+                </TabsTrigger>
+              </TabsList>
 
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={tab}
-                initial={{ opacity: 0, x: tab === "signin" ? -12 : 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: tab === "signin" ? 12 : -12 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-              >
-                <TabsContent value="signin" forceMount={tab === "signin" ? true : undefined} className="mt-6">
-                  {tab === "signin" && (
-                    <OAuthLockGroup>
-                      {(lock) => (
-                        <>
-                          <SignInForm redirectTo={redirectTo} lock={lock} />
-                          <Divider />
-                          <div className="space-y-2">
-                            <OAuthButton
-                              provider="google"
-                              label="Continue with Google"
-                              redirectTo={redirectTo}
-                              lock={lock}
-                            />
-                            <OAuthButton
-                              provider="apple"
-                              label="Continue with Apple"
-                              redirectTo={redirectTo}
-                              lock={lock}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </OAuthLockGroup>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="signup" forceMount={tab === "signup" ? true : undefined} className="mt-6">
-                  {tab === "signup" && (
-                    <Suspense fallback={<FormSkeleton />}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={tab}
+                  initial={{ opacity: 0, x: tab === "signin" ? -12 : 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: tab === "signin" ? 12 : -12 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <TabsContent
+                    value="signin"
+                    forceMount={tab === "signin" ? true : undefined}
+                    className="mt-6"
+                  >
+                    {tab === "signin" && (
                       <OAuthLockGroup>
                         {(lock) => (
                           <>
-                            <SignUpForm redirectTo={redirectTo} />
+                            <SignInForm redirectTo={redirectTo} lock={lock} />
+                            <button
+                              type="button"
+                              className="mt-3 text-sm text-primary underline underline-offset-4"
+                              onClick={() => setForgotPassword(true)}
+                            >
+                              Forgot password?
+                            </button>
                             <Divider />
                             <div className="space-y-2">
-                              <OAuthButton
-                                provider="google"
-                                label="Sign up with Google"
-                                requireAge
-                                redirectTo={redirectTo}
-                                lock={lock}
-                              />
-                              <OAuthButton
-                                provider="apple"
-                                label="Sign up with Apple"
-                                requireAge
-                                redirectTo={redirectTo}
-                                lock={lock}
-                              />
+                              {providers.google && (
+                                <OAuthButton
+                                  provider="google"
+                                  label="Continue with Google"
+                                  redirectTo={redirectTo}
+                                  lock={lock}
+                                />
+                              )}
+                              {providers.apple && (
+                                <OAuthButton
+                                  provider="apple"
+                                  label="Continue with Apple"
+                                  redirectTo={redirectTo}
+                                  lock={lock}
+                                />
+                              )}
                             </div>
                           </>
                         )}
                       </OAuthLockGroup>
-                    </Suspense>
-                  )}
-                </TabsContent>
-              </motion.div>
-            </AnimatePresence>
-          </Tabs>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent
+                    value="signup"
+                    forceMount={tab === "signup" ? true : undefined}
+                    className="mt-6"
+                  >
+                    {tab === "signup" && (
+                      <Suspense fallback={<FormSkeleton />}>
+                        <OAuthLockGroup>
+                          {(lock) => (
+                            <>
+                              <SignUpForm redirectTo={redirectTo} />
+                              <Divider />
+                              <div className="space-y-2">
+                                {providers.google && (
+                                  <OAuthButton
+                                    provider="google"
+                                    label="Sign up with Google"
+                                    requireAge
+                                    redirectTo={redirectTo}
+                                    lock={lock}
+                                  />
+                                )}
+                                {providers.apple && (
+                                  <OAuthButton
+                                    provider="apple"
+                                    label="Sign up with Apple"
+                                    requireAge
+                                    redirectTo={redirectTo}
+                                    lock={lock}
+                                  />
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </OAuthLockGroup>
+                      </Suspense>
+                    )}
+                  </TabsContent>
+                </motion.div>
+              </AnimatePresence>
+            </Tabs>
+          )}
         </motion.div>
 
         <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
@@ -365,7 +438,9 @@ function SignInForm({ redirectTo, lock }: { redirectTo: string; lock: AuthLock }
       const info = classifyAuthError(err);
       toast.error(info.title, {
         description: info.description,
-        action: info.retryable ? { label: "Try again", onClick: () => void attemptSignIn() } : undefined,
+        action: info.retryable
+          ? { label: "Try again", onClick: () => void attemptSignIn() }
+          : undefined,
       });
       lock.release();
     }
@@ -442,7 +517,10 @@ function GoogleIcon({ className }: { className?: string }) {
         fill="#34A853"
         d="M12 22c2.7 0 4.96-.9 6.62-2.42l-3.24-2.52c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.58-4.12H3.06v2.6A10 10 0 0 0 12 22Z"
       />
-      <path fill="#FBBC05" d="M6.42 13.9a5.98 5.98 0 0 1 0-3.82V7.48H3.06a10 10 0 0 0 0 9.04l3.36-2.62Z" />
+      <path
+        fill="#FBBC05"
+        d="M6.42 13.9a5.98 5.98 0 0 1 0-3.82V7.48H3.06a10 10 0 0 0 0 9.04l3.36-2.62Z"
+      />
       <path
         fill="#EA4335"
         d="M12 5.86c1.47 0 2.78.5 3.82 1.5l2.86-2.86C16.95 2.9 14.7 2 12 2A10 10 0 0 0 3.06 7.48l3.36 2.6C7.2 7.62 9.4 5.86 12 5.86Z"
@@ -478,13 +556,16 @@ function OAuthButton({
   async function attempt() {
     if (!lock.acquire(provider)) return;
     try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
+      const result = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
+          skipBrowserRedirect: true,
+        },
       });
       if (result.error) throw result.error;
-      if (result.redirected) return; // browser navigates away, keep lock held
-      // Popup flow: session is set, navigate immediately.
-      window.location.replace(redirectTo);
+      if (!result.data.url) throw new Error("Sign-in provider is unavailable. Please use email.");
+      window.location.assign(result.data.url);
     } catch (err) {
       const info = classifyAuthError(err);
       toast.error(info.title, {

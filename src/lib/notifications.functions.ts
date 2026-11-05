@@ -26,18 +26,25 @@ export const listMyNotifications = createServerFn({ method: "GET" })
     return (data ?? []) as AppNotification[];
   });
 
+export const getNotificationInbox = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { readNotificationInbox } = await import("./notification-inbox.server");
+    return readNotificationInbox(context.supabase, context.userId);
+  });
+
 export const markNotificationsRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { ids?: string[] }) =>
-    z.object({ ids: z.array(z.string().uuid()).max(50).optional() }).parse(input),
+  .inputValidator((input: { ids: string[] }) =>
+    z.object({ ids: z.array(z.string().uuid()).min(1).max(50) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    let q = context.supabase
+    const q = context.supabase
       .from("notifications")
       .update({ read_at: new Date().toISOString() })
       .eq("user_id", context.userId)
-      .is("read_at", null);
-    if (data.ids?.length) q = q.in("id", data.ids);
+      .is("read_at", null)
+      .in("id", data.ids);
     const { error } = await q;
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -45,9 +52,7 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
 
 export const dismissNotification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string }) =>
-    z.object({ id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: { id: string }) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("notifications")

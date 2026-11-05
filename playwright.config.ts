@@ -17,5 +17,10 @@ export default defineConfig({
     screenshot: "only-on-failure",
     viewport: { width: 1280, height: 900 },
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"], channel: process.env.PLAYWRIGHT_CHANNEL },
+    },
+  ],
 });

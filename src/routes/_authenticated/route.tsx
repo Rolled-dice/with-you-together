@@ -39,6 +39,7 @@ export const Route = createFileRoute("/_authenticated")({
     if (expiresAtMs && expiresAtMs <= nowMs) {
       const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError || !refreshed.session) {
+        await supabase.auth.signOut({ scope: "local" });
         throw redirect({
           to: "/auth",
           search: { reason: "session_expired", redirect: safeAuthRedirect(location.href) },
@@ -55,6 +56,7 @@ export const Route = createFileRoute("/_authenticated")({
 
     const { data: verified, error: verificationError } = await supabase.auth.getUser();
     if (verificationError || verified.user?.id !== session.user.id) {
+      await supabase.auth.signOut({ scope: "local" });
       throw redirect({ to: "/auth", search: { redirect: safeAuthRedirect(location.href) } });
     }
     const [{ data: isAdmin, error: adminError }, { data: isAgent, error: agentError }] =
@@ -69,8 +71,9 @@ export const Route = createFileRoute("/_authenticated")({
     if (current?.user.id !== session.user.id) throw redirect({ to: "/auth" });
     const path = location.pathname.replace(/\/+$/, "") || "/";
     if (
-      (!capabilities.outboundCallBooking && path === "/listeners") ||
-      (!capabilities.purchase && path === "/checkout")
+      !capabilities.purchase &&
+      import.meta.env.VITE_DODO_MODE !== "test" &&
+      path === "/checkout"
     ) {
       throw redirect({ to: "/dashboard" });
     }

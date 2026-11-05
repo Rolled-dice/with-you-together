@@ -1,3 +1,4 @@
+import { seedDoseLogs } from "./medication-doses.server";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Json } from "@/integrations/supabase/types";
@@ -102,7 +103,15 @@ export const listFamilyMembers = createServerFn({ method: "GET" })
         .select("id, display_name, full_name")
         .eq("id", context.userId)
         .maybeSingle();
-      return me ? [{ user_id: context.userId, display_name: me.display_name || me.full_name || "You", role: "owner" }] : [];
+      return me
+        ? [
+            {
+              user_id: context.userId,
+              display_name: me.display_name || me.full_name || "You",
+              role: "owner",
+            },
+          ]
+        : [];
     }
     const { data: members, error } = await context.supabase
       .from("family_members")
@@ -152,11 +161,13 @@ export const listTodaysDoses = createServerFn({ method: "GET" })
 export const logDose = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      dose_id: z.string().uuid(),
-      status: z.enum(["taken", "skipped"]),
-      note: z.string().max(500).optional(),
-    }).parse(i),
+    z
+      .object({
+        dose_id: z.string().uuid(),
+        status: z.enum(["taken", "skipped"]),
+        note: z.string().max(500).optional(),
+      })
+      .parse(i),
   )
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase
@@ -178,124 +189,13 @@ export const logDose = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ---- Prescription parsing via Lovable AI Vision ----
-const ParseInput = z.object({ image_path: z.string().min(1) });
-
-const ParsedMedication = z.object({
-  name: z.string().nullable().optional(),
-  dosage: z.string().nullable().optional(),
-  form: z.string().nullable().optional(),
-  frequency: z.string().nullable().optional(),
-  duration: z.string().nullable().optional(),
-  instructions: z.string().nullable().optional(),
-  times_per_day: z.number().int().min(1).max(6).nullable().optional(),
-  when_to_take: z.union([
-    z.enum(["morning", "afternoon", "evening", "night"]),
-    z.array(z.enum(["morning", "afternoon", "evening", "night"])),
-  ]).nullable().optional(),
-});
-
-const ParsedPrescription = z.object({
-  doctor: z.string().nullable().optional(),
-  date: z.string().nullable().optional(),
-  medications: z.array(ParsedMedication).default([]),
-});
-
+// Photo extraction uses the existing Gemini server credential; review before saving.
 export const parsePrescription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ParseInput.parse(i))
+  .inputValidator((input: unknown) =>
+    z.object({ image_path: z.string().min(1).max(300) }).parse(input),
+  )
   .handler(async ({ context, data }) => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("AI is not configured");
-
-    const { data: signed, error: sErr } = await context.supabase.storage
-      .from("prescriptions")
-      .createSignedUrl(data.image_path, 300);
-    if (sErr || !signed?.signedUrl) throw new Error("Could not read prescription image");
-
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.6-flash",
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a careful medical assistant. Extract medications from a prescription image. " +
-              "Return STRICT JSON matching: { doctor: string|null, date: string|null, medications: [{ name, dosage, form, frequency, duration, instructions, times_per_day, when_to_take }] }. " +
-              "times_per_day is an integer 1-6. when_to_take is one of morning, afternoon, evening, night, or an array of these. " +
-              "If unsure, use null. Never invent medications you can't read.",
-          },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "Extract all medications from this prescription:" },
-              { type: "image_url", image_url: { url: signed.signedUrl } },
-            ],
-          },
-        ],
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text();
-      let message = body.slice(0, 240);
-      try {
-        const errorBody = JSON.parse(body) as { error?: { message?: string }; message?: string };
-        message = errorBody.error?.message ?? errorBody.message ?? message;
-      } catch {
-        // The plain response text is already captured above.
-      }
-      if (res.status === 429) throw new Error(`The photo reader is busy right now. ${message}`);
-      if (res.status === 402) throw new Error(message || "This workspace needs more AI credits before photos can be read.");
-      if (res.status === 403) throw new Error(message || "Photo reading is paused by the workspace administrator.");
-      if (res.status === 401) throw new Error("Photo reading is not configured correctly yet.");
-      throw new Error(message || "We could not read this prescription photo.");
-    }
-
-    const json = await res.json();
-    const text = json?.choices?.[0]?.message?.content ?? "{}";
-    let parsed: z.infer<typeof ParsedPrescription> = { medications: [] };
-    try {
-      parsed = ParsedPrescription.parse(JSON.parse(text));
-    } catch {
-      throw new Error("We could not confidently read the medicine details. Try a brighter, closer photo.");
-    }
-    return parsed;
+    const { readPrescription } = await import("./prescription.server");
+    return readPrescription(context, data.image_path, process.env.GEMINI_API_KEY);
   });
-
-// Helper: seed today's dose logs for a medication based on its schedules
-async function seedDoseLogs(supabase: any, medicationId: string) {
-  const { data: med } = await supabase
-    .from("medications")
-    .select("id, for_user_id, is_active, start_date, end_date, medication_schedules(id, time_of_day, days_of_week)")
-    .eq("id", medicationId)
-    .maybeSingle();
-  if (!med || !med.is_active) return;
-  const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
-  if (med.start_date && todayStr < med.start_date) return;
-  if (med.end_date && todayStr > med.end_date) return;
-  const dow = today.getDay();
-  const rows: Array<{ medication_id: string; schedule_id: string; for_user_id: string; scheduled_at: string }> = [];
-  for (const s of med.medication_schedules ?? []) {
-    if (Array.isArray(s.days_of_week) && !s.days_of_week.includes(dow)) continue;
-    const [hh, mm] = String(s.time_of_day).split(":").map((n: string) => parseInt(n, 10));
-    const when = new Date(today);
-    when.setHours(hh || 0, mm || 0, 0, 0);
-    rows.push({
-      medication_id: med.id,
-      schedule_id: s.id,
-      for_user_id: med.for_user_id,
-      scheduled_at: when.toISOString(),
-    });
-  }
-  if (rows.length > 0) {
-    await supabase.from("dose_logs").upsert(rows, { onConflict: "medication_id,scheduled_at", ignoreDuplicates: true });
-  }
-}

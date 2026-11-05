@@ -22,6 +22,8 @@ export function SessionLifecycle() {
         queryClient.clear();
       }
       setIdentity(userId);
+      // The initial route is already loading. Invalidating it here races hydration.
+      if (event === "INITIAL_SESSION") return;
       if (!changed && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       clearTimeout(timeout);
       timeout = setTimeout(() => {

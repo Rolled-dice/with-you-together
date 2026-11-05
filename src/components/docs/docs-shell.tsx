@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { ListIcon, ArrowLeftIcon, ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
-import { BrandMark } from "@/components/landing/brand-mark";
+import { Wordmark } from "@/components/landing/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -111,12 +111,7 @@ export function DocsShell() {
               </SheetContent>
             </Sheet>
             <Link to="/" className="flex items-center gap-2">
-              <BrandMark className="h-7 w-auto" />
-              <span className="text-base font-extrabold tracking-tight">
-                <span className="text-orb-navy">Someone</span>
-                <span className="text-orb-terracotta">Near</span>
-                <span className="ml-1.5 font-semibold text-muted-foreground">Docs</span>
-              </span>
+              <Wordmark />
             </Link>
           </div>
           <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { listMyNotifications } from "@/lib/notifications.functions";
+import { getNotificationInbox } from "@/lib/notifications.functions";
 import { assertIdentity, getIdentity, useIdentity } from "@/features/session/session-store";
 
 const notificationsSchema = z.array(
@@ -21,7 +21,7 @@ const notificationsSchema = z.array(
 export const notificationKey = (id: string | null) => ["notifications", id] as const;
 export function useNotifications() {
   const { userId, generation } = useIdentity();
-  const list = useServerFn(listMyNotifications);
+  const list = useServerFn(getNotificationInbox);
   return useQuery({
     queryKey: notificationKey(userId),
     enabled: !!userId,
@@ -29,9 +29,9 @@ export function useNotifications() {
     queryFn: async () => {
       const result = await list();
       assertIdentity(generation);
-      return notificationsSchema
-        .parse(result)
-        .filter((item) => !item.booking_id && !/call|telnyx|sla|escalat/i.test(item.kind));
+      return z
+        .object({ items: notificationsSchema, unreadCount: z.number().int().nonnegative() })
+        .parse(result);
     },
     staleTime: 30_000,
     refetchInterval: 60_000,

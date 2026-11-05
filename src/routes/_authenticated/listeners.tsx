@@ -21,7 +21,11 @@ import {
   listMyBookings,
   requestBooking,
   rescheduleBooking,
+  listListeners,
 } from "@/lib/listeners.functions";
+import { EditorialAvatar } from "@/components/identity/editorial-avatar";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { capabilities, requireCapability } from "@/lib/frontend/capabilities";
 import { getFeedbackPrompt } from "@/lib/session-feedback.functions";
 import { PostCallFeedbackCard } from "@/components/post-call-feedback-card";
 import {
@@ -91,6 +95,10 @@ function todayIso() {
 }
 
 function ListenersPage() {
+  const [section, setSection] = useState("roster");
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const rosterFn = useServerFn(listListeners);
+  const roster = useQuery({ queryKey: ["listeners"], queryFn: () => rosterFn() });
   const qc = useQueryClient();
   const listBookingsFn = useServerFn(listMyBookings);
   const requestFn = useServerFn(requestBooking);
@@ -109,7 +117,10 @@ function ListenersPage() {
   const [tz, setTz] = useState(TIMEZONES.includes(DEFAULT_TZ) ? DEFAULT_TZ : "Asia/Kolkata");
   const [duration, setDuration] = useState(45);
   const [note, setNote] = useState("");
-  const [bookingError, setBookingError] = useState<{ message: string; settingsLink: boolean } | null>(null);
+  const [bookingError, setBookingError] = useState<{
+    message: string;
+    settingsLink: boolean;
+  } | null>(null);
 
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [emergencyNote, setEmergencyNote] = useState("");
@@ -122,7 +133,10 @@ function ListenersPage() {
       duration_minutes: number;
       note: string;
       booking_type: "scheduled" | "emergency_callback";
-    }) => requestFn({ data: input }),
+    }) => {
+      requireCapability("outboundCallBooking");
+      return requestFn({ data: input });
+    },
     onSuccess: (res, vars) => {
       if (!res.ok) {
         setBookingError({
@@ -144,7 +158,8 @@ function ListenersPage() {
       }
     },
     onError: (e) => {
-      const message = e instanceof Error ? e.message : "We couldn't complete your booking. Please try again.";
+      const message =
+        e instanceof Error ? e.message : "We couldn't complete your booking. Please try again.";
       setBookingError({ message, settingsLink: false });
       toast.error(message);
     },
@@ -160,17 +175,11 @@ function ListenersPage() {
   });
 
   const upcoming = useMemo(
-    () =>
-      (bookings.data ?? []).filter(
-        (b) => b.status === "requested" || b.status === "confirmed",
-      ),
+    () => (bookings.data ?? []).filter((b) => b.status === "requested" || b.status === "confirmed"),
     [bookings.data],
   );
   const past = useMemo(
-    () =>
-      (bookings.data ?? []).filter(
-        (b) => b.status === "completed" || b.status === "cancelled",
-      ),
+    () => (bookings.data ?? []).filter((b) => b.status === "completed" || b.status === "cancelled"),
     [bookings.data],
   );
 
@@ -178,13 +187,80 @@ function ListenersPage() {
     <AppShell>
       <JsonLd data={SERVICE_SCHEMA} />
       <PageHeader
-        eyebrow="Listeners"
+        eyebrow="📞 Page 3 · Trained Listeners & Call Booking"
         slogan="Real ears. Real hearts."
-        title="Book a Listener"
+        title="Empathetic human listeners who speak their language."
         description="Our in-house team is trained to just… listen. Book ahead, and we'll match you with someone from the SomeoneNear roster."
       />
 
-      {feedbackPrompt.data && (
+      <div className="sn-worker-game-tabs" role="tablist" aria-label="Listener hub sections">
+        {[
+          ["roster", "👩‍⚕️ ① Choose a Trained Listener"],
+          ["scheduled", `📅 ② Upcoming Scheduled Calls (${upcoming.length})`],
+          ["reflections", "📝 ③ Post-Call Mood Reflections"],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={section === id}
+            onClick={() => setSection(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {section === "roster" && (
+        <div className="sn-worker-listener-roster">
+          {roster.isLoading ? (
+            <Skeleton className="h-48" />
+          ) : roster.isError ? (
+            <p role="alert">
+              We couldn’t load the listener roster.{" "}
+              <button type="button" onClick={() => void roster.refetch()}>
+                Try again
+              </button>
+            </p>
+          ) : roster.data?.length ? (
+            roster.data.map((listener) => (
+              <article key={listener.id}>
+                <div className="sn-family-card-heading">
+                  <EditorialAvatar size="lg" />
+                  <div>
+                    <h2>{listener.name}</h2>
+                    <p>{listener.headline}</p>
+                  </div>
+                </div>
+                <p>{listener.bio}</p>
+                <div className="sn-worker-focus-tags">
+                  {listener.focus_areas?.map((area) => (
+                    <span key={area} className="sn-worker-status">
+                      {area}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  className="sn-worker-button"
+                  type="button"
+                  onClick={() => setBookingOpen(true)}
+                >
+                  📞 Request a listener call
+                </button>
+              </article>
+            ))
+          ) : (
+            <p>No listeners are currently listed. You can still review your existing sessions.</p>
+          )}
+        </div>
+      )}
+
+      {section === "reflections" && !feedbackPrompt.data && (
+        <section className="sn-worker-detail">
+          <h2>Your post-call reflections</h2>
+          <p>A reflection prompt will appear here after an eligible completed call.</p>
+        </section>
+      )}
+      {section === "reflections" && feedbackPrompt.data && (
         <div className="mb-6">
           <PostCallFeedbackCard
             bookingId={feedbackPrompt.data.id}
@@ -195,195 +271,232 @@ function ListenersPage() {
       )}
 
       {/* SLA + Rules strip */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <RuleTile
-          icon={AlarmIcon}
-          title="Scheduled in advance"
-          body="Choose a preferred day & time in your timezone. Sessions run 30-60 minutes."
-          delay={1}
-        />
-        <RuleTile
-          icon={ShieldCheckIcon}
-          title="In-house team, SLA-backed"
-          body="Every booking is picked up by a SomeoneNear Listener. Confirmed within 15 minutes."
-          delay={2}
-        />
-        <RuleTile
-          icon={CalendarDotIcon}
-          title="2-hour reschedule rule"
-          body="Reschedule up to 2 hours before the start. Later than that, the session counts as used."
-          delay={3}
-        />
-      </div>
+      <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
+        <DialogContent className="sn-worker-dialog sn-worker-booking-dialog">
+          <DialogTitle>Book a Listener Call</DialogTitle>
+          <DialogDescription>
+            Choose your preferred time and review the call details.
+          </DialogDescription>
+          <div
+            hidden={section !== "roster" || !bookingOpen}
+            className="mb-6 grid gap-3 sm:grid-cols-3"
+          >
+            <RuleTile
+              icon={AlarmIcon}
+              title="Scheduled in advance"
+              body="Choose a preferred day & time in your timezone. Sessions run 30-60 minutes."
+              delay={1}
+            />
+            <RuleTile
+              icon={ShieldCheckIcon}
+              title="In-house team, SLA-backed"
+              body="Every booking is picked up by a SomeoneNear Listener. Confirmed within 15 minutes."
+              delay={2}
+            />
+            <RuleTile
+              icon={CalendarDotIcon}
+              title="2-hour reschedule rule"
+              body="Reschedule up to 2 hours before the start. Later than that, the session counts as used."
+              delay={3}
+            />
+          </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
-        {/* Booking form */}
-        <Card data-page-reveal className="rounded-brand border-border bg-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base font-medium">
-              <HandHeartIcon className="h-4 w-4 text-brand-accent" />
-              Schedule your next session
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="day">Preferred day</Label>
-                <Input
-                  id="day"
-                  type="date"
-                  min={todayIso()}
-                  value={day}
-                  onChange={(e) => setDay(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="time">Preferred time</Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Time zone</Label>
-                <Select value={tz} onValueChange={setTz}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {TIMEZONES.map((z) => (
-                      <SelectItem key={z} value={z}>{z}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Session length</Label>
-                <Select value={String(duration)} onValueChange={(v) => setDuration(Number(v))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">60 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="note">Anything to share ahead of time? (optional)</Label>
-              <Textarea
-                id="note"
-                rows={3}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="A word or two about how you're feeling, helps your Listener meet you where you are."
-              />
-            </div>
-            {bookingError && (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-brand border border-destructive/30 bg-destructive/5 p-3">
-                <p role="alert" className="text-sm text-destructive-foreground">
-                  {bookingError.message}
+          <div
+            hidden={section !== "roster" || !bookingOpen}
+            className="grid gap-6 lg:grid-cols-[1.15fr_1fr]"
+          >
+            {/* Booking form */}
+            <Card data-page-reveal className="rounded-brand border-border bg-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base font-medium">
+                  <HandHeartIcon className="h-4 w-4 text-brand-accent" />
+                  Schedule your next session
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="day">Preferred day</Label>
+                    <Input
+                      id="day"
+                      type="date"
+                      min={todayIso()}
+                      value={day}
+                      onChange={(e) => setDay(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="time">Preferred time</Label>
+                    <Input
+                      id="time"
+                      type="time"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Time zone</Label>
+                    <Select value={tz} onValueChange={setTz}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIMEZONES.map((z) => (
+                          <SelectItem key={z} value={z}>
+                            {z}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Session length</Label>
+                    <Select value={String(duration)} onValueChange={(v) => setDuration(Number(v))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="45">45 minutes</SelectItem>
+                        <SelectItem value="60">60 minutes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="note">Anything to share ahead of time? (optional)</Label>
+                  <Textarea
+                    id="note"
+                    rows={3}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="A word or two about how you're feeling, helps your Listener meet you where you are."
+                  />
+                </div>
+                {bookingError && (
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-brand border border-destructive/30 bg-destructive/5 p-3">
+                    <p role="alert" className="text-sm text-destructive-foreground">
+                      {bookingError.message}
+                    </p>
+                    {bookingError.settingsLink && (
+                      <Button asChild size="sm" variant="outline">
+                        <Link to="/settings">Open Settings</Link>
+                      </Button>
+                    )}
+                  </div>
+                )}
+                <Button
+                  onClick={() =>
+                    book.mutate({
+                      preferred_day: day,
+                      preferred_time: time,
+                      time_zone: tz,
+                      duration_minutes: duration,
+                      note,
+                      booking_type: "scheduled",
+                    })
+                  }
+                  disabled={book.isPending || !capabilities.outboundCallBooking}
+                  className="sn-worker-button w-full"
+                >
+                  {book.isPending ? (
+                    <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <EarIcon className="mr-2 h-4 w-4" />
+                  )}
+                  Book with the in-house team
+                </Button>
+                {!capabilities.outboundCallBooking && (
+                  <p role="status" className="text-sm text-muted-foreground">
+                    New call requests are not available yet. You can review your existing sessions
+                    in Upcoming Scheduled Calls.
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  You'll be matched with a SomeoneNear Listener automatically. No profile picking
+                  required.
                 </p>
-                {bookingError.settingsLink && (
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/settings">Open Settings</Link>
+              </CardContent>
+            </Card>
+
+            {/* Emergency callback */}
+            <Card
+              data-page-reveal
+              className="rounded-brand border-2 border-primary/30 bg-primary/5"
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base font-medium">
+                  <PhoneCallIcon className="h-4 w-4 text-brand-accent" />
+                  Need someone right now?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ol className="space-y-2 text-sm text-foreground">
+                  <FlowStep n={1} text="Tap 'Request callback' below." />
+                  <FlowStep n={2} text="Our in-house Listener picks it up (SLA: 10 minutes)." />
+                  <FlowStep n={3} text="You'll get a call notification, join when you're ready." />
+                </ol>
+                <div className="rounded-brand border border-destructive/25 bg-destructive/5 p-3 text-xs text-destructive-foreground/90">
+                  If you're in danger, please call your local emergency line first.{" "}
+                  <Link to="/safety" className="underline underline-offset-4">
+                    Safety resources →
+                  </Link>
+                </div>
+                {emergencyOpen ? (
+                  <div className="space-y-2 animate-fade-in">
+                    <Label htmlFor="e-note">What's happening? (kept private)</Label>
+                    <Textarea
+                      id="e-note"
+                      rows={3}
+                      value={emergencyNote}
+                      onChange={(e) => setEmergencyNote(e.target.value)}
+                      placeholder="A short line so your Listener knows what to hold space for."
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() =>
+                          book.mutate({
+                            preferred_day: todayIso(),
+                            preferred_time: "12:00",
+                            time_zone: tz,
+                            duration_minutes: 30,
+                            note: emergencyNote,
+                            booking_type: "emergency_callback",
+                          })
+                        }
+                        disabled={book.isPending || !capabilities.outboundCallBooking}
+                        className="flex-1"
+                      >
+                        {book.isPending ? (
+                          <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <PhoneCallIcon className="mr-2 h-4 w-4" />
+                        )}
+                        Request callback
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setEmergencyOpen(false)}
+                        className="rounded-brand"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button onClick={() => setEmergencyOpen(true)} className="w-full">
+                    <PhoneCallIcon className="mr-2 h-4 w-4" />
+                    Request an emergency callback
                   </Button>
                 )}
-              </div>
-            )}
-            <Button
-              onClick={() =>
-                book.mutate({
-                  preferred_day: day,
-                  preferred_time: time,
-                  time_zone: tz,
-                  duration_minutes: duration,
-                  note,
-                  booking_type: "scheduled",
-                })
-              }
-              disabled={book.isPending}
-              className="w-full rounded-brand bg-neutral-900 text-white hover:-translate-y-0.5 hover:bg-neutral-900"
-            >
-              {book.isPending ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : <EarIcon className="mr-2 h-4 w-4" />}
-              Book with the in-house team
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              You'll be matched with a SomeoneNear Listener automatically. No profile picking required.
-            </p>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Emergency callback */}
-        <Card data-page-reveal className="rounded-brand border-2 border-primary/30 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base font-medium">
-              <PhoneCallIcon className="h-4 w-4 text-brand-accent" />
-              Need someone right now?
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ol className="space-y-2 text-sm text-foreground">
-              <FlowStep n={1} text="Tap 'Request callback' below." />
-              <FlowStep n={2} text="Our in-house Listener picks it up (SLA: 10 minutes)." />
-              <FlowStep n={3} text="You'll get a call notification, join when you're ready." />
-            </ol>
-            <div className="rounded-brand border border-destructive/25 bg-destructive/5 p-3 text-xs text-destructive-foreground/90">
-              If you're in danger, please call your local emergency line first.{" "}
-              <Link to="/safety" className="underline underline-offset-4">Safety resources →</Link>
-            </div>
-            {emergencyOpen ? (
-              <div className="space-y-2 animate-fade-in">
-                <Label htmlFor="e-note">What's happening? (kept private)</Label>
-                <Textarea
-                  id="e-note"
-                  rows={3}
-                  value={emergencyNote}
-                  onChange={(e) => setEmergencyNote(e.target.value)}
-                  placeholder="A short line so your Listener knows what to hold space for."
-                />
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() =>
-                      book.mutate({
-                        preferred_day: todayIso(),
-                        preferred_time: "12:00",
-                        time_zone: tz,
-                        duration_minutes: 30,
-                        note: emergencyNote,
-                        booking_type: "emergency_callback",
-                      })
-                    }
-                    disabled={book.isPending}
-                    className="flex-1"
-                  >
-                    {book.isPending ? <SpinnerGapIcon className="mr-2 h-4 w-4 animate-spin" /> : <PhoneCallIcon className="mr-2 h-4 w-4" />}
-                    Request callback
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setEmergencyOpen(false)}
-                    className="rounded-brand"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Button
-                onClick={() => setEmergencyOpen(true)}
-                className="w-full"
-              >
-                <PhoneCallIcon className="mr-2 h-4 w-4" />
-                Request an emergency callback
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bookings */}
-      <div className="mt-8 space-y-3">
+          {/* Bookings */}
+        </DialogContent>
+      </Dialog>
+      <div hidden={section !== "scheduled"} className="mt-8 space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Your sessions</h2>
         {bookings.isLoading ? (
           <div className="grid gap-3 sm:grid-cols-2">
@@ -484,9 +597,7 @@ function BookingRow({
   const [editing, setEditing] = useState(false);
   const [day, setDay] = useState(booking.requested_at.slice(0, 10));
   const [time, setTime] = useState(booking.requested_at.slice(11, 16));
-  const [tz, setTz] = useState(
-    booking.note?.match(/\[TZ:([^\]]+)\]/)?.[1] ?? DEFAULT_TZ,
-  );
+  const [tz, setTz] = useState(booking.note?.match(/\[TZ:([^\]]+)\]/)?.[1] ?? DEFAULT_TZ);
 
   return (
     <div className={`p-4 ${past ? "opacity-60" : ""}`}>
@@ -547,12 +658,28 @@ function BookingRow({
         )}
         {editing && !past && (
           <div className="flex w-full flex-wrap items-end gap-2 border-t border-border pt-3 animate-fade-in">
-            <Input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="w-40" />
-            <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="w-32" />
+            <Input
+              type="date"
+              value={day}
+              onChange={(e) => setDay(e.target.value)}
+              className="w-40"
+            />
+            <Input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-32"
+            />
             <Select value={tz} onValueChange={setTz}>
-              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {TIMEZONES.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
+                {TIMEZONES.map((z) => (
+                  <SelectItem key={z} value={z}>
+                    {z}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Button
