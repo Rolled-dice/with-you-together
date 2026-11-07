@@ -23,7 +23,8 @@ export const createConversation = createServerFn({ method: "POST" })
     // PostgREST to serialize the table through its schema cache, which can be
     // briefly stale after production migrations even when inserts are valid.
     const id = crypto.randomUUID();
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("conversations")
       .insert({ id, user_id: context.userId });
     if (error) throw new Error(error.message);
