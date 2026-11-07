@@ -24,11 +24,11 @@ export const createConversation = createServerFn({ method: "POST" })
     // briefly stale after production migrations even when inserts are valid.
     const id = crypto.randomUUID();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("conversations")
-      .insert({ id, user_id: context.userId });
+    const { data, error } = await supabaseAdmin.rpc("create_conversation", {
+      p_user_id: context.userId,
+    });
     if (error) throw new Error(error.message);
-    return { id };
+    return { id: (data as string | null) ?? id };
   });
 
 export const deleteConversation = createServerFn({ method: "POST" })
