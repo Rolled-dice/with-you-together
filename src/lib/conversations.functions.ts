@@ -10,8 +10,10 @@ export const listConversations = createServerFn({ method: "GET" })
       .select("id, title, updated_at")
       .eq("user_id", context.userId)
       .order("updated_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    return data;
+    // Keep the Companion shell usable while PostgREST refreshes a stale
+    // conversations schema cache. A failed list read must not blank the page.
+    if (error) return [];
+    return data ?? [];
   });
 
 export const createConversation = createServerFn({ method: "POST" })
