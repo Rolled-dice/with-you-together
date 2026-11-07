@@ -39,6 +39,18 @@ describe("Gemini with independent safety checks", () => {
     expect((await generateCompanionReply(input)).text).toBe(COMPANION_BLOCKED_REPLY);
     expect(mocks.generate).not.toHaveBeenCalled();
   });
+  it("checks only the current user turn instead of replaying the transcript", async () => {
+    await generateCompanionReply({
+      ...input,
+      messages: [
+        { role: "user" as const, content: "diagnostic test" },
+        { role: "assistant" as const, content: COMPANION_BLOCKED_REPLY },
+        { role: "user" as const, content: "hello" },
+      ],
+      userText: "hello",
+    });
+    expect(mocks.check).toHaveBeenNthCalledWith(1, input.subjectId, "hello", "INPUT");
+  });
   it("never releases a blocked model response or saves its summary", async () => {
     mocks.check.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
     expect((await generateCompanionReply(input)).text).toBe(COMPANION_BLOCKED_REPLY);
