@@ -15,8 +15,9 @@ export async function generateCompanionReply(input: {
   if (!key) throw new Error("Companion is not configured.");
   const store = createCompanionStore(input.environment);
   const previous = await store.loadSummary(input.subjectId);
-  const context = input.messages.map((message) => JSON.stringify(message.content)).join("\n");
-  if (await store.check(input.subjectId, context, "INPUT"))
+  // Moderate the new user turn independently. Rechecking the full transcript
+  // would let an older flagged phrase block every later, harmless message.
+  if (await store.check(input.subjectId, input.userText, "INPUT"))
     return { text: COMPANION_BLOCKED_REPLY, persistContinuity: async () => {} };
   const model = createGoogleGenerativeAI({ apiKey: key })("gemini-3-flash-preview");
   const result = await generateText({
