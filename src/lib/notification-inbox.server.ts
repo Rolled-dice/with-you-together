@@ -19,7 +19,10 @@ export async function readNotificationInbox(client: SupabaseClient, userId: stri
     visibleNotifications(client, userId).order("created_at", { ascending: false }).limit(30),
     visibleNotifications(client, userId, true).is("read_at", null),
   ]);
-  if (items.error || unread.error) throw new Error(items.error?.message ?? unread.error?.message);
+  // Notifications are a non-critical enhancement. During a PostgREST schema
+  // cache refresh, keep the authenticated shell usable and show an empty inbox
+  // instead of surfacing a global retry toast on every page.
+  if (items.error || unread.error) return { items: [], unreadCount: 0 };
   return {
     items: (items.data ?? []) as unknown as AppNotification[],
     unreadCount: unread.count ?? 0,
