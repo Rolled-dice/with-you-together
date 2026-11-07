@@ -1,0 +1,7 @@
+- [x] Fix duplicate React imports causing the blank screen
+- [x] Check related CRM and listener files for duplicate imports
+- [x] Verify the preview build
+- [ ] Integrate Cookiebot with automatic consent blocking
+- [ ] Publish corrected Privacy, Terms, and Cookie pages
+- [ ] Add legal links and registration acceptance
+- [ ] Verify consent, registration, legal pages, and build

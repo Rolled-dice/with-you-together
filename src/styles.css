@@ -1,0 +1,931 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.theme-dark-disabled *));
+
+/* Touch devices: used to raise tap targets to >=44px only on coarse pointers,
+ * so desktop density (Harbor) is unchanged. */
+@custom-variant coarse (@media (pointer: coarse));
+
+/*
+ * SomeoneNear design system — warm, calm, safe, friendly, human, minimal.
+ * All colors in oklch. Semantic tokens only; never hardcode colors in components.
+ */
+
+@theme inline {
+  /* One family carries the whole page — a friendly geometric grotesque in the
+   * Apercu register. No serif display face. */
+  --font-sans: "Figtree", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Figtree", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 8px);
+
+  --radius-2xl: calc(var(--radius) + 16px);
+  --radius-brand: 16px;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-accent: var(--brand-accent);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Playroom — warm white canvas, warm charcoal ink, one navy voltage.
+   * The brand pair is taken straight from the logo: a slate navy and a
+   * terracotta. Navy carries every CTA because it reads calm and trustworthy,
+   * which suits a product about someone's ageing parents far better than a
+   * bright accent would. Terracotta is the warm counterweight. Wider colour
+   * arrives only through the character-orb family. */
+  --background: #fffdfb;
+  --surface: #f3efe9;
+  --foreground: #2a2725;
+
+  --card: #ffffff;
+  --card-foreground: #2a2725;
+  --popover: #ffffff;
+  --popover-foreground: #2a2725;
+
+  /* Brand: navy voltage for CTAs, warm grey plate, terracotta accent.
+   * Both hexes are sampled directly from the logo artwork, not approximated. */
+  --brand-primary: #25435f;
+  --brand-secondary: #f3efe9;
+  --brand-accent: #c05c3a;
+
+  --primary: #25435f;
+  --primary-foreground: #ffffff;
+  --secondary: #f3efe9;
+  --secondary-foreground: #2a2725;
+  --muted: #f3efe9;
+  --muted-foreground: #6b6561;
+  --accent: #e3eaf1;
+  --accent-foreground: #2a2725;
+  /* Muted signal red, never alarm-bright */
+  --destructive: #c4453b;
+  --destructive-foreground: #fff6f5;
+
+  --border: #e7e2da;
+  --input: #ddd6cc;
+  --ring: #25435f;
+
+  --sidebar: #f8f5f1;
+  --sidebar-foreground: #2a2725;
+  --sidebar-primary: #25435f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3eaf1;
+  --sidebar-accent-foreground: #2a2725;
+  --sidebar-border: #e7e2da;
+  --sidebar-ring: #25435f;
+}
+
+@theme inline {
+  /* Character-orb family — the only place saturated colour is allowed to play.
+   * Each orb is a flat fill, never a gradient. */
+  --color-orb-saffron: #ffce2e;
+  --color-orb-pink: #ffa6cb;
+  --color-orb-aqua: #4aa8dc;
+  --color-orb-grass: #0e8a44;
+  /* Both sampled from the logo artwork */
+  --color-orb-navy: #25435f;
+  --color-orb-periwinkle: #7f9dc4;
+  --color-orb-terracotta: #c05c3a;
+
+  /* Full-bleed section plates. Each plate is paired in code with the type
+   * colour that clears AA on it: saffron, pink and periwinkle take ink; navy,
+   * grass and terracotta take light.
+   *
+   * plate-terracotta is deliberately deeper than the brand terracotta. White on
+   * the true #c05c3a is only 4.34:1, which fails AA for body text, and ink on it
+   * is worse at 3.3:1 — neither works. Deepening to #a94a28 gets white to
+   * ~5.4:1. The exact brand hex is preserved for the mark and small accents,
+   * where it sits on light surfaces and passes comfortably. */
+  --color-plate-saffron: #f5cf1a;
+  --color-plate-pink: #f0a3c6;
+  --color-plate-navy: #25435f;
+  --color-plate-grass: #14713c;
+  --color-plate-periwinkle: #7f9dc4;
+  --color-plate-terracotta: #a94a28;
+  --color-plate-cream: #f8f4ef;
+
+  /* Warm neutrals */
+  --color-sand: #f8f4ef;
+  --color-sand-deep: #f3efe9;
+  --color-ink: #2a2725;
+
+  /* Compatibility aliases. The docs, admin and feedback surfaces still paint
+   * with the previous Harbor vocabulary; these remap those names onto the new
+   * palette so nothing renders unstyled while the marketing page moves first. */
+  /* Deepened rather than the true brand hex: these paint small text in the docs
+   * eyebrows and links, where #c05c3a would only reach 4.34:1. */
+  --color-coral: #a94a28;
+  --color-clay: #a94a28;
+  --color-clay-soft: #ffcf8a;
+  --color-mint: #cdebd8;
+  --color-blush: #ffd9e7;
+  --color-peach: #ffe0c9;
+  --color-lilac: #e3d9fb;
+  --color-sage: #d3e0cd;
+  --color-sky: #d3e9fb;
+  --color-sunrise: #ffeab0;
+  --color-amber-soft: #ffeab0;
+  --color-sunrise-from: #ffeab0;
+  --color-sunrise-via: #ffd9e7;
+  --color-sunrise-to: #e3d9fb;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg);
+  }
+}
+@keyframes bloom {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+@keyframes pop-in {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: var(--ring-total);
+  }
+  to {
+    stroke-dashoffset: var(--ring-offset);
+  }
+}
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(var(--orbit-r)) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(var(--orbit-r)) rotate(-360deg);
+  }
+}
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin-reverse {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes avatar-bob {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.06);
+  }
+}
+@keyframes avatar-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.15);
+  }
+}
+
+/* Orbit — GPU-friendly compositor layers, transform/opacity only */
+.orbit-stage {
+  isolation: isolate;
+  contain: layout paint;
+  transform: translateZ(0);
+}
+.orbit-ring {
+  transform-origin: 50% 50%;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout style;
+}
+.orbit-slot,
+.orbit-counter,
+.orbit-avatar,
+.orbit-halo,
+.orbit-dot,
+.orbit-img {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+}
+.orbit-img {
+  transform: translateZ(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-ring,
+  .orbit-counter,
+  .orbit-avatar,
+  .orbit-halo,
+  .orbit-dot {
+    animation: none !important;
+  }
+}
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.15);
+  }
+  30% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(1);
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes shimmer-text {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes tilt-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+@utility animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+@utility animate-bloom {
+  animation: bloom 2.4s ease-in-out infinite;
+}
+@utility animate-pop-in {
+  animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@utility animate-heartbeat {
+  animation: heartbeat 2.2s ease-in-out infinite;
+}
+@utility animate-pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+@utility animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+@utility animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+@utility animate-slide-in-up {
+  animation: slide-in-up 0.5s ease-out both;
+}
+@utility animate-marquee {
+  animation: marquee-x 30s linear infinite;
+}
+@utility animate-tilt-wiggle {
+  animation: tilt-wiggle 0.6s ease-in-out;
+}
+
+@utility stagger-1 {
+  animation-delay: 80ms;
+}
+@utility stagger-2 {
+  animation-delay: 160ms;
+}
+@utility stagger-3 {
+  animation-delay: 240ms;
+}
+@utility stagger-4 {
+  animation-delay: 320ms;
+}
+@utility stagger-5 {
+  animation-delay: 400ms;
+}
+@utility stagger-6 {
+  animation-delay: 480ms;
+}
+@utility shimmer-text {
+  background: linear-gradient(90deg, currentColor 0%, oklch(0.72 0.16 30) 50%, currentColor 100%);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-text 3s linear infinite;
+}
+@utility card-lift {
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  position: relative;
+  isolation: isolate;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  /* Neutral ink shadow. This was a warm clay tint from the old sand-and-clay
+   * theme, which read as an orange halo against the navy palette. */
+  box-shadow: 0 18px 36px -20px rgb(42 39 37 / 0.22);
+}
+.card-lift::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.1),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+  z-index: -1;
+}
+.card-lift:hover::after {
+  opacity: 1;
+}
+
+@utility gradient-sunrise {
+  background-image: linear-gradient(135deg, #f7e8d6 0%, #efcfb4 48%, #e0a184 100%);
+}
+@utility gradient-peach {
+  background-image: linear-gradient(135deg, #fbf6ef 0%, #f0d6c6 100%);
+}
+@utility gradient-sage {
+  background-image: linear-gradient(135deg, #f1f1e8 0%, #c7d3bc 100%);
+}
+@utility gradient-blush {
+  background-image: linear-gradient(135deg, #f9ede5 0%, #efc9b6 100%);
+}
+@utility gradient-sky {
+  background-image: linear-gradient(135deg, #f2f4f3 0%, #c6d3da 100%);
+}
+@utility gradient-lilac {
+  background-image: linear-gradient(135deg, #f6f1ec 0%, #dcd2cb 100%);
+}
+@utility gradient-mint {
+  background-image: linear-gradient(135deg, #f0f4ee 0%, #cbd9c9 100%);
+}
+@utility gradient-animated {
+  background: linear-gradient(120deg, #f7e8d6, #efcfb4, #e0a184, #f7e8d6);
+  background-size: 300% 300%;
+  animation: gradient-shift 14s ease infinite;
+}
+/* Very soft flat shadows — presence, never elevation drama */
+@utility shadow-glow {
+  box-shadow: 0 18px 40px -24px rgb(37 67 95 / 0.3);
+}
+@utility shadow-soft {
+  box-shadow: 0 8px 24px -14px rgb(42 39 37 / 0.14);
+}
+@utility shadow-gentle {
+  box-shadow:
+    0 1px 2px rgb(42 39 37 / 0.04),
+    0 10px 30px -22px rgb(42 39 37 / 0.2);
+}
+
+/* Gentle nudges — a warm breath, never a red alarm */
+@keyframes gentle-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.35);
+  }
+}
+@keyframes gentle-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@utility animate-gentle-breathe {
+  animation: gentle-breathe 3.6s ease-in-out infinite;
+}
+@utility animate-gentle-rise {
+  animation: gentle-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@utility nudge-dot {
+  position: relative;
+  display: inline-flex;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+}
+.nudge-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+  animation: gentle-breathe 3.6s ease-in-out infinite;
+}
+
+@utility card-hover {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+  position: relative;
+  isolation: isolate;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px -14px rgb(42 39 37 / 0.2);
+}
+.card-hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.1),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+  z-index: -1;
+}
+.card-hover:hover::after {
+  opacity: 1;
+}
+
+/* Cursor-aware effects (mobile/reduced-motion neutralized below) */
+@utility card-tilt {
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease;
+  will-change: transform;
+}
+.card-tilt:hover {
+  box-shadow: 0 24px 50px -22px rgb(42 39 37 / 0.26);
+}
+@utility card-glow {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.card-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(37 67 95 / 0.12),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+.card-glow:hover::before {
+  opacity: 1;
+}
+.card-glow > * {
+  position: relative;
+  z-index: 1;
+}
+
+@utility magnetic {
+  transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+@utility parallax-slow {
+  transform: translate3d(calc(var(--px, 0) * 6px), calc(var(--py, 0) * 6px), 0);
+  transition: transform 120ms linear;
+}
+@utility parallax-fast {
+  transform: translate3d(calc(var(--px, 0) * 18px), calc(var(--py, 0) * 18px), 0);
+  transition: transform 120ms linear;
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .card-tilt,
+  .magnetic,
+  .parallax-slow,
+  .parallax-fast {
+    transform: none !important;
+  }
+  .card-glow::before,
+  .card-lift::after,
+  .card-hover::after {
+    display: none;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+  }
+
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  /* SomeoneNear signature cursor — desktop with fine pointer only */
+  @media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .someonenear-cursor {
+      display: block;
+    }
+  }
+  .someonenear-cursor {
+    display: none;
+  }
+}
+
+/* Hero ambient motion uses dedicated classes so parallax transforms cannot
+ * replace animation transforms. When the OS requests reduced motion, these
+ * specific decorative effects stay active at a slower, gentler pace. */
+@keyframes hero-status-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-1deg);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(1deg);
+  }
+}
+
+.hero-orbit-ring {
+  animation: spin-slow 18s linear infinite;
+}
+.hero-orbit-counter {
+  animation: spin-reverse 18s linear infinite;
+}
+.hero-avatar-bob {
+  animation: avatar-bob 3.4s ease-in-out infinite;
+}
+.hero-avatar-glow {
+  animation: avatar-glow 3.4s ease-in-out infinite;
+}
+.hero-status-float {
+  animation: hero-status-float 3.6s ease-in-out infinite;
+  will-change: transform;
+}
+.hero-status-float-delayed {
+  animation-delay: -1.8s;
+}
+
+@layer base {
+  @media (prefers-reduced-motion: reduce) {
+    .hero-orbit-ring {
+      animation: spin-slow 24s linear infinite !important;
+    }
+    .hero-orbit-counter {
+      animation: spin-reverse 24s linear infinite !important;
+    }
+
+    @layer components {
+      .legal-copy {
+        @apply space-y-10 text-[1.0625rem] leading-8 text-foreground;
+      }
+
+      .legal-copy section {
+        @apply space-y-4;
+      }
+
+      .legal-copy h2 {
+        @apply text-2xl font-extrabold tracking-tight text-foreground;
+      }
+
+      .legal-copy h3 {
+        @apply pt-2 text-lg font-bold text-foreground;
+      }
+
+      .legal-copy p {
+        @apply text-muted-foreground;
+      }
+
+      .legal-copy ul {
+        @apply list-disc space-y-2 pl-6 text-muted-foreground;
+      }
+
+      .legal-copy a {
+        @apply font-semibold text-primary underline underline-offset-4;
+      }
+
+      .legal-copy .legal-notice {
+        @apply rounded-2xl border border-brand-accent/30 bg-brand-accent/5 p-6;
+      }
+
+      .legal-copy .legal-notice p {
+        @apply text-foreground;
+      }
+    }
+
+    .hero-avatar-bob {
+      animation: avatar-bob 5s ease-in-out infinite !important;
+    }
+    .hero-avatar-glow {
+      animation: avatar-glow 5s ease-in-out infinite !important;
+    }
+    .hero-status-float {
+      animation: hero-status-float 5s ease-in-out infinite !important;
+    }
+    .hero-status-float-delayed {
+      animation-delay: -2.5s !important;
+    }
+  }
+}
+
+/* Production brand lock: original avatar artwork has its own immutable colors. */
+:root {
+  color-scheme: light;
+  --background: #f7f0e5;
+  --surface: #faf7f2;
+  --foreground: #102f50;
+  --card: #fffdf9;
+  --card-foreground: #102f50;
+  --popover: #fffdf9;
+  --popover-foreground: #102f50;
+  --brand-primary: #102f50;
+  --brand-secondary: #f7f0e5;
+  --brand-accent: #b04426;
+  --primary: #102f50;
+  --primary-foreground: #faf7f2;
+  --secondary: #efe7d7;
+  --secondary-foreground: #102f50;
+  --muted: #efe7d7;
+  --muted-foreground: #4a6076;
+  --accent: #efe7d7;
+  --accent-foreground: #102f50;
+  --border: #dfd3be;
+  --input: #dfd3be;
+  --ring: #102f50;
+  --sidebar: #efe7d7;
+  --sidebar-foreground: #102f50;
+  --sidebar-primary: #102f50;
+  --sidebar-primary-foreground: #faf7f2;
+  --sidebar-accent: #f7f0e5;
+  --sidebar-border: #dfd3be;
+}
+@theme inline {
+  --color-brand-orange: #d95732;
+  --color-brand-coral: #f36d89;
+  --color-brand-gold: #eab84b;
+  --color-orb-navy: #102f50;
+  --color-orb-terracotta: #b04426;
+  --color-orb-grass: #102f50;
+  --color-plate-grass: #f7f0e5;
+}
+html {
+  scroll-padding-top: 6rem;
+}
+body {
+  min-width: 320px;
+}
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+.sn-bootstrap {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: var(--background);
+}
+.sn-bootstrap-mark {
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  padding: 1.5rem;
+  animation: sn-breathe 3s ease-in-out infinite;
+}
+.sn-loading-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+.sn-loading-dots i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  animation: sn-breathe 1.4s infinite;
+}
+.sn-loading-dots i:nth-child(2) {
+  animation-delay: 0.2s;
+  background: #f36d89;
+}
+.sn-loading-dots i:nth-child(3) {
+  animation-delay: 0.4s;
+  background: #eab84b;
+}
+.sn-bootstrap-skeleton {
+  width: min(20rem, 100%);
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+.sn-bootstrap-skeleton span {
+  display: block;
+  height: 0.6rem;
+  margin: 0.6rem 0;
+  background: var(--muted);
+  border-radius: 1rem;
+}
+.sn-bootstrap-skeleton span:first-child {
+  width: 55%;
+}
+.sn-bootstrap-skeleton span:last-child {
+  width: 75%;
+}
+@keyframes sn-breathe {
+  50% {
+    transform: translateY(-4px);
+    opacity: 0.65;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@font-face {
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("/fonts/figtree.ttf") format("truetype");
+}

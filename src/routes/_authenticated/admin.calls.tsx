@@ -1,0 +1,694 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+import {
+  ArrowLeftIcon,
+  FlagIcon,
+  SpinnerGapIcon,
+  PhoneCallIcon,
+  ArrowClockwiseIcon,
+  ShieldWarningIcon,
+  UsersIcon,
+  MagicWandIcon,
+} from "@phosphor-icons/react";
+import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+
+import { AppShell, PageHeader } from "@/components/app-shell";
+import { isCurrentUserAdmin } from "@/lib/feedback-admin.functions";
+import {
+  assignBookingAgent,
+  autoAssignBooking,
+  listCallAgents,
+  listCallFlags,
+  listCallQueue,
+  raiseCallFlag,
+  resolveCallFlag,
+  setBookingCrmState,
+  setBookingContactPhone,
+  // upsertCallAgent,
+} from "@/lib/call-crm.functions";
+
+import { getRoutingConfig, getSupervisorSnapshot, saveRoutingConfig } from "@/lib/telnyx.functions";
+import {
+  CRM_STATES,
+  SLA_META,
+  STATE_META,
+  slaLevel,
+  type CrmState,
+  type QueueRow,
+} from "@/lib/call-crm";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+export const Route = createFileRoute("/_authenticated/admin/calls")({
+  head: () => ({
+    meta: [
+      { title: "Call operations · SomeoneNear admin" },
+      {
+        name: "description",
+        content: "Queue, agent routing, SLA tracking and flags for SomeoneNear listener calls.",
+      },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: AdminCallsPage,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-sm text-primary">
+      Something went wrong: {error instanceof Error ? error.message : "Please try again."}
+    </div>
+  ),
+});
+
+const ACTIVE_STATES: CrmState[] = ["requested", "assigned", "confirmed", "in_call"];
+
+function AdminCallsPage() {
+  const adminFn = useServerFn(isCurrentUserAdmin);
+  const { data: adminCheck, isLoading: checkingAdmin } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => adminFn(),
+  });
+
+  if (checkingAdmin) {
+    return (
+      <AppShell>
+        <div className="space-y-3 p-2">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!adminCheck?.isAdmin) {
+    return (
+      <AppShell>
+        <PageHeader
+          eyebrow="Admin"
+          title="Call operations"
+          description="You don't have access to this panel."
+        />
+        <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm underline">
+          <ArrowLeftIcon className="h-4 w-4" /> Back to dashboard
+        </Link>
+      </AppShell>
+    );
+  }
+
+  return <CallsConsole />;
+}
+
+function CallsConsole() {
+  const qc = useQueryClient();
+  const queueFn = useServerFn(listCallQueue);
+  const agentsFn = useServerFn(listCallAgents);
+  const flagsFn = useServerFn(listCallFlags);
+  const autoAssignFn = useServerFn(autoAssignBooking);
+  const assignFn = useServerFn(assignBookingAgent);
+  const stateFn = useServerFn(setBookingCrmState);
+  const flagFn = useServerFn(raiseCallFlag);
+  const resolveFn = useServerFn(resolveCallFlag);
+  // const upsertAgentFn = useServerFn(upsertCallAgent);
+  const phoneFn = useServerFn(setBookingContactPhone);
+
+  const [showAll, setShowAll] = useState(false);
+
+  const queue = useQuery({
+    queryKey: ["call-queue"],
+    queryFn: () => queueFn(),
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
+  const agents = useQuery({
+    queryKey: ["call-agents"],
+    queryFn: () => agentsFn(),
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
+  const flags = useQuery({
+    queryKey: ["call-flags"],
+    queryFn: () => flagsFn(),
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["call-queue"] });
+    qc.invalidateQueries({ queryKey: ["call-flags"] });
+    qc.invalidateQueries({ queryKey: ["call-agents"] });
+    qc.invalidateQueries({ queryKey: ["supervisor-snapshot"] });
+  };
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`admin-call-crm-${crypto.randomUUID()}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "listener_bookings",
+        },
+        invalidate,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "agent_presence",
+        },
+        invalidate,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "call_flags",
+        },
+        invalidate,
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
+  const autoAssign = useMutation({
+    mutationFn: (id: string) => autoAssignFn({ data: { id } }),
+    onSuccess: (res: any) => {
+      invalidate();
+      if (res?.ok) toast.success(`Assigned to ${res.agent} (score ${res.score})`);
+      else toast.warning(res?.reason ?? "Could not assign.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const setState = useMutation({
+    mutationFn: (v: { id: string; crm_state: CrmState }) => stateFn({ data: v }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("State updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const manualAssign = useMutation({
+    mutationFn: (v: { id: string; agent_id: string }) => assignFn({ data: v }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Agent assigned");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const raise = useMutation({
+    mutationFn: (booking_id: string) =>
+      flagFn({
+        data: { booking_id, kind: "other", severity: "high", note: "Raised from queue board" },
+      }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Flag raised");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const resolve = useMutation({
+    mutationFn: (id: string) => resolveFn({ data: { id } }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Flag resolved");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const savePhone = useMutation({
+    mutationFn: (v: { id: string; contact_phone: string | null }) => phoneFn({ data: v }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Call number saved");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const rows = queue.data?.rows ?? [];
+  const visible = useMemo(
+    () => (showAll ? rows : rows.filter((r) => ACTIVE_STATES.includes(r.crm_state))),
+    [rows, showAll],
+  );
+  const breached = rows.filter(
+    (r) =>
+      slaLevel(r.requested_at, r.crm_state) === "breached" && ACTIVE_STATES.includes(r.crm_state),
+  ).length;
+  const openFlags = (flags.data?.flags ?? []).filter((f) => !f.resolved);
+
+  return (
+    <AppShell>
+      <PageHeader
+        eyebrow="Admin"
+        title="Call operations"
+        description="Queue, routing, SLA ladder and flags for every listener call."
+      />
+
+      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+        <StatTile
+          icon={<PhoneCallIcon className="h-4 w-4" />}
+          label="Active calls in queue"
+          value={rows.filter((r) => ACTIVE_STATES.includes(r.crm_state)).length}
+        />
+        <StatTile
+          icon={<ShieldWarningIcon className="h-4 w-4" />}
+          label="SLA breached"
+          value={breached}
+          tone={breached ? "text-primary" : undefined}
+        />
+        <StatTile
+          icon={<FlagIcon className="h-4 w-4" />}
+          label="Open flags"
+          value={openFlags.length}
+          tone={openFlags.length ? "text-primary" : undefined}
+        />
+      </div>
+
+      <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+        <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-base font-medium">Queue board</h2>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
+              {showAll ? "Show active only" : "Show all"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => queue.refetch()}>
+              <ArrowClockwiseIcon className="mr-1.5 h-4 w-4" /> Refresh
+            </Button>
+          </div>
+        </header>
+
+        {queue.isLoading ? (
+          <Skeleton className="h-32 w-full" />
+        ) : visible.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nothing in the queue right now.</p>
+        ) : (
+          <div className="max-h-[620px] overflow-auto rounded-2xl border border-border">
+            <table className="min-w-[1450px] w-full text-left text-xs">
+              <thead className="sticky top-0 z-20 bg-surface shadow-sm">
+                <tr className="border-b border-border">
+                  <th className="p-3">Scheduled</th>
+                  <th className="p-3">Duration</th>
+                  <th className="p-3">Member</th>
+                  <th className="p-3">Phone</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">SLA</th>
+                  <th className="p-3">Listener</th>
+                  <th className="p-3">Assignment</th>
+                  <th className="p-3">Notes</th>
+                  <th className="sticky right-0 bg-surface p-3">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {visible.map((row) => {
+                  const level = slaLevel(row.requested_at, row.crm_state);
+                  const state = STATE_META[row.crm_state];
+                  const sla = SLA_META[level];
+                  const phone = row.contact_phone ?? row.profile_phone;
+
+                  return (
+                    <tr key={row.id} className="border-b border-border/70 align-top last:border-0">
+                      <td className="whitespace-nowrap p-3">
+                        <p className="font-medium">
+                          {new Date(row.requested_at).toLocaleDateString()}
+                        </p>
+                        <p className="text-muted-foreground">
+                          {new Date(row.requested_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </td>
+
+                      <td className="whitespace-nowrap p-3">{row.duration_minutes} min</td>
+
+                      <td className="p-3">{row.listener_name ?? "Member"}</td>
+
+                      <td className="whitespace-nowrap p-3">{phone ?? "Not available"}</td>
+
+                      <td className="p-3">
+                        <Badge variant="outline" className={state.className}>
+                          {state.label}
+                        </Badge>
+                      </td>
+
+                      <td className="p-3">
+                        <Badge variant="outline" className={sla.className}>
+                          {sla.label}
+                        </Badge>
+                      </td>
+
+                      <td className="p-3">
+                        <p className="font-medium">{row.agent_name ?? "Unassigned"}</p>
+                      </td>
+
+                      <td className="min-w-[190px] p-3">
+                        {row.agent_id ? (
+                          <Badge variant="secondary">Assigned</Badge>
+                        ) : (
+                          <Button
+                            size="sm"
+                            disabled={autoAssign.isPending}
+                            onClick={() => autoAssign.mutate(row.id)}
+                          >
+                            {autoAssign.isPending ? (
+                              <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />
+                            ) : (
+                              <MagicWandIcon className="mr-1.5 h-4 w-4" />
+                            )}
+                            Auto assign
+                          </Button>
+                        )}
+
+                        <Select
+                          value={row.agent_id ?? undefined}
+                          onValueChange={(agentId) =>
+                            manualAssign.mutate({
+                              id: row.id,
+                              agent_id: agentId,
+                            })
+                          }
+                        >
+                          <SelectTrigger className="mt-2 h-8 w-[175px]">
+                            <SelectValue placeholder="Manual assignment" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(agents.data?.agents ?? [])
+                              .filter((agent) => agent.is_active)
+                              .map((agent) => (
+                                <SelectItem key={agent.id} value={agent.id}>
+                                  {agent.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+
+                      <td className="max-w-[260px] p-3">
+                        <p className="line-clamp-3 text-muted-foreground">
+                          {row.note ?? "No notes"}
+                        </p>
+                      </td>
+
+                      <td className="sticky right-0 min-w-[170px] bg-surface p-3">
+                        <Select
+                          value={row.crm_state}
+                          onValueChange={(value) =>
+                            setState.mutate({
+                              id: row.id,
+                              crm_state: value as CrmState,
+                            })
+                          }
+                        >
+                          <SelectTrigger className="h-8 w-[150px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CRM_STATES.map((crmState) => (
+                              <SelectItem key={crmState} value={crmState}>
+                                {STATE_META[crmState].label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Button
+                          className="mt-2"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => raise.mutate(row.id)}
+                        >
+                          <FlagIcon className="mr-1.5 h-4 w-4" />
+                          Flag
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <SupervisorBoard />
+
+      <section className="mb-8 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+        <h2 className="mb-4 flex items-center gap-2 font-display text-base font-medium">
+          <FlagIcon className="h-4 w-4" /> Flag inbox
+        </h2>
+        {flags.isLoading ? (
+          <Skeleton className="h-20 w-full" />
+        ) : (flags.data?.flags ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">No flags raised.</p>
+        ) : (
+          <ul className="space-y-2">
+            {(flags.data?.flags ?? []).map((f) => (
+              <li
+                key={f.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border/70 bg-background/60 px-3 py-2 text-sm"
+              >
+                <div className="min-w-0">
+                  <span className="font-medium">{f.kind}</span>{" "}
+                  <Badge variant="outline" className="ml-1 text-[11px]">
+                    {f.severity}
+                  </Badge>
+                  {f.resolved && (
+                    <Badge variant="outline" className="ml-1 text-[11px]">
+                      resolved
+                    </Badge>
+                  )}
+                  <p className="truncate text-xs text-muted-foreground">
+                    {f.note ?? ", "} ·{" "}
+                    {formatDistanceToNow(new Date(f.created_at), { addSuffix: true })}
+                  </p>
+                </div>
+                {!f.resolved && (
+                  <Button size="sm" variant="outline" onClick={() => resolve.mutate(f.id)}>
+                    Resolve
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* <AgentRoster
+        agents={agents.data?.agents ?? []}
+        loading={agents.isLoading}
+        onSave={async (payload) => {
+          await upsertAgentFn({ data: payload });
+          qc.invalidateQueries({ queryKey: ["call-agents"] });
+          toast.success("Agent saved");
+        }}
+      /> */}
+    </AppShell>
+  );
+}
+
+function StatTile({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number | string;
+  tone?: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        {icon}
+        {label}
+      </div>
+      <p className={`mt-2 font-display text-2xl font-medium ${tone ?? ""}`}>{value}</p>
+    </div>
+  );
+}
+
+/** Live agent board, weekly metrics and editable routing rules. */
+function SupervisorBoard() {
+  const qc = useQueryClient();
+  const snapshotFn = useServerFn(getSupervisorSnapshot);
+  const rulesFn = useServerFn(getRoutingConfig);
+  const saveRulesFn = useServerFn(saveRoutingConfig);
+
+  const snapshot = useQuery({
+    queryKey: ["supervisor-snapshot"],
+    queryFn: () => snapshotFn(),
+    refetchInterval: 20_000,
+  });
+  const rules = useQuery({ queryKey: ["routing-rules"], queryFn: () => rulesFn() });
+
+  const [draft, setDraft] = useState<Record<string, number | boolean | null> | null>(null);
+  const current: any = draft ?? rules.data?.rules ?? null;
+
+  const save = useMutation({
+    mutationFn: () =>
+      saveRulesFn({
+        data: {
+          id: current.id,
+          require_skill_match: Boolean(current.require_skill_match),
+          timezone_tolerance_hours: Number(current.timezone_tolerance_hours),
+          enforce_working_hours: Boolean(current.enforce_working_hours),
+          max_concurrent_override: current.max_concurrent_override
+            ? Number(current.max_concurrent_override)
+            : null,
+          skill_weight: Number(current.skill_weight),
+          load_weight: Number(current.load_weight),
+          timezone_weight: Number(current.timezone_weight),
+          fairness_weight: Number(current.fairness_weight),
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Routing rules saved");
+      setDraft(null);
+      qc.invalidateQueries({ queryKey: ["routing-rules"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const m = snapshot.data?.metrics;
+
+  return (
+    <section className="mb-8 space-y-4 rounded-3xl border border-border bg-surface p-6 shadow-gentle">
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 font-display text-base font-medium">
+          <UsersIcon className="h-4 w-4" /> Live board &amp; routing
+        </h2>
+        <Button variant="outline" size="sm" onClick={() => snapshot.refetch()}>
+          <ArrowClockwiseIcon className="mr-1.5 h-4 w-4" /> Refresh
+        </Button>
+      </header>
+
+      {snapshot.isLoading ? (
+        <Skeleton className="h-24 w-full" />
+      ) : (
+        <>
+          <div className="grid gap-2 sm:grid-cols-4">
+            <StatTile
+              icon={<PhoneCallIcon className="h-4 w-4" />}
+              label="Queue depth"
+              value={snapshot.data?.queueDepth ?? 0}
+            />
+            <StatTile
+              icon={<PhoneCallIcon className="h-4 w-4" />}
+              label="Answer rate (7d)"
+              value={`${m?.answerRate ?? 0}%`}
+            />
+            <StatTile
+              icon={<PhoneCallIcon className="h-4 w-4" />}
+              label="Avg talk time"
+              value={`${Math.round((m?.avgTalkSeconds ?? 0) / 60)}m`}
+            />
+            <StatTile
+              icon={<ShieldWarningIcon className="h-4 w-4" />}
+              label="SLA breach rate"
+              value={`${m?.breachRate ?? 0}%`}
+              tone={(m?.breachRate ?? 0) > 0 ? "text-primary" : undefined}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xs font-medium text-muted-foreground">Agents</h3>
+            {(snapshot.data?.roster ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">No agents on the roster yet.</p>
+            ) : (
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {(snapshot.data?.roster ?? []).map((a: any) => (
+                  <li
+                    key={a.id}
+                    className="flex items-center justify-between gap-2 rounded-2xl border border-border/70 bg-background/60 px-3 py-2 text-sm"
+                  >
+                    <span className="truncate">{a.name}</span>
+                    <Badge variant={a.presence === "on_call" ? "default" : "secondary"}>
+                      {a.presence.replace("_", " ")}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
+
+      {current && (
+        <div className="space-y-3 rounded-2xl border border-border/70 bg-background/60 p-3">
+          <h3 className="text-xs font-medium text-muted-foreground">Routing rules</h3>
+          <div className="grid gap-3 sm:grid-cols-4">
+            {[
+              ["skill_weight", "Skill weight"],
+              ["load_weight", "Load weight"],
+              ["timezone_weight", "Timezone weight"],
+              ["fairness_weight", "Fairness weight"],
+              ["timezone_tolerance_hours", "Timezone tolerance (h)"],
+              ["max_concurrent_override", "Max concurrent override"],
+            ].map(([key, label]) => (
+              <label key={key} className="space-y-1 text-xs">
+                <span className="text-muted-foreground">{label}</span>
+                <Input
+                  type="number"
+                  value={current[key] ?? ""}
+                  onChange={(e) =>
+                    setDraft({
+                      ...current,
+                      [key]: e.target.value === "" ? null : Number(e.target.value),
+                    })
+                  }
+                />
+              </label>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={Boolean(current.require_skill_match)}
+                onChange={(e) => setDraft({ ...current, require_skill_match: e.target.checked })}
+              />
+              Require skill match
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={Boolean(current.enforce_working_hours)}
+                onChange={(e) => setDraft({ ...current, enforce_working_hours: e.target.checked })}
+              />
+              Enforce working hours
+            </label>
+            <Button size="sm" onClick={() => save.mutate()} disabled={!draft || save.isPending}>
+              {save.isPending && <SpinnerGapIcon className="mr-1.5 h-4 w-4 animate-spin" />} Save
+              rules
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}

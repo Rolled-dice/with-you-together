@@ -1,0 +1,54 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.output
+.vinxi
+.tanstack/**
+.nitro
+*.local
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+supabase/.temp/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# Added by code-review-graph
+.code-review-graph/
+
+# Git worktrees + subagent-driven-development scratch
+.worktrees/
+.superpowers/
+
+# Original brand artwork. Kept on disk as the source for scripts/clean-logo.ps1,
+# but not committed: the supplied export is a 7 MB base64 raster in an SVG wrapper.
+brand/
+
+
+# Local secret overrides. .env itself is committed and holds only publishable
+# values; anything secret (service-role keys, provider API keys) belongs here.
+.env.local
+.env.*.local
+
+
+# Local Playwright run artifacts
+test-results/
+playwright-report/

@@ -1,0 +1,3860 @@
+import React, { useState, useEffect, useRef } from 'react';
+import * as THREE from 'three';
+
+// ============================================================================
+// 1. INLINE SVG ICONS & WEB-AUDIO ASMR SYNTHESIZER
+// ============================================================================
+const SvgIcon = ({ children, className = 'w-4 h-4' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.1"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {children}
+  </svg>
+);
+
+const XIcon = (p) => (
+  <SvgIcon {...p}>
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </SvgIcon>
+);
+const PlusIcon = (p) => (
+  <SvgIcon {...p}>
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </SvgIcon>
+);
+const MinusIcon = (p) => (
+  <SvgIcon {...p}>
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </SvgIcon>
+);
+const RotateCcwIcon = (p) => (
+  <SvgIcon {...p}>
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </SvgIcon>
+);
+const SlidersIcon = (p) => (
+  <SvgIcon {...p}>
+    <line x1="4" y1="21" x2="4" y2="14" />
+    <line x1="4" y1="10" x2="4" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12" y2="3" />
+    <line x1="20" y1="21" x2="20" y2="16" />
+    <line x1="20" y1="12" x2="20" y2="3" />
+  </SvgIcon>
+);
+const LogInIcon = (p) => (
+  <SvgIcon {...p}>
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+    <polyline points="10 17 15 12 10 7" />
+    <line x1="15" y1="12" x2="3" y2="12" />
+  </SvgIcon>
+);
+const DownloadIcon = (p) => (
+  <SvgIcon {...p}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </SvgIcon>
+);
+
+const asmrAudio = {
+  ctx: null,
+  init() {
+    if (typeof window === 'undefined') return null;
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    return this.ctx;
+  },
+  playSoftChime(pitchMultiplier = 1) {
+    try {
+      const ctx = this.init();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(528 * pitchMultiplier, now);
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.45);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.45);
+    } catch {}
+  },
+  playBubblePop(freq = 420) {
+    try {
+      const ctx = this.init();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.9, now + 0.08);
+      gain.gain.setValueAtTime(0.11, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.09);
+    } catch {}
+  },
+  playSingingBowl() {
+    try {
+      const ctx = this.init();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      [432, 648, 864].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.07 / (idx + 1), now);
+        gain.gain.exponentialRampToValueAtTime(0.0005, now + 2.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 2.2);
+      });
+    } catch {}
+  }
+};
+
+// ============================================================================
+// 2. 19-COUNTRY IP-GEOLOCATION PRICING CONFIG (Care 15 Calls & Care Plus 30 Calls)
+// ============================================================================
+export const COUNTRY_PRICING_CONFIG = {
+  IN: { country: 'India', flag: '🇮🇳', currency: 'INR', care: '₹3,000', carePlus: '₹5,000', gateway: 'Razorpay / Dodo' },
+  US: { country: 'United States', flag: '🇺🇸', currency: 'USD', care: '$49', carePlus: '$79', gateway: 'Dodo Payments' },
+  GB: { country: 'United Kingdom', flag: '🇬🇧', currency: 'GBP', care: '£39', carePlus: '£62', gateway: 'Dodo Payments' },
+  EU: { country: 'Eurozone', flag: '🇪🇺', currency: 'EUR', care: '€45', carePlus: '€72', gateway: 'Dodo SEPA' },
+  CA: { country: 'Canada', flag: '🇨🇦', currency: 'CAD', care: 'C$65', carePlus: 'C$105', gateway: 'Dodo Payments' },
+  AU: { country: 'Australia', flag: '🇦🇺', currency: 'AUD', care: 'A$75', carePlus: 'A$119', gateway: 'Dodo Payments' },
+  PL: { country: 'Poland', flag: '🇵🇱', currency: 'PLN', care: 'zł179', carePlus: 'zł289', gateway: 'Dodo / P24' },
+  MX: { country: 'Mexico', flag: '🇲🇽', currency: 'MXN', care: 'MX$499', carePlus: 'MX$799', gateway: 'Dodo / Mercado' },
+  SG: { country: 'Singapore', flag: '🇸🇬', currency: 'SGD', care: 'S$65', carePlus: 'S$105', gateway: 'Dodo / PayNow' },
+  JP: { country: 'Japan', flag: '🇯🇵', currency: 'JPY', care: '¥5,900', carePlus: '¥9,500', gateway: 'Dodo / JCB' },
+  KR: { country: 'South Korea', flag: '🇰🇷', currency: 'KRW', care: '₩59,000', carePlus: '₩95,000', gateway: 'Dodo / Toss' },
+  TH: { country: 'Thailand', flag: '🇹🇭', currency: 'THB', care: '฿1,290', carePlus: '฿2,090', gateway: 'Dodo / PromptPay' },
+  KH: { country: 'Cambodia', flag: '🇰🇭', currency: 'USD', care: 'US$25', carePlus: 'US$39', gateway: 'Dodo / ABA' },
+  AE: { country: 'UAE', flag: '🇦🇪', currency: 'AED', care: 'AED 179', carePlus: 'AED 289', gateway: 'Dodo UAE' },
+  SA: { country: 'Saudi Arabia', flag: '🇸🇦', currency: 'SAR', care: 'SAR 179', carePlus: 'SAR 299', gateway: 'Dodo / Mada' },
+  QA: { country: 'Qatar', flag: '🇶🇦', currency: 'QAR', care: 'QAR 179', carePlus: 'QAR 299', gateway: 'Dodo / QPAY' },
+  KW: { country: 'Kuwait', flag: '🇰🇼', currency: 'KWD', care: 'KWD 14.9', carePlus: 'KWD 23.9', gateway: 'Dodo / KNet' },
+  BH: { country: 'Bahrain', flag: '🇧🇭', currency: 'BHD', care: 'BHD 17', carePlus: 'BHD 27', gateway: 'Dodo / Benefit' },
+  OM: { country: 'Oman', flag: '🇴🇲', currency: 'OMR', care: 'OMR 18', carePlus: 'OMR 29', gateway: 'Dodo / Thawani' }
+};
+
+export const EUROZONE_CODES = new Set([
+  'AT', 'BE', 'CY', 'EE', 'FI', 'FR', 'DE', 'GR', 'IE', 'IT',
+  'LV', 'LT', 'LU', 'MT', 'NL', 'PT', 'SK', 'SI', 'ES', 'HR'
+]);
+
+// ============================================================================
+// 3. AVATAR & GLOBE CUSTOMIZATION OPTIONS + INITIAL FAMILY MEMBERS
+// ============================================================================
+export const AVATAR_CUSTOMIZATION_OPTIONS = {
+  archetypes: [
+    { id: 'aged-man', label: 'Aged Man (Dada / Dad)' },
+    { id: 'aged-woman', label: 'Aged Woman (Nani / Mum)' },
+    { id: 'adult-man', label: 'Adult Man (Coordinator)' },
+    { id: 'adult-woman', label: 'Adult Woman (Sibling)' },
+    { id: 'teenager', label: 'Teenager (Student)' },
+    { id: 'child', label: 'Child (Grandchild)' }
+  ],
+  skinTones: [
+    { id: '#E8B195', label: 'Warm Peach' },
+    { id: '#E5A98A', label: 'Honey Almond' },
+    { id: '#E0A183', label: 'Golden Sand' },
+    { id: '#D99B7E', label: 'Warm Terracotta' },
+    { id: '#D69577', label: 'Caramel Bronze' },
+    { id: '#BC7A5C', label: 'Rich Espresso' }
+  ],
+  avatarBgs: [
+    { id: '#EAB84B', label: 'Mustard Gold' },
+    { id: '#F36D89', label: 'Bubblegum Coral' },
+    { id: '#D95732', label: 'Terracotta Warm' },
+    { id: '#1E4A7A', label: 'Harbor Blue' },
+    { id: '#2E7D32', label: 'Garden Sage' }
+  ],
+  outfitColors: [
+    { id: '#D95732', label: 'Terracotta' },
+    { id: '#F36D89', label: 'Bubblegum Coral' },
+    { id: '#8B1E3F', label: 'Deep Crimson' },
+    { id: '#A8581B', label: 'Cinnamon Rust' },
+    { id: '#102F50', label: 'Deep Navy' },
+    { id: '#2E7D32', label: 'Emerald Leaf' }
+  ],
+  backdropMotifs: [
+    { id: 'leaves', label: '🌿 Botanical Fern Leaves' },
+    { id: 'waves', label: '〰️ Organic Waves' },
+    { id: 'stripes', label: '📏 Editorial Stripes' },
+    { id: 'clouds', label: '☁️ Soft Clouds' },
+    { id: 'none', label: '⭕ Solid Backdrop' }
+  ],
+  outfitPatterns: [
+    { id: 'shawl', label: '🧣 Kurta & Mustard Shawl' },
+    { id: 'hearts', label: '🤍 Hearts & Confetti' },
+    { id: 'polka', label: '⚪ Diagonal Polka Dots' },
+    { id: 'collar', label: '👚 Layered Jacket Collar' },
+    { id: 'solid', label: '👕 Classic Solid' }
+  ],
+  earringStyles: [
+    { id: 'none', label: 'None' },
+    { id: 'tassels', label: '🎀 Tiered Pink Tassels' },
+    { id: 'hoops', label: '🟡 Gold Statement Hoops' },
+    { id: 'pink-hoops', label: '🌸 Coral Hoops' },
+    { id: 'stud', label: '💎 Modern Ear Stud' }
+  ],
+  globeThemes: {
+    navy: {
+      id: 'navy',
+      label: 'Deep Navy & Mustard Gold (Default)',
+      coreInner: '#1E4A7A',
+      coreMid: '#102F50',
+      coreOuter: '#091D34',
+      landPrimary: '#F36D89',
+      landSecondary: '#EAB84B',
+      oceanDot: 'rgba(217,87,50,0.42)'
+    },
+    terracotta: {
+      id: 'terracotta',
+      label: 'Warm Terracotta Hearth',
+      coreInner: '#8B1E3F',
+      coreMid: '#5A1228',
+      coreOuter: '#2F0814',
+      landPrimary: '#EAB84B',
+      landSecondary: '#FFFDF9',
+      oceanDot: 'rgba(243,109,137,0.4)'
+    },
+    emerald: {
+      id: 'emerald',
+      label: 'Serene Garden Sage',
+      coreInner: '#245E4E',
+      coreMid: '#133C31',
+      coreOuter: '#09221B',
+      landPrimary: '#EAB84B',
+      landSecondary: '#F36D89',
+      oceanDot: 'rgba(255,253,249,0.35)'
+    }
+  }
+};
+
+export const INITIAL_FAMILY_MEMBERS = [
+  {
+    id: 'dad',
+    name: 'Dad',
+    location: 'Pune, India',
+    role: 'Retired Engineer',
+    archetype: 'aged-man',
+    skinTone: '#D99B7E',
+    avatarBg: '#EAB84B',
+    backdropMotif: 'leaves',
+    outfitColor: '#D95732',
+    outfitPattern: 'shawl',
+    earrings: 'none',
+    glasses: true,
+    frameShape: 'circle',
+    hasNotification: true,
+    notificationCount: 1,
+    statusText: 'Spoke with Listener Priya for 16 mins. BP is 124/80 & took morning Telma 40.',
+    stickerBadge: '🩺 Morning Call Done',
+    theta: 0.0,
+    phi: 1.15,
+    callOptIn: 'confirmed'
+  },
+  {
+    id: 'mum',
+    name: 'Mum',
+    location: 'Pune, India',
+    role: 'Home Gardener',
+    archetype: 'aged-woman',
+    skinTone: '#E5A98A',
+    avatarBg: '#F36D89',
+    backdropMotif: 'leaves',
+    outfitColor: '#102F50',
+    outfitPattern: 'hearts',
+    earrings: 'hoops',
+    glasses: false,
+    frameShape: 'circle',
+    hasNotification: true,
+    notificationCount: 1,
+    statusText: 'Watered the balcony marigolds and had ginger chai ☕🌼',
+    stickerBadge: '☕ Balcony Chai Note',
+    theta: 1.047,
+    phi: 1.52,
+    callOptIn: 'confirmed'
+  },
+  {
+    id: 'aarav',
+    name: 'Aarav (you)',
+    location: 'Bangalore, India',
+    role: 'Circle Coordinator',
+    archetype: 'adult-man',
+    skinTone: '#D69577',
+    avatarBg: '#EAB84B',
+    backdropMotif: 'clouds',
+    outfitColor: '#8B1E3F',
+    outfitPattern: 'solid',
+    earrings: 'none',
+    glasses: false,
+    frameShape: 'circle',
+    hasNotification: false,
+    notificationCount: 0,
+    statusText: 'Scheduled Dad’s evening check-in & Sunday mango delivery.',
+    stickerBadge: '✨ Circle Host',
+    theta: 2.094,
+    phi: 1.25,
+    callOptIn: 'confirmed'
+  },
+  {
+    id: 'priya',
+    name: 'Priya',
+    location: 'London, UK',
+    role: 'Sister · Architect',
+    archetype: 'adult-woman',
+    skinTone: '#E0A183',
+    avatarBg: '#EAB84B',
+    backdropMotif: 'waves',
+    outfitColor: '#A8581B',
+    outfitPattern: 'solid',
+    earrings: 'tassels',
+    glasses: false,
+    frameShape: 'circle',
+    hasNotification: true,
+    notificationCount: 1,
+    statusText: 'Sent fresh Alphonso mangoes for Sunday family lunch 🥭',
+    stickerBadge: '🥭 Sunday Family Share',
+    theta: 3.141,
+    phi: 1.48,
+    callOptIn: 'confirmed'
+  },
+  {
+    id: 'rohan',
+    name: 'Rohan',
+    location: 'Delhi, India',
+    role: 'High School Senior',
+    archetype: 'teenager',
+    skinTone: '#BC7A5C',
+    avatarBg: '#EAB84B',
+    backdropMotif: 'stripes',
+    outfitColor: '#F36D89',
+    outfitPattern: 'polka',
+    earrings: 'stud',
+    glasses: false,
+    frameShape: 'circle',
+    hasNotification: false,
+    notificationCount: 0,
+    statusText: 'Just aced my physics mock test! Sent Dada a voice note 🎉',
+    stickerBadge: '🚀 Aced Physics!',
+    theta: 4.188,
+    phi: 0.92,
+    callOptIn: 'ignored'
+  },
+  {
+    id: 'mia',
+    name: 'Mia',
+    location: 'London, UK',
+    role: 'Granddaughter',
+    archetype: 'child',
+    skinTone: '#E8B195',
+    avatarBg: '#EAB84B',
+    backdropMotif: 'leaves',
+    outfitColor: '#F36D89',
+    outfitPattern: 'collar',
+    earrings: 'pink-hoops',
+    glasses: false,
+    frameShape: 'circle',
+    hasNotification: true,
+    notificationCount: 1,
+    statusText: 'Painted a giant yellow sunshine for Nani & Dada! 🎨',
+    stickerBadge: '🎨 New Drawing',
+    theta: 5.235,
+    phi: 1.35,
+    callOptIn: 'pending'
+  }
+];
+
+// ============================================================================
+// 4. TRAINED GERIATRIC LISTENERS ROSTER (Non-Bald Full Editorial Avatars)
+// ============================================================================
+export const TRAINED_LISTENERS = [
+  {
+    id: 'l-priya',
+    name: 'Listener Priya Sharma',
+    experience: '420+ Senior Calls · 4.9★',
+    specialty: 'Geriatric Care & BP/Meds Check-In Specialist',
+    languages: 'Hindi, Marathi, English',
+    bio: 'Warm, patient listener who loves talking about gardening, old radio classics, and gently verifying morning tablets.',
+    memberAvatar: {
+      archetype: 'adult-woman',
+      skinTone: '#E0A183',
+      avatarBg: '#EAB84B',
+      backdropMotif: 'leaves',
+      outfitColor: '#8B1E3F',
+      outfitPattern: 'solid',
+      earrings: 'tassels',
+      glasses: false
+    }
+  },
+  {
+    id: 'l-rajesh',
+    name: 'Listener Rajesh Kulkarni',
+    experience: '380+ Senior Calls · 4.9★',
+    specialty: 'Retired Bank Officer & Morning Walk Companion',
+    languages: 'Marathi, Hindi, Kannada, English',
+    bio: 'Connects effortlessly with retired fathers and grandfathers over cricket, news, and daily blood pressure logs.',
+    memberAvatar: {
+      archetype: 'aged-man',
+      skinTone: '#D99B7E',
+      avatarBg: '#F36D89',
+      backdropMotif: 'clouds',
+      outfitColor: '#D95732',
+      outfitPattern: 'shawl',
+      earrings: 'none',
+      glasses: true
+    }
+  },
+  {
+    id: 'l-sunita',
+    name: 'Listener Sunita Menon',
+    experience: '510+ Senior Calls · 5.0★',
+    specialty: 'Former Nurse & Memory Keepsake Facilitator',
+    languages: 'Malayalam, Tamil, Hindi, English',
+    bio: 'Specializes in gentle afternoon tea check-ins, calcium/vitamin reminders, and recording family stories.',
+    memberAvatar: {
+      archetype: 'aged-woman',
+      skinTone: '#E5A98A',
+      avatarBg: '#EAB84B',
+      backdropMotif: 'waves',
+      outfitColor: '#102F50',
+      outfitPattern: 'hearts',
+      earrings: 'hoops',
+      glasses: false
+    }
+  },
+  {
+    id: 'l-david',
+    name: 'Listener David Brooks',
+    experience: '290+ Senior Calls · 4.8★',
+    specialty: 'Diaspora Family Coordinator & Evening Check-In Host',
+    languages: 'English, Punjabi, Hindi',
+    bio: 'Helps NRI families bridge time zones with structured evening wellness calls and instant family summaries.',
+    memberAvatar: {
+      archetype: 'adult-man',
+      skinTone: '#D69577',
+      avatarBg: '#EAB84B',
+      backdropMotif: 'clouds',
+      outfitColor: '#2E7D32',
+      outfitPattern: 'solid',
+      earrings: 'none',
+      glasses: false
+    }
+  }
+];
+
+// ============================================================================
+// 5. OFFICIAL SOMEONENEAR BRAND LOGO (Exact Match to Uploaded Squircle Emblem)
+// ============================================================================
+export const SomeoneNearBrandLogo = ({ size = 42, lightText = false, onClick }) => (
+  <div
+    onClick={onClick}
+    className={`flex items-center gap-3 select-none ${onClick ? 'cursor-pointer group' : ''}`}
+  >
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      fill="none"
+      className="shrink-0 transition-transform duration-200 group-hover:scale-105 drop-shadow-sm"
+    >
+      {/* Rounded Navy Squircle Container with Subtle Warm Gold Border */}
+      <rect
+        x="3"
+        y="3"
+        width="58"
+        height="58"
+        rx="16"
+        fill="#0F2C4C"
+        stroke="#A99260"
+        strokeWidth="2.4"
+      />
+      {/* Left Figure: Terracotta Head & Shoulder Arch */}
+      <circle cx="24.5" cy="23" r="5" fill="#D95732" />
+      <path
+        d="M17.5 45 V35.5 C17.5 31.2 20.3 29.2 24.5 29.2 C28.2 29.2 30.8 30.8 32.2 33.8"
+        stroke="#D95732"
+        strokeWidth="5.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Right Figure: Coral Pink Head & Warm Cream Embracing Arch */}
+      <circle cx="39.5" cy="23" r="5" fill="#F36D89" />
+      <path
+        d="M30.5 40.2 L34.8 32.2 C36.1 29.9 38.1 29.2 40.8 29.2 C44.4 29.2 46.8 31.4 46.8 35.5 V45"
+        stroke="#FAF7F2"
+        strokeWidth="5.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+    <div>
+      <span
+        className={`font-serif font-bold text-xl sm:text-2xl tracking-tight block leading-none ${
+          lightText ? 'text-[#FAF7F2]' : 'text-[#102F50]'
+        }`}
+      >
+        Someone<span className="italic text-[#D95732]">Near</span>
+      </span>
+      <span
+        className={`text-[9px] font-extrabold uppercase tracking-[0.16em] block mt-0.5 ${
+          lightText ? 'text-[#EAB84B]' : 'text-[#4A6583]'
+        }`}
+      >
+        WITH YOU TOGETHER
+      </span>
+    </div>
+  </div>
+);
+
+// ============================================================================
+// 6. 6-ARCHETYPE NON-BALD EDITORIAL ILLUSTRATED AVATAR (`<EditorialAvatar />`)
+// ============================================================================
+export const EditorialAvatar = ({ member, size = 'md' }) => {
+  const dim =
+    size === 'xl'
+      ? 'w-28 h-28'
+      : size === 'lg'
+      ? 'w-20 h-20'
+      : size === 'sm'
+      ? 'w-11 h-11'
+      : 'w-14 h-14';
+  const skin = member?.skinTone || '#E5A98A';
+  const bg = member?.avatarBg || '#EAB84B';
+  const outfit = member?.outfitColor || '#D95732';
+  const arch = member?.archetype || 'adult-woman';
+  const pattern =
+    member?.outfitPattern ||
+    (arch === 'aged-man'
+      ? 'shawl'
+      : arch === 'aged-woman'
+      ? 'hearts'
+      : arch === 'teenager'
+      ? 'polka'
+      : arch === 'child'
+      ? 'collar'
+      : 'solid');
+  const earrings =
+    member?.earrings ||
+    (arch === 'adult-woman'
+      ? 'tassels'
+      : arch === 'aged-woman'
+      ? 'hoops'
+      : arch === 'child'
+      ? 'pink-hoops'
+      : arch === 'teenager'
+      ? 'stud'
+      : 'none');
+  const showGlasses =
+    typeof member?.glasses === 'boolean' ? member.glasses : arch === 'aged-man';
+  const radiusClass =
+    member?.frameShape === 'rounded' ? 'rounded-2xl' : 'rounded-full';
+
+  return (
+    <div
+      className={`${dim} ${radiusClass} relative overflow-hidden border-[2.5px] border-[#FAF7F2] shadow-[0_8px_20px_rgba(16,47,80,0.22)] flex-shrink-0 select-none`}
+      style={{ backgroundColor: bg }}
+    >
+      <svg viewBox="0 0 100 100" className="w-full h-full block">
+        {/* Customizable Backdrop Motifs */}
+        {member?.backdropMotif === 'leaves' && (
+          <g opacity="0.92">
+            <path d="M16 95 C13 66 17 40 26 20 C30 42 28 68 24 95 Z" fill="#FFFDF9" />
+            <path d="M84 95 C87 66 83 40 74 20 C70 42 72 68 76 95 Z" fill="#FFFDF9" />
+          </g>
+        )}
+        {member?.backdropMotif === 'waves' && (
+          <g opacity="0.65">
+            <path d="M14 8 C24 28 6 52 18 74 C24 88 18 96 18 100" stroke="#D97724" strokeWidth="7" strokeLinecap="round" fill="none" />
+            <path d="M86 8 C76 28 94 52 82 74 C76 88 82 96 82 100" stroke="#D97724" strokeWidth="7" strokeLinecap="round" fill="none" />
+          </g>
+        )}
+        {member?.backdropMotif === 'stripes' && (
+          <g opacity="0.45" stroke="#102F50" strokeWidth="3">
+            <line x1="0" y1="22" x2="100" y2="22" />
+            <line x1="0" y1="42" x2="100" y2="42" />
+            <line x1="0" y1="62" x2="100" y2="62" />
+          </g>
+        )}
+        {member?.backdropMotif === 'clouds' && (
+          <g fill="#FFFDF9" opacity="0.82">
+            <circle cx="18" cy="28" r="9" />
+            <circle cx="27" cy="30" r="7" />
+            <circle cx="82" cy="26" r="9" />
+            <circle cx="73" cy="29" r="7" />
+          </g>
+        )}
+
+        {/* Back Hair Layer */}
+        {arch === 'adult-woman' && (
+          <path d="M22 30 C16 54 19 82 26 98 L74 98 C81 82 84 54 78 30 Z" fill="#3D1220" />
+        )}
+        {arch === 'aged-woman' && <circle cx="50" cy="17" r="13" fill="#D8DCE3" />}
+        {arch === 'child' && (
+          <g>
+            <path d="M22 36 C12 44 10 64 16 76 C22 72 26 56 27 42 Z" fill="#5C2C1D" />
+            <path d="M78 36 C88 44 90 64 84 76 C78 72 74 56 73 42 Z" fill="#5C2C1D" />
+            <circle cx="25" cy="36" r="3.5" fill="#EAB84B" />
+            <circle cx="75" cy="36" r="3.5" fill="#EAB84B" />
+          </g>
+        )}
+
+        {/* Shoulders & Outfit Patterns */}
+        <path d="M12 100 C15 73 31 67 50 67 C69 67 85 73 88 100 Z" fill={outfit} />
+        {pattern === 'shawl' && (
+          <g>
+            <path d="M28 71 C36 84 64 84 72 71 L66 100 L34 100 Z" fill="#F7F0E5" />
+            <path d="M28 71 L35 100" stroke="#EAB84B" strokeWidth="3" />
+            <path d="M72 71 L65 100" stroke="#EAB84B" strokeWidth="3" />
+          </g>
+        )}
+        {pattern === 'hearts' && (
+          <g fill="#FFFDF9" opacity="0.9">
+            <circle cx="34" cy="84" r="2.3" />
+            <circle cx="50" cy="88" r="2.3" />
+            <circle cx="66" cy="84" r="2.3" />
+            <circle cx="42" cy="94" r="1.8" fill="#EAB84B" />
+            <circle cx="58" cy="94" r="1.8" fill="#EAB84B" />
+          </g>
+        )}
+        {pattern === 'polka' && (
+          <g fill="#FFFDF9" opacity="0.85">
+            <circle cx="30" cy="82" r="1.9" />
+            <circle cx="42" cy="88" r="1.9" />
+            <circle cx="58" cy="84" r="1.9" />
+            <circle cx="70" cy="90" r="1.9" />
+            <circle cx="48" cy="95" r="1.9" />
+          </g>
+        )}
+        {pattern === 'collar' && (
+          <g>
+            <path d="M36 69 L50 86 L64 69 Z" fill="#FFFDF9" />
+            <path d="M32 70 L45 84 L36 90 Z" fill="#102F50" opacity="0.22" />
+            <path d="M68 70 L55 84 L64 90 Z" fill="#102F50" opacity="0.22" />
+          </g>
+        )}
+
+        {/* Neck & Shadow */}
+        <path d="M43 54 L43 74 L57 74 L57 54 Z" fill={skin} />
+        <path d="M43 59 Q50 66 57 59 L57 64 Q50 70 43 64 Z" fill="#9E563C" opacity="0.35" />
+
+        {/* Ears & Statement Earrings */}
+        <circle cx="31" cy="45" r="5" fill={skin} />
+        <circle cx="69" cy="45" r="5" fill={skin} />
+        {earrings === 'tassels' && (
+          <g>
+            <circle cx="30" cy="52" r="3" fill="#F36D89" />
+            <path d="M27 55 L33 55 L35 64 L25 64 Z" fill="#FFFDF9" />
+            <circle cx="70" cy="52" r="3" fill="#F36D89" />
+            <path d="M67 55 L73 55 L75 64 L65 64 Z" fill="#FFFDF9" />
+          </g>
+        )}
+        {earrings === 'hoops' && (
+          <g stroke="#EAB84B" strokeWidth="2.3" fill="none">
+            <circle cx="30" cy="53" r="4.3" />
+            <circle cx="70" cy="53" r="4.3" />
+          </g>
+        )}
+        {earrings === 'pink-hoops' && (
+          <g stroke="#F36D89" strokeWidth="2.2" fill="none">
+            <circle cx="30" cy="52" r="3.6" />
+            <circle cx="70" cy="52" r="3.6" />
+          </g>
+        )}
+        {earrings === 'stud' && (
+          <g fill="#FFFDF9">
+            <circle cx="30" cy="48.5" r="1.8" />
+            <circle cx="70" cy="48.5" r="1.8" />
+          </g>
+        )}
+
+        {/* Face Oval & Cheek Blush */}
+        <path d="M32 33 C32 19 68 19 68 33 L67 49 C67 59 58 63 50 63 C42 63 33 59 33 49 Z" fill={skin} />
+        <circle cx="38.5" cy="48.5" r="4.8" fill="#C86446" opacity="0.48" />
+        <circle cx="61.5" cy="48.5" r="4.8" fill="#C86446" opacity="0.48" />
+
+        {/* Eyebrows, Eyes & Nose */}
+        <path d="M36 36 Q41 33.5 45 36" stroke="#102F50" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <path d="M55 36 Q59 33.5 64 36" stroke="#102F50" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <ellipse cx="41" cy="40.5" rx="3.8" ry="2.4" fill="#FFFDF9" />
+        <circle cx="41.4" cy="40.5" r="1.9" fill="#102F50" />
+        <ellipse cx="59" cy="40.5" rx="3.8" ry="2.4" fill="#FFFDF9" />
+        <circle cx="59.4" cy="40.5" r="1.9" fill="#102F50" />
+        <path d="M50 38 L48 48 L52.2 49" stroke="#8C4A32" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+
+        {/* Full Front Hair Crowns & Bangs (Never Bald!) */}
+        {arch === 'aged-man' && (
+          <g>
+            <path d="M31 35 C30 22 40 18 50 18 C60 18 70 22 69 35 C65 26 58 24 50 24 C42 24 35 26 31 35 Z" fill="#E2E6EC" />
+            <path d="M42 53 Q50 50 58 53 Q54 56 50 55 Q46 56 42 53 Z" fill="#D8DCE3" />
+          </g>
+        )}
+        {arch === 'aged-woman' && (
+          <g>
+            <path d="M30 38 C30 20 70 20 70 38 C64 28 56 26 50 26 C44 26 36 28 30 38 Z" fill="#E2E6EC" />
+            <circle cx="50" cy="33.5" r="1.8" fill="#D95732" />
+            <path d="M45 53 Q50 57 55 53" stroke="#8C3B2B" strokeWidth="2" strokeLinecap="round" fill="none" />
+          </g>
+        )}
+        {arch === 'adult-man' && (
+          <g>
+            <path d="M29 36 C27 20 40 14 50 15 C62 14 73 20 71 36 C66 26 58 24 50 24 C42 24 34 26 29 36 Z" fill="#3B1D1A" />
+            <path d="M33 47 C33 58 41 64 50 64 C59 64 67 58 67 47 L63 47 C61 54 56 57 50 57 C44 57 39 54 37 47 Z" fill="#3B1D1A" />
+            <path d="M46 53.5 Q50 56 54 53.5" stroke="#FFFDF9" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+          </g>
+        )}
+        {arch === 'adult-woman' && (
+          <g>
+            <path d="M29 39 C29 17 47 14 50 21 C53 14 71 17 71 39 C65 28 56 25 50 27 C44 25 35 28 29 39 Z" fill="#3D1220" />
+            <circle cx="50" cy="33" r="1.5" fill="#D95732" />
+            <path d="M45 53 Q50 57 55 53" stroke="#A8383B" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+          </g>
+        )}
+        {arch === 'teenager' && (
+          <g>
+            <path d="M31 35 C31 19 69 19 69 35 C65 26 57 24 50 24 C43 24 35 26 31 35 Z" fill="#231F20" />
+            <path d="M45 53.5 Q50 57 55 53.5" stroke="#8C3B2B" strokeWidth="2" strokeLinecap="round" fill="none" />
+          </g>
+        )}
+        {arch === 'child' && (
+          <g>
+            <path d="M31 35 C32 20 68 20 69 35 L31 35 Z" fill="#5C2C1D" />
+            <path d="M45 53 Q50 57.5 55 53" stroke="#A8383B" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+          </g>
+        )}
+
+        {/* Eyeglasses Layer */}
+        {showGlasses && (
+          <g>
+            <circle cx="41" cy="40.5" r="6" stroke="#102F50" strokeWidth="1.8" fill="none" />
+            <circle cx="59" cy="40.5" r="6" stroke="#102F50" strokeWidth="1.8" fill="none" />
+            <line x1="47" y1="40.5" x2="53" y2="40.5" stroke="#102F50" strokeWidth="1.8" />
+          </g>
+        )}
+      </svg>
+    </div>
+  );
+};
+
+// ============================================================================
+// 7. THREE.JS 3D FAMILY GLOBE STAGE (`ThreeJsFamilyStage`)
+// ============================================================================
+export const ThreeJsFamilyStage = ({
+  members = INITIAL_FAMILY_MEMBERS,
+  zoom = 1,
+  setZoom = () => {},
+  autoRotate = true,
+  setAutoRotate = () => {},
+  expandedNotifId = null,
+  setExpandedNotifId = () => {},
+  targetRotationYaw = null,
+  onUpdateMemberOptIn = null,
+  globeConfig = {
+    theme: 'navy',
+    rotationSpeed: 0.0032,
+    showPulseRings: true
+  }
+}) => {
+  const mountRef = useRef(null);
+  const [projectedNodes, setProjectedNodes] = useState([]);
+  const rotationRef = useRef({ yaw: 0.35, pitch: 0.12 });
+  const dragRef = useRef({ isDragging: false, lastX: 0, lastY: 0 });
+  const membersRef = useRef(members);
+  const zoomRef = useRef(zoom);
+  const autoRotateRef = useRef(autoRotate);
+  const globeConfigRef = useRef(globeConfig);
+
+  useEffect(() => {
+    membersRef.current = members;
+  }, [members]);
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
+  useEffect(() => {
+    autoRotateRef.current = autoRotate;
+  }, [autoRotate]);
+  useEffect(() => {
+    globeConfigRef.current = globeConfig;
+  }, [globeConfig]);
+  useEffect(() => {
+    if (typeof targetRotationYaw === 'number') {
+      rotationRef.current.yaw = targetRotationYaw;
+    }
+  }, [targetRotationYaw]);
+
+  useEffect(() => {
+    const container = mountRef.current;
+    if (!container) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    container.innerHTML = '';
+    container.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = container.clientWidth || 540;
+    let height = container.clientHeight || 400;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
+    camera.position.set(0, 0, 4.3);
+    camera.lookAt(0, 0, 0);
+    camera.updateMatrixWorld(true);
+
+    const globeGroup = new THREE.Group();
+    scene.add(globeGroup);
+
+    const syncCanvasSize = () => {
+      width = Math.max(280, Number(container.clientWidth) || 540);
+      height = Math.max(280, Number(container.clientHeight) || 400);
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      camera.updateMatrixWorld(true);
+    };
+    syncCanvasSize();
+
+    const dotCount = 1800;
+    const dotItems = [];
+    const goldenRatio = (1 + Math.sqrt(5)) / 2;
+    for (let i = 0; i < dotCount; i++) {
+      const y = 1 - (i / (dotCount - 1)) * 2;
+      const radiusAtY = Math.sqrt(1 - y * y);
+      const theta = (2 * Math.PI * i) / goldenRatio;
+      const x = Math.cos(theta) * radiusAtY;
+      const z = Math.sin(theta) * radiusAtY;
+      const mask = Math.sin(x * 4.2 + 0.5) * Math.cos(y * 3.8) + Math.sin(z * 4.5 - 0.3) * 0.6;
+      const isLand = mask > -0.12;
+      const r = isLand ? 1.245 : 1.22;
+      dotItems.push({
+        localPos: new THREE.Vector3(x * r, y * r, z * r),
+        mask,
+        size: isLand ? 2.3 : 1.3
+      });
+    }
+
+    const sphericalToVec3 = (phi, theta, radius = 1.28) =>
+      new THREE.Vector3(
+        radius * Math.sin(phi) * Math.sin(theta),
+        radius * Math.cos(phi),
+        radius * Math.sin(phi) * Math.cos(theta)
+      );
+
+    const project3DToScreen = (localVec) => {
+      const worldPos = localVec.clone().applyMatrix4(globeGroup.matrixWorld);
+      const ndc = worldPos.clone().project(camera);
+      return {
+        x: Number.isFinite(ndc.x) ? (ndc.x * 0.5 + 0.5) * width : width * 0.5,
+        y: Number.isFinite(ndc.y) ? (-ndc.y * 0.5 + 0.5) * height : height * 0.5,
+        z: Number.isFinite(worldPos.z) ? worldPos.z : 0
+      };
+    };
+
+    let frameId;
+    let clock = 0;
+    const animate = () => {
+      frameId = requestAnimationFrame(animate);
+      clock += 0.015;
+      const cfg = globeConfigRef.current || {};
+      const speed = typeof cfg.rotationSpeed === 'number' ? cfg.rotationSpeed : 0.0032;
+      const palette =
+        AVATAR_CUSTOMIZATION_OPTIONS.globeThemes[cfg.theme] ||
+        AVATAR_CUSTOMIZATION_OPTIONS.globeThemes.navy;
+
+      if (autoRotateRef.current && !dragRef.current.isDragging) {
+        rotationRef.current.yaw += speed;
+      }
+
+      const safeZoom = Number.isFinite(zoomRef.current) ? zoomRef.current : 1;
+      globeGroup.scale.setScalar(safeZoom);
+      globeGroup.rotation.y = rotationRef.current.yaw;
+      globeGroup.rotation.x = rotationRef.current.pitch;
+      globeGroup.updateMatrixWorld(true);
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const cx = width / 2;
+      const cy = height / 2;
+      const edgePoint = project3DToScreen(new THREE.Vector3(1.23, 0, 0));
+      const centerPoint = project3DToScreen(new THREE.Vector3(0, 0, 0));
+      const rawDist = Math.hypot(edgePoint.x - centerPoint.x, edgePoint.y - centerPoint.y);
+      const pixelRadius = Number.isFinite(rawDist) && rawDist > 10 ? Math.max(85, rawDist) : 130;
+
+      if (cfg.showPulseRings !== false) {
+        for (let rIdx = 1; rIdx <= 2; rIdx++) {
+          const pulseR = pixelRadius + rIdx * 15 + Math.sin(clock * 2 + rIdx) * 3;
+          ctx.beginPath();
+          ctx.arc(cx, cy, pulseR, 0, Math.PI * 2);
+          ctx.strokeStyle =
+            rIdx % 2 === 0 ? 'rgba(243, 109, 137, 0.22)' : 'rgba(234, 184, 75, 0.26)';
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+        }
+      }
+
+      const sphereGrad = ctx.createRadialGradient(
+        cx - pixelRadius * 0.3,
+        cy - pixelRadius * 0.3,
+        pixelRadius * 0.1,
+        cx,
+        cy,
+        pixelRadius
+      );
+      sphereGrad.addColorStop(0, palette.coreInner);
+      sphereGrad.addColorStop(0.65, palette.coreMid);
+      sphereGrad.addColorStop(1, palette.coreOuter);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, pixelRadius, 0, Math.PI * 2);
+      ctx.fillStyle = sphereGrad;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(234, 184, 75, 0.45)';
+      ctx.stroke();
+
+      for (let i = 0; i < dotItems.length; i++) {
+        const item = dotItems[i];
+        const pt = project3DToScreen(item.localPos);
+        if (pt.z < 0.05) continue;
+        const depthAlpha = Math.min(1, Math.max(0.15, (pt.z - 0.05) / 1.15));
+        ctx.globalAlpha = depthAlpha;
+        ctx.fillStyle =
+          item.mask > 0.35
+            ? palette.landPrimary
+            : item.mask > -0.08
+            ? palette.landSecondary
+            : palette.oceanDot;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, item.size * safeZoom, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      const nextProjected = membersRef.current.map((m) => {
+        const localPos = sphericalToVec3(m.phi, m.theta, 1.28);
+        const pt = project3DToScreen(localPos);
+        const isFront = pt.z > -0.12;
+        return {
+          ...m,
+          screenX: pt.x,
+          screenY: pt.y,
+          zDepth: pt.z,
+          isFront
+        };
+      });
+      setProjectedNodes(nextProjected);
+    };
+    animate();
+
+    window.addEventListener('resize', syncCanvasSize);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', syncCanvasSize);
+    };
+  }, []);
+
+  return (
+    <div className="relative rounded-[32px] border-2 overflow-hidden select-none bg-[radial-gradient(circle_at_center,#FFFDF9_0%,#EFE6D5_88%)] border-[#102F50] shadow-[0_10px_0_#102F50]">
+      <div className="px-4 pt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] font-extrabold text-[#102F50]">
+        <span className="px-3 py-1 rounded-full bg-[#102F50] text-[#EAB84B]">
+          🌍 Interactive 3D Family Globe · Drag to Rotate
+        </span>
+        <span className="text-[#D95732]">Tap any family member pin for live status &amp; call opt-in</span>
+      </div>
+
+      <div
+        className="relative w-full h-[350px] sm:h-[395px] cursor-grab active:cursor-grabbing touch-none"
+        onPointerDown={(e) => {
+          dragRef.current = { isDragging: true, lastX: e.clientX, lastY: e.clientY };
+        }}
+        onPointerMove={(e) => {
+          if (!dragRef.current.isDragging) return;
+          const dx = e.clientX - dragRef.current.lastX;
+          const dy = e.clientY - dragRef.current.lastY;
+          dragRef.current.lastX = e.clientX;
+          dragRef.current.lastY = e.clientY;
+          rotationRef.current.yaw += dx * 0.007;
+          rotationRef.current.pitch = Math.max(-0.6, Math.min(0.6, rotationRef.current.pitch + dy * 0.007));
+        }}
+        onPointerUp={() => {
+          dragRef.current = { isDragging: false };
+        }}
+        onPointerLeave={() => {
+          dragRef.current = { isDragging: false };
+        }}
+      >
+        <div ref={mountRef} className="absolute inset-0" />
+
+        {projectedNodes.map((node) => {
+          if (!node.isFront) return null;
+          const isNotifExpanded = expandedNotifId === node.id;
+          const showAboveNotif = isNotifExpanded || node.hasNotification;
+
+          return (
+            <div
+              key={node.id}
+              style={{
+                left: `${node.screenX}px`,
+                top: `${node.screenY}px`,
+                zIndex: Math.round((node.zDepth + 2) * 10),
+                transform: 'translate(-50%, -50%)'
+              }}
+              className="absolute transition-transform duration-75"
+            >
+              {showAboveNotif && (
+                <div style={{ bottom: 'calc(100% + 8px)' }} className="absolute left-1/2 -translate-x-1/2 z-40">
+                  {isNotifExpanded ? (
+                    <div className="w-56 p-3 rounded-2xl bg-[#102F50] text-[#FAF7F2] border-2 border-[#EAB84B] shadow-2xl">
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-[#F36D89] text-[#102F50]">
+                          {node.stickerBadge || 'Update'}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedNotifId(null);
+                          }}
+                        >
+                          <XIcon className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <p className="text-[11px] font-bold leading-snug">&ldquo;{node.statusText}&rdquo;</p>
+                      <div className="mt-2 pt-2 border-t border-white/20 space-y-1.5 text-[10px]">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#EAB84B]">Call Opt-In:</span>
+                          <span className="font-extrabold uppercase px-1.5 py-0.5 rounded bg-white/15">
+                            {node.callOptIn || 'pending'}
+                          </span>
+                        </div>
+                        {onUpdateMemberOptIn && (
+                          <div className="flex gap-1 pt-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdateMemberOptIn(node.id, 'confirmed');
+                              }}
+                              className="flex-1 py-1 rounded bg-[#2E7D32] text-white font-black text-[9px]"
+                            >
+                              ✓ Confirm
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdateMemberOptIn(node.id, 'ignored');
+                              }}
+                              className="flex-1 py-1 rounded bg-[#D95732] text-white font-black text-[9px]"
+                            >
+                              ✕ Ignore
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedNotifId(node.id);
+                      }}
+                      className="px-2.5 py-1 rounded-full bg-[#102F50] text-[#FAF7F2] border-2 border-[#F36D89] text-[10px] font-black shadow-lg whitespace-nowrap flex items-center gap-1"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-[#F36D89] animate-ping" />
+                      <span>{node.stickerBadge}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  asmrAudio.playSoftChime(1.1);
+                  setExpandedNotifId(expandedNotifId === node.id ? null : node.id);
+                }}
+                className="relative flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
+              >
+                <EditorialAvatar member={node} size="sm" />
+                <span className="mt-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FAF7F2] text-[#102F50] border border-[#102F50] shadow-sm whitespace-nowrap">
+                  {node.name}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom Globe Controls & Member Quick Focus Pills */}
+      <div className="relative z-20 flex flex-wrap items-center justify-between gap-2 px-4 pb-3 pt-1">
+        <div className="flex flex-wrap gap-1">
+          {members.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => {
+                rotationRef.current.yaw = -m.theta;
+                setExpandedNotifId(m.id);
+                asmrAudio.playSoftChime(1.15);
+              }}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border transition-all ${
+                expandedNotifId === m.id
+                  ? 'bg-[#102F50] text-[#EAB84B] border-[#102F50]'
+                  : 'bg-[#FAF7F2] text-[#102F50] border-[#DFD3BE] hover:border-[#102F50]'
+              }`}
+            >
+              {m.name}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setZoom((z) => Math.max(0.75, +(z - 0.12).toFixed(2)))}
+            className="w-7 h-7 rounded-full bg-white text-[#102F50] border border-[#102F50] flex items-center justify-center"
+            title="Zoom Out"
+          >
+            <MinusIcon className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => setZoom((z) => Math.min(1.35, +(z + 0.12).toFixed(2)))}
+            className="w-7 h-7 rounded-full bg-white text-[#102F50] border border-[#102F50] flex items-center justify-center"
+            title="Zoom In"
+          >
+            <PlusIcon className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => setAutoRotate((r) => !r)}
+            className={`w-7 h-7 rounded-full border border-[#102F50] flex items-center justify-center ${
+              autoRotate ? 'bg-[#102F50] text-[#EAB84B]' : 'bg-white text-[#102F50]'
+            }`}
+            title="Toggle Auto-Rotate"
+          >
+            <RotateCcwIcon className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// 8. COZY SOLO-LIVING ASMR & GAME LOUNGE (`WarmCompanionshipSanctuary`)
+// ============================================================================
+const MEMORY_ICONS = ['☕', '🌼', '🥭', '🧣', '📻', '🎨'];
+
+export const WarmCompanionshipSanctuary = ({ onTriggerToast }) => {
+  const [activeGameTab, setActiveGameTab] = useState('bubbles'); // 'bubbles' | 'memory' | 'bowl' | 'barnaby'
+  const [bubbles, setBubbles] = useState(
+    Array.from({ length: 18 }, (_, i) => ({
+      id: i,
+      popped: false,
+      label: ['Cardamom', 'Saffron', 'Ginger Chai', 'Marigold', 'Cinnamon', 'Star Anise'][i % 6],
+      color: ['#EAB84B', '#F36D89', '#D95732', '#102F50'][i % 4]
+    }))
+  );
+
+  // Memory Match Game State
+  const [cards, setCards] = useState(() =>
+    [...MEMORY_ICONS, ...MEMORY_ICONS]
+      .sort(() => Math.random() - 0.5)
+      .map((icon, idx) => ({ id: idx, icon, flipped: false, matched: false }))
+  );
+  const [flippedIds, setFlippedIds] = useState([]);
+  const [barnabyPurrs, setBarnabyPurrs] = useState(14);
+  const [bowlRipples, setBowlRipples] = useState(0);
+
+  const handleCardClick = (idx) => {
+    if (flippedIds.length === 2 || cards[idx].flipped || cards[idx].matched) return;
+    asmrAudio.playSoftChime(1.2);
+    const nextCards = cards.map((c, i) => (i === idx ? { ...c, flipped: true } : c));
+    const nextFlipped = [...flippedIds, idx];
+    setCards(nextCards);
+    setFlippedIds(nextFlipped);
+
+    if (nextFlipped.length === 2) {
+      const [first, second] = nextFlipped;
+      if (nextCards[first].icon === nextCards[second].icon) {
+        setTimeout(() => {
+          setCards((prev) =>
+            prev.map((c, i) => (i === first || i === second ? { ...c, matched: true } : c))
+          );
+          setFlippedIds([]);
+          asmrAudio.playSingingBowl();
+        }, 350);
+      } else {
+        setTimeout(() => {
+          setCards((prev) =>
+            prev.map((c, i) => (i === first || i === second ? { ...c, flipped: false } : c))
+          );
+          setFlippedIds([]);
+        }, 700);
+      }
+    }
+  };
+
+  return (
+    <section className="bg-[#EFE6D5] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span className="px-3 py-1 rounded-full bg-[#F36D89] text-[#102F50] text-[10px] font-extrabold uppercase">
+            🎮 Cozy Solo-Living Game &amp; ASMR Sanctuary
+          </span>
+          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#102F50] mt-1">
+            Tactile calm for quiet afternoons &amp; 2am moments
+          </h2>
+          <p className="text-xs text-[#4A6583]">
+            Gentle cognitive games and Web-Audio harmonic soundscapes designed for seniors and solo dwellers.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: 'bubbles', label: '🫧 Chatak-Patak Spice Pop' },
+            { id: 'memory', label: '🃏 Keepsake Memory Match' },
+            { id: 'bowl', label: '🥣 432Hz Singing Bowl' },
+            { id: 'barnaby', label: '🐱 Barnaby the Cat' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveGameTab(tab.id);
+                asmrAudio.playSoftChime(1.05);
+              }}
+              className={`px-3.5 py-2 rounded-full text-xs font-extrabold border-2 transition-all ${
+                activeGameTab === tab.id
+                  ? 'bg-[#102F50] text-[#EAB84B] border-[#102F50] shadow-[0_3px_0_#D95732]'
+                  : 'bg-[#FFFDF9] text-[#102F50] border-[#DFD3BE]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab 1: Chatak-Patak ASMR Spice Bubble Pop */}
+      {activeGameTab === 'bubbles' && (
+        <div className="bg-[#FFFDF9] border-2 border-[#DFD3BE] rounded-3xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-[#102F50]">
+              Tap the warm spice bubbles for instant Web-Audio ASMR pops ({bubbles.filter((b) => b.popped).length}/{bubbles.length} popped)
+            </p>
+            <button
+              onClick={() => {
+                setBubbles((prev) => prev.map((b) => ({ ...b, popped: false })));
+                asmrAudio.playSoftChime(1.3);
+              }}
+              className="px-3.5 py-1.5 rounded-full bg-[#102F50] text-[#EAB84B] text-xs font-extrabold"
+            >
+              Reset Sheet
+            </button>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+            {bubbles.map((b, idx) => (
+              <button
+                key={b.id}
+                onClick={() => {
+                  asmrAudio.playBubblePop(340 + idx * 24);
+                  setBubbles((prev) =>
+                    prev.map((item) => (item.id === b.id ? { ...item, popped: !item.popped } : item))
+                  );
+                }}
+                style={{ backgroundColor: b.popped ? '#EFE6D5' : b.color }}
+                className={`h-16 rounded-2xl border-2 border-[#102F50] flex flex-col items-center justify-center transition-all ${
+                  b.popped
+                    ? 'scale-95 opacity-60 text-[#102F50]'
+                    : 'shadow-[0_4px_0_#102F50] hover:-translate-y-0.5 text-[#FAF7F2]'
+                }`}
+              >
+                <span className="text-sm font-extrabold">{b.popped ? '✓ Pop!' : '🫧'}</span>
+                <span className="text-[10px] font-bold">{b.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 2: Keepsake Memory Match */}
+      {activeGameTab === 'memory' && (
+        <div className="bg-[#FFFDF9] border-2 border-[#DFD3BE] rounded-3xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-[#102F50]">
+              Match the warm family keepsake pairs ({cards.filter((c) => c.matched).length / 2}/6 matched)
+            </p>
+            <button
+              onClick={() => {
+                setCards(
+                  [...MEMORY_ICONS, ...MEMORY_ICONS]
+                    .sort(() => Math.random() - 0.5)
+                    .map((icon, idx) => ({ id: idx, icon, flipped: false, matched: false }))
+                );
+                setFlippedIds([]);
+              }}
+              className="px-3.5 py-1.5 rounded-full bg-[#102F50] text-[#EAB84B] text-xs font-extrabold"
+            >
+              Shuffle Deck
+            </button>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+            {cards.map((card, idx) => (
+              <button
+                key={card.id}
+                onClick={() => handleCardClick(idx)}
+                className={`h-20 rounded-2xl border-2 border-[#102F50] text-2xl font-bold flex items-center justify-center transition-all ${
+                  card.flipped || card.matched
+                    ? 'bg-[#EAB84B] text-[#102F50] shadow-inner'
+                    : 'bg-[#102F50] text-[#FAF7F2] shadow-[0_4px_0_#D95732] hover:-translate-y-0.5'
+                }`}
+              >
+                {card.flipped || card.matched ? card.icon : '💛'}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 3: 432Hz Singing Bowl */}
+      {activeGameTab === 'bowl' && (
+        <div className="bg-[#FFFDF9] border-2 border-[#DFD3BE] rounded-3xl p-8 flex flex-col items-center text-center space-y-4">
+          <button
+            onClick={() => {
+              asmrAudio.playSingingBowl();
+              setBowlRipples((r) => r + 1);
+              if (onTriggerToast) onTriggerToast('432Hz Tibetan singing bowl resonance playing...', '🥣 Calm Resonance');
+            }}
+            className="w-32 h-32 rounded-full bg-gradient-to-br from-[#EAB84B] via-[#D95732] to-[#102F50] border-4 border-[#102F50] shadow-[0_8px_0_#102F50] flex flex-col items-center justify-center text-[#FAF7F2] hover:scale-105 active:translate-y-1 transition-all"
+          >
+            <span className="text-3xl">🥣</span>
+            <span className="text-[11px] font-extrabold uppercase mt-1">Strike Bowl</span>
+          </button>
+          <p className="text-xs font-bold text-[#4A6583] max-w-md">
+            Tap the brass singing bowl to release a 432Hz harmonic chord. Struck {bowlRipples} times this session.
+          </p>
+        </div>
+      )}
+
+      {/* Tab 4: Barnaby the Cozy Cat */}
+      {activeGameTab === 'barnaby' && (
+        <div className="bg-[#FFFDF9] border-2 border-[#DFD3BE] rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="space-y-2">
+            <span className="px-3 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-[10px] font-extrabold">
+              🐾 Virtual Window-Sill Companion
+            </span>
+            <h3 className="font-serif text-2xl font-bold text-[#102F50]">
+              Barnaby is napping by the warm teacup
+            </h3>
+            <p className="text-xs text-[#4A6583]">
+              Pet Barnaby to hear a gentle harmonic purr ({barnabyPurrs} purrs shared today).
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setBarnabyPurrs((p) => p + 1);
+              asmrAudio.playSoftChime(0.85);
+              if (onTriggerToast) onTriggerToast('Barnaby purred warmly! 🐾', '🐱 Purr +1');
+            }}
+            className="px-6 py-4 rounded-3xl bg-[#102F50] text-[#EAB84B] border-2 border-[#EAB84B] font-extrabold text-sm shadow-[0_5px_0_#D95732] hover:scale-105 transition-transform"
+          >
+            🐱 Pet Barnaby ({barnabyPurrs} ♥)
+          </button>
+        </div>
+      )}
+    </section>
+  );
+};
+
+// ============================================================================
+// 9. AVATAR & 3D GLOBE CUSTOMIZER STUDIO (`<AvatarAndGlobeCustomizer />`)
+// ============================================================================
+export const AvatarAndGlobeCustomizer = ({
+  members,
+  selectedMemberId,
+  onSelectMember,
+  onUpdateMember,
+  onResetMember,
+  globeConfig,
+  onUpdateGlobeConfig
+}) => {
+  const activeMember = members.find((m) => m.id === selectedMemberId) || members[0];
+
+  const updateField = (key, value) => {
+    if (!activeMember) return;
+    onUpdateMember(activeMember.id, { [key]: value });
+  };
+
+  return (
+    <div className="rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] p-5 sm:p-6 shadow-[0_8px_0_#102F50] space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DFD3BE] pb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-[#102F50] text-[#EAB84B] flex items-center justify-center">
+            <SlidersIcon className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="font-serif text-lg sm:text-xl font-bold text-[#102F50]">
+              Editorial Avatar &amp; 3D Globe Customizer Studio
+            </h2>
+            <p className="text-[11px] font-bold text-[#4A6583]">
+              Customize motifs, outfits, statement earrings, coordinates &amp; 3D globe physics
+            </p>
+          </div>
+        </div>
+        {onResetMember && activeMember && (
+          <button
+            onClick={() => onResetMember(activeMember.id)}
+            className="px-3.5 py-1.5 rounded-full bg-[#EFE6D5] hover:bg-[#102F50] hover:text-[#EAB84B] text-xs font-extrabold transition-colors"
+          >
+            Reset {activeMember.name}
+          </button>
+        )}
+      </div>
+
+      {/* Member Selector Pills */}
+      <div className="flex flex-wrap gap-2">
+        {members.map((m) => {
+          const isSelected = m.id === activeMember?.id;
+          return (
+            <button
+              key={m.id}
+              onClick={() => onSelectMember(m.id)}
+              className={`px-3.5 py-1.5 rounded-full border-2 text-xs font-extrabold flex items-center gap-2 transition-all ${
+                isSelected
+                  ? 'bg-[#102F50] text-[#EAB84B] border-[#102F50] shadow-[0_3px_0_#F36D89]'
+                  : 'bg-[#FAF7F2] text-[#102F50] border-[#DFD3BE]'
+              }`}
+            >
+              <span>{m.name}</span>
+              <span className="text-[10px] opacity-75">({m.archetype})</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {activeMember && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-4 p-5 rounded-3xl bg-[#FAF7F2] border-2 border-[#DFD3BE] flex flex-col items-center text-center space-y-3">
+            <EditorialAvatar member={activeMember} size="xl" />
+            <div>
+              <h3 className="font-serif text-lg font-bold text-[#102F50]">{activeMember.name}</h3>
+              <p className="text-xs font-bold text-[#D95732]">{activeMember.role}</p>
+            </div>
+            <div className="w-full pt-2 border-t border-[#DFD3BE] space-y-2 text-left">
+              <label className="block text-[10px] font-black uppercase text-[#4A6583]">Display Name</label>
+              <input
+                type="text"
+                value={activeMember.name}
+                onChange={(e) => updateField('name', e.target.value)}
+                className="w-full px-3 py-1.5 rounded-xl bg-white border border-[#DFD3BE] text-xs font-bold"
+              />
+              <label className="block text-[10px] font-black uppercase text-[#4A6583]">Globe Sticker Badge</label>
+              <input
+                type="text"
+                value={activeMember.stickerBadge || ''}
+                onChange={(e) => updateField('stickerBadge', e.target.value)}
+                className="w-full px-3 py-1.5 rounded-xl bg-white border border-[#DFD3BE] text-xs font-bold"
+              />
+            </div>
+          </div>
+
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-[#4A6583]">1. Character Archetype</label>
+              <select
+                value={activeMember.archetype}
+                onChange={(e) => updateField('archetype', e.target.value)}
+                className="w-full p-2 rounded-xl bg-white border border-[#DFD3BE] text-xs font-bold"
+              >
+                {AVATAR_CUSTOMIZATION_OPTIONS.archetypes.map((a) => (
+                  <option key={a.id} value={a.id}>{a.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-[#4A6583]">2. Backdrop Motif</label>
+              <select
+                value={activeMember.backdropMotif || 'leaves'}
+                onChange={(e) => updateField('backdropMotif', e.target.value)}
+                className="w-full p-2 rounded-xl bg-white border border-[#DFD3BE] text-xs font-bold"
+              >
+                {AVATAR_CUSTOMIZATION_OPTIONS.backdropMotifs.map((m) => (
+                  <option key={m.id} value={m.id}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-[#4A6583]">3. Outfit Pattern</label>
+              <select
+                value={activeMember.outfitPattern || 'solid'}
+                onChange={(e) => updateField('outfitPattern', e.target.value)}
+                className="w-full p-2 rounded-xl bg-white border border-[#DFD3BE] text-xs font-bold"
+              >
+                {AVATAR_CUSTOMIZATION_OPTIONS.outfitPatterns.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-[#4A6583]">4. Statement Earrings</label>
+              <select
+                value={activeMember.earrings || 'none'}
+                onChange={(e) => updateField('earrings', e.target.value)}
+                className="w-full p-2 rounded-xl bg-white border border-[#DFD3BE] text-xs font-bold"
+              >
+                {AVATAR_CUSTOMIZATION_OPTIONS.earringStyles.map((er) => (
+                  <option key={er.id} value={er.id}>{er.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-2">
+              <label className="text-[10px] font-black uppercase text-[#4A6583]">5. Skin Tone</label>
+              <div className="flex flex-wrap gap-2">
+                {AVATAR_CUSTOMIZATION_OPTIONS.skinTones.map((tone) => (
+                  <button
+                    key={tone.id}
+                    onClick={() => updateField('skinTone', tone.id)}
+                    style={{ backgroundColor: tone.id }}
+                    className={`w-7 h-7 rounded-full border-2 ${
+                      activeMember.skinTone === tone.id ? 'border-[#102F50] scale-110 ring-2 ring-[#EAB84B]' : 'border-white'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-2">
+              <label className="text-[10px] font-black uppercase text-[#4A6583]">6. Outfit &amp; Medallion Colors</label>
+              <div className="flex items-center gap-2 flex-wrap">
+                {AVATAR_CUSTOMIZATION_OPTIONS.outfitColors.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => updateField('outfitColor', c.id)}
+                    style={{ backgroundColor: c.id }}
+                    className={`w-6 h-6 rounded-full border-2 ${
+                      activeMember.outfitColor === c.id ? 'border-[#102F50] scale-110' : 'border-white'
+                    }`}
+                  />
+                ))}
+                <span className="text-[#DFD3BE]">|</span>
+                {AVATAR_CUSTOMIZATION_OPTIONS.avatarBgs.map((bg) => (
+                  <button
+                    key={bg.id}
+                    onClick={() => updateField('avatarBg', bg.id)}
+                    style={{ backgroundColor: bg.id }}
+                    className={`w-6 h-6 rounded-lg border-2 ${
+                      activeMember.avatarBg === bg.id ? 'border-[#102F50] scale-110' : 'border-white'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {globeConfig && onUpdateGlobeConfig && (
+        <div className="pt-4 border-t border-[#DFD3BE] grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-1">
+            <label className="text-[10px] font-black uppercase text-[#4A6583]">Globe Sphere Palette</label>
+            <select
+              value={globeConfig.theme || 'navy'}
+              onChange={(e) => onUpdateGlobeConfig({ ...globeConfig, theme: e.target.value })}
+              className="w-full p-2 rounded-xl bg-white border border-[#DFD3BE] text-xs font-bold"
+            >
+              {Object.values(AVATAR_CUSTOMIZATION_OPTIONS.globeThemes).map((t) => (
+                <option key={t.id} value={t.id}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-1">
+            <div className="flex justify-between text-[10px] font-black uppercase text-[#4A6583]">
+              <span>Orbit Rotation Speed</span>
+              <span>{((globeConfig.rotationSpeed || 0.0032) * 1000).toFixed(1)}x</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="0.01"
+              step="0.0005"
+              value={globeConfig.rotationSpeed ?? 0.0032}
+              onChange={(e) => onUpdateGlobeConfig({ ...globeConfig, rotationSpeed: parseFloat(e.target.value) })}
+              className="w-full accent-[#D95732] mt-2"
+            />
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] flex items-center justify-between">
+            <span className="text-xs font-extrabold">Ambient Aura Rings</span>
+            <button
+              onClick={() => onUpdateGlobeConfig({ ...globeConfig, showPulseRings: !globeConfig.showPulseRings })}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black ${
+                globeConfig.showPulseRings !== false ? 'bg-[#102F50] text-[#EAB84B]' : 'bg-white text-[#102F50] border border-[#DFD3BE]'
+              }`}
+            >
+              {globeConfig.showPulseRings !== false ? 'Active' : 'Hidden'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// 10. MAIN UNIFIED APPLICATION (`App`)
+// ============================================================================
+export default function App() {
+  // All 10 www.someonenear.com routes + Docs & Legal Center:
+  // 'home' | 'dashboard' | 'family' | 'listeners' | 'reminders' | 'vault' | 'companion' | 'insights' | 'safety' | 'settings' | 'docs'
+  const [activeSpace, setActiveSpace] = useState('home');
+  const [docsSection, setDocsSection] = useState('architecture'); // 'architecture' | 'privacy' | 'cookies' | 'terms' | 'sla'
+  const [countryCode, setCountryCode] = useState('IN');
+  const [globalToast, setGlobalToast] = useState(null);
+  const [assistOpen, setAssistOpen] = useState(false);
+
+  // Privacy, Cookies & Local Cache Management State
+  const [cookieConsentBanner, setCookieConsentBanner] = useState(() => {
+    try {
+      return !localStorage.getItem('sn_cookie_consent_v1');
+    } catch {
+      return true;
+    }
+  });
+  const [cookiePrefs, setCookiePrefs] = useState({
+    essentialAuth: true,
+    geoCurrencyCache: true,
+    s3MediaPreviewCache: true,
+    voiceLatencyTelemetry: false
+  });
+  const [lastCacheClearedAt, setLastCacheClearedAt] = useState('Today · 09:00 AM');
+
+  // Auth & Checkout Modals
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [userEmail, setUserEmail] = useState('aarav@someonenear.com');
+  const [authInputEmail, setAuthInputEmail] = useState('');
+  const [checkoutModalPlan, setCheckoutModalPlan] = useState(null); // 'care_15' | 'care_plus_30'
+
+  // 3D Globe & Family State
+  const [members, setMembers] = useState(INITIAL_FAMILY_MEMBERS);
+  const [globeZoom, setGlobeZoom] = useState(1);
+  const [globeAutoRotate, setGlobeAutoRotate] = useState(true);
+  const [expandedNotifId, setExpandedNotifId] = useState('dad');
+  const [targetRotationYaw, setTargetRotationYaw] = useState(null);
+  const [selectedCustomMemberId, setSelectedCustomMemberId] = useState('dad');
+  const [globeConfig, setGlobeConfig] = useState({
+    theme: 'navy',
+    rotationSpeed: 0.0032,
+    showPulseRings: true
+  });
+
+  // Landing Page Worry Pill & FAQ Search
+  const [selectedConcern, setSelectedConcern] = useState('far-away');
+  const [faqSearch, setFaqSearch] = useState('');
+
+  // Page 1: Progressive Dashboard State
+  const [dashboardCategory, setDashboardCategory] = useState('circle');
+  const [planTier, setPlanTier] = useState('care_plus_30');
+  const [callsUsed, setCallsUsed] = useState(12);
+
+  // Page 2: Family Circle Add Modal
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [newMemberName, setNewMemberName] = useState('');
+  const [newMemberRole, setNewMemberRole] = useState('Parent (Pune)');
+  const [newMemberPhone, setNewMemberPhone] = useState('');
+
+  // Page 3: Trained Listeners State
+  const [listenerSubTab, setListenerSubTab] = useState('roster'); // 'roster' | 'scheduled' | 'reflections'
+  const [bookingModalListener, setBookingModalListener] = useState(null);
+  const [bookingForMember, setBookingForMember] = useState('Dad (Pune)');
+  const [bookingTimeSlot, setBookingTimeSlot] = useState('Tomorrow · 09:00 AM');
+  const [ bookingTopic, setBookingTopic ] = useState('Morning BP check, Telma 40 tablet & garden chat');
+  const [scheduledCalls, setScheduledCalls] = useState([
+    {
+      id: 'sc-1',
+      listenerName: 'Listener Priya Sharma',
+      forWho: 'Dad (Pune)',
+      time: 'Today · 06:00 PM',
+      topic: 'Evening walk check-in & Atorva 10mg tablet reminder',
+      status: 'Confirmed via Telnyx'
+    },
+    {
+      id: 'sc-2',
+      listenerName: 'Listener Sunita Menon',
+      forWho: 'Mum (Pune)',
+      time: 'Tomorrow · 10:30 AM',
+      topic: 'Balcony marigold gardening & morning tea conversation',
+      status: 'Confirmed via Telnyx'
+    }
+  ]);
+
+  // Page 4: Photo-Verified Meds & Bidirectional Reminders State
+  const [remindersSubTab, setRemindersSubTab] = useState('meds'); // 'meds' | 'reminders' | 'calendar'
+  const [showAddMedModal, setShowAddMedModal] = useState(false);
+  const [newMedName, setNewMedName] = useState('');
+  const [newMedForWho, setNewMedForWho] = useState('Dad (Pune)');
+  const [newMedTime, setNewMedTime] = useState('09:00 AM');
+  const [calendarSynced, setCalendarSynced] = useState(true);
+  const [medList, setMedList] = useState([
+    {
+      id: 'm1',
+      name: 'Telma 40 (Morning BP Tablet)',
+      forWho: 'Dad (Pune)',
+      memberId: 'dad',
+      time: '08:30 AM',
+      instructions: '1 tablet after warm water & morning walk',
+      stripColor: '#D95732',
+      taken: true
+    },
+    {
+      id: 'm2',
+      name: 'Calcium + Vitamin D3 (Shelcal)',
+      forWho: 'Mum (Pune)',
+      memberId: 'mum',
+      time: '01:30 PM',
+      instructions: '1 tablet after lunch with buttermilk',
+      stripColor: '#2E7D32',
+      taken: true
+    },
+    {
+      id: 'm3',
+      name: 'Atorva 10mg (Evening Cholesterol)',
+      forWho: 'Dad (Pune)',
+      memberId: 'dad',
+      time: '08:30 PM',
+      instructions: '1 tablet after light dinner',
+      stripColor: '#1E4A7A',
+      taken: false
+    }
+  ]);
+  const [remindersList, setRemindersList] = useState([
+    {
+      id: 'r1',
+      target: 'For Dad & Mum (Pune)',
+      memberId: 'dad',
+      category: 'Doctor Follow-up',
+      time: 'Tomorrow · 10:30 AM',
+      text: 'Dr. Kulkarni routine blood pressure check-in & ECG review'
+    },
+    {
+      id: 'r2',
+      target: 'Set by Mum for Family',
+      memberId: 'mum',
+      category: 'Evening Walk',
+      time: 'Today · 06:00 PM',
+      text: 'Call Mum after her evening walk in the society garden'
+    }
+  ]);
+  const [newRemText, setNewRemText] = useState('');
+  const [newRemTarget, setNewRemTarget] = useState('For Dad & Mum (Pune)');
+
+  // Page 5: Creative Bounded S3 Memory Vault & Time Capsules State
+  const [vaultSubTab, setVaultSubTab] = useState('keepsakes'); // 'keepsakes' | 'studio' | 'capsules'
+  const [playingAudioId, setPlayingAudioId] = useState(null);
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [newVaultTitle, setNewVaultTitle] = useState('');
+  const [newVaultBoundary, setNewVaultBoundary] = useState('Entire Family Circle');
+  const [newVaultExpiry, setNewVaultExpiry] = useState('7 Days');
+  const [sharedItems, setSharedItems] = useState([
+    {
+      id: 'v1',
+      type: 'photo',
+      title: 'Sunday Balcony Marigolds & Ginger Chai',
+      sender: 'Mum',
+      memberId: 'mum',
+      boundary: 'Entire Family Circle',
+      expiry: '7 Days',
+      size: '1.8 MB · S3 Verified',
+      date: '2 hours ago',
+      washiColor: '#F36D89',
+      reactions: 8,
+      content: 'Mum shared a sunny balcony photo after watering her marigolds (<10MB S3 verified).'
+    },
+    {
+      id: 'v2',
+      type: 'audio',
+      title: 'Dada’s Evening Blessing & Old Radio Song',
+      sender: 'Dad',
+      memberId: 'dad',
+      boundary: 'Entire Family Circle',
+      expiry: '30 Days',
+      size: '2.4 MB · 00:42 WAV',
+      date: 'Yesterday',
+      washiColor: '#EAB84B',
+      reactions: 14,
+      content: '42-second warm voice blessing recorded via 1-Click Assistive Gesture.'
+    },
+    {
+      id: 'v3',
+      type: 'photo',
+      title: 'Mia’s Giant Yellow Sunshine Painting',
+      sender: 'Mia (London)',
+      memberId: 'mia',
+      boundary: 'Grandparents & Parents',
+      expiry: '30 Days',
+      size: '1.4 MB · S3 Verified',
+      date: '3 days ago',
+      washiColor: '#EAB84B',
+      reactions: 11,
+      content: 'Finger-painted sunshine uploaded for Nani and Dada in Pune.'
+    }
+  ]);
+  const [timeCapsules, setTimeCapsules] = useState([
+    {
+      id: 'cap-1',
+      title: 'For Dad & Mum’s 45th Wedding Anniversary',
+      sender: 'Priya & Aarav',
+      memberId: 'priya',
+      unlockDate: 'Unlocks 14 Nov 2026 · 08:00 AM',
+      status: 'Wax-Sealed in S3 Vault',
+      preview: 'A collection of 12 family voice notes and childhood photos from Pune...'
+    }
+  ]);
+
+  // Page 6: 2am AI Companion & Avatar Customizer Studio State
+  const [companionSubTab, setCompanionSubTab] = useState('chat'); // 'chat' | 'customizer'
+  const [chatInput, setChatInput] = useState('');
+  const [isAiTyping, setIsAiTyping] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    {
+      role: 'assistant',
+      text: 'Namaste Aarav 🌙 I am here whenever the house feels quiet—whether you want to draft a gentle check-in script for Dad, practice 4-7-8 breathing, or talk through caregiver worries at 2am.'
+    }
+  ]);
+
+  // IP Geolocation Detection with localStorage memory
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('sn_user_country');
+      if (saved && COUNTRY_PRICING_CONFIG[saved]) {
+        setCountryCode(saved);
+        return;
+      }
+      fetch('https://ipapi.co/json/')
+        .then((r) => r.json())
+        .then((d) => {
+          if (d?.country_code) {
+            const mapped = EUROZONE_CODES.has(d.country_code) ? 'EU' : d.country_code;
+            const resolved = COUNTRY_PRICING_CONFIG[mapped] ? mapped : 'IN';
+            setCountryCode(resolved);
+            localStorage.setItem('sn_user_country', resolved);
+          }
+        })
+        .catch(() => {});
+    } catch {}
+  }, []);
+
+  // Voice Recording Timer
+  useEffect(() => {
+    if (!isRecordingVoice) {
+      setRecordingSeconds(0);
+      return;
+    }
+    const timer = setInterval(() => setRecordingSeconds((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [isRecordingVoice]);
+
+  const activePricing = COUNTRY_PRICING_CONFIG[countryCode] || COUNTRY_PRICING_CONFIG.IN;
+  const totalCallsQuota = planTier === 'care_plus_30' ? 30 : 15;
+
+  const triggerToast = (message, badge = '✨ SomeoneNear') => {
+    setGlobalToast({ message, badge });
+    setTimeout(() => setGlobalToast(null), 3400);
+  };
+
+  const handleCountryChange = (code) => {
+    setCountryCode(code);
+    try {
+      localStorage.setItem('sn_user_country', code);
+    } catch {}
+    triggerToast(
+      `Pricing updated to ${COUNTRY_PRICING_CONFIG[code].country} (${COUNTRY_PRICING_CONFIG[code].currency})`,
+      `${COUNTRY_PRICING_CONFIG[code].flag} Currency Saved`
+    );
+  };
+
+  const handleUpdateMemberOptIn = (memberId, status) => {
+    setMembers((prev) =>
+      prev.map((m) =>
+        m.id === memberId
+          ? {
+              ...m,
+              callOptIn: status,
+              stickerBadge: status === 'confirmed' ? '✅ Call Confirmed' : '🔕 Invite Ignored',
+              statusText:
+                status === 'confirmed'
+                  ? 'Confirmed on Telnyx call: Happy to receive daily check-in calls!'
+                  : 'Invitee chose to ignore call participation for now.'
+            }
+          : m
+      )
+    );
+    triggerToast(`Updated ${memberId.toUpperCase()} call opt-in to "${status}"`, '📞 Telnyx Opt-In');
+  };
+
+  const handleCustomizeMember = (memberId, patch) => {
+    setMembers((prev) => prev.map((m) => (m.id === memberId ? { ...m, ...patch } : m)));
+  };
+
+  const handleResetMember = (memberId) => {
+    const orig = INITIAL_FAMILY_MEMBERS.find((m) => m.id === memberId);
+    if (!orig) return;
+    setMembers((prev) => prev.map((m) => (m.id === memberId ? { ...orig } : m)));
+    triggerToast(`Reset ${orig.name}'s avatar to default`, '🎨 Avatar Reset');
+  };
+
+  const handleDownloadToPhone = (item) => {
+    try {
+      const blob = new Blob(
+        [
+          `SomeoneNear Bounded S3 Family Memory Vault\nTitle: ${item.title}\nBy: ${item.sender}\nPrivacy Boundary: ${item.boundary}\nExpiry: ${item.expiry}\n\n${item.content}`
+        ],
+        { type: 'text/plain;charset=utf-8' }
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      triggerToast(`Saved "${item.title}" to your phone!`, '📲 Downloaded');
+    } catch {}
+  };
+
+  const handleSendCompanionMessage = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    const userMsg = chatInput.trim();
+    setChatMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
+    setChatInput('');
+    setIsAiTyping(true);
+
+    try {
+      const apiKey = '';
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: userMsg }] }],
+          systemInstruction: {
+            parts: [
+              {
+                text: 'You are the SomeoneNear 2am Empathetic Family Care Companion. Respond in 2-3 warm, reassuring, practical sentences for someone caring for aging parents or living solo.'
+              }
+            ]
+          }
+        })
+      });
+      const result = await response.json();
+      const replyText =
+        result?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        'Take a slow breath—you are doing a deeply caring job for your family. Would you like me to schedule a gentle morning listener call with Priya for Dad tomorrow, or set a photo-verified tablet reminder?';
+      setChatMessages((prev) => [...prev, { role: 'assistant', text: replyText }]);
+    } catch {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: 'Take a slow breath—you are doing a deeply caring job for your parents even from miles away. I have noted this in your care journal and can have Listener Priya check in on Dad tomorrow morning.'
+        }
+      ]);
+    } finally {
+      setIsAiTyping(false);
+    }
+  };
+
+  const handleSaveCookieConsent = (mode = 'all') => {
+    const nextPrefs =
+      mode === 'essential'
+        ? {
+            essentialAuth: true,
+            geoCurrencyCache: true,
+            s3MediaPreviewCache: false,
+            voiceLatencyTelemetry: false
+          }
+        : {
+            essentialAuth: true,
+            geoCurrencyCache: true,
+            s3MediaPreviewCache: true,
+            voiceLatencyTelemetry: true
+          };
+    setCookiePrefs(nextPrefs);
+    setCookieConsentBanner(false);
+    try {
+      localStorage.setItem('sn_cookie_consent_v1', JSON.stringify(nextPrefs));
+    } catch {}
+    triggerToast(
+      mode === 'essential'
+        ? 'Saved Essential-Only Cookie & Cache Preferences'
+        : 'Accepted All Privacy, Geolocation & S3 Cache Preferences',
+      '🍪 Privacy Saved'
+    );
+  };
+
+  const handleClearApplicationCache = (scope = 'all') => {
+    try {
+      if (scope === 'geo' || scope === 'all') {
+        localStorage.removeItem('sn_user_country');
+      }
+      if (scope === 'cookies' || scope === 'all') {
+        localStorage.removeItem('sn_cookie_consent_v1');
+      }
+    } catch {}
+    const stamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setLastCacheClearedAt(`Cleared at ${stamp}`);
+    triggerToast(
+      scope === 'geo'
+        ? 'Cleared IP-Geolocation & Currency Cache (sn_user_country)'
+        : 'Purged Local Browser Cache, S3 Previews & Session Storage',
+      '🧹 Cache Purged'
+    );
+  };
+
+  const navigateToDocs = (section) => {
+    setDocsSection(section);
+    setActiveSpace('docs');
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col font-sans bg-[#FAF7F2] text-[#102F50] selection:bg-[#EAB84B]/40">
+      {/* Embedded Warm Cream & Deep Navy Keyframe Animations */}
+      <style>{`
+        @keyframes snFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes snPopIn {
+          0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes snAuraPulse {
+          0% { box-shadow: 0 0 0 0 rgba(243, 109, 137, 0.55), 0 0 0 0 rgba(234, 184, 75, 0.35); }
+          70% { box-shadow: 0 0 0 14px rgba(243, 109, 137, 0), 0 0 0 26px rgba(234, 184, 75, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(243, 109, 137, 0), 0 0 0 0 rgba(234, 184, 75, 0); }
+        }
+        @keyframes snShimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .sn-animate-float { animation: snFloat 4.4s ease-in-out infinite; }
+        .sn-animate-pop { animation: snPopIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .sn-animate-aura { animation: snAuraPulse 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+        .sn-animate-shimmer {
+          background: linear-gradient(90deg, #102F50 0%, #1E4A7A 45%, #EAB84B 50%, #1E4A7A 55%, #102F50 100%);
+          background-size: 200% 100%;
+          animation: snShimmer 6.5s linear infinite;
+        }
+      `}</style>
+
+      {/* Global Toast */}
+      {globalToast && (
+        <div className="fixed top-16 right-4 z-50 sn-animate-pop flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#102F50] text-[#FAF7F2] border-2 border-[#EAB84B] shadow-2xl max-w-sm">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#F36D89] text-[#102F50]">
+            {globalToast.badge}
+          </span>
+          <span className="text-xs font-bold">{globalToast.message}</span>
+        </div>
+      )}
+
+      {/* Top Shimmering Prescription & Free Trial Bar */}
+      <div className="sn-animate-shimmer text-[#FAF7F2] px-4 py-2 text-center text-xs font-medium border-b-2 border-[#102F50]">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 mx-auto sm:mx-0">
+            <span className="bg-[#EAB84B] text-[#102F50] font-extrabold px-2.5 py-0.5 rounded-full text-[10px]">
+              * 7 DAYS FREE TRIAL
+            </span>
+            <span>
+              Human listener phone check-ins (`15` or `30` calls/mo) &amp; photo-verified meds — no app install needed for parents.
+            </span>
+          </div>
+          <div className="hidden md:flex items-center gap-3 text-[11px]">
+            <span className="text-[#EAB84B] font-bold">
+              {activePricing.flag} {activePricing.country}: Care {activePricing.care}/mo · Care Plus {activePricing.carePlus}/mo
+            </span>
+            <button
+              onClick={() => navigateToDocs('cookies')}
+              className="underline text-[#FAF7F2]/85 hover:text-[#EAB84B]"
+            >
+              Cookies &amp; Cache
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Header with Official Squircle Logo, Full 10-Route Navigation, 19-Country Selector & Auth */}
+      <header className="sticky top-0 z-40 backdrop-blur-md border-b-2 bg-[#FAF7F2]/95 border-[#DFD3BE] px-4 sm:px-6 py-3">
+        <div className="max-w-7xl mx-auto flex flex-col gap-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <SomeoneNearBrandLogo
+              size={42}
+              onClick={() => {
+                setActiveSpace('home');
+                asmrAudio.playSoftChime(1.05);
+              }}
+            />
+
+            {/* Right Controls: 19-Country Pricing Dropdown + Docs Shortcut + Email-Only Google/Apple Sign-In */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <select
+                value={countryCode}
+                onChange={(e) => handleCountryChange(e.target.value)}
+                aria-label="Select Country Currency"
+                className="bg-[#EFE6D5] border-2 border-[#102F50] rounded-full px-3 py-1.5 text-xs font-extrabold text-[#102F50] cursor-pointer"
+              >
+                {Object.entries(COUNTRY_PRICING_CONFIG).map(([code, cfg]) => (
+                  <option key={code} value={code}>
+                    {cfg.flag} {cfg.country} ({cfg.currency})
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => navigateToDocs('architecture')}
+                className={`px-3 py-1.5 rounded-full text-xs font-extrabold border-2 transition-all ${
+                  activeSpace === 'docs'
+                    ? 'bg-[#102F50] text-[#EAB84B] border-[#102F50]'
+                    : 'bg-[#FFFDF9] text-[#102F50] border-[#DFD3BE] hover:border-[#102F50]'
+                }`}
+              >
+                📖 Docs &amp; Privacy
+              </button>
+
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#EAB84B] text-[#102F50] border-2 border-[#102F50] shadow-[0_3px_0_#102F50] flex items-center gap-1.5"
+              >
+                <LogInIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{userEmail.split('@')[0]}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* All 10 www.someonenear.com Routes Bar */}
+          <nav className="flex items-center p-1 rounded-full border-2 bg-[#EFE6D5] border-[#DFD3BE] gap-1 overflow-x-auto max-w-full">
+            {[
+              { id: 'home', path: '/', label: '🌍 Home & Globe' },
+              { id: 'dashboard', path: '/dashboard', label: '🏡 Dashboard' },
+              { id: 'family', path: '/family', label: '👨‍👩‍👧‍👦 Family Circle' },
+              { id: 'listeners', path: '/listeners', label: '📞 Listeners (15/30)' },
+              { id: 'reminders', path: '/reminders', label: '💊 Meds & Reminders' },
+              { id: 'vault', path: '/send-later', label: '💌 Memory Vault' },
+              { id: 'companion', path: '/companion', label: '🌙 2am AI' },
+              { id: 'insights', path: '/insights', label: '📈 Insights' },
+              { id: 'safety', path: '/safety', label: '🛡️ Safety & SLA' },
+              { id: 'settings', path: '/settings', label: '⚙️ Avatar & Settings' },
+              { id: 'docs', path: '/docs', label: '📜 Docs & Cookies' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveSpace(tab.id);
+                  asmrAudio.playSoftChime(1.05);
+                }}
+                title={`Route: ${tab.path}`}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-extrabold whitespace-nowrap transition-all ${
+                  activeSpace === tab.id
+                    ? 'bg-[#102F50] text-[#EAB84B] shadow-sm'
+                    : 'text-[#102F50] hover:bg-[#FAF7F2]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      {/* Main Content Container */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-8 pb-28">
+        {/* ====================================================================
+            VIEW 0: FULL LANDING PAGE + 3D GLOBE + ASMR LOUNGE + 19-COUNTRY PLANS
+            ==================================================================== */}
+        {activeSpace === 'home' && (
+          <div className="space-y-16 sn-animate-pop">
+            {/* Hero + 3D Family Globe */}
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-6 space-y-5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F36D89]/20 border border-[#F36D89] text-[#D95732] text-xs font-extrabold">
+                  <span>💛 Warm Daily Phone Check-Ins · Photo Meds · 24/7 AI Companion</span>
+                </div>
+
+                <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-[#102F50] leading-[1.08]">
+                  Be there for your parents, even when you’re <span className="italic text-[#D95732]">miles away.</span>
+                </h1>
+
+                <p className="text-sm sm:text-base text-[#4A6583] leading-relaxed">
+                  A trained, empathetic human listener rings their regular phone for warm 15-minute check-ins, verifies daily tablets with a pill-strip photo, and shares a calm mood note with your family circle.
+                </p>
+
+                {/* 6 Interactive Worry Pills */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#D95732]">
+                    What are you worried about today?
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: 'far-away', label: '🌍 They live far away' },
+                      { id: 'lonely', label: '💛 They seem lonely' },
+                      { id: 'meds', label: '💊 They forget medication' },
+                      { id: 'busy', label: '📞 I can’t call every day' },
+                      { id: 'updates', label: '📝 Nobody tells me how they are' },
+                      { id: 'no-app', label: '📵 They won’t use an app' }
+                    ].map((pill) => (
+                      <button
+                        key={pill.id}
+                        onClick={() => {
+                          setSelectedConcern(pill.id);
+                          asmrAudio.playSoftChime(1.1);
+                        }}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold border-2 transition-all ${
+                          selectedConcern === pill.id
+                            ? 'bg-[#102F50] text-[#EAB84B] border-[#102F50] shadow-[0_3px_0_#D95732]'
+                            : 'bg-[#FFFDF9] text-[#102F50] border-[#DFD3BE] hover:border-[#102F50]'
+                        }`}
+                      >
+                        {pill.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3 Interactive Hero Entry Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                  <div
+                    onClick={() => setActiveSpace('family')}
+                    className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_5px_0_#102F50] hover:-translate-y-0.5 cursor-pointer transition-all"
+                  >
+                    <span className="text-[10px] font-extrabold text-[#D95732]">FOR PARENTS</span>
+                    <h3 className="font-serif font-bold text-base text-[#102F50] mt-0.5">Add a Loved One</h3>
+                    <p className="text-[11px] text-[#4A6583] mt-0.5">Invite via Mobile or ID</p>
+                  </div>
+
+                  <div
+                    onClick={() => setActiveSpace('listeners')}
+                    className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_5px_0_#EAB84B] hover:-translate-y-0.5 cursor-pointer transition-all"
+                  >
+                    <span className="text-[10px] font-extrabold text-[#2E7D32]">● PRIYA · 15/30 CALLS</span>
+                    <h3 className="font-serif font-bold text-base text-[#102F50] mt-0.5">Book Listener Call</h3>
+                    <p className="text-[11px] text-[#4A6583] mt-0.5">Rings their regular phone</p>
+                  </div>
+
+                  <div
+                    onClick={() => setActiveSpace('companion')}
+                    className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_5px_0_#F36D89] hover:-translate-y-0.5 cursor-pointer transition-all"
+                  >
+                    <span className="text-[10px] font-extrabold text-[#D95732]">FREE · 24/7</span>
+                    <h3 className="font-serif font-bold text-base text-[#102F50] mt-0.5">2am AI &amp; Studio</h3>
+                    <p className="text-[11px] text-[#4A6583] mt-0.5">Calm chat &amp; Avatar Studio</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Interactive 3D Family Globe */}
+              <div className="lg:col-span-6">
+                <ThreeJsFamilyStage
+                  members={members}
+                  zoom={globeZoom}
+                  setZoom={setGlobeZoom}
+                  autoRotate={globeAutoRotate}
+                  setAutoRotate={setGlobeAutoRotate}
+                  expandedNotifId={expandedNotifId}
+                  setExpandedNotifId={setExpandedNotifId}
+                  targetRotationYaw={targetRotationYaw}
+                  onUpdateMemberOptIn={handleUpdateMemberOptIn}
+                  globeConfig={globeConfig}
+                />
+              </div>
+            </section>
+
+            {/* Cozy Solo-Living Game & ASMR Sanctuary */}
+            <WarmCompanionshipSanctuary onTriggerToast={triggerToast} />
+
+            {/* 19-Country Geolocation Pricing Section (Care 15 Calls & Care Plus 30 Calls) */}
+            <section className="space-y-8">
+              <div className="text-center max-w-2xl mx-auto space-y-2">
+                <span className="px-3.5 py-1 rounded-full bg-[#F36D89]/20 border border-[#F36D89] text-[#D95732] text-xs font-extrabold">
+                  {activePricing.flag} Localized Pricing for {activePricing.country} ({activePricing.currency}) · {activePricing.gateway}
+                </span>
+                <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#102F50]">
+                  Two transparent monthly care plans
+                </h2>
+                <p className="text-xs sm:text-sm text-[#4A6583] font-medium">
+                  * 7 days free and then subscription will start. Cancel anytime in 1 click.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                {/* Care Plan: 15 Calls / Month */}
+                <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#DFD3BE] flex flex-col justify-between space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-1 rounded-full bg-[#EFE6D5] text-[#102F50] text-xs font-extrabold">
+                        CARE PLAN · 15 CALLS / MO
+                      </span>
+                      <span className="text-xs font-extrabold text-[#2E7D32]">* 7 days free</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-serif text-4xl sm:text-5xl font-bold text-[#102F50]">
+                        {activePricing.care}
+                      </span>
+                      <span className="text-xs font-bold text-[#4A6583]">/ month after 7-day trial*</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-[#D95732]">
+                      * 7 days free and then subscription will start
+                    </p>
+                    <ul className="space-y-2.5 text-xs sm:text-sm text-[#102F50] font-medium">
+                      <li>✓ <strong>15 human listener check-in calls</strong> per month (every alternate day)</li>
+                      <li>✓ Photo-verified medication reminders &amp; pill-strip logs</li>
+                      <li>✓ Bidirectional parent &amp; self reminders synced to Google Calendar</li>
+                      <li>✓ Bounded S3 family memory vault (&lt;10MB, expiry &amp; phone download)</li>
+                    </ul>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setPlanTier('care_15');
+                      setCheckoutModalPlan('care_15');
+                    }}
+                    className="w-full py-3.5 rounded-full bg-[#102F50] hover:bg-[#1E4A7A] text-[#FAF7F2] font-extrabold text-xs sm:text-sm shadow-[0_4px_0_#091D34]"
+                  >
+                    Start 7-Day Free Trial · Care ({activePricing.care}/mo*)
+                  </button>
+                </div>
+
+                {/* Care Plus Plan: 30 Calls / Month */}
+                <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_10px_0_#EAB84B] flex flex-col justify-between space-y-6 relative">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-1 rounded-full bg-[#EAB84B] text-[#102F50] border border-[#102F50] text-xs font-extrabold">
+                        MOST POPULAR · 30 CALLS / MO
+                      </span>
+                      <span className="text-xs font-extrabold text-[#D95732]">* 7 days free</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-serif text-4xl sm:text-5xl font-bold text-[#102F50]">
+                        {activePricing.carePlus}
+                      </span>
+                      <span className="text-xs font-bold text-[#4A6583]">/ month after 7-day trial*</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-[#D95732]">
+                      * 7 days free and then subscription will start
+                    </p>
+                    <ul className="space-y-2.5 text-xs sm:text-sm text-[#102F50] font-medium">
+                      <li>✓ <strong>30 daily human listener check-in calls</strong> per month</li>
+                      <li>✓ Dedicated primary listener matching (Priya, Rajesh, Sunita, David)</li>
+                      <li>✓ Unlimited photo-verified tablet tracking &amp; doctor follow-up reminders</li>
+                      <li>✓ Priority Telnyx call recording opt-in &amp; wax-sealed time capsules</li>
+                    </ul>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setPlanTier('care_plus_30');
+                      setCheckoutModalPlan('care_plus_30');
+                    }}
+                    className="w-full py-3.5 rounded-full bg-[#EAB84B] hover:bg-[#F2C55C] text-[#102F50] border-2 border-[#102F50] font-extrabold text-xs sm:text-sm shadow-[0_4px_0_#102F50]"
+                  >
+                    Start 7-Day Free Trial · Care Plus ({activePricing.carePlus}/mo*)
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 1: TODAY'S CARE DASHBOARD (Decluttered 4-Category Switcher)
+            ==================================================================== */}
+        {activeSpace === 'dashboard' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_10px_0_#EAB84B] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2.5 max-w-2xl">
+                <span className="px-3.5 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold uppercase">
+                  🏡 Page 1 · Family Care Dashboard
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  Good morning, Aarav. All {members.length} family members are connected.
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/85 leading-relaxed">
+                  Dad completed his 16-minute morning check-in call with Listener Priya and verified his morning BP tablet with a pill-strip photo.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2.5 shrink-0">
+                <button
+                  onClick={() => setActiveSpace('listeners')}
+                  className="px-5 py-3.5 rounded-full bg-[#EAB84B] text-[#102F50] font-extrabold text-xs shadow-[0_4px_0_#D95732]"
+                >
+                  📞 Book Listener Call
+                </button>
+                <button
+                  onClick={() => setActiveSpace('family')}
+                  className="px-5 py-3.5 rounded-full bg-white/15 text-[#FAF7F2] border border-white/25 font-bold text-xs"
+                >
+                  + Manage Family Circle
+                </button>
+              </div>
+            </section>
+
+            {/* 4 Focused Category Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { id: 'circle', label: '👨‍👩‍👧‍👦 ① Family Circle', count: `${members.length} Loved Ones`, desc: 'Call opt-in & live status' },
+                { id: 'meds', label: '💊 ② Photo Meds', count: `${medList.filter((m) => m.taken).length}/${medList.length} Verified`, desc: 'S3 pill-strip logs' },
+                { id: 'calls', label: '📞 ③ Listener Calls', count: `${callsUsed} / ${totalCallsQuota} Calls`, desc: 'Monthly plan quota' },
+                { id: 'reminders', label: '⏰ ④ Care Reminders', count: `${remindersList.length} Active`, desc: 'Google Calendar synced' }
+              ].map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => {
+                    setDashboardCategory(c.id);
+                    asmrAudio.playSoftChime(1.1);
+                  }}
+                  className={`p-5 rounded-[26px] border-2 cursor-pointer transition-all ${
+                    dashboardCategory === c.id
+                      ? 'bg-[#102F50] text-[#FAF7F2] border-[#102F50] shadow-[0_6px_0_#EAB84B] -translate-y-0.5'
+                      : 'bg-[#FFFDF9] text-[#102F50] border-[#DFD3BE] hover:border-[#102F50]'
+                  }`}
+                >
+                  <span className={`text-[10px] font-extrabold uppercase ${dashboardCategory === c.id ? 'text-[#EAB84B]' : 'text-[#D95732]'}`}>
+                    {c.desc}
+                  </span>
+                  <h3 className="font-serif text-lg font-bold mt-1">{c.label}</h3>
+                  <p className="text-xs font-extrabold mt-2 opacity-90">{c.count}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Progressive Category Detail Panel */}
+            <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] sn-animate-pop">
+              {dashboardCategory === 'circle' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-serif text-2xl font-bold text-[#102F50]">Family Circle &amp; Call Opt-In Status</h3>
+                    <button onClick={() => setActiveSpace('family')} className="text-xs font-extrabold text-[#D95732] underline">
+                      Open Full Family Hub →
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {members.map((m) => (
+                      <div key={m.id} className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] flex items-center gap-3">
+                        <EditorialAvatar member={m} size="sm" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-serif font-bold text-base text-[#102F50] truncate">{m.name}</h4>
+                            <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#EFE6D5]">
+                              {m.callOptIn}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#4A6583] line-clamp-2">{m.statusText}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {dashboardCategory === 'meds' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-serif text-2xl font-bold text-[#102F50]">Today’s Photo-Verified Medications</h3>
+                    <button onClick={() => setActiveSpace('reminders')} className="text-xs font-extrabold text-[#D95732] underline">
+                      Open Full Meds Log →
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {medList.map((med) => (
+                      <div
+                        key={med.id}
+                        onClick={() => {
+                          setMedList((prev) => prev.map((m) => (m.id === med.id ? { ...m, taken: !m.taken } : m)));
+                          triggerToast(`Updated ${med.name} status!`);
+                        }}
+                        className="p-4 rounded-2xl bg-[#FAF7F2] border-2 border-[#DFD3BE] hover:border-[#102F50] cursor-pointer flex items-center justify-between"
+                      >
+                        <div>
+                          <p className="text-xs font-extrabold text-[#102F50]">{med.name}</p>
+                          <p className="text-[11px] text-[#4A6583]">{med.forWho} · ⏰ {med.time}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold ${med.taken ? 'bg-[#2E7D32] text-white' : 'bg-[#EAB84B] text-[#102F50]'}`}>
+                          {med.taken ? '✓ Taken' : 'Mark Taken'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {dashboardCategory === 'calls' && (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <h3 className="font-serif text-2xl font-bold text-[#102F50]">
+                        Monthly Listener Call Quota ({callsUsed} / {totalCallsQuota} Used)
+                      </h3>
+                      <p className="text-xs text-[#4A6583]">
+                        Switch between the 15-call Care plan and 30-call Care Plus plan anytime.
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setPlanTier('care_15')}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold ${planTier === 'care_15' ? 'bg-[#102F50] text-[#EAB84B]' : 'bg-[#EFE6D5] text-[#102F50]'}`}
+                      >
+                        15 Calls Plan
+                      </button>
+                      <button
+                        onClick={() => setPlanTier('care_plus_30')}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold ${planTier === 'care_plus_30' ? 'bg-[#102F50] text-[#EAB84B]' : 'bg-[#EFE6D5] text-[#102F50]'}`}
+                      >
+                        30 Calls Plan
+                      </button>
+                    </div>
+                  </div>
+                  <div className="w-full h-3 rounded-full bg-[#EFE6D5] overflow-hidden">
+                    <div
+                      className="h-full bg-[#102F50] rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, (callsUsed / totalCallsQuota) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {dashboardCategory === 'reminders' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-serif text-2xl font-bold text-[#102F50]">Bidirectional Parent &amp; Self Reminders</h3>
+                    <button onClick={() => setActiveSpace('reminders')} className="text-xs font-extrabold text-[#D95732] underline">
+                      Manage Reminders →
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {remindersList.map((r) => (
+                      <div key={r.id} className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE]">
+                        <span className="text-[10px] font-extrabold text-[#D95732]">{r.target} · {r.time}</span>
+                        <p className="font-serif font-bold text-base text-[#102F50] mt-1">{r.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 2: FAMILY CIRCLE & ONBOARDING HUB
+            ==================================================================== */}
+        {activeSpace === 'family' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_8px_0_#EAB84B] flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="space-y-2">
+                <span className="px-3.5 py-1 rounded-full bg-[#F36D89] text-[#102F50] text-xs font-extrabold uppercase">
+                  👨‍👩‍👧‍👦 Page 2 · Family Circle &amp; Telnyx Call Opt-In Hub
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  Manage your loved ones &amp; call participation
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/80 max-w-xl">
+                  Add family members by mobile number or shareable Invite ID. Invitees can confirm on the call if they want to be part of it, or ignore the invite.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAddMemberModal(true)}
+                className="px-6 py-3.5 rounded-full bg-[#EAB84B] text-[#102F50] font-extrabold text-xs shadow-[0_4px_0_#D95732] shrink-0"
+              >
+                + Add Family Member (Mobile / ID)
+              </button>
+            </section>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="p-5 rounded-3xl bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#102F50] flex flex-col justify-between gap-4"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <EditorialAvatar member={member} size="md" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <h3 className="font-serif font-bold text-lg text-[#102F50] truncate">{member.name}</h3>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${
+                            member.callOptIn === 'confirmed'
+                              ? 'bg-[#2E7D32]/15 text-[#2E7D32]'
+                              : member.callOptIn === 'ignored'
+                              ? 'bg-[#D95732]/15 text-[#D95732]'
+                              : 'bg-[#EAB84B]/40 text-[#102F50]'
+                          }`}
+                        >
+                          {member.callOptIn}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#4A6583]">{member.location} · {member.role}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-[#102F50] font-medium bg-[#FAF7F2] p-3.5 rounded-2xl border border-[#DFD3BE]">
+                    &ldquo;{member.statusText}&rdquo;
+                  </p>
+
+                  <div className="flex gap-2 pt-1 border-t border-[#DFD3BE]">
+                    <button
+                      onClick={() => handleUpdateMemberOptIn(member.id, 'confirmed')}
+                      className="flex-1 py-2 rounded-xl bg-[#2E7D32] text-white text-[11px] font-extrabold hover:opacity-90"
+                    >
+                      ✓ Confirm on Call
+                    </button>
+                    <button
+                      onClick={() => handleUpdateMemberOptIn(member.id, 'ignored')}
+                      className="flex-1 py-2 rounded-xl bg-[#D95732] text-white text-[11px] font-extrabold hover:opacity-90"
+                    >
+                      ✕ Ignore Invite
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 3: TRAINED LISTENERS & CALL BOOKING HUB (Non-Bald Avatars)
+            ==================================================================== */}
+        {activeSpace === 'listeners' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_8px_0_#EAB84B] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-3.5 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold uppercase">
+                    📞 Page 3 · Trained Listeners &amp; Call Booking Hub
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-[#F36D89] text-[#102F50] text-xs font-extrabold">
+                    {callsUsed} / {totalCallsQuota} Monthly Calls Used
+                  </span>
+                </div>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  Empathetic human listeners who speak their language.
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/85">
+                  Every listener is geriatric-care certified and calls your parents’ regular landline or mobile number via Telnyx.
+                </p>
+              </div>
+            </section>
+
+            {/* 3 Categorized Sub-Tabs */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'roster', label: '👩‍⚕️ ① Choose a Trained Listener (4)' },
+                { id: 'scheduled', label: `📅 ② Upcoming Scheduled Calls (${scheduledCalls.length})` },
+                { id: 'reflections', label: '📝 ③ Post-Call Mood Reflections' }
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setListenerSubTab(t.id)}
+                  className={`px-4 py-2.5 rounded-full text-xs font-extrabold border-2 transition-all ${
+                    listenerSubTab === t.id
+                      ? 'bg-[#102F50] text-[#EAB84B] border-[#102F50] shadow-[0_4px_0_#D95732]'
+                      : 'bg-[#FFFDF9] text-[#102F50] border-[#DFD3BE]'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {listenerSubTab === 'roster' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {TRAINED_LISTENERS.map((l) => (
+                  <div
+                    key={l.id}
+                    className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_8px_0_#102F50] flex flex-col justify-between gap-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4">
+                        <EditorialAvatar member={l.memberAvatar} size="lg" />
+                        <div>
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#EFE6D5] text-[#102F50] text-[10px] font-extrabold">
+                            {l.experience}
+                          </span>
+                          <h3 className="font-serif font-bold text-xl text-[#102F50] mt-1">{l.name}</h3>
+                          <p className="text-xs font-bold text-[#D95732]">{l.specialty}</p>
+                          <p className="text-[11px] text-[#4A6583]">🗣️ {l.languages}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-[#4A6583] bg-[#FAF7F2] p-3.5 rounded-2xl border border-[#DFD3BE] leading-relaxed">
+                        {l.bio}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setBookingModalListener(l)}
+                      className="w-full py-3.5 rounded-full bg-[#102F50] hover:bg-[#1E4A7A] text-[#EAB84B] text-xs font-extrabold shadow-[0_4px_0_#D95732]"
+                    >
+                      📞 Book 15-Min Phone Check-In with {l.name.split(' ')[1]}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {listenerSubTab === 'scheduled' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {scheduledCalls.map((sc) => (
+                  <div key={sc.id} className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#2E7D32] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-0.5 rounded-full bg-[#2E7D32]/15 text-[#2E7D32] text-[10px] font-extrabold">
+                        ✓ {sc.status}
+                      </span>
+                      <span className="text-xs font-extrabold text-[#D95732]">{sc.time}</span>
+                    </div>
+                    <h3 className="font-serif font-bold text-lg text-[#102F50]">
+                      {sc.listenerName} → {sc.forWho}
+                    </h3>
+                    <p className="text-xs text-[#4A6583]">{sc.topic}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {listenerSubTab === 'reflections' && (
+              <div className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#EAB84B] space-y-3">
+                <span className="px-3 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-[10px] font-extrabold">
+                  🩺 TODAY · 08:46 AM · 16 MIN CALL WITH DAD (PUNE)
+                </span>
+                <h3 className="font-serif text-xl font-bold text-[#102F50]">
+                  Listener Priya Sharma’s Post-Call Reflection
+                </h3>
+                <p className="text-xs text-[#4A6583] leading-relaxed">
+                  &ldquo;Uncle sounded cheerful and well-rested today. He confirmed taking his Telma 40 tablet after warm water, shared that his morning blood pressure reading was 124/80, and talked fondly about his upcoming Sunday mango lunch.&rdquo;
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 4: PHOTO-VERIFIED MEDICATIONS & BIDIRECTIONAL REMINDERS
+            ==================================================================== */}
+        {activeSpace === 'reminders' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_10px_0_#F36D89] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2.5 max-w-2xl">
+                <span className="px-3.5 py-1 rounded-full bg-[#F36D89] text-[#102F50] text-xs font-extrabold uppercase">
+                  💊 Page 4 · Photo-Verified Meds &amp; Bidirectional Reminders
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  Tablets, without the nagging.
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/85">
+                  Upload a clear pill-strip photo once (&lt;10MB S3 verified). Listeners verify each dose during daily calls and sync reminders to Google Calendar.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAddMedModal(true)}
+                className="px-6 py-3.5 rounded-full bg-[#EAB84B] text-[#102F50] font-extrabold text-xs shadow-[0_4px_0_#D95732] shrink-0"
+              >
+                📷 + Add Pill-Strip Photo Med
+              </button>
+            </section>
+
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'meds', label: `💊 ① Today's Pill-Strip Photo Log (${medList.filter((m) => m.taken).length}/${medList.length})` },
+                { id: 'reminders', label: `⏰ ② Parent & Self Reminders (${remindersList.length})` },
+                { id: 'calendar', label: '📅 ③ Google Calendar Two-Way Sync' }
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setRemindersSubTab(t.id)}
+                  className={`px-4 py-2.5 rounded-full text-xs font-extrabold border-2 transition-all ${
+                    remindersSubTab === t.id
+                      ? 'bg-[#102F50] text-[#EAB84B] border-[#102F50] shadow-[0_4px_0_#D95732]'
+                      : 'bg-[#FFFDF9] text-[#102F50] border-[#DFD3BE]'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {remindersSubTab === 'meds' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {medList.map((med) => {
+                  const memberObj = members.find((m) => m.id === med.memberId) || members[0];
+                  return (
+                    <div
+                      key={med.id}
+                      onClick={() => {
+                        setMedList((prev) => prev.map((m) => (m.id === med.id ? { ...m, taken: !m.taken } : m)));
+                        triggerToast(`Updated ${med.name} dose verification!`, '💊 Meds Log');
+                      }}
+                      className={`p-6 rounded-[28px] border-2 cursor-pointer transition-all bg-[#FFFDF9] flex flex-col justify-between gap-4 ${
+                        med.taken ? 'border-[#2E7D32] shadow-[0_7px_0_#2E7D32]' : 'border-[#102F50] shadow-[0_7px_0_#EAB84B]'
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <EditorialAvatar member={memberObj} size="sm" />
+                            <div>
+                              <span className="text-[11px] font-extrabold text-[#D95732] block">{med.forWho}</span>
+                              <span className="text-xs font-bold text-[#102F50]">⏰ {med.time}</span>
+                            </div>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${med.taken ? 'bg-[#2E7D32]/15 text-[#2E7D32]' : 'bg-[#F36D89]/25 text-[#D95732]'}`}>
+                            {med.taken ? '✓ Verified' : 'Due Today'}
+                          </span>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border-2 border-[#DFD3BE] flex items-center justify-between gap-3">
+                          <div>
+                            <span className="text-[10px] font-extrabold uppercase text-[#2E7D32]">📷 S3 Pill-Strip Photo</span>
+                            <h3 className="font-serif font-bold text-base text-[#102F50]">{med.name}</h3>
+                            <p className="text-[11px] text-[#4A6583]">{med.instructions}</p>
+                          </div>
+                          <svg viewBox="0 0 48 64" className="w-11 h-14 shrink-0">
+                            <rect x="4" y="4" width="40" height="56" rx="8" fill="#EFE6D5" stroke="#102F50" strokeWidth="2" />
+                            <circle cx="16" cy="18" r="5.5" fill={med.stripColor} />
+                            <circle cx="32" cy="18" r="5.5" fill={med.stripColor} />
+                            <circle cx="16" cy="33" r="5.5" fill={med.stripColor} />
+                            <circle cx="32" cy="33" r="5.5" fill={med.taken ? '#DFD3BE' : med.stripColor} />
+                            <circle cx="16" cy="48" r="5.5" fill={med.stripColor} />
+                            <circle cx="32" cy="48" r="5.5" fill={med.stripColor} />
+                          </svg>
+                        </div>
+                      </div>
+
+                      <button className={`w-full py-2.5 rounded-full text-xs font-extrabold ${med.taken ? 'bg-[#2E7D32] text-white' : 'bg-[#EAB84B] text-[#102F50]'}`}>
+                        {med.taken ? '✓ Dose Confirmed (Tap to Undo)' : 'Tap to Confirm Dose Taken'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {remindersSubTab === 'reminders' && (
+              <div className="space-y-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!newRemText.trim()) return;
+                    setRemindersList((prev) => [
+                      {
+                        id: `rem-${Date.now()}`,
+                        target: newRemTarget,
+                        memberId: 'dad',
+                        category: 'Care Follow-up',
+                        time: 'Today · 07:00 PM',
+                        text: newRemText
+                      },
+                      ...prev
+                    ]);
+                    setNewRemText('');
+                    triggerToast('Bidirectional reminder saved & synced to Google Calendar!', '⏰ Reminder Added');
+                  }}
+                  className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#102F50] flex flex-col sm:flex-row gap-3"
+                >
+                  <select
+                    value={newRemTarget}
+                    onChange={(e) => setNewRemTarget(e.target.value)}
+                    className="px-3.5 py-2.5 rounded-2xl bg-[#EFE6D5] text-xs font-extrabold text-[#102F50]"
+                  >
+                    <option value="For Dad & Mum (Pune)">For Dad &amp; Mum (Pune)</option>
+                    <option value="Set by Mum for Family">Set by Mum for Family</option>
+                    <option value="For Self (Aarav)">For Self (Aarav)</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={newRemText}
+                    onChange={(e) => setNewRemText(e.target.value)}
+                    placeholder="Add doctor visit, walk reminder, or prescription refill..."
+                    className="flex-1 px-4 py-2.5 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] text-xs font-medium"
+                  />
+                  <button type="submit" className="px-6 py-2.5 rounded-2xl bg-[#102F50] text-[#EAB84B] text-xs font-extrabold">
+                    + Add Reminder
+                  </button>
+                </form>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {remindersList.map((rem) => (
+                    <div key={rem.id} className="p-5 rounded-3xl bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_5px_0_#D95732] space-y-2">
+                      <div className="flex items-center justify-between text-xs font-extrabold">
+                        <span className="text-[#D95732]">{rem.target}</span>
+                        <span className="text-[#4A6583]">{rem.time}</span>
+                      </div>
+                      <h4 className="font-serif font-bold text-lg text-[#102F50]">{rem.text}</h4>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {remindersSubTab === 'calendar' && (
+              <div className="bg-[#EFE6D5] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="space-y-2 max-w-xl">
+                  <span className="px-3 py-1 rounded-full bg-[#2E7D32] text-white text-[10px] font-extrabold uppercase">
+                    📅 Two-Way Google Calendar Sync
+                  </span>
+                  <h3 className="font-serif text-2xl font-bold text-[#102F50]">
+                    Every parent doctor visit &amp; tablet time stays synced with your phone calendar
+                  </h3>
+                  <p className="text-xs text-[#4A6583]">
+                    Connected to <code>google-calendar.functions.ts</code> with 30-minute gentle family notifications.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setCalendarSynced(!calendarSynced);
+                    triggerToast(calendarSynced ? 'Paused Calendar Sync' : 'Google Calendar Two-Way Sync Active!');
+                  }}
+                  className="px-6 py-3.5 rounded-full bg-[#102F50] text-[#EAB84B] text-xs font-extrabold shadow-[0_4px_0_#2E7D32]"
+                >
+                  {calendarSynced ? '✓ Connected to Google Calendar' : 'Connect Google Calendar'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 5: CREATIVE BOUNDED S3 MEMORY VAULT & TIME CAPSULES
+            ==================================================================== */}
+        {activeSpace === 'vault' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_10px_0_#EAB84B] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2.5 max-w-2xl">
+                <span className="px-3.5 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold uppercase">
+                  💌 Page 5 · Bounded S3 Memory Vault &amp; Time Capsules
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  A warm family scrapbook of voices, Polaroids &amp; future letters.
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/85">
+                  Every upload enforces a &lt;10MB S3 cap, an audience privacy boundary, an automatic expiry timer, and 1-tap phone download.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'keepsakes', label: '🖼️ ① Polaroid & Vinyl Gallery' },
+                  { id: 'studio', label: '🎙️ ② 1-Click Voice Studio' },
+                  { id: 'capsules', label: '⏳ ③ Wax-Sealed Time Capsules' }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setVaultSubTab(t.id)}
+                    className={`px-4 py-2.5 rounded-full text-xs font-extrabold border-2 transition-all ${
+                      vaultSubTab === t.id
+                        ? 'bg-[#EAB84B] text-[#102F50] border-[#102F50]'
+                        : 'bg-white/10 text-[#FAF7F2] border-white/20'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {vaultSubTab === 'keepsakes' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                {sharedItems.map((item) => {
+                  const memberObj = members.find((m) => m.id === item.memberId) || members[0];
+                  const isPlaying = playingAudioId === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      className="relative bg-[#FFFDF9] border-2 border-[#102F50] rounded-[30px] p-6 shadow-[0_8px_0_#102F50] flex flex-col justify-between gap-4"
+                    >
+                      <div
+                        style={{ backgroundColor: item.washiColor }}
+                        className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-6 rounded-md border-2 border-[#102F50] flex items-center justify-center"
+                      >
+                        <span className="text-[9px] font-extrabold uppercase text-[#102F50]">
+                          {item.type === 'audio' ? '🎙️ Voice Vinyl' : '📷 Polaroid Frame'}
+                        </span>
+                      </div>
+
+                      <div className="space-y-3 pt-2">
+                        <div className="flex items-center justify-between text-[10px] font-extrabold">
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#EFE6D5] text-[#102F50]">🛡️ {item.boundary}</span>
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#F36D89]/25 text-[#D95732]">⏳ {item.expiry}</span>
+                        </div>
+
+                        {item.type === 'audio' ? (
+                          <div
+                            onClick={() => {
+                              setPlayingAudioId(isPlaying ? null : item.id);
+                              asmrAudio.playSingingBowl();
+                            }}
+                            className="p-4 rounded-2xl bg-[#102F50] text-[#FAF7F2] border-2 border-[#EAB84B] cursor-pointer flex items-center gap-4"
+                          >
+                            <div
+                              className={`w-12 h-12 rounded-full border-4 border-[#EAB84B] bg-[#091D34] flex items-center justify-center shrink-0 ${
+                                isPlaying ? 'animate-spin' : ''
+                              }`}
+                            >
+                              <div className="w-4 h-4 rounded-full bg-[#F36D89]" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-extrabold text-[#EAB84B]">
+                                {isPlaying ? '● Spinning Vinyl Blessing...' : '▶ Tap to Spin Voice Vinyl'}
+                              </p>
+                              <span className="text-[10px] text-white/70">{item.size}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-4 rounded-2xl bg-[#FAF7F2] border-2 border-[#DFD3BE] h-28 flex flex-col items-center justify-center text-center">
+                            <span className="text-2xl">🌼📷</span>
+                            <span className="text-[11px] font-extrabold text-[#D95732] mt-1">{item.size}</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2.5">
+                          <EditorialAvatar member={memberObj} size="sm" />
+                          <div>
+                            <h3 className="font-serif font-bold text-base text-[#102F50] leading-snug">{item.title}</h3>
+                            <p className="text-[11px] font-bold text-[#D95732]">By {item.sender} · {item.date}</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-[#4A6583]">&ldquo;{item.content}&rdquo;</p>
+                      </div>
+
+                      <div className="pt-3 border-t border-[#DFD3BE] flex items-center justify-between">
+                        <span className="text-xs font-extrabold text-[#102F50]">💛 {item.reactions} Hearts</span>
+                        <button
+                          onClick={() => handleDownloadToPhone(item)}
+                          className="px-3.5 py-2 rounded-full bg-[#102F50] text-[#EAB84B] text-xs font-extrabold flex items-center gap-1.5"
+                        >
+                          <DownloadIcon className="w-3.5 h-3.5" />
+                          <span>Save to Phone</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {vaultSubTab === 'studio' && (
+              <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] max-w-2xl mx-auto space-y-5">
+                <span className="px-3 py-1 rounded-full bg-[#F36D89] text-[#102F50] text-xs font-extrabold">
+                  🎙️ 1-Click Voice Blessing &amp; Bounded Media Upload (&lt;10MB S3)
+                </span>
+                <h3 className="font-serif text-2xl font-bold text-[#102F50]">
+                  Record a warm voice note or upload a family photo
+                </h3>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={newVaultTitle}
+                    onChange={(e) => setNewVaultTitle(e.target.value)}
+                    placeholder="Title (e.g., Sunday Blessing for Rohan's Exams)"
+                    className="w-full p-3.5 rounded-2xl bg-[#FAF7F2] border-2 border-[#DFD3BE] text-xs font-bold"
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <select
+                      value={newVaultBoundary}
+                      onChange={(e) => setNewVaultBoundary(e.target.value)}
+                      className="p-3 rounded-2xl bg-[#EFE6D5] text-xs font-extrabold text-[#102F50]"
+                    >
+                      <option value="Entire Family Circle">🛡️ Entire Family Circle</option>
+                      <option value="Parents Only (Pune)">🛡️ Parents Only (Pune)</option>
+                      <option value="Siblings Only">🛡️ Siblings Only</option>
+                    </select>
+                    <select
+                      value={newVaultExpiry}
+                      onChange={(e) => setNewVaultExpiry(e.target.value)}
+                      className="p-3 rounded-2xl bg-[#EFE6D5] text-xs font-extrabold text-[#102F50]"
+                    >
+                      <option value="24 Hours">⏳ Expires in 24 Hours</option>
+                      <option value="7 Days">⏳ Expires in 7 Days</option>
+                      <option value="30 Days">⏳ Expires in 30 Days</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsRecordingVoice(!isRecordingVoice);
+                      asmrAudio.playSoftChime(1.2);
+                    }}
+                    className={`flex-1 py-3.5 rounded-full text-xs font-extrabold border-2 border-[#102F50] ${
+                      isRecordingVoice ? 'bg-[#F36D89] text-[#102F50] animate-pulse' : 'bg-[#EFE6D5] text-[#102F50]'
+                    }`}
+                  >
+                    {isRecordingVoice ? `● Recording Voice... 00:0${recordingSeconds}` : '🎙️ Start 1-Click Voice Recording'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const title = newVaultTitle.trim() || 'Warm Family Voice Blessing';
+                      setSharedItems((prev) => [
+                        {
+                          id: `v-${Date.now()}`,
+                          type: 'audio',
+                          title,
+                          sender: 'Aarav',
+                          memberId: 'aarav',
+                          boundary: newVaultBoundary,
+                          expiry: newVaultExpiry,
+                          size: '1.9 MB · S3 Verified WAV',
+                          date: 'Just now',
+                          washiColor: '#EAB84B',
+                          reactions: 1,
+                          content: 'Recorded in the 1-Click Voice Blessing Studio (<10MB S3 verified).'
+                        },
+                        ...prev
+                      ]);
+                      setNewVaultTitle('');
+                      setIsRecordingVoice(false);
+                      setVaultSubTab('keepsakes');
+                      triggerToast(`Published "${title}" to the Bounded S3 Memory Vault!`, '💌 Vault Updated');
+                    }}
+                    className="px-6 py-3.5 rounded-full bg-[#102F50] text-[#EAB84B] text-xs font-extrabold"
+                  >
+                    Publish to Family Vault →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {vaultSubTab === 'capsules' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {timeCapsules.map((cap) => (
+                  <div key={cap.id} className="p-6 rounded-[30px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_8px_0_#D95732] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-1 rounded-full bg-[#D95732] text-white text-[10px] font-extrabold">
+                        🕯️ {cap.status}
+                      </span>
+                      <span className="text-xs font-extrabold text-[#102F50]">{cap.unlockDate}</span>
+                    </div>
+                    <h3 className="font-serif font-bold text-xl text-[#102F50]">{cap.title}</h3>
+                    <p className="text-xs text-[#4A6583]">{cap.preview}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 6: 24/7 2AM AI COMPANION + AVATAR & GLOBE CUSTOMIZER STUDIO
+            ==================================================================== */}
+        {activeSpace === 'companion' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_10px_0_#EAB84B] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <span className="px-3.5 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold uppercase">
+                  🌙 Route: /companion · 24/7 Empathetic 2am AI Companion
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  A calm voice at 2am when the house feels quiet.
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/85">
+                  Powered by <code>ai-gateway.server.ts</code> and <code>conversations.functions.ts</code> for caregiver reflection, parent check-in scripts, and 4-7-8 breathing.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCompanionSubTab('chat')}
+                  className={`px-4 py-2.5 rounded-full text-xs font-extrabold border-2 ${
+                    companionSubTab === 'chat' ? 'bg-[#EAB84B] text-[#102F50] border-[#102F50]' : 'bg-white/10 text-[#FAF7F2] border-white/20'
+                  }`}
+                >
+                  🌙 ① 2am AI Companion
+                </button>
+                <button
+                  onClick={() => setActiveSpace('settings')}
+                  className="px-4 py-2.5 rounded-full text-xs font-extrabold border-2 bg-white/10 text-[#FAF7F2] border-white/20 hover:bg-white/20"
+                >
+                  ⚙️ Open Avatar &amp; Globe Settings →
+                </button>
+              </div>
+            </section>
+
+            <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] space-y-4 max-w-3xl mx-auto">
+              <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+                {chatMessages.map((msg, i) => (
+                  <div
+                    key={i}
+                    className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'bg-[#102F50] text-[#FAF7F2] ml-12'
+                        : 'bg-[#FAF7F2] text-[#102F50] border border-[#DFD3BE] mr-12'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                ))}
+                {isAiTyping && (
+                  <div className="text-xs font-bold text-[#D95732] animate-pulse">
+                    🌙 SomeoneNear Companion is reflecting...
+                  </div>
+                )}
+              </div>
+
+              <form onSubmit={handleSendCompanionMessage} className="flex gap-2 pt-2">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Share what is on your mind or ask for a parent check-in script..."
+                  className="flex-1 px-4 py-3 rounded-full bg-[#FAF7F2] border-2 border-[#DFD3BE] text-xs font-medium outline-none focus:border-[#102F50]"
+                />
+                <button
+                  type="submit"
+                  className="px-6 py-3 rounded-full bg-[#102F50] text-[#EAB84B] text-xs font-extrabold"
+                >
+                  Send
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 7: MOOD & WELLNESS INSIGHTS ROUTE (`/insights`)
+            ==================================================================== */}
+        {activeSpace === 'insights' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_10px_0_#EAB84B] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <span className="px-3.5 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold uppercase">
+                  📈 Route: /insights · Mood, Vitals &amp; Call Adherence Analytics
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  Gentle emotional &amp; medication trends across the month.
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/85">
+                  Powered by <code>insights.functions.ts</code> &amp; <code>call-crm.functions.ts</code>—summarizing parent mood warmth, BP logs, and photo-verified tablet streaks.
+                </p>
+              </div>
+              <span className="px-4 py-2 rounded-full bg-[#2E7D32] text-white text-xs font-extrabold">
+                ✓ 96% Monthly Care Consistency
+              </span>
+            </section>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#2E7D32] space-y-3">
+                <span className="text-[10px] font-extrabold uppercase text-[#2E7D32]">DAD (PUNE) · 14-DAY MOOD</span>
+                <h3 className="font-serif text-2xl font-bold text-[#102F50]">Calm &amp; Cheerful (4.8 / 5)</h3>
+                <p className="text-xs text-[#4A6583]">
+                  Morning BP stabilized around 124/80. Loves discussing cricket and old radio songs with Listener Priya.
+                </p>
+                <div className="flex items-end gap-2 h-20 pt-2">
+                  {[68, 75, 82, 80, 90, 94, 96].map((v, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+                      <div style={{ height: `${v * 0.6}px` }} className="w-full rounded-t-lg bg-[#2E7D32]" />
+                      <span className="text-[9px] font-bold text-[#4A6583]">D{idx + 1}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#EAB84B] space-y-3">
+                <span className="text-[10px] font-extrabold uppercase text-[#D95732]">MUM (PUNE) · SOCIAL WARMTH</span>
+                <h3 className="font-serif text-2xl font-bold text-[#102F50]">Engaged &amp; Creative (4.9 / 5)</h3>
+                <p className="text-xs text-[#4A6583]">
+                  Shared 4 balcony marigold photos in the S3 Vault and never missed her afternoon Shelcal tablet.
+                </p>
+                <div className="flex items-end gap-2 h-20 pt-2">
+                  {[74, 78, 85, 88, 92, 95, 98].map((v, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+                      <div style={{ height: `${v * 0.6}px` }} className="w-full rounded-t-lg bg-[#EAB84B] border border-[#102F50]" />
+                      <span className="text-[9px] font-bold text-[#4A6583]">D{idx + 1}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#F36D89] space-y-3">
+                <span className="text-[10px] font-extrabold uppercase text-[#102F50]">PHOTO-VERIFIED MEDS STREAK</span>
+                <h3 className="font-serif text-2xl font-bold text-[#102F50]">19-Day Verified Streak</h3>
+                <p className="text-xs text-[#4A6583]">
+                  100% of morning Telma 40 and afternoon Calcium doses verified with S3 pill-strip timestamps.
+                </p>
+                <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] text-xs font-bold text-[#102F50]">
+                  🩺 Next Doctor Review: Tomorrow · 10:30 AM (Dr. Kulkarni)
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 8: SAFETY, ESCALATION SLA & TRUST CENTER (`/safety`)
+            ==================================================================== */}
+        {activeSpace === 'safety' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_10px_0_#D95732] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <span className="px-3.5 py-1 rounded-full bg-[#F36D89] text-[#102F50] text-xs font-extrabold uppercase">
+                  🛡️ Route: /safety · Safety, Escalation SLA &amp; Consent Guardrails
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  Enterprise-grade safety for your parents’ voice &amp; health data.
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/85">
+                  Powered by <code>safety.functions.ts</code>, <code>moderation.server.ts</code>, and <code>telnyx.functions.ts</code>.
+                </p>
+              </div>
+              <button
+                onClick={() => triggerToast('Simulated Emergency Family Escalation Alert dispatched via SMS & Telnyx!', '🚨 SLA Tested')}
+                className="px-5 py-3.5 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold shadow-[0_4px_0_#D95732]"
+              >
+                🔔 Test Family Escalation Alert
+              </button>
+            </section>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#102F50] space-y-2.5">
+                <span className="px-2.5 py-1 rounded-full bg-[#EFE6D5] text-[#102F50] text-[10px] font-extrabold">
+                  1. 5-MINUTE UNANSWERED CALL SLA
+                </span>
+                <h3 className="font-serif text-xl font-bold text-[#102F50]">Missed Call Escalation</h3>
+                <p className="text-xs text-[#4A6583] leading-relaxed">
+                  If a scheduled check-in call goes unanswered twice within 15 minutes, SomeoneNear immediately notifies the Circle Coordinator and designated neighbor contact.
+                </p>
+              </div>
+
+              <div className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#102F50] space-y-2.5">
+                <span className="px-2.5 py-1 rounded-full bg-[#EFE6D5] text-[#102F50] text-[10px] font-extrabold">
+                  2. TELNYX CALL OPT-IN CONSENT
+                </span>
+                <h3 className="font-serif text-xl font-bold text-[#102F50]">Explicit Invitee Control</h3>
+                <p className="text-xs text-[#4A6583] leading-relaxed">
+                  Parents and invitees can confirm on the call if they want to be part of it or ignore the invite at any time. Call recording is strictly opt-in per family circle.
+                </p>
+              </div>
+
+              <div className="p-6 rounded-[28px] bg-[#FFFDF9] border-2 border-[#102F50] shadow-[0_6px_0_#102F50] space-y-2.5">
+                <span className="px-2.5 py-1 rounded-full bg-[#EFE6D5] text-[#102F50] text-[10px] font-extrabold">
+                  3. BOUNDED S3 MEDIA VAULT (&lt;10MB)
+                </span>
+                <h3 className="font-serif text-xl font-bold text-[#102F50]">Auto-Expiring Presigned URLs</h3>
+                <p className="text-xs text-[#4A6583] leading-relaxed">
+                  Every pill-strip photo and voice note is scanned for MIME safety, capped at 10MB, isolated by family boundary, and automatically purged upon expiry.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 9: SETTINGS, AVATAR & 3D GLOBE STUDIO (`/settings`)
+            ==================================================================== */}
+        {activeSpace === 'settings' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_10px_0_#EAB84B] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <span className="px-3.5 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold uppercase">
+                  ⚙️ Route: /settings · Editorial Avatar, 3D Globe &amp; Account Preferences
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  Customize every family member’s avatar, 3D globe pin &amp; local cache.
+                </h1>
+              </div>
+              <button
+                onClick={() => navigateToDocs('cookies')}
+                className="px-5 py-3 rounded-full bg-[#F36D89] text-[#102F50] text-xs font-extrabold shadow-[0_4px_0_#091D34]"
+              >
+                🍪 Manage Cookies &amp; Cache →
+              </button>
+            </section>
+
+            <AvatarAndGlobeCustomizer
+              members={members}
+              selectedMemberId={selectedCustomMemberId}
+              onSelectMember={setSelectedCustomMemberId}
+              onUpdateMember={handleCustomizeMember}
+              onResetMember={handleResetMember}
+              globeConfig={globeConfig}
+              onUpdateGlobeConfig={setGlobeConfig}
+            />
+          </div>
+        )}
+
+        {/* ====================================================================
+            PAGE 10: DOCS, ARCHITECTURE, PRIVACY, COOKIES & CACHE CENTER (`/docs`)
+            ==================================================================== */}
+        {activeSpace === 'docs' && (
+          <div className="space-y-8 sn-animate-pop">
+            <section className="bg-gradient-to-br from-[#102F50] via-[#163B63] to-[#1E4A7A] text-[#FAF7F2] rounded-[32px] p-6 sm:p-8 border-2 border-[#102F50] shadow-[0_10px_0_#EAB84B] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <span className="px-3.5 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold uppercase">
+                  📜 Route: /docs · Platform Documentation, Privacy, Cookies &amp; Cache Center
+                </span>
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+                  How SomeoneNear works &amp; how we protect your family’s privacy.
+                </h1>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/85">
+                  Complete technical documentation for <code>www.someonenear.com</code> (`with-you-together` repo), DPDP Act / GDPR privacy compliance, and local browser cache controls.
+                </p>
+              </div>
+            </section>
+
+            {/* Docs Sub-Navigation */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'architecture', label: '🏗️ ① Platform Docs & Route Map' },
+                { id: 'privacy', label: '🔒 ② Privacy Policy (DPDP & GDPR)' },
+                { id: 'cookies', label: '🍪 ③ Cookies & Local Cache Manager' },
+                { id: 'terms', label: '⚖️ ④ Terms, 7-Day Trial & Refund Policy' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setDocsSection(tab.id)}
+                  className={`px-4 py-2.5 rounded-full text-xs font-extrabold border-2 transition-all ${
+                    docsSection === tab.id
+                      ? 'bg-[#102F50] text-[#EAB84B] border-[#102F50] shadow-[0_4px_0_#D95732]'
+                      : 'bg-[#FFFDF9] text-[#102F50] border-[#DFD3BE]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {docsSection === 'architecture' && (
+              <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] space-y-6">
+                <h2 className="font-serif text-2xl font-bold text-[#102F50]">
+                  SomeoneNear (`with-you-together`) Full Route &amp; Server Function Architecture
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  {[
+                    { route: '/ (index.tsx)', fn: 'currency.ts + playroom-orb.tsx', desc: 'Hero, 3D Family Globe, 6 Worry Pills, Cozy Solo-Living ASMR Lounge & 19-Country Geolocation Pricing.' },
+                    { route: '/dashboard (dashboard.tsx)', fn: 'dashboard.functions.ts', desc: 'Decluttered 4-Category Family Care Switcher with live call quota (15/30 calls) and today’s meds.' },
+                    { route: '/family (family.tsx)', fn: 'family.functions.ts + telnyx.functions.ts', desc: 'Invite loved ones via mobile number or shareable Invite ID; live Telnyx Call Opt-In (Confirm / Ignore).' },
+                    { route: '/listeners (listeners.tsx)', fn: 'listeners.functions.ts + call-crm.functions.ts', desc: 'Geriatric-certified human listeners (Priya, Rajesh, Sunita, David) with 1-click landline/mobile call booking.' },
+                    { route: '/reminders (reminders.tsx)', fn: 'medications.functions.ts + google-calendar.functions.ts', desc: 'Pill-strip photo verification (<10MB S3), bidirectional parent/self reminders & two-way Google Calendar sync.' },
+                    { route: '/send-later (send-later.tsx)', fn: 's3.server.ts + memories.functions.ts', desc: 'Bounded S3 Memory Vault (<10MB cap, audience boundary, expiry timer, 1-tap Save to Phone & Time Capsules).' },
+                    { route: '/companion (companion.tsx)', fn: 'ai-gateway.server.ts + conversations.functions.ts', desc: '24/7 empathetic 2am AI companion for caregiver support and parent check-in scripts.' },
+                    { route: '/insights & /safety', fn: 'insights.functions.ts + safety.functions.ts', desc: '14-day parent mood/BP trends, medication streaks, and 5-minute unanswered call escalation SLA.' }
+                  ].map((item, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#DFD3BE] space-y-1">
+                      <div className="flex items-center justify-between font-extrabold text-[#102F50]">
+                        <span>{item.route}</span>
+                        <code className="text-[10px] px-2 py-0.5 rounded bg-[#EFE6D5] text-[#D95732]">{item.fn}</code>
+                      </div>
+                      <p className="text-[#4A6583] leading-relaxed">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {docsSection === 'privacy' && (
+              <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] space-y-4 text-xs sm:text-sm text-[#4A6583] leading-relaxed">
+                <h2 className="font-serif text-2xl font-bold text-[#102F50]">
+                  Privacy Policy &amp; Family Data Protection (DPDP Act India &amp; GDPR)
+                </h2>
+                <p>
+                  <strong className="text-[#102F50]">1. Zero Monetization of Family Voice or Health Data:</strong> SomeoneNear never sells, rents, or shares your parents’ phone numbers, Telnyx call recordings, medication photos, or mood reflections with advertisers or third-party data brokers.
+                </p>
+                <p>
+                  <strong className="text-[#102F50]">2. Bounded S3 Media Vault Encryption &amp; Auto-Expiry:</strong> Every uploaded pill-strip photo, Polaroid keepsake, and 1-click voice blessing is capped at <code>&lt;10MB</code>, stored in private encrypted S3 buckets (<code>s3.server.ts</code>), scoped strictly to your selected family boundary, and automatically purged when its expiry timer (24h, 7d, or 30d) elapses.
+                </p>
+                <p>
+                  <strong className="text-[#102F50]">3. Explicit Telnyx Call Consent:</strong> Parents and family members invited by mobile number or Invite ID can confirm on the call if they want to be part of it or ignore the invite at any time.
+                </p>
+              </div>
+            )}
+
+            {docsSection === 'cookies' && (
+              <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#DFD3BE] pb-4">
+                  <div>
+                    <span className="px-3 py-1 rounded-full bg-[#EAB84B] text-[#102F50] text-[10px] font-extrabold uppercase">
+                      🍪 Interactive Cookie &amp; Local Cache Inspector
+                    </span>
+                    <h2 className="font-serif text-2xl font-bold text-[#102F50] mt-1">
+                      Cookies, IP-Geolocation Currency Memory &amp; Browser Cache Controls
+                    </h2>
+                  </div>
+                  <span className="text-xs font-extrabold text-[#2E7D32]">
+                    Last Cache Action: {lastCacheClearedAt}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    {
+                      key: 'essentialAuth',
+                      title: 'Essential Supabase OAuth & Session Cookies (Required)',
+                      desc: 'Maintains your secure Google / Apple email-only sign-in session and CSRF protection.',
+                      locked: true
+                    },
+                    {
+                      key: 'geoCurrencyCache',
+                      title: 'IP-Geolocation & Currency Memory Cache (sn_user_country)',
+                      desc: `Remembers your detected/selected country (${activePricing.flag} ${activePricing.country} · ${activePricing.currency}) in localStorage so pricing never flickers across page reloads.`,
+                      locked: false
+                    },
+                    {
+                      key: 's3MediaPreviewCache',
+                      title: 'Bounded S3 Media & Avatar SVG Local Cache',
+                      desc: 'Caches presigned S3 Polaroid thumbnails, 3D Globe continent geometry, and custom Editorial Avatar presets for instant zero-latency rendering.',
+                      locked: false
+                    },
+                    {
+                      key: 'voiceLatencyTelemetry',
+                      title: 'Telnyx Voice Quality & Call Reliability Telemetry',
+                      desc: 'Anonymous call audio jitter and connection health metrics to keep parent phone check-ins crystal clear.',
+                      locked: false
+                    }
+                  ].map((item) => (
+                    <div key={item.key} className="p-4 rounded-2xl bg-[#FAF7F2] border-2 border-[#DFD3BE] flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <h4 className="font-serif font-bold text-base text-[#102F50]">{item.title}</h4>
+                        <p className="text-xs text-[#4A6583] leading-relaxed">{item.desc}</p>
+                      </div>
+                      <button
+                        disabled={item.locked}
+                        onClick={() =>
+                          setCookiePrefs((prev) => ({ ...prev, [item.key]: !prev[item.key] }))
+                        }
+                        className={`px-3 py-1.5 rounded-full text-[10px] font-extrabold shrink-0 ${
+                          cookiePrefs[item.key]
+                            ? 'bg-[#2E7D32] text-white'
+                            : 'bg-[#EFE6D5] text-[#102F50]'
+                        }`}
+                      >
+                        {item.locked ? 'Always Active' : cookiePrefs[item.key] ? '✓ Enabled' : 'Disabled'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#DFD3BE]">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleClearApplicationCache('geo')}
+                      className="px-4 py-2.5 rounded-full bg-[#EFE6D5] hover:bg-[#D95732] hover:text-white text-[#102F50] text-xs font-extrabold transition-colors"
+                    >
+                      🌍 Reset Geolocation Currency Cache (sn_user_country)
+                    </button>
+                    <button
+                      onClick={() => handleClearApplicationCache('all')}
+                      className="px-4 py-2.5 rounded-full bg-[#D95732] text-white text-xs font-extrabold hover:opacity-90"
+                    >
+                      🧹 Clear All Local Storage &amp; S3 Media Cache
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => handleSaveCookieConsent('all')}
+                    className="px-6 py-2.5 rounded-full bg-[#102F50] text-[#EAB84B] text-xs font-extrabold shadow-[0_4px_0_#091D34]"
+                  >
+                    Save Cookie &amp; Cache Preferences
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {docsSection === 'terms' && (
+              <div className="bg-[#FFFDF9] border-2 border-[#102F50] rounded-[32px] p-6 sm:p-8 shadow-[0_8px_0_#102F50] space-y-4 text-xs sm:text-sm text-[#4A6583] leading-relaxed">
+                <h2 className="font-serif text-2xl font-bold text-[#102F50]">
+                  Terms of Service, * 7-Day Free Trial &amp; Non-Medical Disclaimer
+                </h2>
+                <p>
+                  <strong className="text-[#102F50]">* 7 Days Free Trial Billing Terms:</strong> Every Care (`15` calls/month) and Care Plus (`30` calls/month) plan begins with a 7-day free trial. Your localized subscription ({activePricing.care} or {activePricing.carePlus} in {activePricing.currency} via {activePricing.gateway}) starts automatically after 7 days unless cancelled in 1 click from your Family Dashboard.
+                </p>
+                <p>
+                  <strong className="text-[#102F50]">Non-Medical Companionship Disclaimer:</strong> SomeoneNear provides warm human companionship calls, photo-verified medication reminders, and family coordination tools. It is not an emergency medical service or clinical diagnostic provider.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* ====================================================================
+          COOKIE, PRIVACY & GEOLOCATION CACHE CONSENT BANNER (Bottom Bar)
+          ==================================================================== */}
+      {cookieConsentBanner && (
+        <div className="fixed bottom-4 left-4 right-24 z-40 max-w-4xl bg-[#102F50] text-[#FAF7F2] border-2 border-[#EAB84B] rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sn-animate-pop">
+          <div className="space-y-1 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#EAB84B] text-[#102F50] text-[10px] font-extrabold uppercase">
+                🍪 Privacy, Cookies &amp; Local Cache
+              </span>
+              <span className="font-bold text-[#EAB84B]">
+                Zero ad-tracking · Local currency &amp; S3 media cache only
+              </span>
+            </div>
+            <p className="text-[#FAF7F2]/85 leading-relaxed">
+              We use essential session cookies and browser cache (<code>sn_user_country</code>) to remember your localized currency ({activePricing.flag} {activePricing.currency}), 3D Family Globe avatar presets, and bounded S3 media previews.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={() => navigateToDocs('cookies')}
+              className="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF7F2] text-xs font-bold"
+            >
+              Manage Cache
+            </button>
+            <button
+              onClick={() => handleSaveCookieConsent('essential')}
+              className="px-3.5 py-2 rounded-full bg-[#EFE6D5] text-[#102F50] text-xs font-extrabold"
+            >
+              Essential Only
+            </button>
+            <button
+              onClick={() => handleSaveCookieConsent('all')}
+              className="px-4 py-2 rounded-full bg-[#EAB84B] text-[#102F50] text-xs font-extrabold shadow-[0_3px_0_#D95732]"
+            >
+              Accept All
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ====================================================================
+          PERSISTENT FLOATING ASSISTIVE GESTURE ORB (Available Across All Pages)
+          ==================================================================== */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        {assistOpen && (
+          <div className="bg-[#102F50] text-[#FAF7F2] border-2 border-[#EAB84B] rounded-3xl p-4 shadow-2xl w-72 space-y-2 sn-animate-pop">
+            <div className="flex items-center justify-between border-b border-white/15 pb-2">
+              <span className="text-xs font-extrabold text-[#EAB84B] uppercase tracking-wider">
+                ✨ Assistive Quick Actions
+              </span>
+              <button onClick={() => setAssistOpen(false)} className="text-xs text-white/70">
+                ✕
+              </button>
+            </div>
+            <button
+              onClick={() => {
+                setAssistOpen(false);
+                setActiveSpace('listeners');
+              }}
+              className="w-full text-left p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold block"
+            >
+              📞 ① Book Trained Listener Call
+            </button>
+            <button
+              onClick={() => {
+                setAssistOpen(false);
+                setActiveSpace('reminders');
+                setRemindersSubTab('reminders');
+              }}
+              className="w-full text-left p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold block"
+            >
+              ⏰ ② Set Reminder (Self or Parents)
+            </button>
+            <button
+              onClick={() => {
+                setAssistOpen(false);
+                setActiveSpace('vault');
+                setVaultSubTab('studio');
+              }}
+              className="w-full text-left p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold block"
+            >
+              🎙️ ③ 1-Click Store &amp; Share Audio
+            </button>
+            <button
+              onClick={() => {
+                setAssistOpen(false);
+                setActiveSpace('reminders');
+                setShowAddMedModal(true);
+              }}
+              className="w-full text-left p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold block"
+            >
+              💊 ④ Add Pill-Strip Photo &amp; Dose Time
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={() => {
+            setAssistOpen((o) => !o);
+            asmrAudio.playSoftChime(1.25);
+          }}
+          className="sn-animate-aura w-15 h-15 rounded-full bg-[#102F50] border-2 border-[#EAB84B] text-[#EAB84B] px-4 py-3.5 shadow-2xl flex flex-col items-center justify-center hover:scale-105 transition-transform"
+        >
+          <span className="text-lg leading-none">🖐️</span>
+          <span className="text-[9px] font-extrabold tracking-wider mt-0.5">ASSIST</span>
+        </button>
+      </div>
+
+      {/* ====================================================================
+          WWW.SOMEONENEAR.COM MULTI-COLUMN ENTERPRISE LANDING PAGE FOOTER
+          ==================================================================== */}
+      <footer className="mt-auto bg-[#102F50] text-[#FAF7F2] border-t-4 border-[#EAB84B] pt-12 pb-10 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 pb-8 border-b border-white/15">
+            {/* Column 1: Official Squircle Emblem, Mission & Live Cache Status */}
+            <div className="lg:col-span-4 space-y-4">
+              <SomeoneNearBrandLogo
+                size={44}
+                lightText={true}
+                onClick={() => {
+                  setActiveSpace('home');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+              <p className="text-xs text-[#FAF7F2]/80 leading-relaxed max-w-sm">
+                Warm daily human listener phone calls, photo-verified medication reminders, bounded S3 family keepsakes, and a 24/7 empathetic 2am AI companion—built for families living miles apart.
+              </p>
+              <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-[#EAB84B]">
+                <span className="px-2.5 py-1 rounded-full bg-white/10">
+                  {activePricing.flag} {activePricing.country} ({activePricing.currency})
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-white/10">
+                  🍪 Cache: {cookiePrefs.geoCurrencyCache ? 'Active' : 'Minimal'}
+                </span>
+              </div>
+            </div>
+
+            {/* Column 2: Platform Routes (www.someonenear.com) */}
+            <div className="lg:col-span-3 space-y-2.5">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#EAB84B]">
+                Platform Routes
+              </h4>
+              <ul className="space-y-2 text-xs text-[#FAF7F2]/85">
+                {[
+                  { id: 'home', label: '/ · Home, 3D Globe & 15/30 Plans' },
+                  { id: 'dashboard', label: '/dashboard · Family Care Hub' },
+                  { id: 'family', label: '/family · Family Circle & Telnyx Opt-In' },
+                  { id: 'listeners', label: '/listeners · Trained Listeners (15/30 Calls)' },
+                  { id: 'reminders', label: '/reminders · Photo Meds & Google Calendar' },
+                  { id: 'vault', label: '/send-later · Bounded S3 Memory Vault' }
+                ].map((link) => (
+                  <li key={link.id}>
+                    <button
+                      onClick={() => {
+                        setActiveSpace(link.id);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="hover:text-[#EAB84B] transition-colors text-left"
+                    >
+                      {link.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 3: Care Wellness, Studio & Docs */}
+            <div className="lg:col-span-2 space-y-2.5">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#EAB84B]">
+                Wellness &amp; Docs
+              </h4>
+              <ul className="space-y-2 text-xs text-[#FAF7F2]/85">
+                {[
+                  { id: 'companion', label: '/companion · 2am AI Companion' },
+                  { id: 'insights', label: '/insights · Mood & BP Analytics' },
+                  { id: 'safety', label: '/safety · Safety & 5-Min SLA' },
+                  { id: 'settings', label: '/settings · Avatar & Globe Studio' },
+                  { id: 'docs', label: '/docs · Technical Architecture' }
+                ].map((link) => (
+                  <li key={link.id}>
+                    <button
+                      onClick={() => {
+                        setActiveSpace(link.id);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="hover:text-[#EAB84B] transition-colors text-left"
+                    >
+                      {link.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 4: Privacy, Cookies, Cache & Legal Compliance */}
+            <div className="lg:col-span-3 space-y-2.5">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#EAB84B]">
+                Privacy, Cookies &amp; Cache
+              </h4>
+              <ul className="space-y-2 text-xs text-[#FAF7F2]/85">
+                <li>
+                  <button onClick={() => navigateToDocs('privacy')} className="hover:text-[#EAB84B] text-left">
+                    🔒 Privacy Policy (DPDP Act &amp; GDPR)
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigateToDocs('cookies')} className="hover:text-[#EAB84B] text-left">
+                    🍪 Cookie Preferences &amp; Local Cache Manager
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigateToDocs('terms')} className="hover:text-[#EAB84B] text-left">
+                    ⚖️ Terms of Service &amp; * 7-Day Free Trial
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handleClearApplicationCache('all')}
+                    className="text-[#F36D89] hover:underline font-bold text-left"
+                  >
+                    🧹 Clear Local Currency &amp; S3 Preview Cache
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCookieConsentBanner(true)}
+                    className="text-[#EAB84B] hover:underline font-bold text-left"
+                  >
+                    ⚙️ Re-open Cookie &amp; Cache Consent Banner
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Legal & Compliance Strip */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#FAF7F2]/75">
+            <p>
+              © 2026 SomeoneNear Inc. (`www.someonenear.com` · `with-you-together`). All rights reserved. * 7 days free and then subscription will start.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <span>19-Country Geolocation Pricing</span>
+              <span>·</span>
+              <span>Telnyx Voice Opt-In</span>
+              <span>·</span>
+              <span>S3 &lt;10MB Bounded Vault</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

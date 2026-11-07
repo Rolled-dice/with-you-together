@@ -1,0 +1,14 @@
+{
+  "name": "SomeoneNear",
+  "short_name": "SomeoneNear",
+  "description": "A warm space for family, reflection and everyday care.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F7F0E5",
+  "theme_color": "#102F50",
+  "icons": [
+    { "src": "/favicon-64.png", "sizes": "64x64", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "type": "image/png" }
+  ]
+}

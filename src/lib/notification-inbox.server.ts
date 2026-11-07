@@ -1,0 +1,27 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AppNotification } from "./notifications.functions";
+function visibleNotifications(client: SupabaseClient, userId: string, countOnly = false) {
+  return client
+    .from("notifications")
+    .select(
+      countOnly ? "id" : "id,booking_id,kind,severity,title,body,read_at,created_at",
+      countOnly ? { count: "exact", head: true } : {},
+    )
+    .eq("user_id", userId)
+    .is("booking_id", null)
+    .not("kind", "ilike", "%call%")
+    .not("kind", "ilike", "%telnyx%")
+    .not("kind", "ilike", "%sla%")
+    .not("kind", "ilike", "%escalat%");
+}
+export async function readNotificationInbox(client: SupabaseClient, userId: string) {
+  const [items, unread] = await Promise.all([
+    visibleNotifications(client, userId).order("created_at", { ascending: false }).limit(30),
+    visibleNotifications(client, userId, true).is("read_at", null),
+  ]);
+  if (items.error || unread.error) throw new Error(items.error?.message ?? unread.error?.message);
+  return {
+    items: (items.data ?? []) as unknown as AppNotification[],
+    unreadCount: unread.count ?? 0,
+  };
+}
