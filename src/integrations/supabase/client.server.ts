@@ -10,7 +10,7 @@ function isNewSupabaseApiKey(value: string): boolean {
 }
 
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
-  return (input, init) => {
+  return async (input, init) => {
     const headers = new Headers(
       typeof Request !== 'undefined' && input instanceof Request ? input.headers : undefined,
     );
@@ -25,7 +25,11 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
     }
 
     headers.set('apikey', supabaseKey);
-    return fetch(input, { ...init, headers });
+    for (let attempt = 0; ; attempt += 1) {
+      const response = await fetch(input, { ...init, headers });
+      if (![502, 503, 504].includes(response.status) || attempt >= 2) return response;
+      await new Promise((resolve) => setTimeout(resolve, 150 * 2 ** attempt));
+    }
   };
 }
 
