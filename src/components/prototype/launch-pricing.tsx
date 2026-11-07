@@ -12,6 +12,9 @@ import {
 } from "@/lib/launch-catalog";
 
 export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: MarketId }) {
+  // Keep the public catalog aligned with the server's fail-closed default:
+  // an omitted VITE_DODO_MODE is the sandbox, never the live catalog.
+  const dodoMode = import.meta.env.VITE_DODO_MODE === "live" ? "live" : "test";
   const [market, setMarket] = useState<MarketId>(initialMarket);
   const [ready, setReady] = useState(false);
   const changed = useRef(false);
@@ -50,7 +53,7 @@ export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: Market
           </select>
         </label>
         <p>
-          {import.meta.env.VITE_DODO_MODE === "test"
+          {dodoMode === "test"
             ? "Dodo test checkout is available in supported markets. No real charges."
             : "Launch catalog preview. New subscriptions are not currently available."}
         </p>
@@ -95,7 +98,7 @@ export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: Market
               <Link
                 className={`sn-button ${id === "care_plus" ? "sn-button-gold" : ""}`}
                 to={
-                  import.meta.env.VITE_DODO_MODE === "test" && launchTestProductId(market, id)
+                  dodoMode === "test" && launchTestProductId(market, id)
                     ? "/checkout"
                     : "/docs/billing"
                 }
@@ -105,7 +108,7 @@ export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: Market
                     : undefined
                 }
               >
-                {import.meta.env.VITE_DODO_MODE === "test"
+                {dodoMode === "test"
                   ? launchTestProductId(market, id)
                     ? `Try ${plan.name} checkout`
                     : `Checkout unavailable in ${LAUNCH_MARKETS.find((m) => m.id === market)?.currency}`
