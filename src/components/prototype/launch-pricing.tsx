@@ -103,7 +103,7 @@ export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: Market
                     : "/docs/billing"
                 }
                 search={
-                  import.meta.env.VITE_DODO_MODE === "test" && launchTestProductId(market, id)
+                  dodoMode === "test" && launchTestProductId(market, id)
                     ? { plan: id, market }
                     : undefined
                 }
