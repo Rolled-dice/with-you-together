@@ -4,6 +4,7 @@ import { LeafIcon, ListIcon, XIcon } from "@phosphor-icons/react";
 import { Wordmark } from "@/components/landing/brand-mark";
 import { PrivacyChoicesButton } from "@/components/privacy-choices-button";
 import { SoundToggle } from "@/components/website-feedback";
+import { useIdentity } from "@/features/session/session-store";
 import { useSiteTheme } from "@/lib/frontend/use-site-theme";
 
 const links = [
@@ -81,6 +82,8 @@ export function SiteHeader({
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("for-families");
   const [preview, setPreview] = useState<string | null>(null);
+  const identity = useIdentity();
+  const signedIn = identity.initialized && Boolean(identity.userId);
   const headerRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const previewTriggerRef = useRef<HTMLAnchorElement | null>(null);
@@ -176,8 +179,8 @@ export function SiteHeader({
               {label}
             </a>
           ))}
-          <Link className="sn-mobile-auth-link" to="/auth" onClick={() => setOpen(false)}>
-            Log in
+          <Link className="sn-mobile-auth-link" to={signedIn ? "/dashboard" : "/auth"} onClick={() => setOpen(false)}>
+            {signedIn ? "Your space" : "Log in"}
           </Link>
         </>
       )}
@@ -209,16 +212,21 @@ export function SiteHeader({
           {!privateNavigation && navigation}
           <div className="sn-header-actions">
             {controls ??
-              (!privateNavigation && (
-                <>
-                  <Link className="sn-login-link" to="/auth">
-                    Log in
+              (!privateNavigation &&
+                (signedIn ? (
+                  <Link className="sn-button sn-nav-cta" to="/dashboard">
+                    Your space
                   </Link>
-                  <Link className="sn-button sn-nav-cta" to="/auth" search={{ mode: "signup" }}>
-                    Try for free
-                  </Link>
-                </>
-              ))}
+                ) : (
+                  <>
+                    <Link className="sn-login-link" to="/auth">
+                      Log in
+                    </Link>
+                    <Link className="sn-button sn-nav-cta" to="/auth" search={{ mode: "signup" }}>
+                      Try for free
+                    </Link>
+                  </>
+                )))}
             {!staff && (
               <button
                 ref={toggleRef}
