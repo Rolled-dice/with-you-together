@@ -1062,6 +1062,17 @@ select {
   margin-left: 8px;
   color: var(--muted-foreground);
 }
+.sn-plan-price .sn-tax-tag {
+  display: inline-block;
+  font: 600 11px/1 var(--font-sans);
+  letter-spacing: 0.02em;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+  margin-left: 8px;
+  vertical-align: middle;
+}
 .sn-plan > p {
   font-size: 14px;
   line-height: 1.6;

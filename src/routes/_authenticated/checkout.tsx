@@ -79,8 +79,11 @@ function CheckoutPage() {
       <section className="sn-panel space-y-4">
         <p>
           7 days free with {terms.trialCalls} shared trial calls. The first paid month is{" "}
-          {launchPrice(plan, market, true)} (30% off), then {launchPrice(plan, market)} per month.
-          Taxes are shown at checkout.
+          {launchPrice(plan, market, true)} (30% off{market === "in" ? ", incl. GST" : ""}), then{" "}
+          {launchPrice(plan, market)} per month{market === "in" ? " (incl. GST)" : ""}.{" "}
+          {market === "in"
+            ? "Price is fully inclusive of 18% GST — the total charged is exactly ₹3,000 / ₹5,000 with zero extra tax added."
+            : "Taxes are shown at checkout."}
         </p>
         <p>
           {terms.calls} shared monthly calls for up to {terms.people} people, including the owner.

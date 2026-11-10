@@ -82,6 +82,7 @@ export function LaunchPricing({ initialMarket }: { initialMarket?: MarketId }) {
               <p className="sn-plan-price">
                 {launchPrice(id, market)}
                 <span>/ month</span>
+                {market === "in" && <span className="sn-tax-tag">incl. 18% GST</span>}
               </p>
               <p>
                 {plan.calls} calls shared by up to {plan.people} people, including the subscription
@@ -101,8 +102,8 @@ export function LaunchPricing({ initialMarket }: { initialMarket?: MarketId }) {
               </ul>
               <p className="sn-launch-offer">
                 Launch offer: 7 days free with {plan.trialCalls} shared trial calls, then{" "}
-                {launchPrice(id, market, true)} for the first paid month (30% off).{" "}
-                {launchPrice(id, market)} per month after that.
+                {launchPrice(id, market, true)} for the first paid month (30% off{market === "in" ? ", incl. GST" : ""}).{" "}
+                {launchPrice(id, market)} per month after that{market === "in" ? " (incl. GST)" : ""}.
               </p>
               <Link
                 className={`sn-button ${id === "care_plus" ? "sn-button-gold" : ""}`}
@@ -129,9 +130,11 @@ export function LaunchPricing({ initialMarket }: { initialMarket?: MarketId }) {
       </div>
       <p className="sn-launch-terms">
         Both plans include the same features. Call allowances are shared across the plan. Refund
-        requests will be available for 7 days after the first successful charge. Taxes and
-        payment-method availability will be confirmed before checkout opens. Existing subscriptions
-        keep their purchased terms.
+        requests will be available for 7 days after the first successful charge.{" "}
+        {market === "in"
+          ? "All India prices (₹3,000 / ₹5,000) are fully inclusive of 18% GST. No extra taxes are added at checkout."
+          : "Taxes and payment-method availability will be confirmed before checkout opens."}{" "}
+        Existing subscriptions keep their purchased terms.
       </p>
     </section>
   );
