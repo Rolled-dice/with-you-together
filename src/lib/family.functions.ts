@@ -106,7 +106,9 @@ export const getMyFamily = createServerFn({ method: "GET" })
       created_at: string;
     }> = [];
     if (isOwner) {
-      const { data: inv } = await supabase
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const db = supabaseAdmin || supabase;
+      const { data: inv } = await db
         .from("family_invitations")
         .select("*")
         .eq("family_id", membership.family_id)
@@ -202,6 +204,8 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => InviteInput.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || supabase;
     const { data: mem } = await supabase
       .from("family_members")
       .select("family_id, role")
@@ -239,7 +243,7 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
     }
 
     // Check if an unexpired pending invitation already exists for this phone
-    const { data: matchingByPhone, error: matchingPhoneError } = await (supabase as any)
+    const { data: matchingByPhone, error: matchingPhoneError } = await (db as any)
       .from("family_invitations")
       .select("id, token")
       .eq("family_id", mem.family_id)
@@ -254,7 +258,7 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
     }
 
     if (email) {
-      const { data: matchingByEmail, error: matchingEmailError } = await supabase
+      const { data: matchingByEmail, error: matchingEmailError } = await db
         .from("family_invitations")
         .select("id, token")
         .eq("family_id", mem.family_id)
@@ -277,7 +281,7 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
       .eq("family_id", mem.family_id);
     if (memberCountError) throw new Error(memberCountError.message);
 
-    const { count: pendingCount, error: pendingCountError } = await supabase
+    const { count: pendingCount, error: pendingCountError } = await db
       .from("family_invitations")
       .select("id", { count: "exact", head: true })
       .eq("family_id", mem.family_id)
@@ -288,7 +292,7 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
     // If active + pending seats reach or exceed capacity, rotate out the oldest pending invites so tests and new invites never lock the account out
     if ((memberCount ?? 0) + (pendingCount ?? 0) >= maxMembers) {
       const excess = ((memberCount ?? 0) + (pendingCount ?? 0)) - maxMembers + 1;
-      const { data: staleInvites } = await supabase
+      const { data: staleInvites } = await db
         .from("family_invitations")
         .select("id")
         .eq("family_id", mem.family_id)
@@ -296,7 +300,7 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
         .order("created_at", { ascending: true })
         .limit(Math.max(1, excess));
       if (staleInvites && staleInvites.length > 0) {
-        await supabase
+        await db
           .from("family_invitations")
           .update({ status: "revoked" })
           .in("id", staleInvites.map((s) => s.id));
@@ -304,7 +308,7 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
     }
 
     const effectiveEmail = email || `${data.phone.replace(/[^0-9]/g, "")}@phone.someonenear.internal`;
-    const { data: inv, error } = await supabase
+    const { data: inv, error } = await db
       .from("family_invitations")
       .insert({
         family_id: mem.family_id,
@@ -342,8 +346,7 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
           inviteUrl,
         });
       }
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin
+      await db
         .from("family_invitations")
         .update({
           delivery_status: emailSent === null ? "not_sent" : emailSent ? "sent" : "failed",
@@ -363,8 +366,9 @@ export const revokeFamilyInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => RevokeInput.parse(i))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
-    const { error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { error } = await db
       .from("family_invitations")
       .update({ status: "revoked" })
       .eq("id", data.id);
