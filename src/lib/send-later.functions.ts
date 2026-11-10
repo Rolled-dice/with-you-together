@@ -9,11 +9,19 @@ export const createSendLater = createServerFn({ method: "POST" })
     if (!["text", "voice", "video"].includes(kind))
       throw new Error("Invalid message type");
     const file = formData.get("file");
+    const rawName = formData.get("recipientName");
+    const recipientName = typeof rawName === "string" && rawName.trim()
+      ? rawName.trim().slice(0, 120)
+      : "You (Future Self)";
+    const rawRecipientId = formData.get("recipientUserId");
+    let recipientUserId: string | undefined = undefined;
+    if (typeof rawRecipientId === "string" && rawRecipientId.trim()) {
+      const parsed = z.string().uuid().safeParse(rawRecipientId.trim());
+      if (parsed.success) recipientUserId = parsed.data;
+    }
     return {
-      recipientName: z.string().min(1).max(120).parse(formData.get("recipientName")),
-      recipientUserId:
-        z.string().uuid().nullable().parse(formData.get("recipientUserId")) ??
-        undefined,
+      recipientName,
+      recipientUserId,
       kind: kind as "text" | "voice" | "video",
       body: formData.get("body") ? String(formData.get("body")) : undefined,
       scheduledAt: z.string().parse(formData.get("scheduledAt")),

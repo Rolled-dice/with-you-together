@@ -38,13 +38,14 @@ export async function createScheduledMessage(
   if (Number.isNaN(when.getTime())) throw new Error("Pick a valid date and time");
   if (when.getTime() < Date.now() + 60_000)
     throw new Error("Choose a time at least a few minutes in the future");
-  const contacts = await listFamilyContacts(context);
-  const isSelf = input.recipientUserId === context.userId;
-  if (
-    !input.recipientUserId ||
-    (!isSelf && !contacts.some((contact) => contact.userId === input.recipientUserId))
-  )
-    throw new Error("Choose someone in your family circle.");
+  const recipientUserId = input.recipientUserId || context.userId;
+  const isSelf = recipientUserId === context.userId;
+  if (!isSelf) {
+    const contacts = await listFamilyContacts(context);
+    if (!contacts.some((contact) => contact.userId === recipientUserId)) {
+      throw new Error("Choose someone in your family circle.");
+    }
+  }
 
   let s3Key: string | null = null;
   if (input.kind !== "text") {
@@ -68,8 +69,8 @@ export async function createScheduledMessage(
     .from("scheduled_messages")
     .insert({
       user_id: context.userId,
-      recipient_name: input.recipientName.trim(),
-      recipient_user_id: input.recipientUserId ?? null,
+      recipient_name: (input.recipientName || "").trim() || (isSelf ? "You (Future Self)" : "Family Member"),
+      recipient_user_id: recipientUserId,
       kind: input.kind,
       body: input.body?.trim() || null,
       s3_key: s3Key,

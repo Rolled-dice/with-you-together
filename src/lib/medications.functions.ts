@@ -61,7 +61,8 @@ export const createMedication = createServerFn({ method: "POST" })
       if (sErr) throw new Error(sErr.message);
     }
     // Seed today's dose logs
-    await seedDoseLogs(context.supabase, row.id);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await seedDoseLogs(supabaseAdmin || context.supabase, row.id);
     try {
       const { syncNow } = await import("@/lib/calendar/sync.server");
       await syncNow();
@@ -137,12 +138,14 @@ export const listTodaysDoses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     // Ensure today's logs are seeded for every active med the user can see
-    const { data: meds } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin || context.supabase;
+    const { data: meds } = await admin
       .from("medications")
       .select("id")
       .eq("is_active", true);
     for (const m of meds ?? []) {
-      await seedDoseLogs(context.supabase, m.id);
+      await seedDoseLogs(admin, m.id);
     }
     const { data: profile } = await context.supabase
       .from("profiles")

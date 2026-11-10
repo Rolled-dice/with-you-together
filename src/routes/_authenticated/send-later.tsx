@@ -72,10 +72,10 @@ function SendLaterPage() {
   const activeWhen = when || defaultWhen;
   const [playback, setPlayback] = useState<{ url: string; kind: "voice" | "video" } | null>(null);
   useEffect(() => {
-    if (vaultTab === "capsules" && userId && !recipientId) {
+    if (userId && !recipientId) {
       setRecipientId(userId);
     }
-  }, [vaultTab, userId, recipientId]);
+  }, [userId, recipientId]);
 
   const list = useServerFn(listSendLater);
   const inbox = useServerFn(listReceivedSendLater);
@@ -102,11 +102,11 @@ function SendLaterPage() {
     mutationFn: async () => {
       assertIdentity(generation);
       if (!zone.data) throw new Error("Your timezone is still loading. Please try again.");
-      const targetUserId = recipientId || (vaultTab === "capsules" ? userId : query.data?.contacts[0]?.userId);
-      const recipient = query.data?.contacts.find((c) => c.userId === targetUserId) || (userId ? {
-        userId,
+      const targetUserId = recipientId || userId || query.data?.contacts[0]?.userId || "";
+      const recipient = (targetUserId ? query.data?.contacts.find((c) => c.userId === targetUserId) : null) || {
+        userId: targetUserId || userId || crypto.randomUUID(),
         name: "You (Future Self · Time Capsule)",
-      } : undefined);
+      };
       const parsed = inputSchema.parse({
         recipient,
         scheduledAt: localToUtc(activeWhen, zone.data),
@@ -242,16 +242,19 @@ function SendLaterPage() {
                       For
                       <select
                         className={inputClass}
-                        value={recipientId}
+                        value={recipientId || userId || ""}
                         onChange={(event) => setRecipientId(event.target.value)}
-                        required
                       >
-                        <option value="">Choose a family member</option>
-                        {query.data.contacts.map((contact) => (
-                          <option key={contact.userId} value={contact.userId}>
-                            {contact.name}
-                          </option>
-                        ))}
+                        {userId && (
+                          <option value={userId}>You (Future Self · Time Capsule)</option>
+                        )}
+                        {query.data.contacts
+                          .filter((c) => c.userId !== userId)
+                          .map((contact) => (
+                            <option key={contact.userId} value={contact.userId}>
+                              {contact.name}
+                            </option>
+                          ))}
                       </select>
                     </label>
                     {kind === "text" ? (

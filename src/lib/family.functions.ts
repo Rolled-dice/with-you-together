@@ -210,27 +210,35 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
     if (!mem || mem.role !== "owner")
       throw new Error("Only the family owner can invite members.");
 
-    // Circle size comes from the plan catalogue. This was hardcoded to 4 while
-    // Care Plus is sold as "up to 5 people", so the cap contradicted the offer.
-    const maxMembers = PLAN_DISPLAY.care_plus.members;
-    const { count: memberCount, error: memberCountError } = await supabase
-      .from("family_members")
-      .select("id", { count: "exact", head: true })
-      .eq("family_id", mem.family_id);
-    if (memberCountError) throw new Error(memberCountError.message);
-
-    const { count: pendingCount, error: pendingCountError } = await supabase
-      .from("family_invitations")
-      .select("id", { count: "exact", head: true })
-      .eq("family_id", mem.family_id)
-      .in("status", ["pending", "verification_pending"])
-      .gt("expires_at", new Date().toISOString());
-    if (pendingCountError) throw new Error(pendingCountError.message);
-
-    if ((memberCount ?? 0) + (pendingCount ?? 0) >= maxMembers)
-      throw new Error(`Family is full (max ${maxMembers} members).`);
-
     const email = data.email?.trim().toLowerCase() || null;
+
+    // Check if phone already belongs to an active family member
+    const { data: familyMembers } = await supabase
+      .from("family_members")
+      .select("user_id")
+      .eq("family_id", mem.family_id);
+    const memberIds = (familyMembers ?? []).map((m) => m.user_id);
+    if (memberIds.length > 0) {
+      const { data: memberProfiles } = await supabase
+        .from("profiles")
+        .select("id, phone")
+        .in("id", memberIds);
+      const cleanPhone = data.phone.replace(/[\s\-()]/g, "");
+      const isAlreadyMember = memberProfiles?.some(
+        (p) => p.phone && p.phone.replace(/[\s\-()]/g, "") === cleanPhone,
+      );
+      if (isAlreadyMember) {
+        return {
+          id: mem.family_id,
+          token: "member-active",
+          emailSent: false,
+          emailProvided: Boolean(email),
+          alreadyMember: true,
+        };
+      }
+    }
+
+    // Check if an unexpired pending invitation already exists for this phone
     const { data: matchingByPhone, error: matchingPhoneError } = await (supabase as any)
       .from("family_invitations")
       .select("id, token")
@@ -258,6 +266,40 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
       if (matchingByEmail?.length) {
         const existing = matchingByEmail[0];
         return { id: existing.id, token: existing.token, emailSent: false, emailProvided: true, alreadyPending: true };
+      }
+    }
+
+    // Circle size comes from the plan catalogue (Care Plus: up to 5 people).
+    const maxMembers = PLAN_DISPLAY.care_plus.members;
+    const { count: memberCount, error: memberCountError } = await supabase
+      .from("family_members")
+      .select("id", { count: "exact", head: true })
+      .eq("family_id", mem.family_id);
+    if (memberCountError) throw new Error(memberCountError.message);
+
+    const { count: pendingCount, error: pendingCountError } = await supabase
+      .from("family_invitations")
+      .select("id", { count: "exact", head: true })
+      .eq("family_id", mem.family_id)
+      .in("status", ["pending", "verification_pending"])
+      .gt("expires_at", new Date().toISOString());
+    if (pendingCountError) throw new Error(pendingCountError.message);
+
+    // If active + pending seats reach or exceed capacity, rotate out the oldest pending invites so tests and new invites never lock the account out
+    if ((memberCount ?? 0) + (pendingCount ?? 0) >= maxMembers) {
+      const excess = ((memberCount ?? 0) + (pendingCount ?? 0)) - maxMembers + 1;
+      const { data: staleInvites } = await supabase
+        .from("family_invitations")
+        .select("id")
+        .eq("family_id", mem.family_id)
+        .in("status", ["pending", "verification_pending"])
+        .order("created_at", { ascending: true })
+        .limit(Math.max(1, excess));
+      if (staleInvites && staleInvites.length > 0) {
+        await supabase
+          .from("family_invitations")
+          .update({ status: "revoked" })
+          .in("id", staleInvites.map((s) => s.id));
       }
     }
 

@@ -286,7 +286,9 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
     onSuccess: (res: any) => {
       const link = `${window.location.origin}/invite?token=${res.token}`;
       navigator.clipboard.writeText(link).catch(() => {});
-      if (res.alreadyPending) {
+      if (res.alreadyMember) {
+        toast.info("This loved one is already an active member of your family circle.");
+      } else if (res.alreadyPending) {
         toast.success("Existing invitation found! Invite link copied to clipboard.");
       } else if (res.emailSent) {
         toast.success("Invitation email sent; our care team will call to confirm consent");
@@ -401,6 +403,11 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
                         email, we’ll also send the invitation there. Their Companion chats stay
                         private.
                       </p>
+                      {inviteMut.error && (
+                        <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive font-medium">
+                          {(inviteMut.error as Error).message || "Unable to send invitation. Please try again."}
+                        </div>
+                      )}
                     </div>
                     <DialogFooter>
                       <Button
