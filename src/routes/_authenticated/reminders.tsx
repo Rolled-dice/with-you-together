@@ -434,9 +434,10 @@ function EverydayReminders() {
   const create = useMutation({
     mutationFn: async () => {
       const { data: auth } = await supabase.auth.getUser();
-      const uid = auth.user?.id;
+      const session = !auth.user ? (await supabase.auth.getSession()).data.session : null;
+      const uid = auth.user?.id || session?.user?.id;
       if (!uid) throw new Error("Please sign in again.");
-      if (!zone.data) throw new Error("Your timezone is still loading.");
+      const targetZone = zone.data || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
       const valid = z
         .object({
           title: z.string().trim().min(1).max(200),
@@ -452,11 +453,11 @@ function EverydayReminders() {
           recurrence: z.enum(["none", "daily", "weekly", "monthly"]),
         })
         .parse({ title, time, category, recurrence });
-      let day = localInput(new Date(), zone.data).slice(0, 10);
-      let due = localToUtc(`${day}T${valid.time}`, zone.data);
+      let day = localInput(new Date(), targetZone).slice(0, 10);
+      let due = localToUtc(`${day}T${valid.time}`, targetZone);
       if (Date.parse(due) < Date.now()) {
         day = new Date(Date.parse(`${day}T12:00:00Z`) + 86400000).toISOString().slice(0, 10);
-        due = localToUtc(`${day}T${valid.time}`, zone.data);
+        due = localToUtc(`${day}T${valid.time}`, targetZone);
       }
       return createFn({
         data: {
@@ -472,6 +473,7 @@ function EverydayReminders() {
       setTitle("");
       gentleToast("Your reminder is ready");
       invalidate();
+      void reminders.refetch();
     },
     onError: (error: Error) => gentleProblem("We could not save this reminder", error.message),
   });

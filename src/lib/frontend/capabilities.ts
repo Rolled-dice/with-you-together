@@ -8,7 +8,7 @@ const schema = z.object({
   pushCheckIn: z.literal(false),
   outboundCallBooking: z.literal(true),
   callEscalation: z.literal(false),
-  localDayDoses: z.literal(false),
+  localDayDoses: z.literal(true),
   purchase: z.literal(true),
 });
 export const capabilities = Object.freeze(
@@ -19,7 +19,7 @@ export const capabilities = Object.freeze(
     pushCheckIn: false,
     outboundCallBooking: true,
     callEscalation: false,
-    localDayDoses: false,
+    localDayDoses: true,
     purchase: true,
   }),
 );

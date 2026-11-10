@@ -289,6 +289,7 @@ export function MedicationOnboarding({
     onSuccess: async (_, variables) => {
       gentleToast(variables.status === "taken" ? "Marked as taken" : "Skipped for now");
       await qc.invalidateQueries({ queryKey: ["medications", "today"] });
+      void doses.refetch();
     },
     onError: (error: Error) => gentleProblem("We could not update this dose", error.message),
   });

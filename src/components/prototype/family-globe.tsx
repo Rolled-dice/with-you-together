@@ -49,6 +49,7 @@ export function FamilyGlobe({
   const rotation = useRef({ yaw: 0.35, pitch: 0.12 });
   const drag = useRef<{ x: number; y: number; id: number } | null>(null);
   const [ready, setReady] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(true);
   const [zoom, setZoom] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -102,8 +103,13 @@ export function FamilyGlobe({
   useEffect(() => {
     const element = canvas.current,
       container = stage.current;
-    const context = element?.getContext("2d");
-    if (!element || !container || !context) return;
+    if (!element || !container) return;
+    const context = element.getContext("2d", { alpha: true });
+    if (!context) {
+      setCanvasReady(false);
+      return;
+    }
+    setCanvasReady(true);
     const projection = createGlobeProjection();
     let clock = 0;
     let frame = 0,
@@ -112,11 +118,13 @@ export function FamilyGlobe({
       height = 395,
       revision = 0;
     const size = () => {
-      width = container.clientWidth;
-      height = container.clientHeight;
+      const cw = container.clientWidth || 540;
+      const ch = container.clientHeight || 395;
+      width = Math.max(cw, 280);
+      height = Math.max(ch, 200);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      element.width = width * dpr;
-      element.height = height * dpr;
+      element.width = Math.round(width * dpr);
+      element.height = Math.round(height * dpr);
       setStageSize({ width, height, top: container.offsetTop });
       revision++;
     };
@@ -132,30 +140,36 @@ export function FamilyGlobe({
     const draw = (time: number) => {
       frame = requestAnimationFrame(draw);
       if (!visible || document.hidden || time - last < 16) return;
-      const elapsed = Math.min(time - last, 100);
-      last = time;
-      const current = settings.current;
-      if (current.playing && !drag.current && !current.studioOpen && !popoverInteraction.current)
-        rotation.current.yaw += elapsed * 0.000192 * current.config.speed;
-      if (!reducedMotion.current && current.playing && !current.studioOpen)
-        clock += elapsed * 0.0009;
-      const signature = JSON.stringify([
-        clock,
-        rotation.current,
-        current.zoom,
-        current.members,
-        current.config,
-        revision,
-      ]);
-      if (signature === previous) return;
-      previous = signature;
-      const theme = globeThemes[current.config.theme];
-      // Same 42-degree camera, 4.3 distance and Three.js group as the supplied source.
-      projection.update(width, height, current.zoom, rotation.current.yaw, rotation.current.pitch);
-      const project = projection.project;
-      const radius = projectedCoreRadius(project({ x: 1.23, y: 0, z: 0 }), width, height);
-      context.setTransform(element.width / width, 0, 0, element.height / height, 0, 0);
-      context.clearRect(0, 0, width, height);
+      if (!width || !height || width <= 0 || height <= 0 || !Number.isFinite(width) || !Number.isFinite(height)) return;
+      try {
+        const elapsed = Math.min(time - last, 100);
+        last = time;
+        const current = settings.current;
+        if (current.playing && !drag.current && !current.studioOpen && !popoverInteraction.current)
+          rotation.current.yaw += elapsed * 0.000192 * current.config.speed;
+        if (!reducedMotion.current && current.playing && !current.studioOpen)
+          clock += elapsed * 0.0009;
+        const signature = JSON.stringify([
+          clock,
+          rotation.current,
+          current.zoom,
+          current.members,
+          current.config,
+          revision,
+        ]);
+        if (signature === previous) return;
+        previous = signature;
+        const theme = globeThemes[current.config.theme];
+        // Same 42-degree camera, 4.3 distance and Three.js group as the supplied source.
+        projection.update(width, height, current.zoom, rotation.current.yaw, rotation.current.pitch);
+        const project = projection.project;
+        const radius = projectedCoreRadius(project({ x: 1.23, y: 0, z: 0 }), width, height);
+        const scaleX = width > 0 ? element.width / width : 1;
+        const scaleY = height > 0 ? element.height / height : 1;
+        if (Number.isFinite(scaleX) && Number.isFinite(scaleY)) {
+          context.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+        }
+        context.clearRect(0, 0, width, height);
       if (current.config.rings)
         for (const extra of [15, 30]) {
           context.beginPath();
@@ -209,6 +223,9 @@ export function FamilyGlobe({
       setPositions(
         current.members.map((member) => ({ ...project(memberPoint(member)), id: member.id })),
       );
+      } catch (err) {
+        console.warn("[family-globe] Canvas draw warning:", err);
+      }
     };
     frame = requestAnimationFrame(draw);
     return () => {
@@ -224,7 +241,7 @@ export function FamilyGlobe({
   };
 
   return (
-    <section className="sn-globe" aria-label="Interactive sample family globe">
+    <section className="sn-globe sn-family-globe" aria-label="Interactive sample family globe">
       <div className="sn-globe-intro">
         <strong>
           {familyName ? `🌍 ${familyName} · Live 3D Family Globe` : "🌍 Interactive 3D Family Globe · Drag to Rotate"}
@@ -285,7 +302,7 @@ export function FamilyGlobe({
           drag.current = null;
         }}
       >
-        <canvas ref={canvas} aria-hidden="true" />
+        <canvas ref={canvas} className="sn-globe-canvas" aria-hidden="true" data-testid="family-globe-canvas" />
         {positions.map((point) => {
           const member = members.find((m) => m.id === point.id);
           return member && point.visible ? (

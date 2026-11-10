@@ -43,6 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { displayTime, localInput } from "@/lib/frontend/time";
 
 export const Route = createFileRoute("/_authenticated/listeners")({
   head: () => ({
@@ -72,19 +73,30 @@ const SERVICE_SCHEMA = {
   ],
 };
 
-const TIMEZONES = [
-  "Asia/Kolkata",
-  "Asia/Dubai",
-  "Asia/Singapore",
-  "Europe/London",
-  "Europe/Berlin",
-  "America/New_York",
-  "America/Los_Angeles",
-  "Australia/Sydney",
-];
-
-const DEFAULT_TZ =
+const BROWSER_TZ =
   typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "Asia/Kolkata";
+
+const TIMEZONES = Array.from(
+  new Set([
+    BROWSER_TZ,
+    "Asia/Kolkata",
+    "Asia/Dubai",
+    "Asia/Singapore",
+    "Asia/Tokyo",
+    "Europe/London",
+    "Europe/Paris",
+    "Europe/Berlin",
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Los_Angeles",
+    "America/Toronto",
+    "Australia/Sydney",
+    "Pacific/Auckland",
+  ]),
+).filter(Boolean);
+
+const DEFAULT_TZ = BROWSER_TZ;
 
 function todayIso() {
   const d = new Date();
@@ -249,7 +261,7 @@ function ListenersPage() {
 
   const [day, setDay] = useState(todayIso());
   const [time, setTime] = useState("18:00");
-  const [tz, setTz] = useState(TIMEZONES.includes(DEFAULT_TZ) ? DEFAULT_TZ : "Asia/Kolkata");
+  const [tz, setTz] = useState(BROWSER_TZ);
   const [duration, setDuration] = useState(45);
   const [note, setNote] = useState("");
   const [bookingError, setBookingError] = useState<{
