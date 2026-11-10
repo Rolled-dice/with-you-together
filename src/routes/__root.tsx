@@ -124,12 +124,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "stylesheet", href: prototypeCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      // Square, padded, genuinely transparent icons built by
-      // scripts/clean-logo.ps1 from the original artwork.
-      { rel: "icon", href: "/favicon.ico?v=8", sizes: "any" },
-      { rel: "icon", href: "/favicon.svg?v=8", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon-64.png?v=8", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=8" },
+      // Brand squircle icons
+      { rel: "shortcut icon", href: "/favicon.ico?v=12" },
+      { rel: "icon", href: "/favicon.ico?v=12", sizes: "any" },
+      { rel: "icon", href: "/favicon.svg?v=12", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon-32.png?v=12", sizes: "32x32", type: "image/png" },
+      { rel: "icon", href: "/favicon-64.png?v=12", sizes: "64x64", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=12", sizes: "180x180" },
       {
         rel: "preload",
         href: "/fonts/figtree.ttf",

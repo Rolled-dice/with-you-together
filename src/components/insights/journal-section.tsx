@@ -179,7 +179,16 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
   });
 
   const listRef = useRef<HTMLUListElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [justSaved, setJustSaved] = useState<string | null>(null);
+
+  const insertPrompt = (promptText: string) => {
+    setOpen(true);
+    setBody((prev) => (prev ? `${prev.trim()}\n\n${promptText}` : promptText));
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 50);
+  };
 
   useGSAP(
     () => {
@@ -293,22 +302,39 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
 
       <AppCard>
         {!open ? (
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="flex w-full items-center gap-4 text-left transition hover:opacity-95"
-          >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
-              <WritingMark />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-base font-bold">Write something down</span>
-              <span className="mt-0.5 block text-sm text-muted-foreground">
-                A sentence is plenty. No one else ever sees this.
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="flex w-full items-center gap-4 text-left transition hover:opacity-95"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+                <WritingMark />
               </span>
-            </span>
-            <NotePencilIcon className="ml-auto h-5 w-5 shrink-0 text-muted-foreground" />
-          </button>
+              <span className="min-w-0">
+                <span className="block text-base font-bold">Write something down</span>
+                <span className="mt-0.5 block text-sm text-muted-foreground">
+                  A sentence is plenty. No one else ever sees this.
+                </span>
+              </span>
+              <NotePencilIcon className="ml-auto h-5 w-5 shrink-0 text-muted-foreground" />
+            </button>
+            <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-border/40">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">
+                Prompt ideas:
+              </span>
+              {PROMPT_SUGGESTIONS.map((s) => (
+                <button
+                  key={s.label}
+                  type="button"
+                  onClick={() => insertPrompt(s.prompt)}
+                  className="rounded-full border border-border/70 bg-background/70 px-2.5 py-0.5 text-xs font-medium text-foreground transition hover:border-brand-primary/50 hover:bg-brand-primary/10"
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
         ) : (
           <div className="space-y-4">
             {/* Thought starters */}
@@ -320,7 +346,7 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
                 <button
                   key={s.label}
                   type="button"
-                  onClick={() => setBody((prev) => (prev ? `${prev}\n\n${s.prompt}` : s.prompt))}
+                  onClick={() => insertPrompt(s.prompt)}
                   className="rounded-full border border-border/80 bg-background/80 px-2.5 py-1 text-xs font-medium text-foreground transition hover:border-brand-primary/50 hover:bg-brand-primary/5"
                 >
                   {s.label}
@@ -347,6 +373,7 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
               </label>
               <textarea
                 id="journal-body"
+                ref={textareaRef}
                 autoFocus
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
@@ -430,6 +457,8 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search past reflections..."
+              data-testid="journal-search-input"
+              id="journal-search"
               className="w-full rounded-full border border-border bg-card py-2 pl-9 pr-8 text-sm outline-none transition placeholder:text-muted-foreground focus:border-brand-primary"
             />
             {searchQuery && (
@@ -571,6 +600,19 @@ export function JournalSection({ onEntrySaved }: { onEntrySaved?: () => void }) 
                 maxLength={8000}
                 className="mt-1 w-full rounded-xl border border-border bg-background p-3 text-sm leading-relaxed outline-none focus:border-brand-primary"
               />
+              <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold mr-1">Idea:</span>
+                {PROMPT_SUGGESTIONS.map((s) => (
+                  <button
+                    key={s.label}
+                    type="button"
+                    onClick={() => setEditBody((prev) => (prev ? `${prev.trim()}\n\n${s.prompt}` : s.prompt))}
+                    className="rounded-full border border-border/80 bg-background/80 px-2 py-0.5 text-[11px] font-medium text-foreground hover:border-brand-primary/40"
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>

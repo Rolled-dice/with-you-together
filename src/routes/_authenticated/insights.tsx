@@ -183,36 +183,27 @@ function InsightsPage() {
       return { label: d.label, mood: avg, entries: b?.count ?? 0 };
     });
 
-    // Forgiving, accurate streak logic
+    // Forgiving, accurate streak logic strictly aligned to user local date keys
     const todayStr = dayKey(new Date());
-    const yesterdayDate = new Date();
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-    const yesterdayStr = dayKey(yesterdayDate);
+    const [tY, tM, tD] = todayStr.split("-").map(Number);
+    const yesterdayDate = new Date(Date.UTC(tY, tM - 1, tD - 1, 12, 0, 0));
+    const yesterdayStr = yesterdayDate.toISOString().slice(0, 10);
 
     const checkedInToday = (byDay.get(todayStr)?.count ?? 0) > 0;
     const checkedInYesterday = (byDay.get(yesterdayStr)?.count ?? 0) > 0;
 
     let streak = 0;
-    if (checkedInToday) {
-      const cursor = new Date(now);
-      cursor.setUTCHours(0, 0, 0, 0);
+    const startOffset = checkedInToday ? 0 : checkedInYesterday ? 1 : null;
+    if (startOffset !== null) {
+      const cursor = new Date(Date.UTC(tY, tM - 1, tD - startOffset, 12, 0, 0));
       while (true) {
         const k = cursor.toISOString().slice(0, 10);
         if ((byDay.get(k)?.count ?? 0) > 0) {
           streak++;
           cursor.setUTCDate(cursor.getUTCDate() - 1);
-        } else break;
-      }
-    } else if (checkedInYesterday) {
-      const cursor = new Date(now);
-      cursor.setUTCHours(0, 0, 0, 0);
-      cursor.setUTCDate(cursor.getUTCDate() - 1);
-      while (true) {
-        const k = cursor.toISOString().slice(0, 10);
-        if ((byDay.get(k)?.count ?? 0) > 0) {
-          streak++;
-          cursor.setUTCDate(cursor.getUTCDate() - 1);
-        } else break;
+        } else {
+          break;
+        }
       }
     }
 
