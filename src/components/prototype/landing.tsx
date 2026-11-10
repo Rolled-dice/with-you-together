@@ -11,6 +11,7 @@ import {
 } from "@phosphor-icons/react";
 import { SiteHeader, SiteFooter } from "./site-chrome";
 import { LaunchPricing } from "./launch-pricing";
+import { QuickCare } from "./quick-care";
 import type { MarketId } from "@/lib/launch-catalog";
 
 const Globe = lazy(() =>
@@ -169,6 +170,13 @@ export function PrototypeLanding({ market }: { market: MarketId }) {
               <Link to="/auth" className="sn-text-link">
                 Sign in to your space →
               </Link>
+            </div>
+            <div className="sn-hero-quick-care">
+              <div>
+                <strong>Need a place to start?</strong>
+                <span>Quick Care brings the everyday helpers together.</span>
+              </div>
+              <QuickCare intro="Start with a human call, a gentle reminder, a voice blessing, or medication support." />
             </div>
           </div>
           <div className="sn-hero-globe">

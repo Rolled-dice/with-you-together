@@ -4,6 +4,11 @@ import { useIdentity } from "@/features/session/session-store";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { MemberAvatar } from "@/components/prototype/member-avatar";
+import { FamilyGlobe } from "@/components/prototype/family-globe";
+import {
+  createGlobeMembersFromFamily,
+  createPreviewGlobeMembers,
+} from "@/components/prototype/globe-model";
 import { PLAN_DISPLAY } from "@/lib/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,7 +37,7 @@ import {
 } from "@/lib/family.functions";
 import { getFamilyPool, setAllocations } from "@/lib/family-sessions.functions";
 import { getMyProfile } from "@/lib/profile.functions";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   CalendarCheckIcon,
@@ -57,6 +62,16 @@ export const Route = createFileRoute("/_authenticated/family")({
       },
     ],
   }),
+  errorComponent: ({ error, reset }) => (
+    <AppShell>
+      <div className="p-6">
+        <DataError
+          retry={reset}
+          message={error?.message || "We couldn't load your family circle. Please try again."}
+        />
+      </div>
+    </AppShell>
+  ),
   component: FamilyPage,
 });
 
@@ -70,11 +85,39 @@ function FamilyPage() {
     isPending: profileLoading,
     isError: profileError,
     refetch: retryProfile,
-  } = useQuery({ queryKey: ["me", userId], queryFn: () => profileFn() });
+  } = useQuery({
+    queryKey: ["me", userId],
+    queryFn: () => profileFn(),
+    enabled: !!userId,
+  });
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["family", userId],
     queryFn: () => familyFn(),
+    enabled: !!userId,
   });
+
+  const previewMembers = useMemo(() => {
+    try {
+      return createPreviewGlobeMembers(profile);
+    } catch {
+      return [];
+    }
+  }, [profile]);
+
+  const realGlobeMembers = useMemo(() => {
+    if (!data?.family) return [];
+    try {
+      return createGlobeMembersFromFamily({
+        family: data.family,
+        members: data.members,
+        invites: data.invites,
+        currentUserId: userId ?? undefined,
+        userProfile: profile,
+      });
+    } catch {
+      return [];
+    }
+  }, [data, profile, userId]);
 
   if (isError || profileError)
     return (
@@ -108,14 +151,46 @@ function FamilyPage() {
       />
 
       {!data?.family ? (
-        <EmptyState hasFamilyTier={hasFamilyTier} />
+        <div className="space-y-8">
+          <section className="space-y-3">
+            <div>
+              <h3 className="font-display text-2xl font-medium">Family Circle Worldwide</h3>
+              <p className="text-sm text-muted-foreground">
+                Your family's connected presence across time zones. Create your circle below to bring your loved ones onto your personal 3D globe.
+              </p>
+            </div>
+            <FamilyGlobe
+              familyName="Your Family Circle"
+              isLiveFamily={false}
+              initialMembers={previewMembers}
+            />
+          </section>
+          <EmptyState hasFamilyTier={hasFamilyTier} />
+        </div>
       ) : (
-        <>
+        <div className="space-y-8">
+          <section className="space-y-3">
+            <div>
+              <h3 className="font-display text-2xl font-medium">
+                {data.family.name} · Live Family Globe
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Connected presence for {data.family.name} across time zones ({data.members.length}{" "}
+                active member{data.members.length === 1 ? "" : "s"}
+                {data.invites.length > 0 ? `, ${data.invites.length} pending invite${data.invites.length === 1 ? "" : "s"}` : ""}).
+              </p>
+            </div>
+            <FamilyGlobe
+              familyName={data.family.name}
+              isLiveFamily={true}
+              initialMembers={realGlobeMembers}
+            />
+          </section>
           <FamilyView data={data} />
-          <div className="mt-6">
+          <div>
             {capabilities.outboundCallBooking && <SessionAllocationPanel />}
           </div>
-        </>
+        </div>
       )}
     </AppShell>
   );

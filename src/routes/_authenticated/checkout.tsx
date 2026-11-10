@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/checkout")({
         status: z.coerce.string().optional(),
       })
       .parse(search),
-  head: () => ({ meta: [{ title: "Test checkout | SomeoneNear" }] }),
+  head: () => ({ meta: [{ title: "Membership checkout | SomeoneNear" }] }),
   component: CheckoutPage,
 });
 function CheckoutPage() {
@@ -47,7 +47,7 @@ function CheckoutPage() {
       const session = await createLaunchCheckout({ data: { plan, market } });
       window.location.assign(session.checkoutUrl);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to start test checkout.");
+      setError(cause instanceof Error ? cause.message : `Unable to start Dodo ${dodoMode} checkout.`);
       setBusy(false);
     }
   }
@@ -59,7 +59,7 @@ function CheckoutPage() {
         description={
           dodoMode === "live"
             ? "Complete your SomeoneNear membership checkout securely with Dodo Payments."
-            : "Try the subscription checkout in Dodo’s sandbox. No real payment will be collected."
+          : "Try the subscription checkout in Dodo’s sandbox. No real payment will be collected."
         }
       />
       <section className="sn-panel space-y-4">
@@ -73,8 +73,9 @@ function CheckoutPage() {
           Both plans include the same features.
         </p>
         <p className="text-sm text-muted-foreground">
-          A payment method is required for the trial. This sandbox checkout does not activate a live
-          membership.
+          {dodoMode === "live"
+            ? "A payment method is required for the trial. Membership access begins only after a verified Dodo webhook."
+            : "A payment method is required for the trial. This sandbox checkout does not activate a live membership."}
         </p>
         {paymentFailed ? (
           <p role="alert" className="text-destructive">

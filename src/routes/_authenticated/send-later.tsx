@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -189,10 +189,14 @@ function SendLaterPage() {
           <>
             {vaultTab !== "gallery" &&
               (query.data.contacts.length === 0 ? (
-                <p className="rounded-2xl border border-border bg-card p-6">
-                  There are no family recipients yet. Add someone to your family circle before
-                  scheduling a message.
-                </p>
+                <div className="rounded-2xl border border-border bg-card p-6 space-y-3">
+                  <p>
+                    There are no recipients in your circle yet. Add someone to your family circle to schedule a message.
+                  </p>
+                  <Button asChild variant="outline" className="rounded-xl">
+                    <Link to="/family">Open Family Circle →</Link>
+                  </Button>
+                </div>
               ) : (
                 <form
                   className="space-y-5 rounded-3xl border border-border bg-card p-6"

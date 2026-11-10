@@ -4,6 +4,8 @@ import {
   memberPoint,
   projectedCoreRadius,
   sampleMembers,
+  createPreviewGlobeMembers,
+  createGlobeMembersFromFamily,
 } from "./globe-model";
 
 describe("supplied ThreeJsFamilyStage projection", () => {
@@ -38,5 +40,30 @@ describe("supplied ThreeJsFamilyStage projection", () => {
     }
     camera.update(540, 395, 1, 0, 0);
     expect(camera.project({ x: 0, y: 0, z: -1.28 }).visible).toBe(false);
+  });
+  it("generates preview globe members with user host pin and sample members without crashing", () => {
+    const preview = createPreviewGlobeMembers({ display_name: "John Doe", timezone: "Asia/Kolkata" });
+    expect(preview.length).toBeGreaterThan(1);
+    expect(preview[0].name).toContain("John Doe");
+    expect(preview[0].badge).toBe("✨ Ready to Connect");
+  });
+  it("maps real family circle members and invitations to globe pins", () => {
+    const members = createGlobeMembersFromFamily({
+      family: { id: "fam-1", name: "The Rivera Family", owner_id: "user-1" },
+      members: [
+        { id: "mem-1", user_id: "user-1", role: "owner", display_name: "Carlos Rivera" },
+        { id: "mem-2", user_id: "user-2", role: "member", display_name: "Elena Rivera" },
+      ],
+      invites: [
+        { id: "inv-1", invitee_name: "Grandma Rosa", role: "adult", status: "pending", verification_status: "awaiting_call", token: "tok-123" },
+      ],
+      currentUserId: "user-1",
+      userProfile: { display_name: "Carlos Rivera", timezone: "America/New_York" },
+    });
+    expect(members).toHaveLength(3);
+    expect(members[0].name).toBe("Carlos Rivera");
+    expect(members[0].badge).toBe("👑 Host");
+    expect(members[2].name).toBe("Grandma Rosa");
+    expect(members[2].badge).toBe("📞 Call Pending");
   });
 });

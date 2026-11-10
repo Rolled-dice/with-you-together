@@ -37,7 +37,7 @@ function Page() {
       <DocSection title="Manage your account">
         <p>
           Existing subscription details and available cancellation controls remain in Settings. New
-          purchases and plan switches are not available in this release.
+          memberships open in secure Dodo Payments checkout; access begins after webhook confirmation.
         </p>
       </DocSection>
     </>

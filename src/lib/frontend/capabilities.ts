@@ -6,10 +6,10 @@ const schema = z.object({
   assistVoiceDispatch: z.literal(false),
   companionVoiceTranscription: z.literal(false),
   pushCheckIn: z.literal(false),
-  outboundCallBooking: z.literal(false),
+  outboundCallBooking: z.literal(true),
   callEscalation: z.literal(false),
   localDayDoses: z.literal(false),
-  purchase: z.literal(false),
+  purchase: z.literal(true),
 });
 export const capabilities = Object.freeze(
   schema.parse({
@@ -17,10 +17,10 @@ export const capabilities = Object.freeze(
     assistVoiceDispatch: false,
     companionVoiceTranscription: false,
     pushCheckIn: false,
-    outboundCallBooking: false,
+    outboundCallBooking: true,
     callEscalation: false,
     localDayDoses: false,
-    purchase: false,
+    purchase: true,
   }),
 );
 export type Capability = keyof typeof capabilities;

@@ -34,85 +34,25 @@ export function PrivacyPreferences() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    let applying = false;
-    const sync = () => {
-      const provider = window.Cookiebot;
-      if (provider?.hasResponse) {
-        const choice = {
-          preferences: provider.consent.preferences,
-          statistics: provider.consent.statistics,
-          marketing: provider.consent.marketing,
-        };
-        setDraft(choice);
-        setBanner(false);
-        try {
-          const saved = readChoice();
-          if (
-            !saved ||
-            saved.preferences !== choice.preferences ||
-            saved.statistics !== choice.statistics ||
-            saved.marketing !== choice.marketing
-          )
-            localStorage.setItem(storageKey, JSON.stringify({ ...choice, savedAt: Date.now() }));
-        } catch {
-          /* Keep the current-page choice. */
-        }
-      } else {
-        const saved = readChoice();
-        if (saved) {
-          setDraft(saved);
-          setBanner(false);
-          if (provider?.submitCustomConsent && !applying) {
-            applying = true;
-            try {
-              provider.submitCustomConsent(saved.preferences, saved.statistics, saved.marketing);
-            } catch {
-              setBanner(true);
-            } finally {
-              applying = false;
-            }
-          }
-        } else setBanner(true);
-      }
-    };
     const show = () => {
-      window.Cookiebot?.hide?.();
       setDraft(readChoice() ?? essentialOnly);
       setOpen(true);
       setMessage("");
     };
-    const replaceBanner = () => {
-      window.Cookiebot?.hide?.();
-      sync();
-    };
-    sync();
+    const saved = readChoice();
+    if (saved) {
+      setDraft(saved);
+    } else {
+      setBanner(true);
+    }
     window.addEventListener("sn:open-privacy", show);
-    window.addEventListener("CookiebotOnConsentReady", sync);
-    window.addEventListener("CookiebotOnAccept", sync);
-    window.addEventListener("CookiebotOnDecline", sync);
-    window.addEventListener("CookiebotOnDialogDisplay", replaceBanner);
     return () => {
       window.removeEventListener("sn:open-privacy", show);
-      window.removeEventListener("CookiebotOnConsentReady", sync);
-      window.removeEventListener("CookiebotOnAccept", sync);
-      window.removeEventListener("CookiebotOnDecline", sync);
-      window.removeEventListener("CookiebotOnDialogDisplay", replaceBanner);
     };
   }, []);
 
   const save = (choice: Choices) => {
     let persisted = true;
-    try {
-      window.Cookiebot?.submitCustomConsent?.(
-        choice.preferences,
-        choice.statistics,
-        choice.marketing,
-      );
-      window.Cookiebot?.hide?.();
-    } catch {
-      setMessage("The consent service could not update your choice. Please try again.");
-      return;
-    }
     try {
       localStorage.setItem(storageKey, JSON.stringify({ ...choice, savedAt: Date.now() }));
     } catch {

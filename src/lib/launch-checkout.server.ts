@@ -9,6 +9,17 @@ import {
 } from "./launch-catalog";
 import { launchDodoTestCatalog, launchTestProductId } from "./launch-dodo-products";
 
+type DodoDiscount = {
+  code?: unknown;
+  type?: unknown;
+  amount?: unknown;
+  subscription_cycles?: unknown;
+  usage_limit?: unknown;
+  per_customer_usage_limit?: unknown;
+  restricted_to?: unknown;
+  expires_at?: unknown;
+};
+
 function launchProductId(environment: "test" | "live", market: MarketId, plan: LaunchPlan) {
   if (environment === "test") return launchTestProductId(market, plan);
   const suffix = plan === "care_plus" ? "CARE_PLUS" : "CARE";
@@ -80,6 +91,59 @@ export function launchCheckoutPayload(
   };
 }
 
+function internalTesterIds() {
+  return new Set(
+    (process.env.INTERNAL_TESTER_UID_ALLOWLIST ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+}
+
+function isInternalTester(userId: string) {
+  return internalTesterIds().has(userId);
+}
+
+async function verifyDiscount(
+  baseUrl: string,
+  headers: Record<string, string>,
+  discountId: string,
+  productId: string,
+  expectedAmount: number,
+  options: { requireSingleUse: boolean },
+) {
+  const response = await fetch(`${baseUrl}/discounts/${encodeURIComponent(discountId)}`, {
+    headers,
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new Error("Unable to verify the configured Dodo discount.");
+  const discount = (await response.json()) as DodoDiscount;
+  const restrictedTo = Array.isArray(discount.restricted_to) ? discount.restricted_to : [];
+  if (
+    discount.type !== "percentage" ||
+    discount.amount !== expectedAmount ||
+    discount.subscription_cycles !== 1 ||
+    !restrictedTo.includes(productId) ||
+    typeof discount.code !== "string" ||
+    !discount.code.trim()
+  ) {
+    throw new Error("The configured Dodo discount no longer matches this offer.");
+  }
+  if (options.requireSingleUse) {
+    const expiresAt = typeof discount.expires_at === "string" ? Date.parse(discount.expires_at) : NaN;
+    if (
+      discount.usage_limit !== 1 ||
+      discount.per_customer_usage_limit !== 1 ||
+      !Number.isFinite(expiresAt) ||
+      expiresAt <= Date.now() ||
+      expiresAt > Date.now() + 48 * 60 * 60 * 1000
+    ) {
+      throw new Error("The internal Dodo test discount is not restricted enough.");
+    }
+  }
+  return discount.code.trim();
+}
+
 export async function createLaunchTestCheckout(
   input: { plan: LaunchPlan; market: MarketId },
   userId: string,
@@ -87,7 +151,7 @@ export async function createLaunchTestCheckout(
 ) {
   const environment = getDodoEnvironment();
   if (!supabase && environment !== "test")
-    throw new Error("Launch checkout is currently available in test mode only.");
+    throw new Error("A signed-in user is required for live checkout.");
   const trustedMarket = await resolveTrustedMarket(supabase, userId, input.market);
   const productId = launchProductId(environment, trustedMarket, input.plan);
   if (!productId) throw new Error(`Checkout is unavailable in ${launchMarket(trustedMarket).currency}.`);
@@ -118,6 +182,22 @@ export async function createLaunchTestCheckout(
     isFirstTimeSubscriber = !hasPaidTier;
   }
 
+  if (environment === "live" && existingSubscriptions?.some((row: { status?: string }) =>
+    ["active", "trialing", "on_hold"].includes(row.status ?? "")
+  )) {
+    throw new Error("You already have an active SomeoneNear subscription.");
+  }
+
+  const headers = {
+    Authorization: `Bearer ${getDodoApiKey(environment)}`,
+    "Content-Type": "application/json",
+  };
+  const baseUrl = environment === "test" ? "https://test.dodopayments.com" : "https://live.dodopayments.com";
+  const internalDiscountId =
+    environment === "live" && isInternalTester(userId)
+      ? process.env.DODO_LIVE_INTERNAL_TEST_DISCOUNT_ID?.trim()
+      : undefined;
+
   const payload = {
     product_cart: [{ product_id: productId, quantity: 1 }],
     subscription_data: { trial_period_days: isFirstTimeSubscriber ? 7 : 0 },
@@ -132,12 +212,7 @@ export async function createLaunchTestCheckout(
       plan: input.plan,
       isFirstTimeSubscriber: String(isFirstTimeSubscriber),
     },
-  };
-  const headers = {
-    Authorization: `Bearer ${getDodoApiKey(environment)}`,
-    "Content-Type": "application/json",
-  };
-  const baseUrl = environment === "test" ? "https://test.dodopayments.com" : "https://live.dodopayments.com";
+  } as { discount_codes?: string[]; [key: string]: unknown };
   const productResponse = await fetch(`${baseUrl}/products/${productId}`, { headers, signal: AbortSignal.timeout(15_000) });
   if (!productResponse.ok) throw new Error("Unable to verify the selected Dodo plan. Please try again.");
   const product = await productResponse.json();
@@ -153,24 +228,30 @@ export async function createLaunchTestCheckout(
   ) {
     throw new Error("The Dodo product no longer matches this plan. Checkout has been paused.");
   }
+
+  let discountCode: string | null = null;
   if (isFirstTimeSubscriber) {
     const discountId = environment === "test"
       ? launchDodoTestCatalog.discount.id
       : process.env.DODO_LIVE_LAUNCH_DISCOUNT_ID?.trim();
     if (!discountId) throw new Error("The live first-month offer is not configured.");
-    const discountResponse = await fetch(`${baseUrl}/discounts/${discountId}`, { headers, signal: AbortSignal.timeout(15_000) });
-    if (!discountResponse.ok) throw new Error("Unable to verify the first-month offer.");
-    const discount = await discountResponse.json();
-    if (discount.type !== "percentage" || discount.amount !== 3000 || discount.subscription_cycles !== 1 || !discount.restricted_to?.includes(productId))
-      throw new Error("The first-month offer has changed. Checkout has been paused.");
+    discountCode = await verifyDiscount(baseUrl, headers, discountId, productId, 3000, {
+      requireSingleUse: false,
+    });
   }
+  if (internalDiscountId) {
+    discountCode = await verifyDiscount(baseUrl, headers, internalDiscountId, productId, 10000, {
+      requireSingleUse: true,
+    });
+  }
+  if (discountCode) payload.discount_codes = [discountCode];
   const response = await fetch(`${baseUrl}/checkouts`, {
     method: "POST",
     headers,
     body: JSON.stringify(payload),
     signal: AbortSignal.timeout(20_000),
   });
-  if (!response.ok) throw new Error("Dodo could not start test checkout. Please try again.");
+  if (!response.ok) throw new Error(`Dodo could not start ${environment} checkout. Please try again.`);
   const session = await response.json();
   const checkoutUrl = new URL(session.checkout_url);
   if (

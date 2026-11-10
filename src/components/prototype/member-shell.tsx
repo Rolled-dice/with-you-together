@@ -15,7 +15,6 @@ import {
   GearIcon,
   SignOutIcon,
   DotsThreeIcon,
-  HandWavingIcon,
 } from "@phosphor-icons/react";
 import { Wordmark } from "@/components/landing/brand-mark";
 import { NotificationBell } from "@/components/notification-bell";
@@ -25,9 +24,9 @@ import { useIdentity } from "@/features/session/session-store";
 import { getMyFamily } from "@/lib/family.functions";
 import { MemberAppearanceProvider } from "./member-avatar";
 import "./member.css";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { SoundToggle } from "@/components/website-feedback";
 import { useSiteTheme } from "@/lib/frontend/use-site-theme";
+import { QuickCare } from "./quick-care";
 
 const navigation = [
   ["/dashboard", "Dashboard", HouseIcon],
@@ -55,7 +54,6 @@ export function MemberShell({ children, signOut }: { children: ReactNode; signOu
   const [theme, setTheme] = useSiteTheme();
   const [simple, setSimple] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
-  const [assistOpen, setAssistOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   useEffect(() => {
     try {
@@ -66,7 +64,6 @@ export function MemberShell({ children, signOut }: { children: ReactNode; signOu
   }, []);
   useEffect(() => {
     setMoreOpen(false);
-    setAssistOpen(false);
   }, [pathname]);
   useEffect(() => {
     const edit = () => setAvatarOpen(true);
@@ -214,66 +211,7 @@ export function MemberShell({ children, signOut }: { children: ReactNode; signOu
             </DialogContent>
           </Dialog>
         </nav>
-        <Popover open={assistOpen} onOpenChange={setAssistOpen}>
-          <PopoverTrigger asChild>
-            <button className="sn-worker-assist" type="button" aria-label="Open Quick Care actions">
-              <HandWavingIcon size={25} weight="fill" />
-              <span>CARE</span>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            side="top"
-            align="end"
-            sideOffset={14}
-            className="sn-quick-care"
-            aria-label="Quick Care actions"
-          >
-            <div>
-              <h2>✨ Quick Care</h2>
-              <button
-                type="button"
-                aria-label="Close Quick Care"
-                onClick={() => setAssistOpen(false)}
-              >
-                ×
-              </button>
-            </div>
-            <p>A little care is just a tap away.</p>
-            <nav aria-label="Quick Care">
-              <Link to="/listeners" onClick={() => setAssistOpen(false)}>
-                📞 Book a Human Listener Call
-              </Link>
-              <Link
-                to="/reminders"
-                search={{ action: "new-reminder" }}
-                onClick={() => setAssistOpen(false)}
-              >
-                🔔 Set a Parent or Self Reminder
-              </Link>
-              <Link
-                to="/send-later"
-                search={{ section: "studio" }}
-                onClick={() => setAssistOpen(false)}
-              >
-                🎙️ Record a Voice Blessing
-              </Link>
-              <Link
-                to="/reminders"
-                search={{ action: "add-medication" }}
-                onClick={() => setAssistOpen(false)}
-              >
-                💊 Add a Pill Strip · PhotoMed
-              </Link>
-            </nav>
-            <section className="sn-quick-care-help" aria-label="Help and enquiries">
-              <Link to="/docs/faq" onClick={() => setAssistOpen(false)}>
-                ❓ FAQs &amp; help →
-              </Link>
-              <p>For more information or any enquiry, email us:</p>
-              <a href="mailto:care@someonenear.com">care@someonenear.com</a>
-            </section>
-          </PopoverContent>
-        </Popover>
+        <QuickCare />
       </div>
     </MemberAppearanceProvider>
   );

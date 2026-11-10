@@ -41,6 +41,10 @@ const approvedBackendFiles = new Set([
   // User requested notification repair: exact owner-scoped inbox counts and explicit read IDs.
   "src/lib/notifications.functions.ts",
   "src/lib/notification-inbox.server.ts",
+  "src/lib/web-push.server.ts",
+  "src/lib/family-reminder-delivery.server.ts",
+  "src/lib/telnyx.server.ts",
+  "src/lib/reminders.functions.ts",
   // User requested direct AWS Companion integration with existing server credentials.
   "src/routes/api/chat.ts",
   "src/lib/aws-config.server.ts",

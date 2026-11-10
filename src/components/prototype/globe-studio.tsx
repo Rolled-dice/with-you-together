@@ -31,9 +31,9 @@ export function GlobeStudio(props: Props) {
 function StudioForm({ members, config, selectedId, onApply, onReset, onOpenChange }: Props) {
   const [draftMembers, setDraftMembers] = useState(members);
   const [draftConfig, setDraftConfig] = useState(config);
-  const [editing, setEditing] = useState(selectedId ?? members[0].id);
+  const [editing, setEditing] = useState(selectedId ?? members[0]?.id ?? "");
   const [error, setError] = useState("");
-  const member = draftMembers.find((m) => m.id === editing)!;
+  const member = draftMembers.find((m) => m.id === editing) ?? draftMembers[0];
   const update = (patch: Partial<GlobeMember>) => {
     setDraftMembers((current) => current.map((m) => (m.id === editing ? { ...m, ...patch } : m)));
     setError("");

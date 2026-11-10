@@ -239,3 +239,43 @@ export function decodeClientState(
     return {};
   }
 }
+
+/**
+ * Sends an enterprise reminder or medication alert SMS via Telnyx.
+ * Auto-caps at single-segment length (<=160 chars) to maintain cost efficiency.
+ */
+export async function sendReminderSms(
+  to: string,
+  message: string,
+  cfg: TelnyxConfig | null = telnyxConfig(),
+): Promise<{ success: boolean; id?: string }> {
+  if (!cfg) {
+    console.warn("[telnyx] sendReminderSms skipped: Telnyx is not configured");
+    return { success: false };
+  }
+  const from = pickSmsSender(cfg, to);
+  const text = message.length > 155 ? `${message.slice(0, 152)}...` : message;
+  const body: Record<string, unknown> = {
+    from,
+    to,
+    text,
+    type: "SMS",
+  };
+  if (cfg.messagingProfileId) body["messaging_profile_id"] = cfg.messagingProfileId;
+
+  const res = await fetch(`${API}/messages`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${cfg.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error(`[telnyx] sendReminderSms failed [${res.status}]: ${errText.slice(0, 300)}`);
+    return { success: false };
+  }
+  const data = (await res.json()) as { data?: { id?: string } };
+  return { success: true, id: data.data?.id };
+}

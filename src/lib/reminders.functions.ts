@@ -45,8 +45,16 @@ export const createReminder = createServerFn({ method: "POST" })
 
 export const completeReminder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
+  .inputValidator((i: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        channel: z.enum(["web_app", "mobile_push", "sms_reply", "caregiver_portal"]).optional(),
+      })
+      .parse(i),
+  )
   .handler(async ({ context, data }) => {
+    const channel = data.channel ?? "web_app";
     const { error } = await context.supabase
       .from("reminders")
       .update({ status: "done", completed_at: new Date().toISOString() })
@@ -58,7 +66,28 @@ export const completeReminder = createServerFn({ method: "POST" })
     } catch (e) {
       console.error("[calendar-sync] reminder mutation", e);
     }
-    return { ok: true };
+    return { ok: true, channel };
+  });
+
+/**
+ * Enterprise Escalation: Dispatches an instant Telnyx SMS nudge to a mobile number.
+ */
+export const sendReminderSmsNudge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z
+      .object({
+        phone: z.string().min(5).max(30),
+        reminder_title: z.string().min(1).max(200),
+        time_label: z.string().optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data }) => {
+    const { sendReminderSms } = await import("@/lib/telnyx.server");
+    const label = data.time_label ? ` at ${data.time_label}` : "";
+    const text = `SomeoneNear reminder: Time for ${data.reminder_title}${label}. Reply 1 if taken.`;
+    return sendReminderSms(data.phone, text);
   });
 
 export const deleteReminder = createServerFn({ method: "POST" })

@@ -55,7 +55,7 @@ export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: Market
         <p>
           {dodoMode === "test"
             ? "Dodo test checkout is available in supported markets. No real charges."
-            : "Launch catalog preview. New subscriptions are not currently available."}
+            : "Secure monthly checkout with Dodo Payments. Your plan starts after webhook confirmation."}
         </p>
       </div>
       <div className="sn-plan-grid">
@@ -98,12 +98,12 @@ export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: Market
               <Link
                 className={`sn-button ${id === "care_plus" ? "sn-button-gold" : ""}`}
                 to={
-                  dodoMode === "test" && launchTestProductId(market, id)
+                  dodoMode === "live" || launchTestProductId(market, id)
                     ? "/checkout"
                     : "/docs/billing"
                 }
                 search={
-                  dodoMode === "test" && launchTestProductId(market, id)
+                  dodoMode === "live" || launchTestProductId(market, id)
                     ? { plan: id, market }
                     : undefined
                 }
@@ -112,7 +112,7 @@ export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: Market
                   ? launchTestProductId(market, id)
                     ? `Try ${plan.name} checkout`
                     : `Checkout unavailable in ${LAUNCH_MARKETS.find((m) => m.id === market)?.currency}`
-                  : `Explore ${plan.name}`}
+                  : `Choose ${plan.name}`}
               </Link>
             </article>
           );

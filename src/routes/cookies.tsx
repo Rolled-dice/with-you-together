@@ -47,8 +47,8 @@ function CookiePolicy() {
         <h2>Preferences</h2>
         <p>
           Preference storage may remember choices that improve your experience. Our privacy controls
-          let you choose optional preferences, statistics, and marketing categories. Cookiebot
-          applies these choices when its service is available.
+          let you choose optional preferences, statistics, and marketing categories. SomeoneNear
+          stores these choices locally in this browser.
         </p>
       </section>
       <section>
@@ -56,8 +56,8 @@ function CookiePolicy() {
         <p>
           Optional statistics technologies help a service understand usage. Marketing technologies
           may measure campaigns or personalize advertising. SomeoneNear currently has no analytics
-          or advertising scripts installed. If we add them, Cookiebot&apos;s automatic blocking
-          keeps them inactive until you give the relevant consent.
+          or advertising scripts installed. If we add them, they will remain inactive until you give
+          the relevant consent.
         </p>
       </section>
       <section>
@@ -65,16 +65,16 @@ function CookiePolicy() {
         <p>
           Features you deliberately use—such as account sign-in, payment checkout, calendar
           connection, or embedded provider tools—may involve storage set by that provider where
-          technically necessary. The Cookiebot declaration shown through the consent interface is
-          the current source for detected cookies, providers, purposes, and expiry periods.
+          technically necessary. The consent interface explains the categories and choices that
+          SomeoneNear currently supports.
         </p>
       </section>
       <section>
         <h2>Your choices</h2>
         <p>
-          You can accept, reject, or customize optional categories in the Cookiebot banner and
-          change your decision later. Withdrawing consent does not affect processing that occurred
-          lawfully before withdrawal.
+          You can accept, reject, or customize optional categories in the SomeoneNear privacy
+          banner and change your decision later. Withdrawing consent does not affect processing
+          that occurred lawfully before withdrawal.
         </p>
         <PrivacyChoicesButton variant="outline" className="mt-3" />
       </section>

@@ -14,11 +14,17 @@ import {
   PillIcon,
   PlusIcon,
   TrashIcon,
+  ChatCircleTextIcon,
+  DeviceMobileIcon,
+  ShieldCheckIcon,
+  PaperPlaneRightIcon,
 } from "@phosphor-icons/react";
 
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { MedicationOnboarding } from "@/components/medication-onboarding";
 import { GoogleCalendarCard } from "@/components/google-calendar-card";
+import { NotificationPermissionStatus } from "@/features/notifications/permission-status";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { MedicationCalendarPrompt } from "@/components/medication-calendar-prompt";
 import { getGoogleCalendarStatus } from "@/lib/google-calendar.functions";
 import { listMedications } from "@/lib/medications.functions";
@@ -42,6 +48,7 @@ import {
   createReminder,
   deleteReminder,
   listReminders,
+  sendReminderSmsNudge,
 } from "@/lib/reminders.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadReminderCalendar } from "@/lib/reminder-calendar";
@@ -160,7 +167,7 @@ function RemindersPage() {
               <BellRingingIcon className="mr-2 size-5" /> ② Parent &amp; Self Reminders
             </TabsTrigger>
             <TabsTrigger value="calendar" className="min-h-12 rounded-xl px-3 text-base">
-              📅 ③ Calendar & Phone
+              🔔 ③ Phone Alerts &amp; Sync
             </TabsTrigger>
           </TabsList>
           <TabsContent value="medication" className="mt-0 space-y-6">
@@ -169,14 +176,35 @@ function RemindersPage() {
           <TabsContent value="everyday" className="mt-0">
             <EverydayReminders />
           </TabsContent>
-          <TabsContent value="calendar" className="mt-0">
+          <TabsContent value="calendar" className="mt-0 space-y-6">
+            {/* Tier 1: 1-Click Native Phone & App Push */}
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-gentle">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <BellRingingIcon className="size-5" />
+                </span>
+                <div>
+                  <h3 className="font-display text-xl font-medium">1-Click Phone &amp; Device Alerts</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Instant lock screen reminders with sound &amp; vibration without downloading calendar files.
+                  </p>
+                </div>
+              </div>
+              <NotificationPermissionStatus />
+            </div>
+
+            {/* Tier 2: Enterprise Telnyx SMS Escalation Nudge */}
+            <EnterpriseSmsNudgeCard />
+
+            {/* Health & HIPAA Lock Screen Privacy Mode */}
+            <LockScreenPrivacyModeCard />
+
+            {/* Optional Calendar Integrations */}
             <section className="sn-midnight-panel sn-companion-memory">
-              <span className="sn-worker-status">📅 Calendar on their phone</span>
-              <h2>A gentle nudge, in your calendar.</h2>
+              <span className="sn-worker-status">📅 Calendar Sync (Optional)</span>
+              <h2>Google &amp; Apple Calendar Sync</h2>
               <p>
-                Open Parent &amp; Self Reminders and choose Download calendar on a saved reminder.
-                Import the file into Apple, Google or Outlook Calendar, then review its time and
-                alert. No account connection is required for a download.
+                Prefer your standard phone calendar? Open Parent &amp; Self Reminders and choose Download calendar on a saved reminder to import into Apple, Google, or Outlook Calendar.
               </p>
               <button
                 type="button"
@@ -229,6 +257,137 @@ function MedicationCalendarSlot() {
   return <MedicationCalendarPrompt hasMedications={hasMedications} />;
 }
 
+function EnterpriseSmsNudgeCard() {
+  const [phone, setPhone] = useState("");
+  const [sampleReminder, setSampleReminder] = useState("Luke warm water (or medication)");
+  const sendSmsFn = useServerFn(sendReminderSmsNudge);
+
+  const mutation = useMutation({
+    mutationFn: (e164: string) =>
+      sendSmsFn({
+        data: {
+          phone: e164,
+          reminder_title: sampleReminder,
+          time_label: "08:00 AM",
+        },
+      }),
+    onSuccess: (res) => {
+      if (res.success) {
+        gentleToast("SMS Nudge Dispatched", "A live reminder text was sent via Telnyx.");
+      } else {
+        gentleProblem(
+          "SMS delivery failed",
+          "Please use international E.164 format (e.g. +1 315-997-8334 or +91...).",
+        );
+      }
+    },
+    onError: (err: Error) => gentleProblem("Could not send SMS", err.message),
+  });
+
+  return (
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-gentle">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <ChatCircleTextIcon className="size-5" />
+        </span>
+        <div>
+          <h3 className="font-display text-xl font-medium">Enterprise Telnyx SMS Nudges</h3>
+          <p className="text-sm text-muted-foreground">
+            Zero-friction fallback. Sends an instant SMS directly to elderly parents or caregivers if app push is delayed.
+          </p>
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-[1.5fr_1.5fr_auto] items-end">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium" htmlFor="sms-phone">
+            Mobile Number (E.164)
+          </label>
+          <Input
+            id="sms-phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="+1 315-997-8334 or +91..."
+            className="rounded-xl"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium" htmlFor="sms-rem">
+            Reminder Preview
+          </label>
+          <Input
+            id="sms-rem"
+            value={sampleReminder}
+            onChange={(e) => setSampleReminder(e.target.value)}
+            className="rounded-xl"
+          />
+        </div>
+        <Button
+          type="button"
+          disabled={!phone.trim() || mutation.isPending}
+          onClick={() => mutation.mutate(phone.trim())}
+          className="rounded-xl min-h-10"
+        >
+          {mutation.isPending ? (
+            <SpinnerGapIcon className="animate-spin" />
+          ) : (
+            <PaperPlaneRightIcon className="mr-1.5" />
+          )}
+          Test SMS Nudge
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function LockScreenPrivacyModeCard() {
+  const [isDiscreet, setIsDiscreet] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("someonenear_privacy_mode") !== "false";
+  });
+
+  const toggle = () => {
+    const next = !isDiscreet;
+    setIsDiscreet(next);
+    localStorage.setItem("someonenear_privacy_mode", String(next));
+    gentleToast(
+      next ? "Health Privacy Mode Enabled" : "Detailed Notifications Enabled",
+      next
+        ? "Sensitive medication and dose details are hidden on lock screens (HIPAA aligned)."
+        : "Full reminder titles will be visible on lock screens.",
+    );
+  };
+
+  return (
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-gentle">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <ShieldCheckIcon className="size-5" />
+          </span>
+          <div>
+            <h3 className="font-display text-xl font-medium">
+              Healthcare Privacy &amp; HIPAA Lock Screen Mode
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {isDiscreet
+                ? "Active: Phone lock screen displays a neutral check-in without exposing private medication names to bystanders."
+                : "Standard: Exact medication and reminder titles show up directly on phone lock screens."}
+            </p>
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant={isDiscreet ? "default" : "outline"}
+          onClick={toggle}
+          className="rounded-xl shrink-0"
+        >
+          {isDiscreet ? "🔒 Discreet Mode: ON" : "🔓 Discreet Mode: OFF"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function EverydayReminders() {
   const qc = useQueryClient();
   const zone = useTimeZone();
@@ -236,12 +395,41 @@ function EverydayReminders() {
   const createFn = useServerFn(createReminder);
   const doneFn = useServerFn(completeReminder);
   const removeFn = useServerFn(deleteReminder);
+  const sendSmsFn = useServerFn(sendReminderSmsNudge);
+  const [activeSmsReminder, setActiveSmsReminder] = useState<ReminderRow | null>(null);
+  const [smsPhoneInput, setSmsPhoneInput] = useState("");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("general");
   const [recurrence, setRecurrence] = useState("daily");
   const [time, setTime] = useState("20:00");
   const reminders = useQuery({ queryKey: ["reminders"], queryFn: () => listFn() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["reminders"] });
+
+  const sendSms = useMutation({
+    mutationFn: async () => {
+      if (!activeSmsReminder || !smsPhoneInput.trim()) return;
+      return sendSmsFn({
+        data: {
+          phone: smsPhoneInput.trim(),
+          reminder_title: activeSmsReminder.title,
+          time_label: zone.data ? displayTime(activeSmsReminder.due_at, zone.data) : undefined,
+        },
+      });
+    },
+    onSuccess: (res) => {
+      if (res?.success) {
+        gentleToast("SMS Nudge Dispatched", "A reminder text was sent via Telnyx.");
+        setActiveSmsReminder(null);
+        setSmsPhoneInput("");
+      } else {
+        gentleProblem(
+          "SMS delivery failed",
+          "Please verify the phone number format (+1... or +91...).",
+        );
+      }
+    },
+    onError: (err: Error) => gentleProblem("Could not send SMS", err.message),
+  });
 
   const create = useMutation({
     mutationFn: async () => {
@@ -431,6 +619,16 @@ function EverydayReminders() {
                     >
                       📅 Download calendar
                     </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setActiveSmsReminder(reminder);
+                      }}
+                    >
+                      <DeviceMobileIcon className="mr-1" /> SMS Nudge
+                    </Button>
                     <Badge variant="secondary">
                       {CATEGORIES.find((item) => item.value === reminder.category)?.label ??
                         reminder.category}
@@ -470,6 +668,55 @@ function EverydayReminders() {
           ))}
         </div>
       )}
+
+      {/* Enterprise SMS Nudge Dialog */}
+      <Dialog
+        open={!!activeSmsReminder}
+        onOpenChange={(open) => !open && setActiveSmsReminder(null)}
+      >
+        <DialogContent className="max-w-md rounded-3xl p-6">
+          <DialogTitle className="font-display text-xl">Send Telnyx SMS Nudge</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground mt-1">
+            Deliver an instant SMS reminder for <strong>{activeSmsReminder?.title}</strong> directly
+            to any mobile number (no app or calendar setup needed).
+          </DialogDescription>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-1.5">
+              <label htmlFor="modal-sms-phone" className="text-sm font-medium">
+                Phone Number (E.164 with country code)
+              </label>
+              <Input
+                id="modal-sms-phone"
+                value={smsPhoneInput}
+                onChange={(e) => setSmsPhoneInput(e.target.value)}
+                placeholder="+1 315-997-8334 or +91..."
+                className="rounded-xl"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => setActiveSmsReminder(null)}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={!smsPhoneInput.trim() || sendSms.isPending}
+                onClick={() => sendSms.mutate()}
+                className="rounded-xl"
+              >
+                {sendSms.isPending ? (
+                  <SpinnerGapIcon className="animate-spin" />
+                ) : (
+                  <PaperPlaneRightIcon className="mr-1.5" />
+                )}
+                Send SMS Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

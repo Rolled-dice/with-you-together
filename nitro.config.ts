@@ -55,6 +55,9 @@ export default defineNitroConfig({
         DYNAMODB_SAFETY_TABLE: "someonenear-ai-safety-audits",
       },
       routes: [{ pattern: "www.someonenear.com", custom_domain: true }],
+      triggers: {
+        crons: ["* * * * *"],
+      },
       observability: {
         enabled: true,
         head_sampling_rate: 0.1,

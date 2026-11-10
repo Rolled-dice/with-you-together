@@ -1,26 +1,63 @@
 self.addEventListener("push", (event) => {
   let destination = "/reminders";
-  try {
-    const received = event.data?.json();
-    if (
-      typeof received?.destination === "string" &&
-      received.destination.startsWith("/") &&
-      !received.destination.startsWith("//")
-    ) {
-      destination = received.destination;
+  let title = "SomeoneNear";
+  let body = "You have an update waiting in SomeoneNear.";
+  let tag = "someonenear-reminder";
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      const payload = data?.data || data || {};
+
+      if (typeof payload.title === "string" && payload.title.trim()) {
+        title = payload.title.trim();
+      } else if (typeof data.title === "string" && data.title.trim()) {
+        title = data.title.trim();
+      }
+
+      if (typeof payload.body === "string" && payload.body.trim()) {
+        body = payload.body.trim();
+      } else if (typeof data.body === "string" && data.body.trim()) {
+        body = data.body.trim();
+      } else if (typeof payload.message === "string" && payload.message.trim()) {
+        body = payload.message.trim();
+      }
+
+      const candidateDest = payload.destination || payload.url || data?.destination;
+      if (
+        typeof candidateDest === "string" &&
+        candidateDest.startsWith("/") &&
+        !candidateDest.startsWith("//")
+      ) {
+        destination = candidateDest;
+      }
+      if (payload.tag) {
+        tag = String(payload.tag);
+      }
+    } catch {
+      // If it's plain text rather than JSON
+      try {
+        const text = event.data.text();
+        if (text && text.trim()) {
+          body = text.trim();
+        }
+      } catch {
+        // Fall back to default
+      }
     }
-  } catch {
-    // A malformed payload should never stop a generic notification.
   }
+
   const notification = {
-    body: "You have an update waiting in SomeoneNear.",
+    body,
     icon: "/favicon-64.png",
     badge: "/favicon-64.png",
-    tag: "someonenear-update",
+    tag,
     data: { path: destination },
+    vibrate: [200, 100, 200],
+    requireInteraction: true,
   };
 
-  event.waitUntil(self.registration.showNotification("SomeoneNear", notification));
+  event.waitUntil(self.registration.showNotification(title, notification));
 });
 
 self.addEventListener("notificationclick", (event) => {

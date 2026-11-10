@@ -23,7 +23,7 @@ import {
   rescheduleBooking,
   listListeners,
 } from "@/lib/listeners.functions";
-import { EditorialAvatar } from "@/components/identity/editorial-avatar";
+import { EditorialAvatar, type AvatarAppearance } from "@/components/identity/editorial-avatar";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { capabilities, requireCapability } from "@/lib/frontend/capabilities";
 import { getFeedbackPrompt } from "@/lib/session-feedback.functions";
@@ -92,6 +92,141 @@ function todayIso() {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+function ListenerAvatar({
+  listener,
+  size = "lg",
+}: {
+  listener: { name: string; avatar_url?: string | null };
+  size?: "sm" | "md" | "lg" | "xl";
+}) {
+  const avatarUrl = listener.avatar_url;
+  if (avatarUrl) {
+    if (
+      avatarUrl.startsWith("http://") ||
+      avatarUrl.startsWith("https://") ||
+      avatarUrl.startsWith("/") ||
+      avatarUrl.startsWith("data:")
+    ) {
+      const dim =
+        size === "xl"
+          ? "w-28 h-28"
+          : size === "lg"
+            ? "w-20 h-20"
+            : size === "sm"
+              ? "w-11 h-11"
+              : "w-14 h-14";
+      return (
+        <img
+          src={avatarUrl}
+          alt={listener.name}
+          className={`${dim} rounded-full object-cover border-[2.5px] border-[#FAF7F2] shadow-[0_8px_20px_rgba(16,47,80,0.22)] flex-shrink-0 select-none`}
+        />
+      );
+    }
+    try {
+      const parsed = JSON.parse(avatarUrl) as AvatarAppearance;
+      if (parsed && typeof parsed === "object") {
+        return <EditorialAvatar member={parsed} size={size} />;
+      }
+    } catch {
+      /* parse error, fall through */
+    }
+  }
+
+  const name = listener.name.toLowerCase();
+  let appearance: AvatarAppearance = {
+    archetype: "adult-woman",
+    skinTone: "#D89B78",
+    avatarBg: "#EAB84B",
+    outfitColor: "#D95732",
+    earrings: "hoops",
+    backdropMotif: "leaves",
+  };
+
+  if (name.includes("kenji")) {
+    appearance = {
+      archetype: "adult-man",
+      skinTone: "#F0C0A8",
+      avatarBg: "#3E5C76",
+      outfitColor: "#2B4C7E",
+      backdropMotif: "waves",
+    };
+  } else if (
+    name.includes("aarav") ||
+    name.includes("rahul") ||
+    name.includes("rohan") ||
+    name.includes("vikram")
+  ) {
+    appearance = {
+      archetype: "adult-man",
+      skinTone: "#C8845A",
+      avatarBg: "#2E5B88",
+      outfitColor: "#1F3B4D",
+      glasses: true,
+      backdropMotif: "stripes",
+    };
+  } else if (
+    name.includes("david") ||
+    name.includes("marcus") ||
+    name.includes("james") ||
+    name.includes("robert")
+  ) {
+    appearance = {
+      archetype: "aged-man",
+      skinTone: "#E5A98A",
+      avatarBg: "#5C527F",
+      outfitColor: "#3E2C41",
+      glasses: true,
+      backdropMotif: "waves",
+    };
+  } else if (name.includes("riya") || name.includes("ananya") || name.includes("maya")) {
+    appearance = {
+      archetype: "teenager",
+      skinTone: "#D89B78",
+      avatarBg: "#3E7B78",
+      outfitColor: "#D95732",
+      earrings: "pink-hoops",
+      backdropMotif: "clouds",
+    };
+  } else if (name.includes("amara") || name.includes("zainab")) {
+    appearance = {
+      archetype: "adult-woman",
+      skinTone: "#8D5524",
+      avatarBg: "#D97724",
+      outfitColor: "#3D1220",
+      earrings: "tassels",
+      backdropMotif: "leaves",
+    };
+  } else if (name.includes("priya") || name.includes("pooja") || name.includes("neha")) {
+    appearance = {
+      archetype: "adult-woman",
+      skinTone: "#D89B78",
+      avatarBg: "#EAB84B",
+      outfitColor: "#D95732",
+      earrings: "hoops",
+      backdropMotif: "leaves",
+    };
+  } else {
+    const isMale =
+      /\b(mr|he|him|man|boy|kumar|singh|sharma|patel|john|james|robert|david|alex|kenji|aarav)\b/i.test(
+        listener.name,
+      );
+    let hash = 0;
+    for (let i = 0; i < listener.name.length; i++)
+      hash = (hash << 5) - hash + listener.name.charCodeAt(i);
+    const bgList = ["#EAB84B", "#3E5C76", "#4A7C59", "#D97724", "#2E5B88", "#5C527F", "#3E7B78"];
+    appearance = {
+      archetype: isMale ? "adult-man" : "adult-woman",
+      skinTone: "#E5A98A",
+      avatarBg: bgList[Math.abs(hash) % bgList.length],
+      outfitColor: isMale ? "#2B4C7E" : "#D95732",
+      earrings: isMale ? "none" : "hoops",
+    };
+  }
+
+  return <EditorialAvatar member={appearance} size={size} />;
 }
 
 function ListenersPage() {
@@ -225,7 +360,7 @@ function ListenersPage() {
             roster.data.map((listener) => (
               <article key={listener.id}>
                 <div className="sn-family-card-heading">
-                  <EditorialAvatar size="lg" />
+                  <ListenerAvatar listener={listener} size="lg" />
                   <div>
                     <h2>{listener.name}</h2>
                     <p>{listener.headline}</p>
@@ -374,8 +509,8 @@ function ListenersPage() {
                   />
                 </div>
                 {bookingError && (
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-brand border border-destructive/30 bg-destructive/5 p-3">
-                    <p role="alert" className="text-sm text-destructive-foreground">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-brand border border-destructive/30 bg-destructive/10 p-3">
+                    <p role="alert" className="text-sm font-medium text-destructive">
                       {bookingError.message}
                     </p>
                     {bookingError.settingsLink && (
@@ -436,9 +571,9 @@ function ListenersPage() {
                   <FlowStep n={2} text="Our in-house Listener picks it up (SLA: 10 minutes)." />
                   <FlowStep n={3} text="You'll get a call notification, join when you're ready." />
                 </ol>
-                <div className="rounded-brand border border-destructive/25 bg-destructive/5 p-3 text-xs text-destructive-foreground/90">
+                <div className="rounded-brand border border-destructive/30 bg-destructive/10 p-3 text-xs font-medium text-destructive">
                   If you're in danger, please call your local emergency line first.{" "}
-                  <Link to="/safety" className="underline underline-offset-4">
+                  <Link to="/safety" className="underline underline-offset-4 hover:opacity-80">
                     Safety resources →
                   </Link>
                 </div>

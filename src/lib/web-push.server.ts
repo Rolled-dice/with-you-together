@@ -19,6 +19,9 @@ export type ReminderPushDevice = {
 
 export type ReminderPushMessage = {
   destination: string;
+  title?: string;
+  body?: string;
+  discreet?: boolean;
 };
 
 export type PushDeliveryOutcome = "sent" | "expired" | "retry";
@@ -56,9 +59,23 @@ export async function sendGenericReminderPush(
     expirationTime: null,
     keys: { p256dh: device.p256dh, auth: device.authKey },
   };
+  const isDiscreet = message.discreet === true;
+  const pushTitle = isDiscreet ? "SomeoneNear · Reminder" : (message.title || "SomeoneNear");
+  const pushBody = isDiscreet
+    ? "You have a scheduled check-in. Tap to view."
+    : (message.body || "You have an update waiting in SomeoneNear.");
+
+  const pushData: Record<string, string | number | boolean> = {
+    version: 1,
+    destination: safeDestination(message.destination),
+    title: pushTitle,
+    body: pushBody,
+    discreet: isDiscreet,
+  };
+
   const payload = await buildPushPayload(
     {
-      data: { version: 1, destination: safeDestination(message.destination) },
+      data: pushData,
       options: { ttl: 300, urgency: "high", topic: "someonenear-reminder" },
     },
     subscription,

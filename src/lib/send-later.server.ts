@@ -157,12 +157,16 @@ export async function listReceivedMessages(context: Ctx) {
   }));
 }
 
-/** Family members the user can address a message to. */
+/** Family members and future self the user can address a message or time capsule to. */
 export async function listFamilyContacts(context: Ctx) {
+  const selfContact = {
+    userId: context.userId,
+    name: "You (Future Self · Time Capsule)",
+  };
   const { data: famId, error: famErr } = await context.supabase.rpc("get_user_family_id", {
     _uid: context.userId,
   });
-  if (famErr || !famId) return [];
+  if (famErr || !famId) return [selfContact];
   const { data, error } = await context.supabase
     .from("family_members")
     .select("user_id")
@@ -170,7 +174,7 @@ export async function listFamilyContacts(context: Ctx) {
     .neq("user_id", context.userId);
   if (error) throw new Error(error.message);
   const ids = (data ?? []).map((m) => m.user_id as string);
-  if (!ids.length) return [];
+  if (!ids.length) return [selfContact];
   const { data: profs } = await context.supabase
     .from("profiles")
     .select("id, display_name")
@@ -178,8 +182,9 @@ export async function listFamilyContacts(context: Ctx) {
   const names = new Map<string, string>(
     (profs ?? []).map((p) => [p.id as string, p.display_name as string]),
   );
-  return ids.map((id: string) => ({
+  const family = ids.map((id: string) => ({
     userId: id,
     name: names.get(id) || "Family member",
   }));
+  return [selfContact, ...family];
 }

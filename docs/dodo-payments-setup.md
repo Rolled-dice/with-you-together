@@ -59,6 +59,11 @@ DODO_TEST_PRODUCT_CARE_PLUS_INR=""
 DODO_LIVE_API_KEY=""
 DODO_LIVE_WEBHOOK_SECRET=""
 DODO_LIVE_LAUNCH_DISCOUNT_ID=""
+# Restricted internal smoke-test offer. Keep this unset until the live Dodo
+# discount is limited to one use, one customer, a 24–48 hour expiry, and the
+# designated live product IDs.
+DODO_LIVE_INTERNAL_TEST_DISCOUNT_ID=""
+INTERNAL_TESTER_UID_ALLOWLIST=""
 # Cloudflare deployment may store all live product IDs in this single JSON secret.
 DODO_LIVE_PRODUCT_CATALOG=""
 DODO_LIVE_PRODUCT_CARE_USD=""
@@ -114,3 +119,10 @@ The route verifies `webhook-id`, `webhook-timestamp`, and `webhook-signature` ag
 ## Live rollout prerequisite
 
 Do not set `DODO_PAYMENTS_ENV=live` until live products, `DODO_LIVE_API_KEY`, `DODO_LIVE_WEBHOOK_SECRET`, and the live webhook endpoint are all configured and verified with dashboard example events. The live environment must use a separate Dodo API key, webhook secret, and product IDs from test mode.
+
+The first successful subscription checkout automatically applies the live 30%
+discount returned by `DODO_LIVE_LAUNCH_DISCOUNT_ID` for one billing cycle. The
+internal 100% smoke-test discount is never accepted from the browser: it is
+only applied when the authenticated user ID appears in
+`INTERNAL_TESTER_UID_ALLOWLIST` and the configured Dodo discount passes the
+one-use, one-customer, product-restricted, short-expiry checks.

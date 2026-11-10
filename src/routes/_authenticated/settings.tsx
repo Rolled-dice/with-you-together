@@ -645,7 +645,7 @@ function PhoneVerifyDialog({
           {verificationError ? (
             <div
               role="alert"
-              className="rounded-brand border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive-foreground"
+              className="rounded-brand border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive"
             >
               {verificationError}
             </div>

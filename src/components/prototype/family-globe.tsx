@@ -7,6 +7,7 @@ import {
   SlidersHorizontalIcon,
   XIcon,
 } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import { EditorialAvatar } from "@/components/identity/editorial-avatar";
 import { GlobeStudio } from "./globe-studio";
 import {
@@ -32,7 +33,17 @@ const dots = Array.from({ length: 1800 }, (_, i) => {
   return { x: x * shellRadius, y: y * shellRadius, z: z * shellRadius, mask };
 });
 
-export function FamilyGlobe() {
+export interface FamilyGlobeProps {
+  initialMembers?: GlobeMember[];
+  familyName?: string;
+  isLiveFamily?: boolean;
+}
+
+export function FamilyGlobe({
+  initialMembers,
+  familyName,
+  isLiveFamily = false,
+}: FamilyGlobeProps = {}) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const rotation = useRef({ yaw: 0.35, pitch: 0.12 });
@@ -41,7 +52,9 @@ export function FamilyGlobe() {
   const [zoom, setZoom] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
-  const [members, setMembers] = useState<GlobeMember[]>(sampleMembers);
+  const [members, setMembers] = useState<GlobeMember[]>(
+    initialMembers && initialMembers.length > 0 ? initialMembers : sampleMembers,
+  );
   const [config, setConfig] = useState<GlobeConfig>(defaultGlobeConfig);
   const [studioOpen, setStudioOpen] = useState(false);
   const [positions, setPositions] = useState<(Projection & { id: string })[]>([]);
@@ -53,6 +66,13 @@ export function FamilyGlobe() {
   const [popoverHeight, setPopoverHeight] = useState(145);
   const popoverInteraction = useRef(false);
   const reducedMotion = useRef(false);
+
+  useEffect(() => {
+    if (initialMembers && initialMembers.length > 0) {
+      setMembers(initialMembers);
+      setSelected((prev) => (prev && initialMembers.some((m) => m.id === prev) ? prev : initialMembers[0].id));
+    }
+  }, [initialMembers]);
 
   useEffect(() => {
     if (!popover.current) return;
@@ -206,8 +226,14 @@ export function FamilyGlobe() {
   return (
     <section className="sn-globe" aria-label="Interactive sample family globe">
       <div className="sn-globe-intro">
-        <strong>🌍 Interactive 3D Family Globe · Drag to Rotate</strong>
-        <span>Tap a family pin for a sample update &amp; call opt-in</span>
+        <strong>
+          {familyName ? `🌍 ${familyName} · Live 3D Family Globe` : "🌍 Interactive 3D Family Globe · Drag to Rotate"}
+        </strong>
+        <span>
+          {isLiveFamily
+            ? "Your family circle connected across time zones · Tap any pin for details"
+            : "Tap a family pin for an update & call participation"}
+        </span>
       </div>
       <div
         ref={stage}
@@ -328,9 +354,54 @@ export function FamilyGlobe() {
                 <XIcon />
               </button>
             </div>
+            {(selectedMember.role || selectedMember.location) && (
+              <div className="flex flex-col gap-0.5 mb-1.5">
+                <span className="text-xs font-semibold text-brand-primary">
+                  {selectedMember.name}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {[selectedMember.role, selectedMember.location].filter(Boolean).join(" · ")}
+                </span>
+              </div>
+            )}
             <p>“{selectedMember.note}”</p>
+
+            {selectedMember.inviteToken && (
+              <div className="mt-2 mb-1">
+                <button
+                  type="button"
+                  className="w-full text-xs py-1.5 px-2 rounded-brand bg-brand-primary text-primary-foreground font-medium hover:bg-brand-primary/90 flex items-center justify-center gap-1 transition-colors"
+                  onClick={() => {
+                    const link = `${window.location.origin}/invite?token=${selectedMember.inviteToken}`;
+                    navigator.clipboard.writeText(link).catch(() => {});
+                    toast.success("Invitation link copied to clipboard!");
+                  }}
+                >
+                  📋 Copy Invite Link
+                </button>
+              </div>
+            )}
+
+            {isLiveFamily && !selectedMember.isInvite && (
+              <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-border/40 text-[11px]">
+                <a
+                  href="/send-later"
+                  className="text-brand-accent hover:underline font-medium"
+                >
+                  💌 Time Capsule
+                </a>
+                <span className="text-muted-foreground">·</span>
+                <a
+                  href="/listeners"
+                  className="text-brand-accent hover:underline font-medium"
+                >
+                  📞 Listener Call
+                </a>
+              </div>
+            )}
+
             <div className="sn-globe-opt-in">
-              <span>Call opt-in · demo</span>
+              <span>{isLiveFamily ? "Call participation" : "Call opt-in · demo"}</span>
               <strong aria-live="polite">{selectedMember.optIn || "pending"}</strong>
             </div>
             <div className="sn-globe-opt-actions">
@@ -343,17 +414,26 @@ export function FamilyGlobe() {
                       ? "Confirm sample call opt-in"
                       : "Ignore sample call opt-in"
                   }
-                  onClick={() =>
+                  onClick={() => {
                     setMembers((current) =>
                       current.map((m) => (m.id === selected ? { ...m, optIn: status } : m)),
-                    )
-                  }
+                    );
+                    if (isLiveFamily) {
+                      toast.success(
+                        `${selectedMember.name}'s call participation updated to ${status}`,
+                      );
+                    }
+                  }}
                 >
                   {status === "confirmed" ? "✓ Confirm" : "✕ Ignore"}
                 </button>
               ))}
             </div>
-            <small>Sample only · No calls are placed.</small>
+            <small>
+              {isLiveFamily
+                ? `Connected to ${familyName || "your family circle"}`
+                : "Sample only · No calls are placed."}
+            </small>
           </div>
         )}
       </div>
@@ -424,7 +504,7 @@ export function FamilyGlobe() {
           else setSelected(null);
         }}
         onReset={() => {
-          setMembers(sampleMembers);
+          setMembers(initialMembers && initialMembers.length > 0 ? initialMembers : sampleMembers);
           setConfig(defaultGlobeConfig);
           setSelected(null);
           setZoom(1);

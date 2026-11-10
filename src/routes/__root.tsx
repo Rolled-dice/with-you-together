@@ -151,23 +151,6 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  useEffect(() => {
-    // Cookiebot inserts head nodes; load after hydration so login can initialize.
-    // Local development uses the existing essential-only consent fallback.
-    if (
-      ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) ||
-      document.getElementById("Cookiebot")
-    )
-      return;
-    const script = document.createElement("script");
-    script.id = "Cookiebot";
-    script.src = "https://consent.cookiebot.com/uc.js";
-    script.async = true;
-    script.dataset.cbid = "3a9d7ca9-0293-48e0-8195-dda50a5cb1d6";
-    script.dataset.blockingmode = "auto";
-    document.head.appendChild(script);
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <SessionLifecycle />

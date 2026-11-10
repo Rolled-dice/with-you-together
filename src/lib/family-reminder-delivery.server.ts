@@ -15,11 +15,13 @@ const claimedJobSchema = z.object({
   p256dh: z.string().min(32).max(256),
   auth: z.string().min(16).max(128),
   url: z.string().min(1).max(1024),
+  title: z.string().optional(),
+  body: z.string().optional(),
 });
 
 type ReminderPushSender = (
   device: ReminderPushDevice,
-  message: { destination: string },
+  message: { destination: string; title?: string; body?: string },
   environment: NodeJS.ProcessEnv,
 ) => Promise<"sent" | "expired" | "retry">;
 
@@ -62,9 +64,14 @@ export async function deliverFamilyReminders(
   for (const job of jobs) {
     let outcome: "sent" | "gone" | "retry" = "retry";
     try {
+      const message: { destination: string; title?: string; body?: string } = {
+        destination: job.url,
+      };
+      if (job.title) message.title = job.title;
+      if (job.body) message.body = job.body;
       const result = await sender(
         { endpoint: job.endpoint, p256dh: job.p256dh, authKey: job.auth },
-        { destination: job.url },
+        message,
         environment,
       );
       outcome = result === "expired" ? "gone" : result;

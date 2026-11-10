@@ -166,17 +166,25 @@ export const logDose = createServerFn({ method: "POST" })
         dose_id: z.string().uuid(),
         status: z.enum(["taken", "skipped"]),
         note: z.string().max(500).optional(),
+        channel: z
+          .enum(["web_app", "mobile_push", "sms_reply", "caregiver_portal"])
+          .default("web_app")
+          .optional(),
       })
       .parse(i),
   )
   .handler(async ({ context, data }) => {
+    const channel = data.channel ?? "web_app";
+    const auditNote = data.note
+      ? `${data.note} [Audit: ${channel}]`
+      : `[Audit: Confirmed via ${channel}]`;
     const { error } = await context.supabase
       .from("dose_logs")
       .update({
         status: data.status,
         logged_at: new Date().toISOString(),
         logged_by: context.userId,
-        note: data.note ?? null,
+        note: auditNote,
       })
       .eq("id", data.dose_id);
     if (error) throw new Error(error.message);
@@ -186,7 +194,7 @@ export const logDose = createServerFn({ method: "POST" })
     } catch (e) {
       console.error("[calendar-sync] medication mutation", e);
     }
-    return { ok: true };
+    return { ok: true, channel };
   });
 
 // Photo extraction uses the existing Gemini server credential; review before saving.

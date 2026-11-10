@@ -36,12 +36,12 @@ describe("launch test checkout", () => {
     expect(launchTestProductId("kh", "care")).not.toBe(launchTestProductId("us", "care"));
     expect(launchDodoTestCatalog.discount.subscriptionCycles).toBe(1);
   });
-  it("refuses live mode before contacting a provider", async () => {
+  it("requires a signed-in user before creating live checkout", async () => {
     vi.stubEnv("DODO_PAYMENTS_ENV", "live");
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     await expect(createLaunchTestCheckout({ market: "in", plan: "care" }, "user")).rejects.toThrow(
-      "test mode only",
+      "signed-in user",
     );
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -81,6 +81,7 @@ describe("launch test checkout", () => {
       .mockResolvedValueOnce(
         Response.json({
           type: "percentage",
+          code: "SNLAUNCH30FIRST2026",
           amount: 3000,
           subscription_cycles: 1,
           restricted_to: [product],

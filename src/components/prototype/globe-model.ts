@@ -13,7 +13,27 @@ export type GlobeMember = AvatarAppearance & {
   notificationCount?: number;
   location?: string;
   role?: string;
+  isInvite?: boolean;
+  inviteToken?: string;
+  email?: string;
+  phone?: string;
 };
+
+export const globeArchetypes: Array<{
+  archetype: string;
+  avatarBg: string;
+  skinTone: string;
+  outfitColor: string;
+  backdropMotif: string;
+  glasses: boolean;
+}> = [
+  { archetype: "adult-man", avatarBg: "#EAB84B", skinTone: "#D69577", outfitColor: "#8B1E3F", backdropMotif: "clouds", glasses: false },
+  { archetype: "aged-woman", avatarBg: "#F36D89", skinTone: "#E5A98A", outfitColor: "#102F50", backdropMotif: "leaves", glasses: false },
+  { archetype: "aged-man", avatarBg: "#EAB84B", skinTone: "#D99B7E", outfitColor: "#D95732", backdropMotif: "leaves", glasses: true },
+  { archetype: "adult-woman", avatarBg: "#EAB84B", skinTone: "#E0A183", outfitColor: "#A8581B", backdropMotif: "waves", glasses: false },
+  { archetype: "teenager", avatarBg: "#EAB84B", skinTone: "#BC7A5C", outfitColor: "#F36D89", backdropMotif: "stripes", glasses: false },
+  { archetype: "child", avatarBg: "#EAB84B", skinTone: "#E8B195", outfitColor: "#F36D89", backdropMotif: "leaves", glasses: false },
+];
 
 export const sampleMembers: GlobeMember[] = [
   {
@@ -149,6 +169,138 @@ export const sampleMembers: GlobeMember[] = [
     optIn: "pending",
   },
 ];
+
+export function createPreviewGlobeMembers(userProfile?: { display_name?: string | null; timezone?: string | null } | null): GlobeMember[] {
+  const hostName = userProfile?.display_name ? `${userProfile.display_name} (You)` : "You (Circle Host)";
+  const hostLocation = userProfile?.timezone ? userProfile.timezone.replace("_", " ") : "Your City";
+  return [
+    {
+      id: "preview-host",
+      name: hostName,
+      location: hostLocation,
+      role: "Circle Host",
+      archetype: "adult-man",
+      skinTone: "#D69577",
+      avatarBg: "#EAB84B",
+      backdropMotif: "clouds",
+      outfitColor: "#8B1E3F",
+      outfitPattern: "solid",
+      earrings: "none",
+      glasses: false,
+      frameShape: "circle",
+      hasNotification: true,
+      notificationCount: 1,
+      note: "Ready to start your family circle! Name your circle below to connect loved ones.",
+      badge: "✨ Ready to Connect",
+      theta: 2.094,
+      phi: 1.25,
+      optIn: "confirmed",
+    },
+    ...sampleMembers.filter((m) => m.id !== "aarav"),
+  ];
+}
+
+export function createGlobeMembersFromFamily(params: {
+  family: { id: string; name: string; owner_id: string } | null;
+  members: Array<{ id: string; user_id: string; role: string; joined_at?: string; display_name: string | null }>;
+  invites?: Array<{ id: string; email?: string | null; invitee_name: string; invitee_phone?: string | null; role: string; status: string; verification_status: string; token: string }>;
+  currentUserId?: string;
+  userProfile?: { display_name?: string | null; timezone?: string | null } | null;
+}): GlobeMember[] {
+  if (!params.family) {
+    return createPreviewGlobeMembers(params.userProfile);
+  }
+
+  const result: GlobeMember[] = [];
+  const members = params.members ?? [];
+  const invites = (params.invites ?? []).filter((inv) => inv.status !== "revoked");
+  const totalCount = members.length + invites.length;
+
+  members.forEach((m, idx) => {
+    const isOwner = m.role === "owner";
+    const isMe = m.user_id === params.currentUserId;
+    const name = m.display_name || (isMe ? "You (Host)" : isOwner ? "Circle Host" : "Family Member");
+    const style = globeArchetypes[idx % globeArchetypes.length];
+    const theta = (idx * 2 * Math.PI) / Math.max(1, totalCount);
+    const phi = 1.05 + ((idx % 3) * 0.24);
+
+    result.push({
+      id: m.id,
+      name,
+      role: isOwner ? "Circle Host" : m.role === "adult" ? "Adult Caregiver" : "Family Member",
+      location: isMe && params.userProfile?.timezone ? params.userProfile.timezone.replace("_", " ") : "Circle Member",
+      note: isOwner
+        ? `${params.family!.name} Circle Host · Keeping everyone connected.`
+        : "Active family member · Sharing daily check-ins & care.",
+      badge: isOwner ? "👑 Host" : "💚 Active Member",
+      optIn: "confirmed",
+      hasNotification: isOwner,
+      notificationCount: isOwner ? 1 : 0,
+      theta,
+      phi,
+      ...style,
+    });
+  });
+
+  invites.forEach((inv, idx) => {
+    const overallIndex = members.length + idx;
+    const name = inv.invitee_name || inv.email || "Invited Loved One";
+    const isCallPending = inv.verification_status === "awaiting_call";
+    const style = globeArchetypes[overallIndex % globeArchetypes.length];
+    const theta = (overallIndex * 2 * Math.PI) / Math.max(1, totalCount);
+    const phi = 1.05 + ((overallIndex % 3) * 0.24);
+
+    result.push({
+      id: inv.id,
+      name,
+      role: "Invitation Pending",
+      location: inv.invitee_phone || inv.email || "Awaiting consent",
+      note: isCallPending
+        ? "Care team verification call pending with SomeoneNear care team."
+        : `Invitation link generated. Link: ${inv.token}`,
+      badge: isCallPending ? "📞 Call Pending" : "✉️ Invited",
+      optIn: "pending",
+      hasNotification: true,
+      notificationCount: 1,
+      theta,
+      phi,
+      isInvite: true,
+      inviteToken: inv.token,
+      email: inv.email ?? undefined,
+      phone: inv.invitee_phone ?? undefined,
+      ...style,
+    });
+  });
+
+  // If there is only 1 member and 0 invites, add a friendly "+ Invite a loved one" preview pin
+  if (result.length === 1) {
+    result.push({
+      id: "invite-placeholder",
+      name: "+ Invite a loved one",
+      location: "Anywhere in the world",
+      role: "Next Family Member",
+      archetype: "child",
+      skinTone: "#E8B195",
+      avatarBg: "#EAB84B",
+      backdropMotif: "leaves",
+      outfitColor: "#F36D89",
+      outfitPattern: "collar",
+      earrings: "none",
+      glasses: false,
+      frameShape: "circle",
+      hasNotification: true,
+      notificationCount: 1,
+      note: "Tap 'Invite family member' below to add parents, siblings, or children to your 3D globe.",
+      badge: "💌 Ready to Invite",
+      theta: Math.PI,
+      phi: 1.35,
+      optIn: "pending",
+      isInvite: true,
+    });
+  }
+
+  return result;
+}
 
 // Artwork palettes and pin coordinates from the deployed test_front prototype.
 export const globeThemes = {
