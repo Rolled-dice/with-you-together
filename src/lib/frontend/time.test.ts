@@ -4,8 +4,9 @@ import { capabilities, requireCapability } from "./capabilities";
 import { safeAuthRedirect } from "@/lib/auth-routing";
 
 describe("timezone-safe scheduling", () => {
-  it("converts Kolkata midnight to the preceding UTC date", () => {
+  it("converts Kolkata midnight to the preceding UTC date and normalizes seconds", () => {
     expect(localToUtc("2026-11-02T00:15", "Asia/Kolkata")).toBe("2026-11-01T18:45:00.000Z");
+    expect(localToUtc("2026-11-02T00:15:00", "Asia/Kolkata")).toBe("2026-11-01T18:45:00.000Z");
     expect(localInput(new Date("2026-11-01T18:45:00Z"), "Asia/Kolkata")).toBe("2026-11-02T00:15");
   });
   it("rejects nonexistent and repeated DST times", () => {
@@ -20,8 +21,18 @@ describe("timezone-safe scheduling", () => {
 });
 describe("contract exclusions", () => {
   it("blocks every unverified capability at the action boundary", () => {
-    for (const key of Object.keys(capabilities) as Array<keyof typeof capabilities>)
+    const disabled = (Object.keys(capabilities) as Array<keyof typeof capabilities>).filter(
+      (k) => !capabilities[k],
+    );
+    for (const key of disabled) {
       expect(() => requireCapability(key)).toThrow(/not available/);
+    }
+    const enabled = (Object.keys(capabilities) as Array<keyof typeof capabilities>).filter(
+      (k) => capabilities[k],
+    );
+    for (const key of enabled) {
+      expect(() => requireCapability(key)).not.toThrow();
+    }
   });
   it("keeps auth redirects local", () => {
     expect(safeAuthRedirect("/family?invite=1")).toBe("/family?invite=1");

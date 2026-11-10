@@ -144,15 +144,27 @@ export const listTodaysDoses = createServerFn({ method: "GET" })
     for (const m of meds ?? []) {
       await seedDoseLogs(context.supabase, m.id);
     }
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 1);
+    const { data: profile } = await context.supabase
+      .from("profiles")
+      .select("timezone")
+      .eq("id", context.userId)
+      .maybeSingle();
+    const tz = profile?.timezone || "Asia/Kolkata";
+    const todayStr = new Intl.DateTimeFormat("en-CA", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const { combineToUtc } = await import("./listeners.functions");
+    const startUtc = combineToUtc(todayStr, "00:00", tz);
+    const tomorrowStr = new Date(Date.parse(`${todayStr}T12:00:00Z`) + 86400000).toISOString().slice(0, 10);
+    const endUtc = combineToUtc(tomorrowStr, "00:00", tz);
     const { data, error } = await context.supabase
       .from("dose_logs")
       .select("*, medications(name, dosage, form, instructions, for_user_id)")
-      .gte("scheduled_at", start.toISOString())
-      .lt("scheduled_at", end.toISOString())
+      .gte("scheduled_at", startUtc)
+      .lt("scheduled_at", endUtc)
       .order("scheduled_at", { ascending: true });
     if (error) throw new Error(error.message);
     return data ?? [];

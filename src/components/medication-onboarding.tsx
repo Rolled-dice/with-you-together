@@ -623,7 +623,7 @@ export function MedicationOnboarding({
                   {medication.medication_schedules &&
                     medication.medication_schedules.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-2">
-                        {medication.medication_schedules.map((schedule) => (
+                        {[...medication.medication_schedules].sort((a, b) => a.time_of_day.localeCompare(b.time_of_day)).map((schedule) => (
                           <span
                             key={schedule.id}
                             className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-sm text-foreground"

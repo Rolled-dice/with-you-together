@@ -30,8 +30,8 @@ describe("launch test checkout", () => {
       } }))
       .mockResolvedValueOnce(Response.json({
         code: "PRIVATE100", type: "percentage", amount: 10000,
-        subscription_cycles: 1, usage_limit: 1, per_customer_usage_limit: 1,
-        customer_eligibility: "specific", restricted_to: ["pdt_live_india"],
+        subscription_cycles: 1, usage_limit: 20, per_customer_usage_limit: 3,
+        customer_eligibility: "any", restricted_to: ["pdt_live_india"],
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       }))
       .mockResolvedValueOnce(Response.json({

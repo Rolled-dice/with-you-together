@@ -98,6 +98,23 @@ const TIMEZONES = Array.from(
 
 const DEFAULT_TZ = BROWSER_TZ;
 
+function defaultBookingSlot() {
+  const now = new Date();
+  if (now.getHours() >= 17) {
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const y = tomorrow.getFullYear();
+    const m = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const d = String(tomorrow.getDate()).padStart(2, "0");
+    return { day: `${y}-${m}-${d}`, time: "10:00" };
+  }
+  const candidate = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  const y = candidate.getFullYear();
+  const m = String(candidate.getMonth() + 1).padStart(2, "0");
+  const d = String(candidate.getDate()).padStart(2, "0");
+  const hh = String(candidate.getHours()).padStart(2, "0");
+  return { day: `${y}-${m}-${d}`, time: `${hh}:00` };
+}
+
 function todayIso() {
   const d = new Date();
   const y = d.getFullYear();
@@ -259,8 +276,9 @@ function ListenersPage() {
     queryFn: () => feedbackPromptFn(),
   });
 
-  const [day, setDay] = useState(todayIso());
-  const [time, setTime] = useState("18:00");
+  const initialSlot = useMemo(() => defaultBookingSlot(), []);
+  const [day, setDay] = useState(initialSlot.day);
+  const [time, setTime] = useState(initialSlot.time);
   const [tz, setTz] = useState(BROWSER_TZ);
   const [duration, setDuration] = useState(45);
   const [note, setNote] = useState("");

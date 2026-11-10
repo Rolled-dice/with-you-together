@@ -193,7 +193,8 @@ const InviteInput = z.object({
   phone: z
     .string()
     .trim()
-    .regex(/^\+[1-9]\d{7,14}$/, "Use international format, such as +919876543210."),
+    .transform((val) => val.replace(/[\s\-()]/g, ""))
+    .pipe(z.string().regex(/^\+[1-9]\d{7,14}$/, "Use international format, such as +919876543210.")),
 });
 
 export const inviteFamilyMember = createServerFn({ method: "POST" })

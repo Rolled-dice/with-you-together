@@ -288,10 +288,8 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
       navigator.clipboard.writeText(link).catch(() => {});
       if (res.emailSent) {
         toast.success("Invitation email sent; our care team will call to confirm consent");
-      } else if (!res.emailProvided) {
-        toast.success("Call request sent to the care team");
       } else {
-        toast.error("Couldn’t email the invitation. The call request is still queued.");
+        toast.success("Invitation created! Link copied to clipboard to share directly.");
       }
       setInviteEmail("");
       setInviteName("");

@@ -168,15 +168,16 @@ export const requestBooking = createServerFn({ method: "POST" })
         status: data.booking_type === "emergency_callback" ? "requested" : "confirmed",
         crm_state: "requested",
         sla_deadline: requestedAt,
-
+        contact_phone: me?.phone ?? null,
       })
       .select("id")
       .single();
     if (error) {
+      console.error("[requestBooking] insert error:", error);
       return {
         ok: false as const,
         code: "booking_failed" as const,
-        message: "We couldn't complete your booking. Please try again.",
+        message: error.message || "We couldn't complete your booking. Please try again.",
       };
     }
     return { ok: true as const, id: inserted?.id };

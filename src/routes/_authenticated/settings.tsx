@@ -107,7 +107,7 @@ function SettingsPage() {
     setDisplayName(profile.display_name ?? "");
     setFullName(profile.full_name ?? "");
     setPronouns(profile.pronouns ?? "");
-    setTimezone(profile.timezone ?? "");
+    setTimezone(profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
     setIntent(profile.care_intent ?? "");
     setPhone((profile.phone as string | null) ?? "");
     setLanguage((profile.preferred_language as "en" | "hi") ?? "en");
@@ -522,8 +522,6 @@ function SettingsPage() {
         </Card>
 
         <BillingHistoryCard />
-
-        {profile?.id && <WebhookEventsCard userId={profile.id} />}
 
         <Card data-page-reveal className="rounded-brand border-border bg-card">
           <CardHeader>

@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-// Helper: seed today's dose logs for a medication based on its schedules
+import { combineToUtc } from "@/lib/listeners.functions";
+
+// Helper: seed today's dose logs for a medication based on its schedules in user's timezone
 export async function seedDoseLogs(supabase: SupabaseClient<Database>, medicationId: string) {
   const { data: med } = await supabase
     .from("medications")
@@ -10,31 +12,46 @@ export async function seedDoseLogs(supabase: SupabaseClient<Database>, medicatio
     .eq("id", medicationId)
     .maybeSingle();
   if (!med || !med.is_active) return;
-  const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
+
+  const { data: userProfile } = await supabase
+    .from("profiles")
+    .select("timezone")
+    .eq("id", med.for_user_id)
+    .maybeSingle();
+  const tz = userProfile?.timezone || "Asia/Kolkata";
+
+  const todayStr = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
   if (med.start_date && todayStr < med.start_date) return;
   if (med.end_date && todayStr > med.end_date) return;
-  const dow = today.getDay();
+
+  // Day of week in user's local timezone
+  const dow = new Date(Date.parse(`${todayStr}T12:00:00Z`)).getDay();
+
   const rows: Array<{
     medication_id: string;
     schedule_id: string;
     for_user_id: string;
     scheduled_at: string;
   }> = [];
+
   for (const s of med.medication_schedules ?? []) {
     if (Array.isArray(s.days_of_week) && !s.days_of_week.includes(dow)) continue;
-    const [hh, mm] = String(s.time_of_day)
-      .split(":")
-      .map((n: string) => parseInt(n, 10));
-    const when = new Date(today);
-    when.setHours(hh || 0, mm || 0, 0, 0);
+    const timeStr = String(s.time_of_day).slice(0, 5);
+    const scheduledAt = combineToUtc(todayStr, timeStr, tz);
     rows.push({
       medication_id: med.id,
       schedule_id: s.id,
       for_user_id: med.for_user_id,
-      scheduled_at: when.toISOString(),
+      scheduled_at: scheduledAt,
     });
   }
+
   if (rows.length > 0) {
     await supabase
       .from("dose_logs")
