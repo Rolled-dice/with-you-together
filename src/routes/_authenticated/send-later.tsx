@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/app-shell";
@@ -64,7 +64,12 @@ function SendLaterPage() {
   }, [section, navigate]);
   const [recipientId, setRecipientId] = useState("");
   const [body, setBody] = useState("");
+  const defaultWhen = useMemo(
+    () => (zone.data ? localInput(new Date(Date.now() + 24 * 3600_000), zone.data) : ""),
+    [zone.data],
+  );
   const [when, setWhen] = useState("");
+  const activeWhen = when || defaultWhen;
   const [playback, setPlayback] = useState<{ url: string; kind: "voice" | "video" } | null>(null);
   const list = useServerFn(listSendLater);
   const inbox = useServerFn(listReceivedSendLater);
@@ -93,7 +98,7 @@ function SendLaterPage() {
       if (!zone.data) throw new Error("Your timezone is still loading. Please try again.");
       const parsed = inputSchema.parse({
         recipient: query.data?.contacts.find((c) => c.userId === recipientId),
-        scheduledAt: localToUtc(when, zone.data),
+        scheduledAt: localToUtc(activeWhen, zone.data),
         body,
         kind,
       });
@@ -310,7 +315,7 @@ function SendLaterPage() {
                         type="datetime-local"
                         required
                         min={localInput(new Date(Date.now() + 120_000), zone.data)}
-                        value={when}
+                        value={activeWhen}
                         onChange={(event) => setWhen(event.target.value)}
                       />
                     </label>

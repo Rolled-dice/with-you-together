@@ -623,7 +623,15 @@ export function MedicationOnboarding({
                   {medication.medication_schedules &&
                     medication.medication_schedules.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-2">
-                        {[...medication.medication_schedules].sort((a, b) => a.time_of_day.localeCompare(b.time_of_day)).map((schedule) => (
+                        {[...medication.medication_schedules]
+                          .sort((a, b) => {
+                            const parseMins = (t: string) => {
+                              const [h, m] = String(t || "00:00").split(":").map(Number);
+                              return (h || 0) * 60 + (m || 0);
+                            };
+                            return parseMins(a.time_of_day) - parseMins(b.time_of_day);
+                          })
+                          .map((schedule) => (
                           <span
                             key={schedule.id}
                             className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-sm text-foreground"
@@ -912,7 +920,9 @@ function TodayDoses({
         </div>
       ) : (
         <div className="space-y-3">
-          {rows.map((dose) => {
+          {[...rows]
+            .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+            .map((dose) => {
             const isDone = dose.status === "taken" || dose.status === "skipped";
             return (
               <div

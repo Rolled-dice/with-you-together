@@ -39,7 +39,7 @@ const BookingInput = z.object({
   preferred_day: z.string().min(4), // YYYY-MM-DD
   preferred_time: z.string().min(3), // HH:MM (24h)
   time_zone: z.string().min(1),
-  duration_minutes: z.number().int().min(15).max(120).default(45),
+  duration_minutes: z.number().int().min(15).max(120).default(15),
   note: z.string().max(1000).default(""),
   booking_type: z.enum(["scheduled", "emergency_callback"]).default("scheduled"),
 });
@@ -163,7 +163,7 @@ export const requestBooking = createServerFn({ method: "POST" })
         listener_id: assigned,
         requested_at: requestedAt,
         duration_minutes:
-          data.booking_type === "emergency_callback" ? 30 : data.duration_minutes,
+          data.booking_type === "emergency_callback" ? 15 : (data.duration_minutes || 15),
         note: prefix + data.note,
         status: data.booking_type === "emergency_callback" ? "requested" : "confirmed",
         crm_state: "requested",

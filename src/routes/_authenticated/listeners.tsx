@@ -280,7 +280,7 @@ function ListenersPage() {
   const [day, setDay] = useState(initialSlot.day);
   const [time, setTime] = useState(initialSlot.time);
   const [tz, setTz] = useState(BROWSER_TZ);
-  const [duration, setDuration] = useState(45);
+  const [duration, setDuration] = useState(15);
   const [note, setNote] = useState("");
   const [bookingError, setBookingError] = useState<{
     message: string;
@@ -449,7 +449,7 @@ function ListenersPage() {
             <RuleTile
               icon={AlarmIcon}
               title="Scheduled in advance"
-              body="Choose a preferred day & time in your timezone. Sessions run 30-60 minutes."
+              body="Choose a preferred day & time in your timezone. Sessions run 15 minutes."
               delay={1}
             />
             <RuleTile
@@ -521,6 +521,7 @@ function ListenersPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="15">15 minutes (Standard Session)</SelectItem>
                         <SelectItem value="30">30 minutes</SelectItem>
                         <SelectItem value="45">45 minutes</SelectItem>
                         <SelectItem value="60">60 minutes</SelectItem>
@@ -624,7 +625,7 @@ function ListenersPage() {
                             preferred_day: todayIso(),
                             preferred_time: "12:00",
                             time_zone: tz,
-                            duration_minutes: 30,
+                            duration_minutes: 15,
                             note: emergencyNote,
                             booking_type: "emergency_callback",
                           })

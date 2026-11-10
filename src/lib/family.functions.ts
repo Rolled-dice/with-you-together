@@ -283,26 +283,29 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
       "",
     );
     const inviteUrl = `${siteUrl}/invite?token=${encodeURIComponent(inv.token)}`;
-    const { sendFamilyInvitationEmail } = await import("@/lib/family-invitation-email.server");
-    const emailSent = email
-      ? await sendFamilyInvitationEmail({
+    let emailSent: boolean | null = null;
+    try {
+      if (email) {
+        const { sendFamilyInvitationEmail } = await import("@/lib/family-invitation-email.server");
+        emailSent = await sendFamilyInvitationEmail({
           to: email,
           familyName: family?.name || "your family circle",
           inviterName: inviter?.display_name || "Someone in your family",
           role: "adult",
           inviteUrl,
-        })
-      : null;
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error: deliveryError } = await supabaseAdmin
-      .from("family_invitations")
-      .update({
-        delivery_status: emailSent === null ? "not_sent" : emailSent ? "sent" : "failed",
-        last_sent_at: emailSent ? new Date().toISOString() : null,
-      } as never)
-      .eq("id", inv.id);
-    if (deliveryError) throw new Error(deliveryError.message);
+        });
+      }
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
+        .from("family_invitations")
+        .update({
+          delivery_status: emailSent === null ? "not_sent" : emailSent ? "sent" : "failed",
+          last_sent_at: emailSent ? new Date().toISOString() : null,
+        } as never)
+        .eq("id", inv.id);
+    } catch (e) {
+      console.warn("[inviteFamilyMember] email notification or delivery status update skipped:", e);
+    }
 
     return { id: inv.id, token: inv.token, emailSent, emailProvided: Boolean(email) };
   });

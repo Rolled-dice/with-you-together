@@ -25,7 +25,11 @@ export function localInput(instant: Date, zone: string) {
 // Reject both nonexistent and ambiguous DST wall times rather than silently shift them.
 export function localToUtc(value: string, zone: string): string {
   timeZoneSchema.parse(zone);
-  const cleanValue = typeof value === "string" ? value.trim().slice(0, 16) : "";
+  let cleanValue = typeof value === "string" ? value.trim() : "";
+  if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}/.test(cleanValue)) {
+    cleanValue = cleanValue.replace(/\s+/, "T");
+  }
+  cleanValue = cleanValue.slice(0, 16);
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(cleanValue))
     throw new Error("Choose a valid date and time.");
   const wall = Date.parse(`${cleanValue}:00Z`);

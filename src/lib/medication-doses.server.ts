@@ -56,5 +56,28 @@ export async function seedDoseLogs(supabase: SupabaseClient<Database>, medicatio
     await supabase
       .from("dose_logs")
       .upsert(rows, { onConflict: "medication_id,scheduled_at", ignoreDuplicates: true });
+
+    // Clean up stale uncompleted doses for today that do not match the valid schedule times
+    const validTimes = rows.map((r) => r.scheduled_at);
+    const tomorrowStr = new Date(Date.parse(`${todayStr}T12:00:00Z`) + 86400000)
+      .toISOString()
+      .slice(0, 10);
+    const dayStart = combineToUtc(todayStr, "00:00", tz);
+    const dayEnd = combineToUtc(tomorrowStr, "00:00", tz);
+
+    const { data: todayDoses } = await supabase
+      .from("dose_logs")
+      .select("id, scheduled_at, status")
+      .eq("medication_id", med.id)
+      .gte("scheduled_at", dayStart)
+      .lt("scheduled_at", dayEnd);
+
+    const staleIds = (todayDoses ?? [])
+      .filter((d) => d.status === "pending" && !validTimes.includes(d.scheduled_at))
+      .map((d) => d.id);
+
+    if (staleIds.length > 0) {
+      await supabase.from("dose_logs").delete().in("id", staleIds);
+    }
   }
 }
