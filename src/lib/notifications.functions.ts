@@ -99,19 +99,20 @@ export const sendTestPushNotification = createServerFn({ method: "POST" })
       import("@/integrations/supabase/client.server"),
       import("@/lib/web-push.server"),
     ]);
-    const { data: devices, error } = await supabaseAdmin
+    const { data: devices, error } = await (supabaseAdmin as any)
       .from("push_devices")
       .select("endpoint, p256dh, auth_key")
       .eq("user_id", context.userId)
       .eq("enabled", true);
 
     if (error) throw new Error(error.message);
-    if (!devices || devices.length === 0) {
+    const typedDevices = (devices ?? []) as Array<{ endpoint: string; p256dh: string; auth_key: string }>;
+    if (typedDevices.length === 0) {
       throw new Error("No active device notification registered yet. Click 'Enable on this device' first.");
     }
 
     let sentCount = 0;
-    for (const d of devices) {
+    for (const d of typedDevices) {
       const outcome = await sendGenericReminderPush(
         { endpoint: d.endpoint, p256dh: d.p256dh, authKey: d.auth_key },
         {

@@ -55,6 +55,8 @@ const approvedBackendFiles = new Set([
   "src/lib/conversations.functions.ts",
   "src/lib/media-storage.server.ts",
   "src/lib/send-later.server.ts",
+  "src/lib/send-later.functions.ts",
+  "src/lib/family.functions.ts",
   "src/lib/s3.server.ts",
   "src/lib/medications.functions.ts",
   "src/lib/medication-doses.server.ts",
