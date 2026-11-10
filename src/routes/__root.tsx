@@ -111,8 +111,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.webmanifest" },
       // Square, padded, genuinely transparent icons built by
       // scripts/clean-logo.ps1 from the original artwork.
-      { rel: "icon", href: "/favicon-64.png?v=6", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=6" },
+      { rel: "icon", href: "/favicon.ico?v=8", sizes: "any" },
+      { rel: "icon", href: "/favicon.svg?v=8", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon-64.png?v=8", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=8" },
       {
         rel: "preload",
         href: "/fonts/figtree.ttf",
