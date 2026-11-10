@@ -291,9 +291,9 @@ function EnterpriseSmsNudgeCard() {
           <ChatCircleTextIcon className="size-5" />
         </span>
         <div>
-          <h3 className="font-display text-xl font-medium">Enterprise Telnyx SMS Nudges</h3>
+          <h3 className="font-display text-xl font-medium">SMS Escalation (Emergency Fallback Only)</h3>
           <p className="text-sm text-muted-foreground">
-            Zero-friction fallback. Sends an instant SMS directly to elderly parents or caregivers if app push is delayed.
+            Zero-cost mobile push alerts handle all daily reminders above. Use SMS only as an emergency fallback if an elderly parent's phone is offline.
           </p>
         </div>
       </div>

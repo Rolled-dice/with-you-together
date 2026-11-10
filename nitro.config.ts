@@ -53,6 +53,10 @@ export default defineNitroConfig({
         BEDROCK_GUARDRAIL_VERSION: "1",
         DYNAMODB_SUMMARY_TABLE: "someonenear-ai-user-summaries",
         DYNAMODB_SAFETY_TABLE: "someonenear-ai-safety-audits",
+        FAMILY_PUSH_ENABLED: "true",
+        WEB_PUSH_SUBJECT: "mailto:care@someonenear.com",
+        WEB_PUSH_PUBLIC_KEY: "BPa0mpq1msEHQGNIUhxE9S5qIKdL90ynoJ2mEFMlDpNQDZQ8nIo5HfFjKLOWXbj7dWDA0BuLB_CopzMMQUdhokM",
+        WEB_PUSH_PRIVATE_KEY: "lv0-Y6-UofUuGs5le4maUeUW2-SiSYbCQzq-_5r2tac",
       },
       routes: [
         { pattern: "www.someonenear.com", custom_domain: true },

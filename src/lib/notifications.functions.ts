@@ -92,6 +92,40 @@ export const removeMyPushSubscription = createServerFn({ method: "POST" })
     return removeWebPushSubscription(supabaseAdmin, context.userId, data.endpoint);
   });
 
+export const sendTestPushNotification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const [{ supabaseAdmin }, { sendGenericReminderPush }] = await Promise.all([
+      import("@/integrations/supabase/client.server"),
+      import("@/lib/web-push.server"),
+    ]);
+    const { data: devices, error } = await supabaseAdmin
+      .from("push_devices")
+      .select("endpoint, p256dh, auth_key")
+      .eq("user_id", context.userId)
+      .eq("enabled", true);
+
+    if (error) throw new Error(error.message);
+    if (!devices || devices.length === 0) {
+      throw new Error("No active device notification registered yet. Click 'Enable on this device' first.");
+    }
+
+    let sentCount = 0;
+    for (const d of devices) {
+      const outcome = await sendGenericReminderPush(
+        { endpoint: d.endpoint, p256dh: d.p256dh, authKey: d.auth_key },
+        {
+          destination: "/reminders",
+          title: "SomeoneNear · Gentle Reminder",
+          body: "This is a test notification. Your phone is ready for zero-cost medication & hydration alerts!",
+        },
+        process.env,
+      );
+      if (outcome === "sent") sentCount++;
+    }
+    return { ok: true, sent: sentCount };
+  });
+
 /** Runs the SLA ladder for the signed-in user's own upcoming calls (client-triggered fallback for cron). */
 export const runMySlaLadder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

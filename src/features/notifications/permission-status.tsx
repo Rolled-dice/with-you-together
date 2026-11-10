@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
-import { removeMyPushSubscription, saveMyPushSubscription } from "@/lib/notifications.functions";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  removeMyPushSubscription,
+  saveMyPushSubscription,
+  sendTestPushNotification,
+} from "@/lib/notifications.functions";
 
 type Permission = NotificationPermission | "unsupported" | "checking";
 
-const vapidPublicKey = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY as string | undefined;
+const vapidPublicKey =
+  (import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY as string | undefined) ||
+  "BPa0mpq1msEHQGNIUhxE9S5qIKdL90ynoJ2mEFMlDpNQDZQ8nIo5HfFjKLOWXbj7dWDA0BuLB_CopzMMQUdhokM";
 
 function decodeVapidKey(value: string) {
   const padding = "=".repeat((4 - (value.length % 4)) % 4);
@@ -36,6 +43,7 @@ export function NotificationPermissionStatus() {
   const [deviceEnabled, setDeviceEnabled] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const testPushFn = useServerFn(sendTestPushNotification);
   useEffect(() => {
     const update = () =>
       setPermission(
@@ -126,22 +134,52 @@ export function NotificationPermissionStatus() {
         </button>
       )}
       {permission === "granted" && (
-        <button
-          type="button"
-          className="mt-4 rounded-lg border border-border px-4 py-2 text-sm font-medium disabled:opacity-60"
-          onClick={deviceEnabled ? disable : enable}
-          disabled={busy || !canUsePush}
-        >
-          {busy ? "Updating…" : deviceEnabled ? "Turn off on this device" : "Enable on this device"}
-        </button>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            className="rounded-lg border border-border bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            onClick={deviceEnabled ? disable : enable}
+            disabled={busy || !canUsePush}
+          >
+            {busy ? "Updating…" : deviceEnabled ? "Turn off on this device" : "Enable on this device"}
+          </button>
+          {deviceEnabled && (
+            <button
+              type="button"
+              className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent disabled:opacity-60"
+              onClick={async () => {
+                setBusy(true);
+                setMessage(null);
+                try {
+                  const res = await testPushFn();
+                  setMessage(`Test alert sent! (${res.sent} active device notified with vibration)`);
+                } catch (err) {
+                  setMessage(err instanceof Error ? err.message : "Failed to send test push.");
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              disabled={busy}
+            >
+              🔔 Send Test Phone Alert
+            </button>
+          )}
+        </div>
       )}
       {!canUsePush && permission === "granted" && (
         <p className="mt-2 text-sm text-muted-foreground">
           Background alerts will become available after the site’s push service is configured.
         </p>
       )}
+      {typeof navigator !== "undefined" &&
+        /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+        !(typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone)) && (
+          <p className="mt-3 rounded-lg bg-primary/5 p-3 text-xs text-muted-foreground">
+            💡 <strong>iPhone / iPad tip:</strong> To receive lock-screen reminder notifications, tap the Safari Share button (box with arrow up) and choose <strong>"Add to Home Screen"</strong>.
+          </p>
+        )}
       {message && (
-        <p className="mt-2 text-sm" role="status">
+        <p className="mt-2 text-sm font-medium text-primary" role="status">
           {message}
         </p>
       )}
