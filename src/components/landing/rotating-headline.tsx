@@ -77,7 +77,7 @@ export function RotatingHeadline() {
       });
 
       // A repeating driver: hold, advance, repeat.
-      const loop = gsap.timeline({ repeat: -1, repeatDelay: HOLD });
+      const loop = gsap.timeline({ repeat: -1 });
       loop.to({}, { duration: HOLD }).add(() => advance?.());
 
       return () => {

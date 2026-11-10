@@ -746,7 +746,7 @@
     margin-left: 0;
   }
   .sn-worker-app {
-    padding-bottom: calc(70px + env(safe-area-inset-bottom));
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
   .sn-worker-mobile-brand {
     display: block;
@@ -763,7 +763,7 @@
     font-size: 8px;
   }
   .sn-worker-toolbar {
-    padding: 20px 16px;
+    padding: 16px;
   }
   .sn-worker-toolbar-controls {
     gap: 8px;
@@ -777,16 +777,18 @@
     bottom: 0;
     inset-inline: 0;
     display: flex;
-    padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+    padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
     border-radius: 24px 24px 0 0;
     background: var(--sn-paper);
     box-shadow: 0 -4px 18px color-mix(in srgb, var(--sn-navy) 9%, transparent);
   }
   .sn-worker-dock > a,
+  .sn-worker-dock > button,
   .sn-worker-dock > details {
     flex: 1;
   }
   .sn-worker-dock > a,
+  .sn-worker-dock > button,
   .sn-worker-dock summary {
     min-height: 53px;
     display: flex;
@@ -798,6 +800,10 @@
     font-weight: 800;
     border-radius: 18px;
     padding: 6px 4px;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
   }
   .sn-worker-dock a[aria-current="page"] {
     background: var(--sn-navy);
@@ -833,29 +839,35 @@
     font-size: 13px;
   }
   .sn-worker-assist {
-    bottom: calc(88px + env(safe-area-inset-bottom));
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     right: 24px;
   }
 }
 @media (max-width: 639px) {
   .sn-worker-care-tabs {
-    margin: 16px 16px 0;
-    padding: 10px;
+    margin: 12px 16px 0;
+    padding: 8px 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 6px;
   }
   .sn-worker-care-tabs a {
-    font-size: 10px;
-    padding-inline: 2px;
+    font-size: 11px;
+    padding: 6px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .sn-worker-main {
-    padding: 24px 16px 32px;
+    padding: 20px 16px 32px;
   }
   .sn-worker-app .sn-page-header {
-    margin-bottom: 28px;
-    gap: 20px;
+    margin-bottom: 24px;
+    gap: 16px;
   }
   .sn-worker-app .sn-page-header h1 {
-    font-size: 28px;
-    line-height: 1.15;
+    font-size: 26px;
+    line-height: 1.18;
     letter-spacing: -0.4px;
   }
   .sn-worker-app .sn-page-eyebrow {
@@ -864,29 +876,34 @@
   }
   .sn-worker-app .sn-page-description {
     font-size: 12px;
-    margin-top: 14px;
+    margin-top: 10px;
+  }
+  .sn-worker-toolbar-controls {
+    gap: 6px;
+    flex-wrap: wrap;
   }
   .sn-worker-toolbar-controls > button,
   .sn-worker-theme button {
     font-size: 10px;
-    padding: 10px 12px;
+    padding: 8px 10px;
+    min-height: 32px;
   }
   .sn-worker-theme button {
-    padding-inline: 10px;
+    padding-inline: 9px;
   }
   .sn-worker-categories {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
   .sn-worker-categories button {
-    padding: 20px;
+    padding: 18px;
   }
   .sn-worker-detail {
-    padding: 24px;
-    border-radius: 30px;
+    padding: 20px 16px;
+    border-radius: 26px;
   }
   .sn-worker-panel-title h2 {
-    font-size: 24px;
+    font-size: 22px;
   }
   .sn-worker-panel-title a {
     font-size: 10px;
@@ -904,17 +921,17 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .sn-worker-detail {
-    animation: sn-worker-pop 220ms ease-out;
+    animation: sn-worker-pop 260ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 @keyframes sn-worker-pop {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(6px) scale(0.99);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 .sn-worker-dock > button {
@@ -926,6 +943,13 @@
   gap: 6px;
   font-size: 10px;
   font-weight: 800;
+  min-height: 53px;
+  border-radius: 18px;
+  padding: 6px 4px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
 }
 .sn-worker-more nav {
   display: grid;

@@ -3,6 +3,7 @@ import { AppShell, PageHeader } from "@/components/app-shell";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { useIdentity } from "@/features/session/session-store";
+import { cn } from "@/lib/utils";
 import {
   LifebuoyIcon,
   PhoneIcon,
@@ -490,7 +491,7 @@ function SafetyPage() {
         </div>
 
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-          {EMERGENCY.map((e) => (
+          {EMERGENCY.map((e, idx) => (
             <a
               key={e.region}
               href={`tel:${e.number}`}
@@ -499,7 +500,10 @@ function SafetyPage() {
                 triggerDialIntent(e.number, `${e.region} Emergency (${e.number})`);
               }}
               aria-label={`Call ${e.region} emergency line ${e.number}`}
-              className="flex flex-col items-center justify-center rounded-brand bg-destructive px-3 py-3 text-destructive-foreground font-semibold shadow hover:opacity-95 active:scale-[0.98] transition-all card-lift text-center cursor-pointer"
+              className={cn(
+                "flex flex-col items-center justify-center rounded-brand bg-destructive px-3 py-3 text-destructive-foreground font-semibold shadow hover:opacity-95 active:scale-[0.98] transition-all card-lift text-center cursor-pointer",
+                idx === EMERGENCY.length - 1 && "col-span-2 sm:col-span-1"
+              )}
             >
               <span className="flex items-center gap-1.5 text-xl font-bold">
                 <PhoneIcon className="h-5 w-5" /> {e.number}
