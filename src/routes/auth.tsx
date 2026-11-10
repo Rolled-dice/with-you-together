@@ -98,6 +98,21 @@ function AuthPage() {
   }, [search.reason]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, "?"));
+    const error = urlParams.get("error") || hashParams.get("error");
+    const errorDesc = urlParams.get("error_description") || hashParams.get("error_description");
+    if (error) {
+      toast.error("Google sign-in could not be completed", {
+        description:
+          errorDesc?.replace(/\+/g, " ") ||
+          "The authentication provider returned an error. Please try again or use email sign-in below.",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     if (recovering) {
       setCheckingSession(false);
       return;
@@ -555,18 +570,25 @@ function OAuthButton({
 
   async function attempt() {
     if (!lock.acquire(provider)) return;
+    const fallbackTimer = window.setTimeout(() => {
+      lock.release();
+    }, 7000);
+
     try {
+      const authOrigin = window.location.origin;
+      const callbackUrl = `${authOrigin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`;
       const result = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth${redirectTo === "/dashboard" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`}`,
+          redirectTo: callbackUrl,
           skipBrowserRedirect: true,
         },
       });
       if (result.error) throw result.error;
       if (!result.data.url) throw new Error("Sign-in provider is unavailable. Please use email.");
-      window.location.assign(result.data.url);
+      window.location.href = result.data.url;
     } catch (err) {
+      window.clearTimeout(fallbackTimer);
       const info = classifyAuthError(err);
       toast.error(info.title, {
         description: info.description,
