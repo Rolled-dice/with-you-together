@@ -3,9 +3,11 @@ import { useState } from "react";
 import { z } from "zod";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { createLaunchCheckout } from "@/lib/launch-checkout.functions";
 import { isMarketId, LAUNCH_PLANS, launchPrice, type MarketId } from "@/lib/launch-catalog";
 import { launchTestProductId } from "@/lib/launch-dodo-products";
+import { getLaunchMarket } from "@/lib/launch-market.functions";
 
 export const Route = createFileRoute("/_authenticated/checkout")({
   validateSearch: (search: Record<string, unknown>) =>
@@ -27,24 +29,29 @@ export const Route = createFileRoute("/_authenticated/checkout")({
       })
       .parse(search),
   head: () => ({ meta: [{ title: "Membership checkout | SomeoneNear" }] }),
+  loader: () => getLaunchMarket(),
   component: CheckoutPage,
 });
 function CheckoutPage() {
   const search = Route.useSearch();
   const plan = search.plan ?? (search.price?.startsWith("care_plus") ? "care_plus" : "care");
-  const market = search.market ?? (search.price?.endsWith("inr") ? "in" : "us");
+  const detected = Route.useLoaderData();
+  const market = import.meta.env.VITE_DODO_MODE === "live"
+    ? detected.market
+    : search.market ?? (search.price?.endsWith("inr") ? "in" : "us");
   const terms = LAUNCH_PLANS[plan];
   const paymentStatus = (search.payment_status ?? search.status ?? "").toLowerCase();
   const paymentFailed = ["failed", "cancelled", "canceled", "expired"].includes(paymentStatus);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [voucher, setVoucher] = useState("");
   const dodoMode = import.meta.env.VITE_DODO_MODE === "live" ? "live" : "test";
   const available = dodoMode === "live" || !!launchTestProductId(market, plan);
   async function checkout() {
     setBusy(true);
     setError("");
     try {
-      const session = await createLaunchCheckout({ data: { plan, market } });
+      const session = await createLaunchCheckout({ data: { plan, market, ...(voucher.trim() ? { voucher: voucher.trim() } : {}) } });
       window.location.assign(session.checkoutUrl);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : `Unable to start Dodo ${dodoMode} checkout.`);
@@ -98,6 +105,12 @@ function CheckoutPage() {
           <p role="alert" className="text-destructive">
             {error}
           </p>
+        )}
+        {dodoMode === "live" && (
+          <div className="max-w-sm space-y-2">
+            <label htmlFor="checkout-voucher">Voucher code (optional)</label>
+            <Input id="checkout-voucher" value={voucher} onChange={(event) => setVoucher(event.target.value)} maxLength={80} disabled={busy} autoComplete="off" />
+          </div>
         )}
         <Button onClick={checkout} disabled={busy || !available}>
           {busy

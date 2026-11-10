@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { CheckCircleIcon } from "@phosphor-icons/react";
 import { launchTestProductId } from "@/lib/launch-dodo-products";
+import { getLaunchMarket } from "@/lib/launch-market.functions";
 import {
   LAUNCH_CATALOG_VERSION,
   LAUNCH_MARKETS,
@@ -11,18 +12,26 @@ import {
   type MarketId,
 } from "@/lib/launch-catalog";
 
-export function LaunchPricing({ initialMarket = "us" }: { initialMarket?: MarketId }) {
+export function LaunchPricing({ initialMarket }: { initialMarket?: MarketId }) {
   // Keep the public catalog aligned with the server's fail-closed default:
   // an omitted VITE_DODO_MODE is the sandbox, never the live catalog.
   const dodoMode = import.meta.env.VITE_DODO_MODE === "live" ? "live" : "test";
-  const [market, setMarket] = useState<MarketId>(initialMarket);
+  const [market, setMarket] = useState<MarketId>(initialMarket ?? "us");
   const [ready, setReady] = useState(false);
   const changed = useRef(false);
   useEffect(() => {
     setReady(true);
   }, []);
   useEffect(() => {
-    if (!changed.current) setMarket(initialMarket);
+    let cancelled = false;
+    if (initialMarket) {
+      if (!changed.current) setMarket(initialMarket);
+    } else {
+      void getLaunchMarket().then(({ market: detected }) => {
+        if (!cancelled && !changed.current) setMarket(detected);
+      }).catch(() => {});
+    }
+    return () => { cancelled = true; };
   }, [initialMarket]);
   return (
     <section

@@ -18,6 +18,7 @@ type DodoDiscount = {
   per_customer_usage_limit?: unknown;
   restricted_to?: unknown;
   expires_at?: unknown;
+  customer_eligibility?: unknown;
 };
 
 function launchProductId(environment: "test" | "live", market: MarketId, plan: LaunchPlan) {
@@ -58,7 +59,8 @@ function launchProductId(environment: "test" | "live", market: MarketId, plan: L
 }
 
 async function resolveTrustedMarket(supabase: any, userId: string, fallback: MarketId): Promise<MarketId> {
-  const country = getRequest().headers.get("cf-ipcountry");
+  const request = getRequest() as Request & { cf?: { country?: string } };
+  const country = request.cf?.country ?? request.headers.get("cf-ipcountry");
   if (country) return marketForCountry(country);
   if (!supabase) return fallback;
   const { data } = await supabase.from("profiles").select("phone_country").eq("id", userId).maybeSingle();
@@ -134,6 +136,7 @@ async function verifyDiscount(
     if (
       discount.usage_limit !== 1 ||
       discount.per_customer_usage_limit !== 1 ||
+      discount.customer_eligibility !== "specific" ||
       !Number.isFinite(expiresAt) ||
       expiresAt <= Date.now() ||
       expiresAt > Date.now() + 48 * 60 * 60 * 1000
@@ -145,7 +148,7 @@ async function verifyDiscount(
 }
 
 export async function createLaunchTestCheckout(
-  input: { plan: LaunchPlan; market: MarketId },
+  input: { plan: LaunchPlan; market: MarketId; voucher?: string },
   userId: string,
   supabase?: any,
 ) {
@@ -161,11 +164,15 @@ export async function createLaunchTestCheckout(
         .from("subscriptions")
         .select("status")
         .eq("user_id", userId)
+        .eq("provider", "dodo")
+        .eq("environment", environment)
         .in("status", ["active", "trialing", "cancelled", "on_hold", "expired"])
-        .limit(1)
     : { data: [], error: null };
   let isFirstTimeSubscriber = !existingSubscriptions?.length;
   if (subscriptionError) {
+    if (environment === "live") {
+      throw new Error("Unable to verify subscription eligibility. Please try again.");
+    }
     // Older production projects may not expose the subscription view yet. Use
     // the profile tier as a conservative fallback: an active paid tier never
     // receives another trial, while a new/free account can still open test
@@ -194,15 +201,19 @@ export async function createLaunchTestCheckout(
   };
   const baseUrl = environment === "test" ? "https://test.dodopayments.com" : "https://live.dodopayments.com";
   const internalDiscountId =
-    environment === "live" && isInternalTester(userId)
+    environment === "live" && (isInternalTester(userId) || input.voucher)
       ? process.env.DODO_LIVE_INTERNAL_TEST_DISCOUNT_ID?.trim()
       : undefined;
+  if (input.voucher && !internalDiscountId) {
+    throw new Error("This voucher is unavailable.");
+  }
 
   const payload = {
     product_cart: [{ product_id: productId, quantity: 1 }],
+    billing_currency: launchMarket(trustedMarket).currency,
     subscription_data: { trial_period_days: isFirstTimeSubscriber ? 7 : 0 },
     ...(isFirstTimeSubscriber ? { discount_codes: [launchDodoTestCatalog.discount.code] } : {}),
-    feature_flags: { allow_currency_selection: false, allow_discount_code: false },
+    feature_flags: { allow_currency_selection: false, allow_discount_code: environment === "live" },
     return_url: `${new URL(getRequest().url).origin}/checkout?plan=${input.plan}&market=${trustedMarket}&completed=1`,
     metadata: {
       userId,
@@ -221,7 +232,7 @@ export async function createLaunchTestCheckout(
     product.price?.type !== "recurring_price" ||
     product.price.currency !== expected.currency ||
     product.price.price !== expected[input.plan] ||
-    product.price.trial_period_days !== (isFirstTimeSubscriber ? 7 : 0) ||
+    product.price.trial_period_days !== 7 ||
     product.price.trial_payment_method_optional !== false ||
     product.price.payment_frequency_count !== 1 ||
     product.price.payment_frequency_interval !== "Month"
@@ -230,7 +241,7 @@ export async function createLaunchTestCheckout(
   }
 
   let discountCode: string | null = null;
-  if (isFirstTimeSubscriber) {
+  if (isFirstTimeSubscriber && !internalDiscountId) {
     const discountId = environment === "test"
       ? launchDodoTestCatalog.discount.id
       : process.env.DODO_LIVE_LAUNCH_DISCOUNT_ID?.trim();
@@ -243,6 +254,14 @@ export async function createLaunchTestCheckout(
     discountCode = await verifyDiscount(baseUrl, headers, internalDiscountId, productId, 10000, {
       requireSingleUse: true,
     });
+    if (input.voucher && input.voucher.trim().toUpperCase() !== discountCode) {
+      throw new Error("This voucher is unavailable.");
+    }
+    const { data, error } = await supabase.auth.getUser();
+    if (error || data.user?.id !== userId || !data.user.email) {
+      throw new Error("Please sign in again to use your voucher.");
+    }
+    payload.customer = { email: data.user.email };
   }
   if (discountCode) payload.discount_codes = [discountCode];
   const response = await fetch(`${baseUrl}/checkouts`, {

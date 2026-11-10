@@ -8,7 +8,7 @@ export const createLaunchCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
-      .object({ plan: z.enum(["care", "care_plus"]), market: z.custom<MarketId>(isMarketId) })
+      .object({ plan: z.enum(["care", "care_plus"]), market: z.custom<MarketId>(isMarketId), voucher: z.string().trim().max(80).optional() })
       .strict()
       .parse(input),
   )

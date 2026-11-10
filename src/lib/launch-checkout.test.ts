@@ -11,6 +11,80 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("launch test checkout", () => {
+  it.each(["PRIVATE100", "WRONGCODE"])("validates the private live voucher %s before checkout", async (voucher) => {
+    vi.stubEnv("DODO_PAYMENTS_ENV", "live");
+    vi.stubEnv("DODO_LIVE_API_KEY", "fake-live-key");
+    vi.stubEnv("DODO_LIVE_PRODUCT_CARE_INR", "pdt_live_india");
+    vi.stubEnv("DODO_LIVE_INTERNAL_TEST_DISCOUNT_ID", "dsc_private");
+    const query = {
+      select: () => query,
+      eq: () => query,
+      in: async () => ({ data: [], error: null }),
+      maybeSingle: async () => ({ data: { phone_country: "IN" }, error: null }),
+    };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(Response.json({ price: {
+        type: "recurring_price", currency: "INR", price: 300000,
+        trial_period_days: 7, trial_payment_method_optional: false,
+        payment_frequency_count: 1, payment_frequency_interval: "Month",
+      } }))
+      .mockResolvedValueOnce(Response.json({
+        code: "PRIVATE100", type: "percentage", amount: 10000,
+        subscription_cycles: 1, usage_limit: 1, per_customer_usage_limit: 1,
+        customer_eligibility: "specific", restricted_to: ["pdt_live_india"],
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      }))
+      .mockResolvedValueOnce(Response.json({
+        session_id: "cks_private", checkout_url: "https://checkout.dodopayments.com/session/cks_private",
+      }));
+    vi.stubGlobal("fetch", fetchMock);
+    const result = createLaunchTestCheckout({ market: "in", plan: "care", voucher }, "user", {
+      from: () => query,
+      auth: { getUser: async () => ({ data: { user: { id: "user", email: "tester@example.com" } }, error: null }) },
+    });
+    if (voucher === "WRONGCODE") {
+      await expect(result).rejects.toThrow("voucher is unavailable");
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } else {
+      await expect(result).resolves.toMatchObject({ sessionId: "cks_private" });
+      const payload = JSON.parse(fetchMock.mock.calls[2][1].body);
+      expect(payload.discount_codes).toEqual(["PRIVATE100"]);
+      expect(payload.customer).toEqual({ email: "tester@example.com" });
+    }
+  });
+  it("isolates live eligibility and overrides the trial for returning subscribers", async () => {
+    vi.stubEnv("DODO_PAYMENTS_ENV", "live");
+    vi.stubEnv("DODO_LIVE_API_KEY", "fake-live-key");
+    vi.stubEnv("DODO_LIVE_PRODUCT_CARE_INR", "pdt_live_india");
+    const eq = vi.fn();
+    const query = {
+      select: () => query,
+      eq,
+      in: async () => ({ data: [{ status: "cancelled" }], error: null }),
+      maybeSingle: async () => ({ data: { phone_country: "IN" }, error: null }),
+    };
+    eq.mockReturnValue(query);
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(Response.json({ price: {
+        type: "recurring_price", currency: "INR", price: 300000,
+        trial_period_days: 7, trial_payment_method_optional: false,
+        payment_frequency_count: 1, payment_frequency_interval: "Month",
+      } }))
+      .mockResolvedValueOnce(Response.json({
+        session_id: "cks_live", checkout_url: "https://checkout.dodopayments.com/session/cks_live",
+      }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(createLaunchTestCheckout({ market: "us", plan: "care" }, "user", {
+      from: () => query,
+    })).resolves.toMatchObject({ sessionId: "cks_live" });
+    expect(eq).toHaveBeenCalledWith("environment", "live");
+    expect(eq).toHaveBeenCalledWith("provider", "dodo");
+    const payload = JSON.parse(fetchMock.mock.calls[1][1].body);
+    expect(payload.billing_currency).toBe("INR");
+    expect(payload.subscription_data.trial_period_days).toBe(0);
+    expect(payload.discount_codes).toBeUndefined();
+    expect(payload.feature_flags.allow_discount_code).toBe(true);
+  });
   it("maps 32 supported offers and preserves the six rejected-currency offers", () => {
     expect(Object.keys(launchDodoTestCatalog.products)).toHaveLength(32);
     for (const market of LAUNCH_MARKETS)
