@@ -58,7 +58,8 @@ export async function seedDoseLogs(supabase: SupabaseClient<Database>, medicatio
       .upsert(rows, { onConflict: "medication_id,scheduled_at", ignoreDuplicates: true });
 
     // Clean up stale uncompleted doses for today that do not match the valid schedule times
-    const validTimes = rows.map((r) => r.scheduled_at);
+    // Compare numeric epoch timestamps to prevent false negatives from formatting differences (+00:00 vs .000Z)
+    const validTimeMs = new Set(rows.map((r) => new Date(r.scheduled_at).getTime()));
     const tomorrowStr = new Date(Date.parse(`${todayStr}T12:00:00Z`) + 86400000)
       .toISOString()
       .slice(0, 10);
@@ -73,7 +74,10 @@ export async function seedDoseLogs(supabase: SupabaseClient<Database>, medicatio
       .lt("scheduled_at", dayEnd);
 
     const staleIds = (todayDoses ?? [])
-      .filter((d) => d.status === "pending" && !validTimes.includes(d.scheduled_at))
+      .filter(
+        (d) =>
+          d.status === "pending" && !validTimeMs.has(new Date(d.scheduled_at).getTime()),
+      )
       .map((d) => d.id);
 
     if (staleIds.length > 0) {

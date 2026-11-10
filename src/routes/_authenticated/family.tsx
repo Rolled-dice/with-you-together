@@ -283,10 +283,12 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
   const inviteMut = useMutation({
     mutationFn: () =>
       inviteFn({ data: { name: inviteName, email: inviteEmail, phone: invitePhone } }),
-    onSuccess: (res) => {
+    onSuccess: (res: any) => {
       const link = `${window.location.origin}/invite?token=${res.token}`;
       navigator.clipboard.writeText(link).catch(() => {});
-      if (res.emailSent) {
+      if (res.alreadyPending) {
+        toast.success("Existing invitation found! Invite link copied to clipboard.");
+      } else if (res.emailSent) {
         toast.success("Invitation email sent; our care team will call to confirm consent");
       } else {
         toast.success("Invitation created! Link copied to clipboard to share directly.");

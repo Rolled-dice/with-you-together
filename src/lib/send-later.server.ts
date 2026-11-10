@@ -39,9 +39,10 @@ export async function createScheduledMessage(
   if (when.getTime() < Date.now() + 60_000)
     throw new Error("Choose a time at least a few minutes in the future");
   const contacts = await listFamilyContacts(context);
+  const isSelf = input.recipientUserId === context.userId;
   if (
     !input.recipientUserId ||
-    !contacts.some((contact) => contact.userId === input.recipientUserId)
+    (!isSelf && !contacts.some((contact) => contact.userId === input.recipientUserId))
   )
     throw new Error("Choose someone in your family circle.");
 

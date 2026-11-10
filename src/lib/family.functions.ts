@@ -91,7 +91,7 @@ export const getMyFamily = createServerFn({ method: "GET" })
       display_name: nameMap.get(m.user_id) ?? null,
     }));
 
-    const isOwner = membership.role === "owner";
+    const isOwner = membership.role === "owner" || membership.role === "adult";
     let invites: Array<{
       id: string;
       email: string;
@@ -233,35 +233,40 @@ export const inviteFamilyMember = createServerFn({ method: "POST" })
     const email = data.email?.trim().toLowerCase() || null;
     const { data: matchingByPhone, error: matchingPhoneError } = await (supabase as any)
       .from("family_invitations")
-      .select("id")
+      .select("id, token")
       .eq("family_id", mem.family_id)
       .eq("call_phone", data.phone)
       .in("status", ["pending", "verification_pending"])
       .gt("expires_at", new Date().toISOString())
       .limit(1);
     if (matchingPhoneError) throw new Error(matchingPhoneError.message);
-    if (matchingByPhone?.length)
-      throw new Error("A pending invitation already exists for this mobile number.");
+    if (matchingByPhone?.length) {
+      const existing = matchingByPhone[0];
+      return { id: existing.id, token: existing.token, emailSent: false, emailProvided: Boolean(email), alreadyPending: true };
+    }
 
     if (email) {
       const { data: matchingByEmail, error: matchingEmailError } = await supabase
         .from("family_invitations")
-        .select("id")
+        .select("id, token")
         .eq("family_id", mem.family_id)
         .eq("email", email)
         .in("status", ["pending", "verification_pending"])
         .gt("expires_at", new Date().toISOString())
         .limit(1);
       if (matchingEmailError) throw new Error(matchingEmailError.message);
-      if (matchingByEmail?.length)
-        throw new Error("A pending invitation already exists for this email.");
+      if (matchingByEmail?.length) {
+        const existing = matchingByEmail[0];
+        return { id: existing.id, token: existing.token, emailSent: false, emailProvided: true, alreadyPending: true };
+      }
     }
 
+    const effectiveEmail = email || `${data.phone.replace(/[^0-9]/g, "")}@phone.someonenear.internal`;
     const { data: inv, error } = await supabase
       .from("family_invitations")
       .insert({
         family_id: mem.family_id,
-        email,
+        email: effectiveEmail,
         invitee_name: data.name,
         call_phone: data.phone,
         contact_phone: data.phone,

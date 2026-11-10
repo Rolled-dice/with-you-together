@@ -71,6 +71,12 @@ function SendLaterPage() {
   const [when, setWhen] = useState("");
   const activeWhen = when || defaultWhen;
   const [playback, setPlayback] = useState<{ url: string; kind: "voice" | "video" } | null>(null);
+  useEffect(() => {
+    if (vaultTab === "capsules" && userId && !recipientId) {
+      setRecipientId(userId);
+    }
+  }, [vaultTab, userId, recipientId]);
+
   const list = useServerFn(listSendLater);
   const inbox = useServerFn(listReceivedSendLater);
   const contactsFn = useServerFn(listSendLaterContacts);
@@ -96,8 +102,13 @@ function SendLaterPage() {
     mutationFn: async () => {
       assertIdentity(generation);
       if (!zone.data) throw new Error("Your timezone is still loading. Please try again.");
+      const targetUserId = recipientId || (vaultTab === "capsules" ? userId : query.data?.contacts[0]?.userId);
+      const recipient = query.data?.contacts.find((c) => c.userId === targetUserId) || (userId ? {
+        userId,
+        name: "You (Future Self · Time Capsule)",
+      } : undefined);
       const parsed = inputSchema.parse({
-        recipient: query.data?.contacts.find((c) => c.userId === recipientId),
+        recipient,
         scheduledAt: localToUtc(activeWhen, zone.data),
         body,
         kind,
