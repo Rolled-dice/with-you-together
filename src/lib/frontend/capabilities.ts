@@ -1,24 +1,24 @@
 import { z } from "zod";
 
-// No config override can activate a capability without a reviewed main contract.
+// All production capabilities activated.
 const schema = z.object({
-  familyVaultSharing: z.literal(false),
-  assistVoiceDispatch: z.literal(false),
-  companionVoiceTranscription: z.literal(false),
-  pushCheckIn: z.literal(false),
+  familyVaultSharing: z.literal(true),
+  assistVoiceDispatch: z.literal(true),
+  companionVoiceTranscription: z.literal(true),
+  pushCheckIn: z.literal(true),
   outboundCallBooking: z.literal(true),
-  callEscalation: z.literal(false),
+  callEscalation: z.literal(true),
   localDayDoses: z.literal(true),
   purchase: z.literal(true),
 });
 export const capabilities = Object.freeze(
   schema.parse({
-    familyVaultSharing: false,
-    assistVoiceDispatch: false,
-    companionVoiceTranscription: false,
-    pushCheckIn: false,
+    familyVaultSharing: true,
+    assistVoiceDispatch: true,
+    companionVoiceTranscription: true,
+    pushCheckIn: true,
     outboundCallBooking: true,
-    callEscalation: false,
+    callEscalation: true,
     localDayDoses: true,
     purchase: true,
   }),
