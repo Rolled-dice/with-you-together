@@ -33,6 +33,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useIdentity } from "@/features/session/session-store";
 import { cn } from "@/lib/utils";
 import {
   ResponsiveContainer,
@@ -83,6 +84,7 @@ function InsightsPage() {
   const listJournalFn = useServerFn(listJournalEntries);
   const createFn = useServerFn(createMoodCheckIn);
   const qc = useQueryClient();
+  const { userId } = useIdentity();
 
   const [pendingMood, setPendingMood] = useState<number | null>(null);
   const [range, setRange] = useState<RangeKey>("30");
@@ -99,12 +101,12 @@ function InsightsPage() {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["mood-checkins"],
+    queryKey: ["mood-checkins", userId],
     queryFn: () => listFn(),
   });
 
   const { data: journalEntries = [] } = useQuery({
-    queryKey: ["journal-entries-summary"],
+    queryKey: ["journal-entries-summary", userId],
     queryFn: () => listJournalFn(),
   });
 
@@ -118,7 +120,7 @@ function InsightsPage() {
     onMutate: (mood) => setPendingMood(mood),
     onSuccess: (_, mood) => {
       toast.success(`Checked in as ${MOOD_LABEL[mood].label} ${MOOD_LABEL[mood].emoji}`);
-      qc.invalidateQueries({ queryKey: ["mood-checkins"] });
+      qc.invalidateQueries({ queryKey: ["mood-checkins", userId] });
     },
     onError: (err: Error) => toast.error(err.message || "Couldn't save your check-in"),
     onSettled: () => setPendingMood(null),
@@ -468,8 +470,8 @@ function InsightsPage() {
         {/* Journal and Reflections Section */}
         <JournalSection
           onEntrySaved={() => {
-            qc.invalidateQueries({ queryKey: ["mood-checkins"] });
-            qc.invalidateQueries({ queryKey: ["journal-entries-summary"] });
+            qc.invalidateQueries({ queryKey: ["mood-checkins", userId] });
+            qc.invalidateQueries({ queryKey: ["journal-entries-summary", userId] });
           }}
         />
 

@@ -52,7 +52,14 @@ function CheckoutPage() {
     setError("");
     try {
       const session = await createLaunchCheckout({ data: { plan, market, ...(voucher.trim() ? { voucher: voucher.trim() } : {}) } });
-      window.location.assign(session.checkoutUrl);
+      if (!session?.checkoutUrl) {
+        throw new Error("Payment session created without a valid checkout URL.");
+      }
+      try {
+        window.location.assign(session.checkoutUrl);
+      } catch {
+        window.location.href = session.checkoutUrl;
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : `Unable to start Dodo ${dodoMode} checkout.`);
       setBusy(false);

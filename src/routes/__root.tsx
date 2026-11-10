@@ -42,10 +42,17 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(new Error("A page failed to render"), {
+    reportLovableError(error instanceof Error ? error : new Error(String(error || "A page failed to render")), {
       boundary: "tanstack_root_error_component",
     });
   }, [error]);
+
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "Something went wrong on our end. You can try refreshing or head back home.";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -53,9 +60,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{errorMessage}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -65,6 +70,16 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Try again
+          </button>
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.location.reload();
+              }
+            }}
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Reload page
           </button>
           <a
             href="/"
@@ -143,7 +158,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
 
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>

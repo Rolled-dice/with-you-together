@@ -33,6 +33,7 @@ export const Route = createFileRoute("/_authenticated/companion/$threadId")({
 
 function CompanionThread() {
   const { threadId } = Route.useParams();
+  const { userId } = useIdentity();
   const getMessages = useServerFn(getConversationMessages);
 
   const {
@@ -41,7 +42,7 @@ function CompanionThread() {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["messages", threadId],
+    queryKey: ["messages", threadId, userId],
     queryFn: () => getMessages({ data: { id: threadId } }),
   });
 
@@ -97,7 +98,7 @@ function ChatSurface({
   const qc = useQueryClient();
   const quotaFn = useServerFn(getMyAiQuota);
   const { data: quota, refetch: refetchQuota } = useQuery({
-    queryKey: ["ai-quota"],
+    queryKey: ["ai-quota", userId],
     queryFn: () => quotaFn(),
   });
 
@@ -116,7 +117,7 @@ function ChatSurface({
       }
     },
     onFinish: () => {
-      qc.invalidateQueries({ queryKey: ["ai-quota"] });
+      qc.invalidateQueries({ queryKey: ["ai-quota", userId] });
     },
   });
 

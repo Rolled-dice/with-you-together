@@ -25,6 +25,17 @@ export function SessionLifecycle() {
       if (changed || event === "SIGNED_OUT") {
         void queryClient.cancelQueries();
         queryClient.clear();
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            localStorage.removeItem("sn_ice_card_v1");
+            if (previous.userId) {
+              localStorage.removeItem(`sn_ice_card_v1_${previous.userId}`);
+              localStorage.removeItem(`sn_member_art_${previous.userId}`);
+            }
+          }
+        } catch {
+          /* ignore storage access restriction */
+        }
       }
       setIdentity(userId);
       // The initial route is already loading. Invalidating it here races hydration.

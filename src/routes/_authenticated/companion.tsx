@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompanionCalm } from "@/components/prototype/companion-calm";
 import { CompanionMemoryCard } from "@/components/prototype/companion-memory";
 import { toast } from "sonner";
+import { useIdentity } from "@/features/session/session-store";
 
 export const Route = createFileRoute("/_authenticated/companion")({
   head: () => ({
@@ -35,6 +36,7 @@ function CompanionLayout() {
   const createFn = useServerFn(createConversation);
   const deleteFn = useServerFn(deleteConversation);
   const params = useParams({ strict: false }) as { threadId?: string };
+  const { userId } = useIdentity();
 
   const {
     data: conversations = [],
@@ -42,14 +44,14 @@ function CompanionLayout() {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["conversations"],
+    queryKey: ["conversations", userId],
     queryFn: () => listFn(),
   });
 
   const createMut = useMutation({
     mutationFn: () => createFn(),
     onSuccess: (data) => {
-      qc.invalidateQueries({ queryKey: ["conversations"] });
+      qc.invalidateQueries({ queryKey: ["conversations", userId] });
       navigate({ to: "/companion/$threadId", params: { threadId: data.id } });
     },
     onError: (e) => toast.error((e as Error).message),
@@ -58,7 +60,7 @@ function CompanionLayout() {
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
     onSuccess: (_r, id) => {
-      qc.invalidateQueries({ queryKey: ["conversations"] });
+      qc.invalidateQueries({ queryKey: ["conversations", userId] });
       if (params.threadId === id) navigate({ to: "/companion" });
     },
     onError: (e) => toast.error((e as Error).message),

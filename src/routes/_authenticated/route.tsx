@@ -11,10 +11,14 @@ function AuthGateLoader() {
   return <BootstrapLoader message="Checking your session…" />;
 }
 function AuthenticatedLayout() {
-  const { user } = Route.useRouteContext();
+  const context = Route.useRouteContext();
+  const userId = context?.user?.id;
+  if (!userId) {
+    return <AuthGateLoader />;
+  }
   return (
-    <PrivateSessionBoundary userId={user.id}>
-      <RealtimeRecovery userId={user.id} />
+    <PrivateSessionBoundary userId={userId}>
+      <RealtimeRecovery userId={userId} />
       <Outlet />
     </PrivateSessionBoundary>
   );

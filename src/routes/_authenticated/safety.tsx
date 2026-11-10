@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
+import { useIdentity } from "@/features/session/session-store";
 import {
   LifebuoyIcon,
   PhoneIcon,
@@ -313,30 +314,73 @@ function SafetyPage() {
   const [breathSecondsLeft, setBreathSecondsLeft] = useState(4);
   const [cycleCount, setCycleCount] = useState(1);
 
+  // User identity scoping for private health & emergency data
+  const { userId } = useIdentity();
+  const iceStorageKey = `sn_ice_card_v1_${userId || "anon"}`;
+
   // 5-4-3-2-1 Interactive checklist
   const [checkedSenses, setCheckedSenses] = useState<Record<string, boolean>>({});
 
-  // ICE Card state
+  // ICE Card state (scoped per authenticated account to prevent cross-account leakage)
   const [iceCard, setIceCard] = useState<IceCardData>(DEFAULT_ICE);
   const [iceEditing, setIceEditing] = useState(false);
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("sn_ice_card_v1");
-      if (saved) setIceCard(JSON.parse(saved));
+      const saved = localStorage.getItem(iceStorageKey);
+      if (saved) {
+        setIceCard(JSON.parse(saved));
+      } else {
+        setIceCard(DEFAULT_ICE);
+      }
     } catch {
-      /* fallback */
+      setIceCard(DEFAULT_ICE);
     }
-  }, []);
+  }, [iceStorageKey]);
 
   const saveIceCard = (data: IceCardData) => {
     setIceCard(data);
     setIceEditing(false);
     try {
-      localStorage.setItem("sn_ice_card_v1", JSON.stringify(data));
-      toast.success("Emergency Care Card saved to this device");
+      localStorage.setItem(iceStorageKey, JSON.stringify(data));
+      toast.success("Emergency Care Card saved to your account");
     } catch {
       toast.error("Could not save to local storage");
+    }
+  };
+
+  // Resilient dial & SMS intent dispatchers
+  const getSmsHref = (number: string, body?: string) => {
+    const sanitized = number.replace(/[\s-]/g, "");
+    if (!body) return `sms:${sanitized}`;
+    const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const delimiter = isIOS ? "&" : "?";
+    return `sms:${sanitized}${delimiter}body=${encodeURIComponent(body)}`;
+  };
+
+  const triggerDialIntent = (phone: string, label?: string) => {
+    const sanitized = phone.replace(/[\s-]/g, "");
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(sanitized).catch(() => {});
+    }
+    toast.success(`Dialing ${label || sanitized}... (Number copied to clipboard)`);
+    try {
+      window.location.href = `tel:${sanitized}`;
+    } catch {
+      window.open(`tel:${sanitized}`, "_self");
+    }
+  };
+
+  const triggerSmsIntent = (number: string, body?: string, label?: string) => {
+    const href = getSmsHref(number, body);
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(number).catch(() => {});
+    }
+    toast.success(`Opening SMS for ${label || number}...`);
+    try {
+      window.location.href = href;
+    } catch {
+      window.open(href, "_self");
     }
   };
 
@@ -450,8 +494,12 @@ function SafetyPage() {
             <a
               key={e.region}
               href={`tel:${e.number}`}
+              onClick={(ev) => {
+                ev.preventDefault();
+                triggerDialIntent(e.number, `${e.region} Emergency (${e.number})`);
+              }}
               aria-label={`Call ${e.region} emergency line ${e.number}`}
-              className="flex flex-col items-center justify-center rounded-brand bg-destructive px-3 py-3 text-destructive-foreground font-semibold shadow hover:opacity-95 active:scale-[0.98] transition-all card-lift text-center"
+              className="flex flex-col items-center justify-center rounded-brand bg-destructive px-3 py-3 text-destructive-foreground font-semibold shadow hover:opacity-95 active:scale-[0.98] transition-all card-lift text-center cursor-pointer"
             >
               <span className="flex items-center gap-1.5 text-xl font-bold">
                 <PhoneIcon className="h-5 w-5" /> {e.number}
@@ -765,17 +813,25 @@ function SafetyPage() {
                   {r.phone && (
                     <a
                       href={`tel:${r.phone.replace(/[\s-]/g, "")}`}
+                      onClick={(ev) => {
+                        ev.preventDefault();
+                        triggerDialIntent(r.phone!, r.name);
+                      }}
                       aria-label={`Call ${r.name} at ${r.phone}`}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-brand bg-brand-primary px-3 py-1.5 text-primary-foreground font-semibold text-xs shadow-sm hover:opacity-90 active:scale-[0.98] transition"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-brand bg-brand-primary px-3 py-1.5 text-primary-foreground font-semibold text-xs shadow-sm hover:opacity-90 active:scale-[0.98] transition cursor-pointer"
                     >
                       <PhoneIcon className="h-3.5 w-3.5" /> Call {r.phone}
                     </a>
                   )}
                   {r.sms && (
                     <a
-                      href={`sms:${r.sms}${r.smsBody ? `?&body=${encodeURIComponent(r.smsBody)}` : ""}`}
+                      href={getSmsHref(r.sms, r.smsBody)}
+                      onClick={(ev) => {
+                        ev.preventDefault();
+                        triggerSmsIntent(r.sms!, r.smsBody, r.name);
+                      }}
                       aria-label={`Text ${r.name} at ${r.sms}`}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-brand bg-brand-accent px-3 py-1.5 text-white font-semibold text-xs shadow-sm hover:opacity-90 active:scale-[0.98] transition"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-brand bg-brand-accent px-3 py-1.5 text-white font-semibold text-xs shadow-sm hover:opacity-90 active:scale-[0.98] transition cursor-pointer"
                     >
                       <ChatIcon className="h-3.5 w-3.5" /> Text {r.sms}
                     </a>
@@ -786,7 +842,7 @@ function SafetyPage() {
                       onClick={() => copyToClipboard(r.phone!, r.name)}
                       title="Copy phone number"
                       aria-label={`Copy phone number for ${r.name}`}
-                      className="rounded-brand border border-border p-1.5 text-muted-foreground hover:text-foreground transition"
+                      className="rounded-brand border border-border p-1.5 text-muted-foreground hover:text-foreground transition cursor-pointer"
                     >
                       <CopyIcon className="h-3.5 w-3.5" />
                     </button>
@@ -1007,9 +1063,13 @@ function SafetyPage() {
               {iceCard.emergencyPhone && (
                 <a
                   href={`tel:${iceCard.emergencyPhone}`}
-                  className="text-brand-accent underline block mt-0.5"
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    triggerDialIntent(iceCard.emergencyPhone, `Emergency Contact (${iceCard.emergencyContact})`);
+                  }}
+                  className="text-brand-accent underline block mt-0.5 cursor-pointer"
                 >
-                  {iceCard.emergencyPhone}
+                  📞 {iceCard.emergencyPhone}
                 </a>
               )}
             </div>
@@ -1023,9 +1083,13 @@ function SafetyPage() {
               {iceCard.doctorPhone && (
                 <a
                   href={`tel:${iceCard.doctorPhone}`}
-                  className="text-brand-accent underline block mt-0.5"
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    triggerDialIntent(iceCard.doctorPhone, `Physician (${iceCard.doctorName})`);
+                  }}
+                  className="text-brand-accent underline block mt-0.5 cursor-pointer"
                 >
-                  {iceCard.doctorPhone}
+                  📞 {iceCard.doctorPhone}
                 </a>
               )}
             </div>

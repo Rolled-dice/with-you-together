@@ -29,7 +29,7 @@ function CompanionStart() {
         threadId: conversation.id,
         text: message,
       });
-      void cache.invalidateQueries({ queryKey: ["conversations"] });
+      void cache.invalidateQueries({ queryKey: ["conversations", started.userId] });
       navigate({ to: "/companion/$threadId", params: { threadId: conversation.id } });
     },
     onError: (error) =>

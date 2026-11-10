@@ -272,10 +272,18 @@ export async function createLaunchTestCheckout(
   });
   if (!response.ok) throw new Error(`Dodo could not start ${environment} checkout. Please try again.`);
   const session = await response.json();
+  if (!session?.checkout_url || typeof session.checkout_url !== "string") {
+    throw new Error("Dodo response did not contain a valid checkout URL.");
+  }
   const checkoutUrl = new URL(session.checkout_url);
+  const isValidHost =
+    checkoutUrl.hostname === "dodopayments.com" ||
+    checkoutUrl.hostname.endsWith(".dodopayments.com") ||
+    checkoutUrl.hostname === "dodo.pe" ||
+    checkoutUrl.hostname.endsWith(".dodo.pe");
   if (
     checkoutUrl.protocol !== "https:" ||
-    !checkoutUrl.hostname.endsWith(".dodopayments.com") ||
+    !isValidHost ||
     typeof session.session_id !== "string"
   )
     throw new Error("Dodo returned an invalid checkout session.");
