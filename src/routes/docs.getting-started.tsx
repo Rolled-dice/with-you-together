@@ -1,7 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DocHeader, DocSection } from "@/components/docs/docs-shell";
 export const Route = createFileRoute("/docs/getting-started")({
-  head: () => ({ meta: [{ title: "Getting started | SomeoneNear Docs" }] }),
+  head: () => ({
+    meta: [
+      { title: "Getting Started Guide | SomeoneNear Docs" },
+      {
+        name: "description",
+        content:
+          "Make yourself at home with SomeoneNear. Setup your profile, connect your family circle, configure reminders, and begin your first conversation.",
+      },
+      { property: "og:title", content: "Getting Started Guide | SomeoneNear Docs" },
+      {
+        property: "og:description",
+        content:
+          "Make yourself at home with SomeoneNear. Setup your profile, connect your family circle, configure reminders, and begin your first conversation.",
+      },
+      { property: "og:url", content: "https://someonenear.com/docs/getting-started" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/getting-started" }],
+  }),
   component: Page,
 });
 function Page() {

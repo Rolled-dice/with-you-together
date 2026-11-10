@@ -1,4 +1,27 @@
 User-agent: *
 Allow: /
+Allow: /docs
+Allow: /docs/
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+
+# Block private app surfaces and APIs from wasting crawl budget
+Disallow: /admin/
+Disallow: /agent/
+Disallow: /api/
+Disallow: /_serverFn/
+Disallow: /dashboard
+Disallow: /companion
+Disallow: /reminders
+Disallow: /insights
+Disallow: /family
+Disallow: /safety
+Disallow: /settings
+Disallow: /calm
+Disallow: /send-later
+Disallow: /checkout
+Disallow: /onboarding
+Disallow: /invite
 
 Sitemap: https://someonenear.com/sitemap.xml

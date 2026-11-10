@@ -15,6 +15,7 @@ import { WebsiteFeedback } from "@/components/website-feedback";
 import prototypeCss from "../prototype.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SessionLifecycle } from "@/features/session/session-boundary";
+import { OrganizationSchema } from "@/components/organization-schema";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -98,27 +99,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SomeoneNear Checking in when they can't" },
+      { title: "SomeoneNear — Warm Family Care, Reminders & AI Companion" },
       {
         name: "description",
         content:
-          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, reminders, mood insights, and a shared circle that keeps your loved ones close.",
+          "Stay close across any distance. SomeoneNear provides gentle phone check-in listeners, daily medication reminders, mood insights, and an empathetic AI Companion for elderly family care.",
       },
       { name: "author", content: "SomeoneNear" },
-      { property: "og:title", content: "SomeoneNear Checking in when they can't" },
+      { property: "og:site_name", content: "SomeoneNear" },
+      { property: "og:title", content: "SomeoneNear — Warm Family Care, Reminders & AI Companion" },
       {
         property: "og:description",
         content:
-          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, reminders, mood insights, and a shared circle that keeps your loved ones close.",
+          "Stay close across any distance. SomeoneNear provides gentle phone check-in listeners, daily medication reminders, mood insights, and an empathetic AI Companion for elderly family care.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://someonenear.com/" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "SomeoneNear — Checking in when they can't" },
+      { name: "twitter:title", content: "SomeoneNear — Warm Family Care, Reminders & AI Companion" },
       {
         name: "twitter:description",
         content:
-          "Checking in when they can't. SomeoneNear is a warm family care membership with an AI Companion, reminders, mood insights, and a shared circle that keeps your loved ones close.",
+          "Stay close across any distance. SomeoneNear provides gentle phone check-in listeners, daily medication reminders, mood insights, and an empathetic AI Companion for elderly family care.",
       },
+      { name: "twitter:image", content: "https://someonenear.com/logo.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -157,6 +162,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <OrganizationSchema />
       </head>
 
       <body suppressHydrationWarning>

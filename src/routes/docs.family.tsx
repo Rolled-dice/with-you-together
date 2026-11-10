@@ -1,7 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DocHeader, DocSection } from "@/components/docs/docs-shell";
 export const Route = createFileRoute("/docs/family")({
-  head: () => ({ meta: [{ title: "Family circle | SomeoneNear Docs" }] }),
+  head: () => ({
+    meta: [
+      { title: "Family Circle Management & Sharing | SomeoneNear Docs" },
+      {
+        name: "description",
+        content:
+          "Keep your family close with shared updates, circle invitations, role permissions, and privacy controls you choose.",
+      },
+      { property: "og:title", content: "Family Circle Management & Sharing | SomeoneNear Docs" },
+      {
+        property: "og:description",
+        content: "Keep your family close with shared updates, circle invitations, and role permissions.",
+      },
+      { property: "og:url", content: "https://someonenear.com/docs/family" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/family" }],
+  }),
   component: Page,
 });
 function Page() {

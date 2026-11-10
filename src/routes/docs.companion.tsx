@@ -11,14 +11,18 @@ import {
 export const Route = createFileRoute("/docs/companion")({
   head: () => ({
     meta: [
-      { title: "Companion | SomeoneNear Docs" },
+      { title: "AI Companion Guide & Features | SomeoneNear Docs" },
       {
         name: "description",
-        content: "How to chat with your SomeoneNear Companion, a warm AI that's always awake.",
+        content: "How to chat with your SomeoneNear Companion, a warm, empathetic AI that's always awake for quiet reflection and friendly conversation.",
       },
-      { property: "og:title", content: "Companion | SomeoneNear Docs" },
-      { property: "og:description", content: "A warm AI chat, always awake." },
+      { property: "og:title", content: "AI Companion Guide & Features | SomeoneNear Docs" },
+      { property: "og:description", content: "A warm, empathetic AI chat that is always awake for friendly conversation." },
+      { property: "og:url", content: "https://someonenear.com/docs/companion" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/companion" }],
   }),
   component: Page,
 });

@@ -14,8 +14,11 @@ export const Route = createFileRoute("/cookies")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:url", content: "https://someonenear.com/cookies" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/cookies" }],
   }),
   component: CookiePolicy,
 });

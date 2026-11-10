@@ -1,7 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DocHeader, DocSection } from "@/components/docs/docs-shell";
 export const Route = createFileRoute("/docs/account")({
-  head: () => ({ meta: [{ title: "Your account | SomeoneNear Docs" }] }),
+  head: () => ({
+    meta: [
+      { title: "Account & Profile Settings | SomeoneNear Docs" },
+      {
+        name: "description",
+        content:
+          "Manage your profile, timezone preferences, and session privacy in SomeoneNear.",
+      },
+      { property: "og:title", content: "Account & Profile Settings | SomeoneNear Docs" },
+      {
+        property: "og:description",
+        content: "Manage your profile, timezone preferences, and session privacy in SomeoneNear.",
+      },
+      { property: "og:url", content: "https://someonenear.com/docs/account" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/account" }],
+  }),
   component: Page,
 });
 function Page() {

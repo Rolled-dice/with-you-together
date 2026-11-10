@@ -11,18 +11,22 @@ import {
 export const Route = createFileRoute("/docs/send-later")({
   head: () => ({
     meta: [
-      { title: "Send It Later | SomeoneNear Docs" },
+      { title: "Send It Later — Scheduled Family Messages | SomeoneNear Docs" },
       {
         name: "description",
         content:
           "Write, record, or film a message now and choose the day it should arrive — a birthday, an anniversary, or any moment you want to be there for.",
       },
-      { property: "og:title", content: "Send It Later | SomeoneNear Docs" },
+      { property: "og:title", content: "Send It Later — Scheduled Family Messages | SomeoneNear Docs" },
       {
         property: "og:description",
         content: "Schedule a text, voice, or video message to be delivered on a future day.",
       },
+      { property: "og:url", content: "https://someonenear.com/docs/send-later" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/send-later" }],
   }),
   component: Page,
 });

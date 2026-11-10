@@ -11,18 +11,22 @@ import {
 export const Route = createFileRoute("/docs/medication")({
   head: () => ({
     meta: [
-      { title: "Medication reminders | SomeoneNear Docs" },
+      { title: "Medication Reminders & Prescription Tracking | SomeoneNear Docs" },
       {
         name: "description",
         content:
-          "Add medicines from a prescription photo or by hand, and get gentle dose reminders.",
+          "Add medicines from a prescription photo or by hand, and get gentle dose reminders on your phone or shared with family.",
       },
-      { property: "og:title", content: "Medication reminders | SomeoneNear Docs" },
+      { property: "og:title", content: "Medication Reminders & Prescription Tracking | SomeoneNear Docs" },
       {
         property: "og:description",
         content: "Add medicines from a photo and get gentle dose reminders.",
       },
+      { property: "og:url", content: "https://someonenear.com/docs/medication" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/medication" }],
   }),
   component: Page,
 });

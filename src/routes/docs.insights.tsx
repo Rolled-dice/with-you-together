@@ -4,14 +4,18 @@ import { DocHeader, DocSection, Callout, MiniFaq, TryItNow } from "@/components/
 export const Route = createFileRoute("/docs/insights")({
   head: () => ({
     meta: [
-      { title: "Insights | SomeoneNear Docs" },
+      { title: "Mood Insights & Wellbeing Trends | SomeoneNear Docs" },
       {
         name: "description",
-        content: "See gentle patterns in your mood over time, for your eyes only.",
+        content: "Understand weekly mood trends, reflection logs, and gentle family wellness indicators over time.",
       },
-      { property: "og:title", content: "Insights | SomeoneNear Docs" },
-      { property: "og:description", content: "Gentle mood patterns over time." },
+      { property: "og:title", content: "Mood Insights & Wellbeing Trends | SomeoneNear Docs" },
+      { property: "og:description", content: "Gentle mood patterns and private wellness reflections over time." },
+      { property: "og:url", content: "https://someonenear.com/docs/insights" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/insights" }],
   }),
   component: Page,
 });

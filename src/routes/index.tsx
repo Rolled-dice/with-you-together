@@ -5,16 +5,29 @@ import { PrototypeLanding } from "@/components/prototype/landing";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Warm Family Presence | SomeoneNear" },
+      { title: "SomeoneNear — Warm Family Care, Reminders & AI Companion" },
       {
         name: "description",
         content:
-          "A warm place for your family circle, everyday reminders, private reflection and messages for the moments that matter.",
+          "Stay close across any distance. SomeoneNear provides gentle phone check-in listeners, daily medication reminders, mood insights, and an empathetic AI Companion for elderly family care.",
       },
-      { property: "og:title", content: "Warm Family Presence | SomeoneNear" },
-      { property: "og:description", content: "Stay close to the people and moments that matter." },
+      { property: "og:site_name", content: "SomeoneNear" },
+      { property: "og:title", content: "SomeoneNear — Warm Family Care, Reminders & AI Companion" },
+      {
+        property: "og:description",
+        content:
+          "Stay close across any distance. SomeoneNear provides gentle phone check-in listeners, daily medication reminders, mood insights, and an empathetic AI Companion for elderly family care.",
+      },
       { property: "og:image", content: "https://someonenear.com/logo.png" },
       { property: "og:url", content: "https://someonenear.com/" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "SomeoneNear — Warm Family Care, Reminders & AI Companion" },
+      {
+        name: "twitter:description",
+        content:
+          "Stay close across any distance. SomeoneNear provides gentle phone check-in listeners, daily medication reminders, mood insights, and an empathetic AI Companion for elderly family care.",
+      },
       { name: "twitter:image", content: "https://someonenear.com/logo.png" },
     ],
     links: [

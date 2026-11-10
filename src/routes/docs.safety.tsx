@@ -4,11 +4,15 @@ import { DocHeader, DocSection, Callout, MiniFaq } from "@/components/docs/docs-
 export const Route = createFileRoute("/docs/safety")({
   head: () => ({
     meta: [
-      { title: "Safety | SomeoneNear Docs" },
-      { name: "description", content: "How to get help fast, and what SomeoneNear is not." },
-      { property: "og:title", content: "Safety | SomeoneNear Docs" },
-      { property: "og:description", content: "Crisis resources and safety guidance." },
+      { title: "Safety, Crisis Helplines & Emergency Support | SomeoneNear Docs" },
+      { name: "description", content: "How to get emergency help fast, crisis helplines, grounding exercises, and safety resources supported by SomeoneNear." },
+      { property: "og:title", content: "Safety, Crisis Helplines & Emergency Support | SomeoneNear Docs" },
+      { property: "og:description", content: "Crisis resources, emergency helpline contacts, and safety guidance." },
+      { property: "og:url", content: "https://someonenear.com/docs/safety" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/safety" }],
   }),
   component: Page,
 });

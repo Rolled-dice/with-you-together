@@ -3,7 +3,25 @@ import { DocHeader, DocSection } from "@/components/docs/docs-shell";
 import { LaunchPricing } from "@/components/prototype/launch-pricing";
 import { PLAN_DISPLAY } from "@/lib/currency";
 export const Route = createFileRoute("/docs/billing")({
-  head: () => ({ meta: [{ title: "Membership | SomeoneNear Docs" }] }),
+  head: () => ({
+    meta: [
+      { title: "Membership Plans & Pricing | SomeoneNear Docs" },
+      {
+        name: "description",
+        content:
+          "Explore SomeoneNear Care and Care Plus plans, pricing in USD and INR, 7-day free trial, and billing management.",
+      },
+      { property: "og:title", content: "Membership Plans & Pricing | SomeoneNear Docs" },
+      {
+        property: "og:description",
+        content: "Explore SomeoneNear Care and Care Plus plans, pricing, free trial, and billing management.",
+      },
+      { property: "og:url", content: "https://someonenear.com/docs/billing" },
+      { property: "og:image", content: "https://someonenear.com/logo.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://someonenear.com/docs/billing" }],
+  }),
   component: Page,
 });
 function Page() {
