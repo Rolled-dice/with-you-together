@@ -8,11 +8,11 @@
   "background_color": "#F7F0E5",
   "theme_color": "#102F50",
   "icons": [
-    { "src": "/favicon.svg?v=12", "type": "image/svg+xml" },
-    { "src": "/favicon-32.png?v=12", "sizes": "32x32", "type": "image/png" },
-    { "src": "/favicon-64.png?v=12", "sizes": "64x64", "type": "image/png" },
-    { "src": "/apple-touch-icon.png?v=12", "sizes": "180x180", "type": "image/png" },
-    { "src": "/logo-mark.png?v=12", "sizes": "256x256", "type": "image/png" },
-    { "src": "/logo.png?v=12", "sizes": "640x640", "type": "image/png" }
+    { "src": "/favicon.svg?v=15", "type": "image/svg+xml" },
+    { "src": "/favicon-32.png?v=15", "sizes": "32x32", "type": "image/png" },
+    { "src": "/favicon-64.png?v=15", "sizes": "64x64", "type": "image/png" },
+    { "src": "/apple-touch-icon.png?v=15", "sizes": "180x180", "type": "image/png" },
+    { "src": "/logo-mark.png?v=15", "sizes": "256x256", "type": "image/png" },
+    { "src": "/logo.png?v=15", "sizes": "640x640", "type": "image/png" }
   ]
 }
