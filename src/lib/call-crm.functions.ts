@@ -16,16 +16,18 @@ export const listCallQueue = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
     const [{ data: bookings, error }, { data: agents }, { data: flags }] = await Promise.all([
-      context.supabase
+      db
         .from("listener_bookings")
         .select(
           "id, user_id, requested_at, duration_minutes, note, status, crm_state, sla_deadline, agent_id, contact_phone, listeners(name)",
         )
         .order("requested_at", { ascending: true })
         .limit(500),
-      context.supabase.from("call_agents").select("id, name"),
-      context.supabase.from("call_flags").select("booking_id").eq("resolved", false),
+      db.from("call_agents").select("id, name"),
+      db.from("call_flags").select("booking_id").eq("resolved", false),
     ]);
     if (error) throw new Error(error.message);
 
@@ -41,8 +43,7 @@ export const listCallQueue = createServerFn({ method: "GET" })
     const userIds = Array.from(new Set(((bookings ?? []) as any[]).map((b) => b.user_id)));
     const profilePhone = new Map<string, string | null>();
     if (userIds.length > 0) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: profiles } = await supabaseAdmin.from("profiles").select("id, phone").in("id", userIds);
+      const { data: profiles } = await db.from("profiles").select("id, phone").in("id", userIds);
       for (const p of (profiles ?? []) as { id: string; phone: string | null }[]) {
         profilePhone.set(p.id, p.phone);
       }
@@ -83,7 +84,9 @@ export const setBookingContactPhone = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { error } = await db
       .from("listener_bookings")
       .update({ contact_phone: data.contact_phone })
       .eq("id", data.id);
@@ -98,7 +101,9 @@ export const listCallAgents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { data, error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { data, error } = await db
       .from("call_agents")
       .select("id, name, email, phone, timezone, skills, work_start, work_end, max_concurrent, is_active")
       .order("name");
@@ -126,6 +131,8 @@ export const upsertCallAgent = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
     const { id, ...fields } = data;
     const payload = {
       ...fields,
@@ -133,11 +140,11 @@ export const upsertCallAgent = createServerFn({ method: "POST" })
       phone: fields.phone ?? null,
     };
     if (id) {
-      const { error } = await context.supabase.from("call_agents").update(payload).eq("id", id);
+      const { error } = await db.from("call_agents").update(payload).eq("id", id);
       if (error) throw new Error(error.message);
       return { ok: true, id };
     }
-    const { data: inserted, error } = await context.supabase.from("call_agents").insert(payload).select("id").single();
+    const { data: inserted, error } = await db.from("call_agents").insert(payload).select("id").single();
     if (error) throw new Error(error.message);
     return { ok: true, id: inserted?.id as string };
   });
@@ -147,7 +154,9 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { data: booking, error: berr } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { data: booking, error: berr } = await db
       .from("listener_bookings")
       .select("id, requested_at, note, crm_state")
       .eq("id", data.id)
@@ -158,14 +167,7 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
     const startsAt = new Date(booking.requested_at);
     const tooLate = startsAt.getTime() - Date.now() < 2 * 60 * 60 * 1000;
 
-    // const { data: agentRows, error: aerr } = await context.supabase
-    //   .from("call_agents")
-    //   .select(
-    //     "id, name, email, phone, timezone, skills, work_start, work_end, max_concurrent, is_active",
-    //   );
-    // if (aerr) throw new Error(aerr.message);
-
-    const { data: presenceRows, error: presenceError } = await context.supabase
+    const { data: presenceRows, error: presenceError } = await db
       .from("agent_presence")
       .select("agent_id, state")
       .eq("state", "available");
@@ -181,7 +183,7 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
       };
     }
 
-    const { data: agentRows, error: aerr } = await context.supabase
+    const { data: agentRows, error: aerr } = await db
       .from("call_agents")
       .select("id, name, email, phone, timezone, skills, work_start, work_end, max_concurrent, is_active")
       .eq("is_active", true)
@@ -189,7 +191,7 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
 
     if (aerr) throw new Error(aerr.message);
 
-    const { data: openBookings } = await context.supabase
+    const { data: openBookings } = await db
       .from("listener_bookings")
       .select("agent_id, requested_at, crm_state")
       .in("crm_state", ["assigned", "confirmed", "in_call"]);
@@ -212,8 +214,8 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
     });
 
     if (ranked.length === 0) {
-      await context.supabase.from("listener_bookings").update({ crm_state: "escalated" }).eq("id", data.id);
-      await context.supabase.from("call_flags").insert({
+      await db.from("listener_bookings").update({ crm_state: "escalated" }).eq("id", data.id);
+      await db.from("call_flags").insert({
         booking_id: data.id,
         kind: "other",
         severity: tooLate ? "urgent" : "high",
@@ -227,7 +229,7 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
     }
 
     const winner = ranked[0];
-    const { error: uerr } = await context.supabase
+    const { error: uerr } = await db
       .from("listener_bookings")
       .update({
         agent_id: winner.agent.id,
@@ -242,7 +244,7 @@ export const autoAssignBooking = createServerFn({ method: "POST" })
       reasons: winner.reasons,
     });
     if (tooLate) {
-      await context.supabase.from("call_flags").insert({
+      await db.from("call_flags").insert({
         booking_id: data.id,
         kind: "sla_breach",
         severity: "high",
@@ -263,7 +265,9 @@ export const assignBookingAgent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid(), agent_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { error } = await db
       .from("listener_bookings")
       .update({ agent_id: data.agent_id, crm_state: "assigned" })
       .eq("id", data.id);
@@ -277,7 +281,9 @@ export const setBookingCrmState = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid(), crm_state: z.enum(CRM_STATES) }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { error } = await db
       .from("listener_bookings")
       .update({ crm_state: data.crm_state })
       .eq("id", data.id);
@@ -290,7 +296,9 @@ export const listCallFlags = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { data, error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { data, error } = await db
       .from("call_flags")
       .select("id, booking_id, kind, severity, note, resolved, created_at")
       .order("created_at", { ascending: false })
@@ -313,7 +321,9 @@ export const raiseCallFlag = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase.from("call_flags").insert({
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { error } = await db.from("call_flags").insert({
       booking_id: data.booking_id,
       kind: data.kind,
       severity: data.severity,
@@ -330,7 +340,9 @@ export const resolveCallFlag = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase.from("call_flags").update({ resolved: true }).eq("id", data.id);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin || context.supabase;
+    const { error } = await db.from("call_flags").update({ resolved: true }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

@@ -65,6 +65,17 @@ const approvedBackendFiles = new Set([
   "src/routes/api/public/hooks/send-later.ts",
   "src/routes/api/public/hooks/call-sla.ts",
   "src/routes/api/public/hooks/calendar-sync.ts",
+  "src/lib/call-console.server.ts",
+  "src/lib/call-crm.functions.ts",
+  "src/lib/dodo.config.server.ts",
+  "src/lib/dodo.server.ts",
+  "src/lib/listeners.functions.ts",
+  "src/lib/profile.functions.ts",
+  "src/lib/profile.server.ts",
+  "src/lib/telnyx-calls.server.ts",
+  "src/routes/api/public/payments/-dodo-webhook.test.ts",
+  "src/routes/api/public/payments/dodo-webhook.ts",
+  "supabase/migrations/20261111190000_live_entitlements_and_profile_write_guard.sql",
 ]);
 const forbidden = [...new Set([...changed, ...untracked])].filter(
   (file) =>
