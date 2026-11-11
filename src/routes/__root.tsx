@@ -128,14 +128,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "stylesheet", href: prototypeCss },
-      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "manifest", href: "/manifest.webmanifest?v=16" },
       // Brand squircle icons
-      { rel: "icon", href: "/favicon.svg?v=15", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon-32.png?v=15", sizes: "32x32", type: "image/png" },
-      { rel: "icon", href: "/favicon-64.png?v=15", sizes: "64x64", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=15", sizes: "180x180" },
-      { rel: "shortcut icon", href: "/favicon.ico?v=15" },
-      { rel: "icon", href: "/favicon.ico?v=15", sizes: "any" },
+      { rel: "icon", href: "/favicon.svg?v=16", type: "image/svg+xml" },
+      { rel: "icon", href: "/icon-192.png?v=16", sizes: "192x192", type: "image/png" },
+      { rel: "icon", href: "/favicon-32.png?v=16", sizes: "32x32", type: "image/png" },
+      { rel: "icon", href: "/favicon-64.png?v=16", sizes: "64x64", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=16", sizes: "180x180" },
+      { rel: "shortcut icon", href: "/favicon.ico?v=16" },
+      { rel: "icon", href: "/favicon.ico?v=16", sizes: "any" },
       {
         rel: "preload",
         href: "/fonts/figtree.ttf",
@@ -186,14 +187,17 @@ function RootComponent() {
         position="top-center"
         gap={12}
         duration={5000}
+        richColors
+        closeButton
         toastOptions={{
           classNames: {
             toast:
-              "rounded-3xl border border-border bg-surface text-foreground shadow-gentle font-sans",
-            title: "font-display font-medium",
-            description: "text-muted-foreground",
-            actionButton: "rounded-full bg-primary text-primary-foreground",
-            cancelButton: "rounded-full bg-muted text-muted-foreground",
+              "rounded-2xl border border-border/80 bg-surface text-foreground shadow-gentle font-sans backdrop-blur-md animate-in fade-in-50 slide-in-from-top-3 duration-300",
+            title: "font-display font-medium text-sm text-foreground",
+            description: "text-xs text-muted-foreground",
+            actionButton: "rounded-full bg-brand-primary text-primary-foreground font-medium text-xs px-3 py-1 shadow-sm transition hover:opacity-90",
+            cancelButton: "rounded-full bg-muted text-muted-foreground text-xs px-3 py-1",
+            closeButton: "!bg-surface !border-border !text-foreground hover:!bg-muted",
           },
         }}
       />

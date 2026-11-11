@@ -1,3 +1,11 @@
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener("push", (event) => {
   let destination = "/reminders";
   let title = "SomeoneNear";
@@ -49,8 +57,8 @@ self.addEventListener("push", (event) => {
 
   const notification = {
     body,
-    icon: "/favicon-64.png",
-    badge: "/favicon-64.png",
+    icon: "/icon-192.png?v=16",
+    badge: "/favicon-64.png?v=16",
     tag,
     data: { path: destination },
     vibrate: [200, 100, 200],

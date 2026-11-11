@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ringtone } from "@/lib/ringtone";
 
 export type SoftphoneStatus =
   | "idle"
@@ -36,6 +37,17 @@ export function useSoftphone(getToken: () => Promise<{ token: string }>) {
     setSeconds(0);
     const t = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(t);
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "ringing") {
+      ringtone.start();
+    } else {
+      ringtone.stop();
+    }
+    return () => {
+      ringtone.stop();
+    };
   }, [status]);
 
   const connect = useCallback(async () => {

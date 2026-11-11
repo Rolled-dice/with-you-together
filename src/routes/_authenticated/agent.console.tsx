@@ -559,9 +559,18 @@ function SoftphoneDock({
   return (
     <Card className="rounded-3xl border-border bg-surface shadow-gentle">
       <CardContent className="flex flex-wrap items-center gap-3 p-4">
-        <Badge variant={phone.status === "on_call" ? "default" : "secondary"}>
+        <Badge variant={phone.status === "on_call" ? "default" : phone.status === "ringing" ? "outline" : "secondary"} className={phone.status === "ringing" ? "border-brand-primary text-brand-primary font-medium animate-pulse" : ""}>
           {label[phone.status]}
         </Badge>
+        {phone.status === "ringing" && (
+          <div className="flex items-center gap-2 text-xs font-medium text-brand-primary">
+            <span className="relative flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-primary opacity-75"></span>
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-brand-primary"></span>
+            </span>
+            <span>Calling member… ringing…</span>
+          </div>
+        )}
         {phone.status === "on_call" && (
           <span className="text-sm tabular-nums text-muted-foreground">
             {Math.floor(phone.seconds / 60)}:{String(phone.seconds % 60).padStart(2, "0")}

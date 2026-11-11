@@ -1,18 +1,23 @@
 {
+  "id": "someonenear-pwa-v16",
   "name": "SomeoneNear",
   "short_name": "SomeoneNear",
   "description": "A warm space for family, reflection and everyday care.",
-  "start_url": "/",
+  "start_url": "/?v=16",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F7F0E5",
   "theme_color": "#102F50",
   "icons": [
-    { "src": "/favicon.svg?v=15", "type": "image/svg+xml" },
-    { "src": "/favicon-32.png?v=15", "sizes": "32x32", "type": "image/png" },
-    { "src": "/favicon-64.png?v=15", "sizes": "64x64", "type": "image/png" },
-    { "src": "/apple-touch-icon.png?v=15", "sizes": "180x180", "type": "image/png" },
-    { "src": "/logo-mark.png?v=15", "sizes": "256x256", "type": "image/png" },
-    { "src": "/logo.png?v=15", "sizes": "640x640", "type": "image/png" }
+    { "src": "/icon-192.png?v=16", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192-maskable.png?v=16", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512.png?v=16", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512-maskable.png?v=16", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/apple-touch-icon.png?v=16", "sizes": "180x180", "type": "image/png" },
+    { "src": "/logo-mark.png?v=16", "sizes": "256x256", "type": "image/png" },
+    { "src": "/logo.png?v=16", "sizes": "512x512", "type": "image/png" },
+    { "src": "/favicon-64.png?v=16", "sizes": "64x64", "type": "image/png" },
+    { "src": "/favicon-32.png?v=16", "sizes": "32x32", "type": "image/png" },
+    { "src": "/favicon.svg?v=16", "type": "image/svg+xml" }
   ]
 }
