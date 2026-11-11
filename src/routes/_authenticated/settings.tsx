@@ -46,6 +46,7 @@ import { WebhookEventsCard } from "@/components/webhook-events-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
+import { hasSubscriptionAccess } from "@/lib/subscription-access";
 import {
   PLAN_DISPLAY,
   currencyForCountry,
@@ -88,7 +89,7 @@ function SettingsPage() {
     queryFn: () => profileFn(),
   });
 
-  const { data: subscription, refetch: refetchSub } = useQuery({
+  const { data: subscription, isError: subscriptionError, refetch: refetchSub } = useQuery({
     queryKey: ["my-dodo-subscription"],
     queryFn: () => dodoSubFn(),
   });
@@ -149,7 +150,9 @@ function SettingsPage() {
           care_intent: intent || null,
           preferred_language: language,
           preferred_currency: currency,
-          phone: phone.trim() || null,
+          ...(phone.replace(/\D/g, "") === (profile?.phone ?? "").replace(/\D/g, "")
+            ? {}
+            : { phone: phone.trim() || null }),
         },
       }),
     onSuccess: () => {
@@ -186,10 +189,10 @@ function SettingsPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  if (isError)
+  if (isError || subscriptionError)
     return (
       <AppShell>
-        <DataError retry={() => void retryProfile()} />
+        <DataError retry={() => { void retryProfile(); void refetchSub(); }} />
       </AppShell>
     );
   if (isLoading || !profile) {
@@ -204,11 +207,7 @@ function SettingsPage() {
     );
   }
 
-  const currentTier: TierId = (profile.care_tier as TierId) ?? "free";
-  const hasPaidSub =
-    !!subscription &&
-    subscription.status !== "canceled" &&
-    subscription.status !== "incomplete_expired";
+  const hasPaidSub = !!subscription && hasSubscriptionAccess(subscription);
   // Infer the active plan from the live subscription price when the profile
   // hasn't synced yet, prevents "no card looks active" state.
   const subTier: TierId | null = (() => {
@@ -217,7 +216,7 @@ function SettingsPage() {
     if (p.startsWith("care")) return "care";
     return null;
   })();
-  const activeTier: TierId = currentTier !== "free" ? currentTier : (subTier ?? "free");
+  const activeTier: TierId = hasPaidSub ? (subTier ?? "free") : "free";
   const cancelsAt =
     subscription?.cancel_at_period_end && subscription.current_period_end
       ? new Date(subscription.current_period_end as string).toLocaleDateString()
@@ -478,7 +477,8 @@ function SettingsPage() {
                   autoComplete="tel"
                   className="rounded-brand"
                 />
-                {profile.phone_verified && phone === (profile.phone ?? "") ? (
+                {profile.phone_verified &&
+                phone.replace(/\D/g, "") === (profile.phone ?? "").replace(/\D/g, "") ? (
                   <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
                 ) : (
                   <>

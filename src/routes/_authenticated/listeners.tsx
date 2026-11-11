@@ -41,6 +41,7 @@ import {
 } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { DataError } from "@/components/feedback/load-state";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { displayTime, localInput } from "@/lib/frontend/time";
@@ -669,6 +670,8 @@ function ListenersPage() {
             <Skeleton className="h-24 w-full rounded-brand" />
             <Skeleton className="h-24 w-full rounded-brand" />
           </div>
+        ) : bookings.isError ? (
+          <DataError retry={() => void bookings.refetch()} />
         ) : upcoming.length === 0 && past.length === 0 ? (
           <EmptyState
             icon={<CalendarDotIcon className="h-6 w-6" />}
@@ -742,6 +745,7 @@ type Booking = {
   duration_minutes: number;
   note: string | null;
   status: string;
+  crm_state: string | null;
   listeners: { name: string } | null;
 };
 
@@ -788,7 +792,7 @@ function BookingRow({
               </Badge>
             )}
             <Badge variant="outline" className="rounded-full text-[10px] capitalize">
-              {booking.status}
+              {booking.crm_state === "escalated" ? "Needs attention" : booking.status}
             </Badge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">

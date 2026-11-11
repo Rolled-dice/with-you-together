@@ -82,10 +82,11 @@ describe("verifyDodoWebhook", () => {
 describe("mapDodoStatus", () => {
   it("maps Dodo lifecycle states to the existing entitlement vocabulary", () => {
     expect(mapDodoStatus("active")).toBe("active");
-    expect(mapDodoStatus("on_hold")).toBe("past_due");
+    expect(mapDodoStatus("on_hold")).toBe("on_hold");
+    expect(mapDodoStatus("paused")).toBe("paused");
     expect(mapDodoStatus("failed")).toBe("incomplete_expired");
     expect(mapDodoStatus("cancelled")).toBe("canceled");
-    expect(mapDodoStatus("expired")).toBe("canceled");
+    expect(mapDodoStatus("expired")).toBe("expired");
     expect(mapDodoStatus("trialing")).toBe("trialing");
     expect(mapDodoStatus("pending")).toBe("incomplete");
     expect(mapDodoStatus("created")).toBe("incomplete");

@@ -14,7 +14,8 @@ export function SessionLifecycle() {
     // Hydrate the identity explicitly. Some browsers can miss the initial
     // auth event when the listener is registered during route hydration.
     void supabase.auth.getSession().then(({ data }) => {
-      if (!disposed) setIdentity(data.session?.user.id ?? null);
+      // A newer auth event may have arrived while this initial read was pending.
+      if (!disposed && !getIdentity().initialized) setIdentity(data.session?.user.id ?? null);
     });
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (disposed) return;

@@ -6,6 +6,7 @@ import {
   type DodoEnvironment,
   type DodoPriceId,
 } from "@/lib/dodo.config.server";
+import { currentSubscription } from "@/lib/subscription-access";
 
 export type DodoEnv = DodoEnvironment;
 
@@ -102,6 +103,16 @@ export async function cancelDodoSubscription(params: {
   });
 }
 
+export async function retrieveDodoSubscription(
+  environment: DodoEnvironment,
+  subscriptionId: string,
+): Promise<Record<string, unknown>> {
+  return dodoFetch<Record<string, unknown>>(
+    environment,
+    `/subscriptions/${encodeURIComponent(subscriptionId)}`,
+  );
+}
+
 function base64ToBytes(value: string): Uint8Array {
   const binary = atob(value.replace(/-/g, "+").replace(/_/g, "/"));
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
@@ -182,12 +193,17 @@ export function mapDodoStatus(status: string): string {
     case "active":
       return "active";
     case "on_hold":
+      return "on_hold";
+    case "paused":
+      return "paused";
+    case "past_due":
       return "past_due";
     case "failed":
       return "incomplete_expired";
     case "cancelled":
-    case "expired":
       return "canceled";
+    case "expired":
+      return "expired";
     case "trialing":
       return "trialing";
     case "pending":
@@ -233,20 +249,21 @@ export async function cancelDodoSubscriptionForUser(
 ): Promise<{ ok: true } | { error: string }> {
   try {
     const environment = getDodoEnvironment();
-    const { data: subscription, error } = await supabase
+    const { data: subscriptions, error } = await supabase
       .from("subscriptions")
-      .select("dodo_subscription_id")
+      .select("dodo_subscription_id, status, price_id, current_period_end, created_at")
       .eq("user_id", userId)
       .eq("provider", "dodo")
       .eq("environment", environment)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("created_at", { ascending: false });
     if (error) return { error: error.message };
 
+    const subscription = currentSubscription(subscriptions ?? []);
     const subscriptionId = (subscription as { dodo_subscription_id?: string } | null)
       ?.dodo_subscription_id;
-    if (!subscriptionId) return { error: "No Dodo subscription found" };
+    if (!subscriptionId || !subscription || !["active", "trialing", "past_due"].includes(subscription.status)) {
+      return { error: "No active Dodo subscription found" };
+    }
 
     await cancelDodoSubscription({ env: environment, subscriptionId, atPeriodEnd: true });
     return { ok: true };
@@ -259,14 +276,12 @@ export async function getDodoSubscriptionForUser(supabase: any, userId: string) 
   const environment = getDodoEnvironment();
   const { data, error } = await supabase
     .from("subscriptions")
-    .select("status, price_id, current_period_end, cancel_at_period_end, provider")
+    .select("status, price_id, current_period_end, cancel_at_period_end, provider, created_at")
     .eq("user_id", userId)
     .eq("provider", "dodo")
     .eq("environment", environment)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order("created_at", { ascending: false });
 
-  if (error) return { error: error.message };
-  return data;
+  if (error) throw new Error(`Unable to load your subscription: ${error.message}`);
+  return currentSubscription(data ?? []);
 }

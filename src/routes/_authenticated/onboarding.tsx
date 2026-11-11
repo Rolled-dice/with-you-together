@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { HeartIcon, SpinnerGapIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { updateMyProfile } from "@/lib/profile.functions";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
@@ -22,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
 
 function OnboardingPage() {
   const navigate = useNavigate();
+  const updateProfile = useServerFn(updateMyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [displayName, setDisplayName] = useState("");
@@ -74,22 +77,21 @@ function OnboardingPage() {
       setSaving(false);
       return;
     }
-    const { error } = await supabase
-      .from("profiles")
-      .update({
+    try {
+      await updateProfile({ data: {
         display_name: displayName.trim(),
         pronouns: pronouns.trim() || null,
         timezone,
         care_intent: careIntent.trim() || null,
         phone: trimmedPhone || null,
         onboarding_completed: true,
-      })
-      .eq("id", userData.user.id);
-    setSaving(false);
-    if (error) {
-      toast.error(error.message);
+      } });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to save your profile.");
+      setSaving(false);
       return;
     }
+    setSaving(false);
     toast.success("You're all set. Welcome to SomeoneNear.");
     navigate({ to: "/dashboard" });
   }

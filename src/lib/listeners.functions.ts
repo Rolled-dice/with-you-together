@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { assertRescheduleAllowed } from "@/lib/listener-booking-rules";
 
 export const listListeners = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -20,7 +21,7 @@ export const listMyBookings = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("listener_bookings")
       .select(
-        "id, listener_id, requested_at, duration_minutes, note, status, listeners(name)",
+        "id, listener_id, requested_at, duration_minutes, note, status, crm_state, listeners(name)",
       )
       .eq("user_id", context.userId)
       .order("requested_at", { ascending: false });
@@ -33,7 +34,7 @@ export const listMyBookings = createServerFn({ method: "GET" })
  * - Every session is booked in advance.
  * - The user picks preferred day, preferred time, and time zone.
  * - The system auto-assigns any active in-house listener with the lightest load.
- * - Reschedules within 2h of the scheduled time are refused (session marked used).
+ * - Reschedules within 2h of the scheduled time are refused without changing the booking.
  */
 const BookingInput = z.object({
   preferred_day: z.string().min(4), // YYYY-MM-DD
@@ -99,11 +100,12 @@ export const requestBooking = createServerFn({ method: "POST" })
 
 
     // A listener calls the member's phone, so the number must be verified first.
-    const { data: me } = await context.supabase
+    const { data: me, error: profileError } = await context.supabase
       .from("profiles")
       .select("phone, phone_verified")
       .eq("id", context.userId)
       .single();
+    if (profileError) throw new Error(`Unable to check your verified number: ${profileError.message}`);
     if (!me?.phone) {
       return {
         ok: false as const,
@@ -140,10 +142,11 @@ export const requestBooking = createServerFn({ method: "POST" })
     }
 
     // Fetch current queue counts and pick the smallest.
-    const { data: existing } = await context.supabase
+    const { data: existing, error: queueError } = await context.supabase
       .from("listener_bookings")
       .select("listener_id, status")
       .in("status", ["requested", "confirmed"]);
+    if (queueError) throw new Error(`Unable to check listener availability: ${queueError.message}`);
     const counts = new Map<string, number>();
     for (const l of listeners) counts.set(l.id, 0);
     for (const b of existing ?? []) {
@@ -202,21 +205,8 @@ export const rescheduleBooking = createServerFn({ method: "POST" })
       .single();
     if (gerr) throw new Error(gerr.message);
     if (!booking) throw new Error("Booking not found.");
-    const startsAt = new Date(booking.requested_at).getTime();
-    const now = Date.now();
-    const twoHoursMs = 2 * 60 * 60 * 1000;
-    if (startsAt - now < twoHoursMs) {
-      // Mark original as used so ops can reallocate the freed slot.
-      await context.supabase
-        .from("listener_bookings")
-        .update({ status: "completed", note: "[USED_BY_LATE_RESCHEDULE]" })
-        .eq("id", data.id)
-        .eq("user_id", context.userId);
-      throw new Error(
-        "Reschedules must be made at least 2 hours before your session. This session has been marked used so our team can reallocate the slot.",
-      );
-    }
     const newAt = combineToUtc(data.preferred_day, data.preferred_time, data.time_zone);
+    assertRescheduleAllowed(booking.status, booking.requested_at, newAt);
     const { error } = await context.supabase
       .from("listener_bookings")
       .update({ requested_at: newAt })

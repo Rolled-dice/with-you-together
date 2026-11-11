@@ -11,5 +11,5 @@ export function refreshServerEnvironment(mode: string, root: string) {
   state.__someoneNearViteEnv = new Map(
     Object.entries(loaded).filter(([name]) => process.env[name] === undefined),
   );
-  Object.assign(process.env, loaded);
+  for (const [name, value] of state.__someoneNearViteEnv) process.env[name] = value;
 }

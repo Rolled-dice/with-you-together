@@ -29,7 +29,8 @@ export async function listMyQueue(context: Ctx) {
     .from("listener_bookings")
     .select("id, user_id, requested_at, duration_minutes, note, status, crm_state, sla_deadline")
     .eq("agent_id", agent.id)
-    .in("crm_state", ["assigned", "confirmed", "in_call"])
+    .in("crm_state", ["assigned", "confirmed", "in_call", "escalated"])
+    .in("status", ["requested", "confirmed"])
     .order("requested_at", { ascending: true })
     .limit(100);
   if (error) throw new Error(error.message);

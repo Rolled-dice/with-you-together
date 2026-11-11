@@ -25,6 +25,12 @@ function requireEnv(name: string): string {
 
 export function getDodoEnvironment(): DodoEnvironment {
   const value = serverEnvironment().DODO_PAYMENTS_ENV?.trim().toLowerCase() || "test";
+  const browserMode = import.meta.env.PROD
+    ? import.meta.env.VITE_DODO_MODE?.trim().toLowerCase()
+    : null;
+  if (browserMode && value !== browserMode) {
+    throw new Error("Dodo payment mode differs between the deployed browser and server.");
+  }
   if (value === "test" || value === "live") return value;
   throw new Error("DODO_PAYMENTS_ENV must be either 'test' or 'live'");
 }

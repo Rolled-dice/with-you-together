@@ -15,6 +15,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     auth: {
+      getSession: () => Promise.resolve({ data: { session: null } }),
       onAuthStateChange: (callback: typeof mocked.callback) => {
         mocked.callback = callback;
         return { data: { subscription: { unsubscribe: mocked.unsubscribe } } };

@@ -319,6 +319,12 @@ export async function handleTelnyxEvent(payload: any) {
       .maybeSingle();
     if (cfg && agentLeg?.call_control_id && p.call_control_id) {
       await bridge(cfg, p.call_control_id, agentLeg.call_control_id);
+      const { error: bridgeEventError } = await supabaseAdmin.from("call_events").insert({
+        booking_id: bookingId,
+        event_type: "call.bridged",
+        detail: { member_leg: p.call_control_id, agent_leg: agentLeg.call_control_id },
+      });
+      if (bridgeEventError) throw new Error(bridgeEventError.message);
       try {
         await startRecording(cfg, p.call_control_id);
       } catch (e) {
@@ -358,16 +364,38 @@ export async function handleTelnyxEvent(payload: any) {
       }
     }
 
-    const { data: open } = await supabaseAdmin
+    const { data: open, error: openLegsError } = await supabaseAdmin
       .from("call_legs")
       .select("id")
       .eq("booking_id", bookingId)
       .is("ended_at", null);
-    if (!open || open.length === 0) {
-      await supabaseAdmin
+    if (openLegsError) throw new Error(openLegsError.message);
+    if (open.length === 0) {
+      const { data: bridged, error: bridgeReadError } = await supabaseAdmin
+        .from("call_events")
+        .select("id")
+        .eq("booking_id", bookingId)
+        .eq("event_type", "call.bridged")
+        .limit(1);
+      if (bridgeReadError) throw new Error(bridgeReadError.message);
+      const connected = Boolean(bridged?.length);
+      const { error: bookingUpdateError } = await supabaseAdmin
         .from("listener_bookings")
-        .update({ call_ended_at: now, crm_state: "completed", status: "completed" })
-        .eq("id", bookingId);
+        .update(
+          connected
+            ? { call_ended_at: now, crm_state: "completed", status: "completed" }
+            : { call_ended_at: now, crm_state: "escalated", status: "confirmed" },
+        )
+        .eq("id", bookingId)
+        .in("status", ["requested", "confirmed"]);
+      if (bookingUpdateError) throw new Error(bookingUpdateError.message);
+      if (!connected) {
+        await supabaseAdmin.from("call_events").insert({
+          booking_id: bookingId,
+          event_type: "call.failed_before_bridge",
+          detail: { reason: "Call ended before both parties connected" },
+        });
+      }
     }
     return { ok: true };
   }

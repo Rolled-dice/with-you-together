@@ -6,7 +6,7 @@ import {
   getDodoWebhookSecret,
   type DodoEnvironment,
 } from "@/lib/dodo.config.server";
-import { mapDodoStatus, verifyDodoWebhook } from "@/lib/dodo.server";
+import { mapDodoStatus, retrieveDodoSubscription, verifyDodoWebhook } from "@/lib/dodo.server";
 
 type DodoResource = Record<string, unknown>;
 
@@ -92,7 +92,15 @@ async function recordWebhook(
   } as never);
 
   if (!error) return true;
-  if (`${error.message}`.toLowerCase().includes("duplicate")) return false;
+  if (error.code === "23505") {
+    const { data: existing, error: readError } = await supabase
+      .from("stripe_webhook_events")
+      .select("processed")
+      .eq("stripe_event_id", eventId)
+      .single();
+    if (readError) throw new Error(`Dodo webhook ledger read failed: ${readError.message}`);
+    return !existing.processed;
+  }
   throw new Error(`Dodo webhook ledger insert failed: ${error.message}`);
 }
 
@@ -110,7 +118,7 @@ async function markProcessed(
     } as never)
     .eq("stripe_event_id", eventId);
 
-  if (updateError) console.error("Dodo webhook ledger update failed:", updateError.message);
+  if (updateError) throw new Error(`Dodo webhook ledger update failed: ${updateError.message}`);
 }
 
 async function logBillingEvent(
@@ -126,7 +134,7 @@ async function logBillingEvent(
     resource: DodoResource;
   },
 ) {
-  const { error } = await supabase.from("billing_events").insert({
+  const { error } = await supabase.from("billing_events").upsert({
     user_id: row.userId,
     event_type: row.eventType,
     stripe_event_id: row.eventId,
@@ -138,7 +146,7 @@ async function logBillingEvent(
     status: row.status,
     environment: row.environment,
     metadata: row.resource as never,
-  } as never);
+  } as never, { onConflict: "stripe_event_id", ignoreDuplicates: true });
   if (error) throw new Error(`Dodo billing event insert failed: ${error.message}`);
 }
 
@@ -149,34 +157,38 @@ async function upsertSubscription(
   eventId: string,
   eventType: string,
 ) {
-  const metadata = metadataFor(resource);
+  const subscriptionId = dodoSubscriptionId(resource);
+  if (!subscriptionId) throw new Error("Dodo subscription event is missing a subscription id");
+  // Webhooks may arrive out of order; read the current provider state before
+  // changing entitlements so an older delivery cannot undo a newer payment.
+  const current = await retrieveDodoSubscription(environment, subscriptionId);
+  const metadata = metadataFor(current);
   const userId = asString(metadata.userId);
   const priceId = asString(metadata.priceId);
-  const subscriptionId = dodoSubscriptionId(resource);
-  if (!userId || !priceId || !subscriptionId) {
+  if (!userId || !priceId) {
     throw new Error("Dodo subscription event is missing required metadata or subscription id");
   }
 
-  const status = mapDodoStatus(asString(resource.status) ?? "");
+  const status = mapDodoStatus(asString(current.status) ?? "");
   const productId =
-    asString(resource.product_id) ??
-    asString(asObject(resource.product).product_id) ??
-    asString(asObject(resource.product).id) ??
+    asString(current.product_id) ??
+    asString(asObject(current.product).product_id) ??
+    asString(asObject(current.product).id) ??
     "";
   const { error } = await supabase.from("subscriptions").upsert(
     {
       user_id: userId,
       provider: "dodo",
       dodo_subscription_id: subscriptionId,
-      dodo_customer_id: dodoCustomerId(resource),
+      dodo_customer_id: dodoCustomerId(current),
       product_id: productId,
       // This must be our internal key, never a Dodo product ID.
       price_id: priceId,
       status,
-      current_period_start: periodDate(resource, "current_period_start"),
+      current_period_start: periodDate(current, "current_period_start"),
       current_period_end:
-        periodDate(resource, "current_period_end") ?? periodDate(resource, "next_billing_date"),
-      cancel_at_period_end: Boolean(resource.cancel_at_next_billing_date),
+        periodDate(current, "current_period_end") ?? periodDate(current, "next_billing_date"),
+      cancel_at_period_end: Boolean(current.cancel_at_next_billing_date),
       environment,
       updated_at: new Date().toISOString(),
     } as never,
@@ -192,8 +204,9 @@ async function upsertSubscription(
     priceId,
     status,
     environment,
-    resource,
+    resource: current,
   });
+  return { userId, priceId };
 }
 
 async function processWebhook(
@@ -206,39 +219,40 @@ async function processWebhook(
   const resource = resourceFor(payload);
   const metadata = metadataFor(resource);
   const userId = asString(metadata.userId);
-  if (!userId) {
-    console.error("Dodo webhook missing metadata.userId; event will not be applied", {
-      eventId,
-      eventType,
-    });
-    throw new Error("Dodo webhook missing metadata.userId");
-  }
 
   switch (eventType) {
     case "subscription.active":
       await upsertSubscription(supabase, resource, environment, eventId, "subscription.updated");
       return;
     case "subscription.renewed":
-      await upsertSubscription(supabase, resource, environment, eventId, "subscription.renewed");
+      {
+      const current = await upsertSubscription(supabase, resource, environment, eventId, "subscription.renewed");
       await logBillingEvent(supabase, {
-        userId,
+        userId: current.userId,
         eventType: "invoice.paid",
         eventId: `${eventId}:invoice`,
         subscriptionId: dodoSubscriptionId(resource),
-        priceId: asString(metadata.priceId) ?? "",
+        priceId: current.priceId,
         status: "active",
         environment,
         resource,
       });
       return;
+      }
     case "subscription.updated":
+    case "subscription.plan_changed":
+    case "subscription.past_due":
     case "subscription.on_hold":
+    case "subscription.paused":
+    case "subscription.unpaused":
     case "subscription.failed":
     case "subscription.cancelled":
+    case "subscription.expired":
       await upsertSubscription(supabase, resource, environment, eventId, "subscription.updated");
       return;
     case "payment.succeeded":
     case "payment.failed":
+      if (!userId) throw new Error("Dodo payment event is missing metadata.userId");
       await logBillingEvent(supabase, {
         userId,
         eventType: eventType === "payment.succeeded" ? "payment.succeeded" : "payment.failed",
@@ -262,7 +276,7 @@ export const Route = createFileRoute("/api/public/payments/dodo-webhook")({
         const requestedEnvironment = new URL(request.url).searchParams.get("env");
         if (requestedEnvironment !== "test" && requestedEnvironment !== "live") {
           console.error("Dodo webhook missing/invalid env:", requestedEnvironment);
-          return Response.json({ received: true, ignored: "invalid env" });
+          return Response.json({ error: "Invalid payment environment" }, { status: 503 });
         }
 
         let environment: DodoEnvironment;
@@ -274,7 +288,7 @@ export const Route = createFileRoute("/api/public/payments/dodo-webhook")({
               requestedEnvironment,
               environment,
             });
-            return Response.json({ received: true, ignored: "environment mismatch" });
+            return Response.json({ error: "Payment environment mismatch" }, { status: 503 });
           }
           webhookSecret = getDodoWebhookSecret(environment);
         } catch (error) {
@@ -302,18 +316,18 @@ export const Route = createFileRoute("/api/public/payments/dodo-webhook")({
           const isNew = await recordWebhook(supabase, payload, environment, eventId, resource);
           if (!isNew) return Response.json({ received: true, duplicate: true });
 
-          try {
-            await processWebhook(supabase, payload, environment, eventId);
-            await markProcessed(supabase, eventId);
-          } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error("Dodo webhook processing failed:", message);
-            await markProcessed(supabase, eventId, message);
-          }
+          await processWebhook(supabase, payload, environment, eventId);
+          await markProcessed(supabase, eventId);
         } catch (error) {
-          // A valid event must not cause retries forever because of a transient
-          // persistence error. The error is logged for operational follow-up.
-          console.error("Dodo webhook infrastructure failure:", error);
+          const message = error instanceof Error ? error.message : String(error);
+          console.error("Dodo webhook processing failed:", message);
+          try {
+            const supabase = getSupabase();
+            await markProcessed(supabase, eventId, message);
+          } catch (ledgerError) {
+            console.error("Dodo webhook failure could not be recorded:", ledgerError);
+          }
+          return Response.json({ error: "Webhook processing failed" }, { status: 503 });
         }
 
         return Response.json({ received: true });

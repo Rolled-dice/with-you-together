@@ -14,7 +14,10 @@ it.each(["default", "granted", "denied"])(
     expect(screen.getByRole("status").textContent).toMatch(
       permission === "default" ? /hasn’t/ : permission === "denied" ? /blocked/ : /allowed/,
     );
-    expect(screen.getByText(/Background push delivery is not available/)).toBeTruthy();
+    expect(screen.getByText(/Updates are always available in your notification inbox/)).toBeTruthy();
+    if (permission === "granted") {
+      expect(screen.getByText(/Background alerts will become available/)).toBeTruthy();
+    }
   },
 );
 it("refreshes revoked permission when returning to the page", () => {

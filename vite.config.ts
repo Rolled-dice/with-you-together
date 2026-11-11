@@ -55,6 +55,17 @@ refreshServerEnvironment(
   process.cwd(),
 );
 
+const serverPaymentMode = process.env.DODO_PAYMENTS_ENV?.trim().toLowerCase();
+const browserPaymentMode = process.env.VITE_DODO_MODE?.trim().toLowerCase();
+if (process.env.NODE_ENV === "production" && (!serverPaymentMode || !browserPaymentMode)) {
+  throw new Error("Dodo payment mode must be configured for both server and browser builds.");
+}
+if (serverPaymentMode && browserPaymentMode && serverPaymentMode !== browserPaymentMode) {
+  throw new Error(
+    `Dodo payment mode mismatch: server=${serverPaymentMode}, browser=${browserPaymentMode}. Both must use the same mode.`,
+  );
+}
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).

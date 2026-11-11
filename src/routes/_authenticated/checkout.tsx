@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -8,6 +10,8 @@ import { createLaunchCheckout } from "@/lib/launch-checkout.functions";
 import { isMarketId, LAUNCH_PLANS, launchPrice, type MarketId } from "@/lib/launch-catalog";
 import { launchTestProductId } from "@/lib/launch-dodo-products";
 import { getLaunchMarket } from "@/lib/launch-market.functions";
+import { getMyDodoSubscription } from "@/lib/dodo.functions";
+import { hasSubscriptionAccess } from "@/lib/subscription-access";
 
 export const Route = createFileRoute("/_authenticated/checkout")({
   validateSearch: (search: Record<string, unknown>) =>
@@ -42,6 +46,13 @@ function CheckoutPage() {
   const terms = LAUNCH_PLANS[plan];
   const paymentStatus = (search.payment_status ?? search.status ?? "").toLowerCase();
   const paymentFailed = ["failed", "cancelled", "canceled", "expired"].includes(paymentStatus);
+  const getSubscription = useServerFn(getMyDodoSubscription);
+  const subscriptionQuery = useQuery({
+    queryKey: ["my-dodo-subscription"],
+    queryFn: () => getSubscription(),
+    refetchInterval: search.completed && !paymentFailed ? 5_000 : false,
+  });
+  const hasMembership = !!subscriptionQuery.data && hasSubscriptionAccess(subscriptionQuery.data);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [voucher, setVoucher] = useState("");
@@ -94,17 +105,24 @@ function CheckoutPage() {
             ? "A payment method is required for the trial. Membership access begins only after a verified Dodo webhook."
             : "A payment method is required for the trial. This sandbox checkout does not activate a live membership."}
         </p>
-        {paymentFailed ? (
+        {hasMembership ? (
+          <p role="status">Your membership is active. You can view your plan in Settings.</p>
+        ) : paymentFailed ? (
           <p role="alert" className="text-destructive">
             The payment was not completed. No membership was activated and no charge was confirmed.
             You can try checkout again below.
           </p>
         ) : search.completed ? (
           <p role="status">
-            You’ve returned from Dodo checkout. Membership activation is confirmed only after the
-            payment webhook is received.
+            We’re confirming your checkout. Your plan will appear here when Dodo confirms it.
+            Please wait on this page or check Settings shortly.
           </p>
         ) : null}
+        {subscriptionQuery.isError && (
+          <p role="alert" className="text-destructive">
+            We couldn’t check your membership right now. Please try again before starting another checkout.
+          </p>
+        )}
         {!available && (
           <p role="status">
             Test checkout is not available for this market yet. Your requested prices have been
@@ -122,11 +140,15 @@ function CheckoutPage() {
             <Input id="checkout-voucher" value={voucher} onChange={(event) => setVoucher(event.target.value)} maxLength={80} disabled={busy} autoComplete="off" />
           </div>
         )}
-        <Button onClick={checkout} disabled={busy || !available}>
-          {busy
-            ? `Opening Dodo ${dodoMode} checkout…`
-            : `Continue to Dodo ${dodoMode} checkout`}
-        </Button>
+        {subscriptionQuery.isError ? (
+          <Button variant="outline" onClick={() => void subscriptionQuery.refetch()}>Check membership again</Button>
+        ) : !hasMembership && (!search.completed || paymentFailed) ? (
+          <Button onClick={checkout} disabled={busy || !available || subscriptionQuery.isLoading}>
+            {busy
+              ? `Opening Dodo ${dodoMode} checkout…`
+              : `Continue to Dodo ${dodoMode} checkout`}
+          </Button>
+        ) : null}
         <p>
           <Link to="/settings">Back to settings</Link>
         </p>
