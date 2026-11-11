@@ -48,6 +48,11 @@ import { cn } from "@/lib/utils";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { hasSubscriptionAccess } from "@/lib/subscription-access";
 import {
+  LAUNCH_PLANS,
+  launchPrice,
+  type LaunchPlan,
+} from "@/lib/launch-catalog";
+import {
   PLAN_DISPLAY,
   currencyForCountry,
   priceIdFor,
@@ -272,7 +277,7 @@ function SettingsPage() {
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-brand border border-border bg-muted/40 p-3 text-sm">
                 <span className="text-muted-foreground">
                   Active subscription
-                  {subTier ? `, ${PLAN_DISPLAY[subTier as PlanId].name}` : ""}
+                  {subTier ? `, ${LAUNCH_PLANS[subTier as LaunchPlan]?.name ?? subTier}` : ""}
                   {subscription?.status === "trialing" ? " (in free trial)" : ""}
                 </span>
                 <Button
@@ -332,9 +337,10 @@ function SettingsPage() {
                 {/* Plans */}
                 <div className="grid gap-3 md:grid-cols-2">
                   {plans.map((plan) => {
-                    const info = PLAN_DISPLAY[plan];
+                    const terms = LAUNCH_PLANS[plan];
                     const active = activeTier === plan;
-                    const priceId = priceIdFor(plan, currency);
+                    const market = currency === "inr" ? "in" : "us";
+                    const priceFormatted = launchPrice(plan, market);
                     return (
                       <div
                         key={plan}
@@ -342,15 +348,15 @@ function SettingsPage() {
                           "flex flex-col gap-3 rounded-brand border p-4",
                           active
                             ? "border-brand-primary bg-brand-primary/5"
-                            : info.highlight
+                            : plan === "care_plus"
                               ? "border-brand-accent/40 bg-brand-accent/5"
                               : "border-border",
                         )}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="text-sm font-medium">{info.name}</span>
-                            {info.highlight && !active ? (
+                            <span className="text-sm font-medium">{terms.name}</span>
+                            {plan === "care_plus" && !active ? (
                               <span className="ml-2 rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">
                                 Most chosen
                               </span>
@@ -364,16 +370,17 @@ function SettingsPage() {
                         </div>
                         <div>
                           <div className="text-lg font-semibold">
-                            {displayPrice(plan, currency)}
+                            {priceFormatted}
                           </div>
-                          <div className="text-[11px] text-muted-foreground">per month</div>
+                          <div className="text-[11px] text-muted-foreground">
+                            per month{market === "in" ? " (incl. 18% GST)" : ""}
+                          </div>
                         </div>
                         <ul className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
-                          {info.bullets
-                            .filter((b) => !/call|check-in|safety net|telnyx/i.test(b))
-                            .map((b) => (
-                              <li key={b}>· {b}</li>
-                            ))}
+                          <li>· {terms.calls} human listener calls per month</li>
+                          <li>· Up to {terms.people} people</li>
+                          <li>· Companion conversations</li>
+                          <li>· Family circle & shared updates</li>
                         </ul>
                         {active ? (
                           <Button
@@ -395,18 +402,15 @@ function SettingsPage() {
                               navigate({
                                 to: "/checkout",
                                 search: {
-                                  price: priceId as
-                                    | "care_monthly_inr"
-                                    | "care_monthly_usd"
-                                    | "care_plus_monthly_inr"
-                                    | "care_plus_monthly_usd",
+                                  plan,
+                                  market,
                                 },
                               })
                             }
                             className="rounded-brand bg-brand-primary text-primary-foreground hover:bg-brand-primary/90"
                           >
                             <SparkleIcon className="mr-2 h-3 w-3" />
-                            {hasPaidSub ? "Switch plan" : "Choose plan"}
+                            Switch plan
                           </Button>
                         ) : null}
                       </div>
