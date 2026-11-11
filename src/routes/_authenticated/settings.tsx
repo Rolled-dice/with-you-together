@@ -32,7 +32,7 @@ import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { startPhoneVerification, confirmPhoneVerification } from "@/lib/phone-verify.functions";
 import { CompanionMemoryCard } from "@/components/prototype/companion-memory";
 import { cancelDodoSubscription, getMyDodoSubscription } from "@/lib/dodo.functions";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -322,12 +322,12 @@ function SettingsPage() {
               </div>
             </div>
 
-            <LaunchPricing initialMarket={currency === "inr" ? "in" : "us"} />
-            {hasPaidSub && (
+            {!hasPaidSub ? (
+              <LaunchPricing initialMarket={currency === "inr" ? "in" : "us"} />
+            ) : (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Existing memberships keep their purchased prices and allowances. The following
-                  controls describe the existing catalog.
+                  Your active care membership:
                 </p>
                 {/* Plans */}
                 <div className="grid gap-3 md:grid-cols-2">
@@ -708,9 +708,12 @@ const EVENT_LABELS: Record<string, string> = {
   "checkout.completed": "Checkout completed",
   "invoice.paid": "Payment received",
   "invoice.payment_succeeded": "Payment received",
+  "payment.succeeded": "Payment received",
+  "payment.failed": "Payment failed",
   "invoice.payment_failed": "Payment failed",
   "subscription.created": "Subscription started",
   "subscription.updated": "Subscription updated",
+  "subscription.renewed": "Subscription renewed",
   "subscription.canceled": "Subscription canceled",
   "tier.started": "Membership started",
   "tier.ended": "Membership ended",
@@ -749,6 +752,25 @@ function BillingHistoryCard() {
     },
   });
 
+  type BillingEventItem = NonNullable<typeof data>[number];
+  const displayEvents: BillingEventItem[] = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    // Hide developer/synthetic internal reconciliation events
+    const clean = data.filter((e) => e.event_type !== "subscription.reconciled");
+    // Deduplicate multiple events logged for the same payment/subscription start within the same minute
+    const seenTimes = new Set<string>();
+    const uniqueEvents: BillingEventItem[] = [];
+    for (const item of clean) {
+      // Key down to the minute: YYYY-MM-DDTHH:MM
+      const minuteKey = new Date(item.created_at).toISOString().slice(0, 16);
+      if (!seenTimes.has(minuteKey)) {
+        seenTimes.add(minuteKey);
+        uniqueEvents.push(item);
+      }
+    }
+    return uniqueEvents;
+  }, [data]);
+
   return (
     <Card data-page-reveal className="rounded-brand border-border bg-card">
       <CardHeader>
@@ -757,13 +779,13 @@ function BillingHistoryCard() {
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-10 w-full rounded-brand" />
-        ) : !data || data.length === 0 ? (
+        ) : displayEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No billing activity yet. Purchases, renewals, and plan changes will appear here.
           </p>
         ) : (
           <ul className="divide-y divide-border">
-            {data.map((e) => {
+            {displayEvents.map((e) => {
               const money = formatMoney(e.amount_cents, e.currency);
               const label = EVENT_LABELS[e.event_type] ?? e.event_type;
               const tierChange =
