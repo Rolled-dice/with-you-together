@@ -72,6 +72,45 @@ function periodDate(resource: DodoResource, key: string): string | null {
   return null;
 }
 
+function paymentServicePeriod(resource: DodoResource): DodoResource {
+  const periods = resource.service_periods;
+  return Array.isArray(periods) ? asObject(periods[0]) : {};
+}
+
+async function upsertSubscriptionFromPayment(
+  supabase: ReturnType<typeof getSupabase>,
+  resource: DodoResource,
+  environment: DodoEnvironment,
+) {
+  const metadata = metadataFor(resource);
+  const userId = asString(metadata.userId);
+  const priceId = asString(metadata.priceId);
+  const subscriptionId = dodoSubscriptionId(resource);
+  if (!userId || !priceId || !subscriptionId) {
+    throw new Error("Dodo payment event is missing required subscription metadata");
+  }
+
+  const period = paymentServicePeriod(resource);
+  const { error } = await supabase.from("subscriptions").upsert(
+    {
+      user_id: userId,
+      provider: "dodo",
+      dodo_subscription_id: subscriptionId,
+      dodo_customer_id: dodoCustomerId(resource),
+      product_id: asString(resource.product_id) ?? "",
+      price_id: priceId,
+      status: "active",
+      current_period_start: periodDate(period, "starts_at") ?? periodDate(resource, "created_at"),
+      current_period_end: periodDate(period, "ends_at"),
+      cancel_at_period_end: false,
+      environment,
+      updated_at: new Date().toISOString(),
+    } as never,
+    { onConflict: "dodo_subscription_id" },
+  );
+  if (error) throw new Error(`Dodo payment subscription upsert failed: ${error.message}`);
+}
+
 async function recordWebhook(
   supabase: ReturnType<typeof getSupabase>,
   payload: DodoResource,
@@ -253,6 +292,12 @@ async function processWebhook(
     case "payment.succeeded":
     case "payment.failed":
       if (!userId) throw new Error("Dodo payment event is missing metadata.userId");
+      if (eventType === "payment.succeeded" && dodoSubscriptionId(resource)) {
+        // Payment events contain signed user metadata and service periods. Write
+        // entitlement from this payload so a temporary provider read failure
+        // cannot leave a completed checkout on the free plan.
+        await upsertSubscriptionFromPayment(supabase, resource, environment);
+      }
       await logBillingEvent(supabase, {
         userId,
         eventType: eventType === "payment.succeeded" ? "payment.succeeded" : "payment.failed",

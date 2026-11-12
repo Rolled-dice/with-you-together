@@ -90,4 +90,37 @@ describe("Dodo webhook delivery", () => {
     expect((await delivery("subscription.active")).status).toBe(200);
     expect(state.subscriptionRows).toContainEqual(expect.objectContaining({ status: "canceled" }));
   });
+
+  it("activates membership from a verified payment without a provider lookup", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-key");
+    const response = await handler({ request: new Request("https://www.someonenear.com/api/public/payments/dodo-webhook?env=live", {
+      method: "POST",
+      headers: { "webhook-id": "payment-event", "content-type": "application/json" },
+      body: JSON.stringify({
+        type: "payment.succeeded",
+        data: {
+          subscription_id: "sub-paid",
+          customer: { customer_id: "cus-paid" },
+          created_at: "2026-11-12T14:42:21.484Z",
+          service_periods: [{
+            starts_at: "2026-11-12T14:42:21.484Z",
+            ends_at: "2026-11-19T14:42:55.322Z",
+          }],
+          metadata: { userId: "user-1", priceId: "care_launch_2026_11_in" },
+          status: "succeeded",
+        },
+      }),
+    }) });
+
+    expect(response.status).toBe(200);
+    expect(state.subscriptionRows).toContainEqual(expect.objectContaining({
+      dodo_subscription_id: "sub-paid",
+      dodo_customer_id: "cus-paid",
+      price_id: "care_launch_2026_11_in",
+      status: "active",
+      current_period_end: "2026-11-19T14:42:55.322Z",
+      environment: "live",
+    }));
+  });
 });
