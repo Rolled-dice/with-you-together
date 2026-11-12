@@ -39,6 +39,7 @@ import { getFamilyPool, setAllocations } from "@/lib/family-sessions.functions";
 import { getMyProfile } from "@/lib/profile.functions";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PhoneNumberField } from "@/components/phone-number-field";
 import {
   CalendarCheckIcon,
   CopyIcon,
@@ -268,6 +269,7 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [invitePhone, setInvitePhone] = useState("");
+  const [inviteCountry, setInviteCountry] = useState("IN");
   const [inviteOpen, setInviteOpen] = useState(false);
   const memberLimit = PLAN_DISPLAY.care_plus.members;
 
@@ -298,6 +300,7 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
       setInviteEmail("");
       setInviteName("");
       setInvitePhone("");
+      setInviteCountry("IN");
       setInviteOpen(false);
       qc.invalidateQueries({ queryKey: ["family"] });
     },
@@ -389,13 +392,11 @@ function FamilyView({ data }: { data: Awaited<ReturnType<typeof getMyFamily>> })
                         <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                           Mobile number
                         </Label>
-                        <Input
-                          type="tel"
+                        <PhoneNumberField
                           value={invitePhone}
-                          onChange={(e) => setInvitePhone(e.target.value)}
-                          placeholder="+91 98765 43210"
-                          autoComplete="tel"
-                          className="mt-1 rounded-brand"
+                          country={inviteCountry}
+                          onChange={(next, country) => { setInvitePhone(next); setInviteCountry(country); }}
+                          className="mt-1"
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">

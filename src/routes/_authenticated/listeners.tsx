@@ -42,9 +42,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { DataError } from "@/components/feedback/load-state";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { displayTime, localInput } from "@/lib/frontend/time";
+import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
+import { PhoneNumberField } from "@/components/phone-number-field";
 
 export const Route = createFileRoute("/_authenticated/listeners")({
   head: () => ({
@@ -270,11 +272,30 @@ function ListenersPage() {
   const cancelFn = useServerFn(cancelBooking);
   const rescheduleFn = useServerFn(rescheduleBooking);
   const feedbackPromptFn = useServerFn(getFeedbackPrompt);
+  const profileFn = useServerFn(getMyProfile);
+  const updateProfileFn = useServerFn(updateMyProfile);
 
   const bookings = useQuery({ queryKey: ["listener-bookings"], queryFn: () => listBookingsFn() });
   const feedbackPrompt = useQuery({
     queryKey: ["session-feedback-prompt"],
     queryFn: () => feedbackPromptFn(),
+  });
+  const profile = useQuery({ queryKey: ["me"], queryFn: () => profileFn() });
+  const [callPhone, setCallPhone] = useState("");
+  const [callCountry, setCallCountry] = useState("IN");
+  useEffect(() => {
+    if (!profile.data) return;
+    setCallPhone(profile.data.phone ?? "");
+    setCallCountry(profile.data.phone_country ?? "IN");
+  }, [profile.data]);
+
+  const saveCallPhone = useMutation({
+    mutationFn: () => updateProfileFn({ data: { phone: callPhone || null, phone_country: callCountry } }),
+    onSuccess: () => {
+      toast.success("Call number saved. Verify it before booking.");
+      qc.invalidateQueries({ queryKey: ["me"] });
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save call number."),
   });
 
   const initialSlot = useMemo(() => defaultBookingSlot(), []);
@@ -480,6 +501,27 @@ function ListenersPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="listener-call-phone">Number Listener will call</Label>
+                  <PhoneNumberField
+                    id="listener-call-phone"
+                    value={callPhone}
+                    country={callCountry}
+                    onChange={(phone, country) => { setCallPhone(phone); setCallCountry(country); }}
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    {profile.data?.phone_verified && callPhone === profile.data.phone ? (
+                      <Badge variant="secondary">Verified</Badge>
+                    ) : (
+                      <Button asChild size="sm" variant="outline"><Link to="/settings">Verify in Settings</Link></Button>
+                    )}
+                    {callPhone !== (profile.data?.phone ?? "") && (
+                      <Button size="sm" type="button" onClick={() => saveCallPhone.mutate()} disabled={saveCallPhone.isPending || !callPhone}>
+                        Save number
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label htmlFor="day">Preferred day</Label>

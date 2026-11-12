@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { PhoneNumberField } from "@/components/phone-number-field";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -440,11 +441,10 @@ function AgentConsolePage() {
                       <PhoneDisconnectIcon className="mr-1.5 h-4 w-4" /> End call
                     </Button>
                     <div className="flex gap-2">
-                      <Input
+                      <PhoneNumberField
                         value={transferTo}
-                        onChange={(e) => setTransferTo(e.target.value)}
-                        placeholder="+1... transfer to"
-                        className="w-[180px]"
+                        onChange={(phone) => setTransferTo(phone)}
+                        className="w-[280px]"
                       />
                       <Button
                         variant="outline"

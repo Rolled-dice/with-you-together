@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PhoneNumberField } from "@/components/phone-number-field";
 import {
   listCallAgents,
   upsertCallAgent,
@@ -195,12 +196,9 @@ function AgentsPage() {
             }
           />
 
-          <Input
-            placeholder="Phone"
+          <PhoneNumberField
             value={draft.phone}
-            onChange={(event) =>
-              setDraft({ ...draft, phone: event.target.value })
-            }
+            onChange={(phone) => setDraft({ ...draft, phone })}
           />
 
           <Input

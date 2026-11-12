@@ -11,6 +11,7 @@ import { HeartIcon, SpinnerGapIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { updateMyProfile } from "@/lib/profile.functions";
+import { PhoneNumberField } from "@/components/phone-number-field";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
@@ -34,6 +35,7 @@ function OnboardingPage() {
   );
   const [careIntent, setCareIntent] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState("IN");
 
   useEffect(() => {
     (async () => {
@@ -41,7 +43,7 @@ function OnboardingPage() {
       if (!userData.user) return;
       const { data: profile } = await supabase
         .from("profiles")
-        .select("display_name, pronouns, timezone, care_intent, phone")
+        .select("display_name, pronouns, timezone, care_intent, phone, phone_country")
         .eq("id", userData.user.id)
         .maybeSingle();
       if (profile) {
@@ -50,6 +52,7 @@ function OnboardingPage() {
         setTimezone(profile.timezone ?? timezone);
         setCareIntent(profile.care_intent ?? "");
         setPhone((profile as { phone?: string | null }).phone ?? "");
+        setPhoneCountry((profile as { phone_country?: string | null }).phone_country ?? "IN");
       }
       setLoading(false);
     })();
@@ -67,7 +70,7 @@ function OnboardingPage() {
       return;
     }
     const trimmedPhone = phone.trim();
-    if (trimmedPhone && !/^\+?[0-9][0-9\s-]{6,17}$/.test(trimmedPhone)) {
+    if (trimmedPhone && !/^\+[0-9]{7,18}$/.test(trimmedPhone)) {
       toast.error("Please enter a valid mobile number with country code.");
       return;
     }
@@ -84,6 +87,7 @@ function OnboardingPage() {
         timezone,
         care_intent: careIntent.trim() || null,
         phone: trimmedPhone || null,
+        phone_country: phoneCountry,
         onboarding_completed: true,
       } });
     } catch (error) {
@@ -144,17 +148,14 @@ function OnboardingPage() {
 
               <div className="flex flex-col gap-2">
                 <Label htmlFor="phone">Mobile number (optional)</Label>
-                <Input
+                <PhoneNumberField
                   id="phone"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1 555 000 1234"
-                  inputMode="tel"
-                  autoComplete="tel"
+                  country={phoneCountry}
+                  onChange={(next, country) => { setPhone(next); setPhoneCountry(country); }}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Include your country code. This is your contact number. You can change it any time
-                  in Settings.
+                  Pick country code, then enter mobile number. You can change it in Settings.
                 </p>
               </div>
 

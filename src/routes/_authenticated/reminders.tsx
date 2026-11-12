@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PhoneNumberField } from "@/components/phone-number-field";
 import {
   Select,
   SelectContent,
@@ -302,12 +303,10 @@ function EnterpriseSmsNudgeCard() {
           <label className="text-sm font-medium" htmlFor="sms-phone">
             Mobile Number (E.164)
           </label>
-          <Input
+          <PhoneNumberField
             id="sms-phone"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+1 315-997-8334 or +91..."
-            className="rounded-xl"
+            onChange={(next) => setPhone(next)}
           />
         </div>
         <div className="space-y-1.5">
@@ -687,12 +686,10 @@ function EverydayReminders() {
               <label htmlFor="modal-sms-phone" className="text-sm font-medium">
                 Phone Number (E.164 with country code)
               </label>
-              <Input
+              <PhoneNumberField
                 id="modal-sms-phone"
                 value={smsPhoneInput}
-                onChange={(e) => setSmsPhoneInput(e.target.value)}
-                placeholder="+1 315-997-8334 or +91..."
-                className="rounded-xl"
+                onChange={(phone) => setSmsPhoneInput(phone)}
               />
             </div>
             <div className="flex justify-end gap-2">

@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { hasSubscriptionAccess } from "@/lib/subscription-access";
 import { customerBillingEvents } from "@/lib/billing-history";
+import { PhoneNumberField } from "@/components/phone-number-field";
 import {
   LAUNCH_PLANS,
   launchPrice,
@@ -108,6 +109,7 @@ function SettingsPage() {
   const [language, setLanguage] = useState<"en" | "hi">("en");
   const [currency, setCurrency] = useState<Currency>("usd");
   const [phone, setPhone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState(profile?.phone_country ?? "IN");
 
   useEffect(() => {
     if (!profile) return;
@@ -117,6 +119,7 @@ function SettingsPage() {
     setTimezone(profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
     setIntent(profile.care_intent ?? "");
     setPhone((profile.phone as string | null) ?? "");
+    setPhoneCountry(profile.phone_country ?? "IN");
     setLanguage((profile.preferred_language as "en" | "hi") ?? "en");
     const prefCur = profile.preferred_currency as Currency | null;
     setCurrency(prefCur ?? currencyForCountry(profile.phone_country));
@@ -158,7 +161,7 @@ function SettingsPage() {
           preferred_currency: currency,
           ...(phone.replace(/\D/g, "") === (profile?.phone ?? "").replace(/\D/g, "")
             ? {}
-            : { phone: phone.trim() || null }),
+            : { phone: phone.trim() || null, phone_country: phoneCountry }),
         },
       }),
     onSuccess: () => {
@@ -474,13 +477,11 @@ function SettingsPage() {
             </Field>
             <Field label="Mobile number">
               <div className="flex items-center gap-2">
-                <Input
+                <PhoneNumberField
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1 555 000 1234"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  className="rounded-brand"
+                  country={phoneCountry}
+                  onChange={(next, country) => { setPhone(next); setPhoneCountry(country); }}
+                  className="flex-1"
                 />
                 {profile.phone_verified &&
                 phone.replace(/\D/g, "") === (profile.phone ?? "").replace(/\D/g, "") ? (
@@ -493,7 +494,7 @@ function SettingsPage() {
                     {capabilities.outboundCallBooking && (
                       <PhoneVerifyDialog
                         phone={phone}
-                        country={profile.phone_country ?? "IN"}
+                        country={phoneCountry}
                         onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
                       />
                     )}

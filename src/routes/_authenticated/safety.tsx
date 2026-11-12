@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { useIdentity } from "@/features/session/session-store";
 import { cn } from "@/lib/utils";
+import { PhoneNumberField } from "@/components/phone-number-field";
 import {
   LifebuoyIcon,
   PhoneIcon,
@@ -999,12 +1000,9 @@ function SafetyPage() {
             </div>
             <div>
               <label className="block text-muted-foreground font-medium mb-1">Emergency Contact Phone</label>
-              <input
-                type="tel"
+              <PhoneNumberField
                 value={iceCard.emergencyPhone}
-                onChange={(e) => setIceCard({ ...iceCard, emergencyPhone: e.target.value })}
-                placeholder="+1 555-123-4567"
-                className="w-full p-2 rounded-brand border border-border bg-card"
+                onChange={(phone) => setIceCard({ ...iceCard, emergencyPhone: phone })}
               />
             </div>
             <div>
@@ -1019,12 +1017,9 @@ function SafetyPage() {
             </div>
             <div>
               <label className="block text-muted-foreground font-medium mb-1">Doctor&apos;s Phone</label>
-              <input
-                type="tel"
+              <PhoneNumberField
                 value={iceCard.doctorPhone}
-                onChange={(e) => setIceCard({ ...iceCard, doctorPhone: e.target.value })}
-                placeholder="+1 555-987-6543"
-                className="w-full p-2 rounded-brand border border-border bg-card"
+                onChange={(phone) => setIceCard({ ...iceCard, doctorPhone: phone })}
               />
             </div>
             <div className="sm:col-span-2">
