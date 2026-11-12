@@ -54,6 +54,7 @@ for (const width of [390, 1440]) {
     await expect(page.getByText(new RegExp(`Active subscription, ${expectedPlan}`))).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole("heading", { name: "Two transparent monthly care plans" })).toHaveCount(0);
     await expect(page.getByText("subscription.reconciled", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Membership started", { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByText(new RegExp(`Active subscription, ${expectedPlan}`))).toBeVisible({ timeout: 30_000 });
 
