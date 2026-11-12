@@ -47,6 +47,7 @@ import { toast } from "sonner";
 import { displayTime, localInput } from "@/lib/frontend/time";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { PhoneNumberField } from "@/components/phone-number-field";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/listeners")({
   head: () => ({
@@ -124,6 +125,92 @@ function todayIso() {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+const HOURS_12 = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+const MINUTES_12 = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"];
+
+function parse24to12(time24: string) {
+  const parts = (time24 || "10:00").split(":");
+  let h = parseInt(parts[0] || "10", 10);
+  const m = (parts[1] || "00").padStart(2, "0");
+  const period: "AM" | "PM" = h >= 12 ? "PM" : "AM";
+  if (h === 0) h = 12;
+  else if (h > 12) h -= 12;
+  return {
+    hour: String(h).padStart(2, "0"),
+    minute: m,
+    period,
+  };
+}
+
+function format12to24(hour12: string, minute: string, period: "AM" | "PM") {
+  let h = parseInt(hour12, 10);
+  if (period === "AM") {
+    if (h === 12) h = 0;
+  } else {
+    if (h !== 12) h += 12;
+  }
+  return `${String(h).padStart(2, "0")}:${minute.padStart(2, "0")}`;
+}
+
+function BookingTime12Picker({
+  value,
+  onChange,
+  className,
+}: {
+  value: string;
+  onChange: (time24: string) => void;
+  className?: string;
+}) {
+  const { hour, minute, period } = parse24to12(value);
+
+  const minuteOptions = useMemo(() => {
+    return MINUTES_12.includes(minute) ? MINUTES_12 : [...MINUTES_12, minute].sort();
+  }, [minute]);
+
+  function update(newHour = hour, newMinute = minute, newPeriod = period) {
+    onChange(format12to24(newHour, newMinute, newPeriod));
+  }
+
+  return (
+    <div className={cn("flex items-center gap-1.5", className)}>
+      <Select value={hour} onValueChange={(h) => update(h, minute, period)}>
+        <SelectTrigger aria-label="Hour" className="h-9 min-w-0 flex-1 rounded-brand px-2 text-center text-sm font-medium">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="max-h-56">
+          {HOURS_12.map((h) => (
+            <SelectItem key={h} value={h}>
+              {h}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <span className="text-muted-foreground font-semibold text-sm">:</span>
+      <Select value={minute} onValueChange={(m) => update(hour, m, period)}>
+        <SelectTrigger aria-label="Minute" className="h-9 min-w-0 flex-1 rounded-brand px-2 text-center text-sm font-medium">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="max-h-56">
+          {minuteOptions.map((m) => (
+            <SelectItem key={m} value={m}>
+              {m}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={period} onValueChange={(p) => update(hour, minute, p as "AM" | "PM")}>
+        <SelectTrigger aria-label="AM or PM" className="h-9 w-[68px] shrink-0 rounded-brand px-2 text-center text-sm font-medium">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="AM">AM</SelectItem>
+          <SelectItem value="PM">PM</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
 }
 
 function ListenerAvatar({
@@ -534,13 +621,8 @@ function ListenersPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="time">Preferred time</Label>
-                    <Input
-                      id="time"
-                      type="time"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                    />
+                    <Label>Preferred time (12-hour)</Label>
+                    <BookingTime12Picker value={time} onChange={setTime} />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Time zone</Label>
@@ -566,8 +648,6 @@ function ListenersPage() {
                       <SelectContent>
                         <SelectItem value="15">15 minutes (Standard Session)</SelectItem>
                         <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="45">45 minutes</SelectItem>
-                        <SelectItem value="60">60 minutes</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -876,11 +956,10 @@ function BookingRow({
               onChange={(e) => setDay(e.target.value)}
               className="w-40"
             />
-            <Input
-              type="time"
+            <BookingTime12Picker
               value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-32"
+              onChange={setTime}
+              className="w-56"
             />
             <Select value={tz} onValueChange={setTz}>
               <SelectTrigger className="w-48">
