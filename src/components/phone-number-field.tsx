@@ -13,12 +13,40 @@ const countries = getCountries()
   .map((code) => ({ code, dial: `+${getCountryCallingCode(code)}` }))
   .sort((a, b) => a.code.localeCompare(b.code));
 
-function split(value: string, fallback: CountryCode) {
-  const parsed = parsePhoneNumberFromString(value || "", fallback);
-  return {
-    country: parsed?.country ?? fallback,
-    national: parsed?.nationalNumber ?? value.replace(/\D/g, ""),
-  };
+const countryDialList = getCountries()
+  .map((code) => ({ code, dial: getCountryCallingCode(code) }))
+  .sort((a, b) => b.dial.length - a.dial.length);
+
+export function splitPhone(value: string, fallback: CountryCode = "IN"): { country: CountryCode; national: string } {
+  if (!value) return { country: fallback, national: "" };
+  const clean = value.trim();
+  const parsed = parsePhoneNumberFromString(clean, fallback);
+  if (parsed && parsed.nationalNumber) {
+    return {
+      country: (parsed.country ?? fallback) as CountryCode,
+      national: String(parsed.nationalNumber),
+    };
+  }
+  if (clean.startsWith("+")) {
+    const digits = clean.replace(/\D/g, "");
+    const fallbackDial = getCountryCallingCode(fallback);
+    if (digits.startsWith(fallbackDial)) {
+      return {
+        country: fallback,
+        national: digits.slice(fallbackDial.length),
+      };
+    }
+    for (const c of countryDialList) {
+      if (digits.startsWith(c.dial)) {
+        return {
+          country: c.code as CountryCode,
+          national: digits.slice(c.dial.length),
+        };
+      }
+    }
+    return { country: fallback, national: digits };
+  }
+  return { country: fallback, national: clean.replace(/\D/g, "") };
 }
 
 export function phoneToE164(national: string, country: CountryCode) {
@@ -41,20 +69,29 @@ export function PhoneNumberField({
   disabled?: boolean;
   className?: string;
 }) {
-  const initial = useMemo(() => split(value, (country || "IN") as CountryCode), []);
+  const fallbackCountry = (country || "IN") as CountryCode;
+  const initial = useMemo(() => splitPhone(value, fallbackCountry), []);
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(initial.country);
   const [national, setNational] = useState(initial.national);
 
   useEffect(() => {
-    const next = split(value, (country || selectedCountry) as CountryCode);
+    const next = splitPhone(value, (country || selectedCountry) as CountryCode);
     if (next.country !== selectedCountry) setSelectedCountry(next.country);
     if (next.national !== national) setNational(next.national);
   }, [value, country]);
 
   function emit(nextNational: string, nextCountry = selectedCountry) {
-    const digits = nextNational.replace(/\D/g, "");
+    let raw = nextNational.trim();
+    let targetCountry = nextCountry;
+    if (raw.startsWith("+")) {
+      const parsed = splitPhone(raw, targetCountry);
+      raw = parsed.national;
+      targetCountry = parsed.country;
+      setSelectedCountry(targetCountry);
+    }
+    const digits = raw.replace(/\D/g, "");
     setNational(digits);
-    onChange(phoneToE164(digits, nextCountry), nextCountry);
+    onChange(phoneToE164(digits, targetCountry), targetCountry);
   }
 
   return (
