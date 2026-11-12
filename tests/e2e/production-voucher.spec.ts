@@ -21,7 +21,10 @@ test("live voucher opens Dodo checkout without submitting payment", async ({ pag
   if (verified.error || !verified.data.session) throw new Error("QA account sign-in failed");
 
   await page.goto("/robots.txt");
-  await page.evaluate(({ key, session }) => localStorage.setItem(key, JSON.stringify(session)), {
+  await page.evaluate(({ key, session }) => {
+    localStorage.setItem(key, JSON.stringify(session));
+    localStorage.setItem("sn_privacy_choice_v1", JSON.stringify({ preferences: false, statistics: false, marketing: false, savedAt: Date.now() }));
+  }, {
     key: storageKey,
     session: verified.data.session,
   });
