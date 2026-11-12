@@ -16,6 +16,11 @@ describe("splitPhone", () => {
   it("clears national number when value is dial code only or empty", () => {
     expect(splitPhone("", "IN")).toEqual({ country: "IN", national: "" });
     expect(splitPhone("+91", "IN")).toEqual({ country: "IN", national: "" });
+    expect(splitPhone("91", "IN")).toEqual({ country: "IN", national: "" });
+    expect(splitPhone("+509", "HT")).toEqual({ country: "HT", national: "" });
+    expect(splitPhone("509", "HT")).toEqual({ country: "HT", national: "" });
+    expect(splitPhone("+592", "GY")).toEqual({ country: "GY", national: "" });
+    expect(splitPhone("592", "GY")).toEqual({ country: "GY", national: "" });
     expect(splitPhone("+1", "US")).toEqual({ country: "US", national: "" });
   });
 
@@ -24,9 +29,10 @@ describe("splitPhone", () => {
     expect(splitPhone("+9198", "IN")).toEqual({ country: "IN", national: "98" });
   });
 
-  it("extracts full national number cleanly", () => {
+  it("extracts full national number cleanly and strips duplicate dial code", () => {
     expect(splitPhone("+919876543210", "IN")).toEqual({ country: "IN", national: "9876543210" });
     expect(splitPhone("9876543210", "IN")).toEqual({ country: "IN", national: "9876543210" });
+    expect(splitPhone("919876543210", "IN")).toEqual({ country: "IN", national: "9876543210" });
     expect(splitPhone("+12025550123", "IN")).toEqual({ country: "US", national: "2025550123" });
   });
 });
