@@ -459,7 +459,7 @@ function ListenersPage() {
 
       {/* SLA + Rules strip */}
       <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
-        <DialogContent className="sn-worker-dialog sn-worker-booking-dialog">
+        <DialogContent className="sn-worker-dialog sn-worker-booking-dialog p-4 sm:p-6">
           <DialogTitle>Book a Listener Call</DialogTitle>
           <DialogDescription>
             Choose your preferred time and review the call details.
@@ -494,13 +494,13 @@ function ListenersPage() {
           >
             {/* Booking form */}
             <Card data-page-reveal className="rounded-brand border-border bg-card">
-              <CardHeader>
+              <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
                 <CardTitle className="flex items-center gap-2 text-base font-medium">
                   <HandHeartIcon className="h-4 w-4 text-brand-accent" />
                   Schedule your next session
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0 space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="listener-call-phone">Number Listener will call</Label>
                   <PhoneNumberField

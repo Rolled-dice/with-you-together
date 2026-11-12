@@ -68,7 +68,7 @@ export function PhoneNumberField({
           emit(national, code);
         }}
       >
-        <SelectTrigger aria-label="Country code" className="w-[126px] shrink-0 rounded-brand">
+        <SelectTrigger aria-label="Country code" className="w-[84px] shrink-0 px-2 sm:w-[92px] sm:px-2.5 rounded-brand text-xs sm:text-sm font-medium">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="max-h-72">
@@ -86,7 +86,8 @@ export function PhoneNumberField({
         disabled={disabled}
         onChange={(event) => emit(event.target.value)}
         placeholder="Mobile number"
-        className="min-w-0 flex-1 rounded-brand"
+        maxLength={15}
+        className="min-w-0 flex-1 px-2.5 sm:px-3 text-sm rounded-brand"
       />
     </div>
   );

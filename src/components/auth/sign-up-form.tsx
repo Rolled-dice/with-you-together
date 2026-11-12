@@ -150,7 +150,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
         <Label>Mobile number</Label>
         <div className="flex gap-2">
           <Select value={country} onValueChange={(v) => setCountry(v as CountryCode)}>
-            <SelectTrigger className="w-[120px] rounded-brand">
+            <SelectTrigger className="w-[84px] shrink-0 px-2 sm:w-[92px] sm:px-2.5 rounded-brand text-xs sm:text-sm font-medium">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="max-h-64">
@@ -167,7 +167,7 @@ export function SignUpForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
             required
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="rounded-brand flex-1 transition-all focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+            className="rounded-brand min-w-0 flex-1 px-2.5 sm:px-3 text-sm transition-all focus-visible:ring-2 focus-visible:ring-brand-primary/40"
             placeholder={PHONE_PLACEHOLDER}
           />
         </div>
