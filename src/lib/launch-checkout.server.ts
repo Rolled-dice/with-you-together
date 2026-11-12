@@ -132,7 +132,8 @@ async function verifyDiscount(
     throw new Error("The configured Dodo discount no longer matches this offer.");
   }
   if (options.requireSingleUse) {
-    const expiresAt = typeof discount.expires_at === "string" ? Date.parse(discount.expires_at) : NaN;
+    const hasExpiry = typeof discount.expires_at === "string" && discount.expires_at.trim().length > 0;
+    const expiresAt = hasExpiry ? Date.parse(discount.expires_at as string) : null;
     if (
       typeof discount.usage_limit !== "number" ||
       discount.usage_limit < 1 ||
@@ -140,8 +141,7 @@ async function verifyDiscount(
       typeof discount.per_customer_usage_limit !== "number" ||
       discount.per_customer_usage_limit < 1 ||
       discount.per_customer_usage_limit > 20 ||
-      !Number.isFinite(expiresAt) ||
-      expiresAt <= Date.now()
+      (hasExpiry && (!Number.isFinite(expiresAt) || (expiresAt as number) <= Date.now()))
     ) {
       throw new Error("The internal Dodo test discount is not restricted enough.");
     }
