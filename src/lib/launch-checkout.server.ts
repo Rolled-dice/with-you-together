@@ -134,14 +134,14 @@ async function verifyDiscount(
   if (options.requireSingleUse) {
     const expiresAt = typeof discount.expires_at === "string" ? Date.parse(discount.expires_at) : NaN;
     if (
-      discount.usage_limit !== 20 ||
+      typeof discount.usage_limit !== "number" ||
+      discount.usage_limit < 1 ||
+      discount.usage_limit > 20 ||
       typeof discount.per_customer_usage_limit !== "number" ||
       discount.per_customer_usage_limit < 1 ||
       discount.per_customer_usage_limit > 20 ||
-      discount.customer_eligibility === "specific" ||
       !Number.isFinite(expiresAt) ||
-      expiresAt <= Date.now() ||
-      expiresAt > Date.now() + 48 * 60 * 60 * 1000
+      expiresAt <= Date.now()
     ) {
       throw new Error("The internal Dodo test discount is not restricted enough.");
     }

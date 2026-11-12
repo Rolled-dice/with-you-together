@@ -30,9 +30,9 @@ describe("launch test checkout", () => {
       } }))
       .mockResolvedValueOnce(Response.json({
         code: "PRIVATE100", type: "percentage", amount: 10000,
-        subscription_cycles: 1, usage_limit: 20, per_customer_usage_limit: 3,
+        subscription_cycles: 1, usage_limit: 10, per_customer_usage_limit: 3,
         customer_eligibility: "any", restricted_to: ["pdt_live_india"],
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       }))
       .mockResolvedValueOnce(Response.json({
         session_id: "cks_private", checkout_url: "https://checkout.dodopayments.com/session/cks_private",
