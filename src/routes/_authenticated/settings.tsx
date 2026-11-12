@@ -476,30 +476,32 @@ function SettingsPage() {
               </p>
             </Field>
             <Field label="Mobile number">
-              <div className="flex items-center gap-2">
+              <div className="space-y-2">
                 <PhoneNumberField
                   value={phone}
                   country={phoneCountry}
                   onChange={(next, country) => { setPhone(next); setPhoneCountry(country); }}
-                  className="flex-1"
+                  className="w-full"
                 />
-                {profile.phone_verified &&
-                phone.replace(/\D/g, "") === (profile.phone ?? "").replace(/\D/g, "") ? (
-                  <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
-                ) : (
-                  <>
-                    <Badge variant="secondary" className="rounded-full whitespace-nowrap">
-                      Not verified
-                    </Badge>
-                    {capabilities.outboundCallBooking && (
-                      <PhoneVerifyDialog
-                        phone={phone}
-                        country={phoneCountry}
-                        onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
-                      />
-                    )}
-                  </>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {profile.phone_verified &&
+                  phone.replace(/\D/g, "") === (profile.phone ?? "").replace(/\D/g, "") ? (
+                    <Badge className="rounded-full bg-emerald-100 text-emerald-800">Verified</Badge>
+                  ) : (
+                    <>
+                      <Badge variant="secondary" className="rounded-full whitespace-nowrap">
+                        Not verified
+                      </Badge>
+                      {capabilities.outboundCallBooking && (
+                        <PhoneVerifyDialog
+                          phone={phone}
+                          country={phoneCountry}
+                          onVerified={() => qc.invalidateQueries({ queryKey: ["me"] })}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Include your country code when saving your contact number.
