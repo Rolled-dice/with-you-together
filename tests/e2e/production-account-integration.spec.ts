@@ -62,6 +62,11 @@ for (const width of [390, 1440]) {
       await page.goto(path);
       await expect(page.getByRole("button", { name: "Sign out", exact: true }).first()).toBeVisible({ timeout: 30_000 });
       await expect(page.getByText("This page didn't load", { exact: true })).toHaveCount(0);
+      if (path === "/listeners") {
+        await page.getByRole("button", { name: /Request a listener call/ }).first().click();
+        await expect(page.getByRole("combobox", { name: "Country code" })).toBeVisible();
+        await expect(page.getByLabel("Number Listener will call")).toBeVisible();
+      }
     }
   });
 }
