@@ -50,9 +50,12 @@ for (const width of [390, 1440]) {
     });
 
     await page.goto("/settings");
-    await expect(page.getByText(/Active subscription, Care Plus/)).toBeVisible({ timeout: 30_000 });
+    const expectedPlan = process.env.SN_QA_EXPECTED_PLAN ?? "Care Plus";
+    await expect(page.getByText(new RegExp(`Active subscription, ${expectedPlan}`))).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: "Two transparent monthly care plans" })).toHaveCount(0);
+    await expect(page.getByText("subscription.reconciled", { exact: true })).toHaveCount(0);
     await page.reload();
-    await expect(page.getByText(/Active subscription, Care Plus/)).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(new RegExp(`Active subscription, ${expectedPlan}`))).toBeVisible({ timeout: 30_000 });
 
     for (const path of ["/listeners", "/family", "/reminders", "/send-later", "/companion", "/insights", "/safety"]) {
       await page.goto(path);

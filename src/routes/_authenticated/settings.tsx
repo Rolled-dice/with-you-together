@@ -47,6 +47,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { hasSubscriptionAccess } from "@/lib/subscription-access";
+import { customerBillingEvents } from "@/lib/billing-history";
 import {
   LAUNCH_PLANS,
   launchPrice,
@@ -752,7 +753,7 @@ function BillingHistoryCard() {
         .order("created_at", { ascending: false })
         .limit(15);
       if (error) throw error;
-      return data ?? [];
+      return customerBillingEvents(data ?? []);
     },
   });
 
